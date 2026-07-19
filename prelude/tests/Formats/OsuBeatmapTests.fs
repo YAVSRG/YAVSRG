@@ -11,7 +11,7 @@ module OsuBeatmapTests =
         let inline expected_result (expected: string, input: string) =
             let result =
                 try
-                    OsuParser.parse_timing_point(input).ToString()
+                    TimingPoint.FromString(input).ToString()
                 with _ ->
                     "## PARSE ERROR"
 
@@ -30,7 +30,7 @@ module OsuBeatmapTests =
                 }
             )
 
-        Assert.AreEqual(default_values, OsuParser.parse_timing_point("100.1,"))
+        Assert.AreEqual(default_values, TimingPoint.FromString("100.1,"))
 
 
         expected_result("## PARSE ERROR", "")

@@ -222,7 +222,7 @@ module ChartConversionTests =
                 "5000.1,25,4,1,0,10,1,0"
                 "5000.2,250,4,1,0,10,1,0"
             ]
-            |> List.map OsuParser.parse_timing_point
+            |> List.map TimingPoint.FromString
 
         printfn "%A" points
 

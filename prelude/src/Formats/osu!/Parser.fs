@@ -141,41 +141,6 @@ module OsuParser =
             parse_failure "Empty line" line
         else parse(values)
 
-    let parse_timing_point (line: string) : TimingPoint =
-        
-        let inline parse_uninherited(values: SplitValues) =
-            Uninherited {
-                Time = values.Float(0)
-                MsPerBeat = values.FloatOrDefault(1, 500.0) |> max 0.0
-                Meter = values.IntOrDefault(2, 4) |> fun v -> if v <= 0 then 4 else v
-                SampleSet = values.EnumOrDefault(3, SampleSet.Default)
-                SampleIndex = values.IntOrDefault(4, 0)
-                Volume = values.IntOrDefault(5, 100) |> max 0 |> min 100
-                Effects = values.EnumOrDefault(7, TimingEffect.None)
-            }
-            
-        let inline parse_inherited(values: SplitValues) =
-            Inherited {
-                Time = values.Float(0)
-                Multiplier =
-                    let v = values.FloatOrDefault(1, 1.0)
-                    if v < 0 then -100.0 / v else 1.0
-                SampleSet = values.EnumOrDefault(3, SampleSet.Default)
-                SampleIndex = values.IntOrDefault(4, 0)
-                Volume = values.IntOrDefault(5, 100)
-                Effects = values.EnumOrDefault(7, TimingEffect.None)
-            }
-            
-        let values = SplitValues.Parse(line, ',')
-        if values.Length = 0 then
-            parse_failure "Empty line" line
-        elif values.Length < 2 then
-            parse_failure "Failed to parse timing point (needed 2 or more values)" line
-        else
-            let is_uninherited = values.UntrimmedStringOrDefault(6, "1").StartsWith('1')
-            if is_uninherited then parse_uninherited(values)
-            else parse_inherited(values)
-
     let parse_hit_sample (sample: string) : HitSample =
         let values = SplitValues.Parse(sample, ':')
         {
@@ -364,9 +329,7 @@ module OsuParser =
                 |> parse_storyboard_event
                 |> Option.iter events.Add
             | TimingPoints ->
-                line
-                |> parse_timing_point
-                |> timing.Add
+                timing.Add(TimingPoint.FromString(line))
             | Objects ->
                 line
                 |> parse_hit_object
