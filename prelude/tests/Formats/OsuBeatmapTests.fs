@@ -39,9 +39,9 @@ module OsuBeatmapTests =
         // Time
         expected_result("## PARSE ERROR", ",250.1")
         expected_result("## PARSE ERROR", "AAA,250.1")
-        expected_result("## PARSE ERROR", "Nan,250.1")
-        expected_result("## PARSE ERROR", "Infinity,250.1")
-        expected_result("## PARSE ERROR", "-Infinity,250.1")
+        expected_result("## PARSE ERROR", "NaN,250.1")
+        expected_result("## PARSE ERROR", "1e100,250.1")
+        expected_result("## PARSE ERROR", "-1e100,250.1")
         expected_result("## PARSE ERROR", "2147483648,250.1")
         expected_result("## PARSE ERROR", "-2147483648,250.1")
         expected_result("-2147483647,250.1,4,0,0,100,1,0", "-2147483647,250.1")
@@ -50,22 +50,21 @@ module OsuBeatmapTests =
         // MsPerBeat
         expected_result("100.1,500,4,0,0,100,1,0", "100.1,")
         expected_result("100.1,500,4,0,0,100,1,0", "100.1,AAA")
-        expected_result("100.1,500,4,0,0,100,1,0", "100.1,Nan")
-        expected_result("100.1,500,4,0,0,100,1,0", "100.1,Infinity")
-        expected_result("100.1,500,4,0,0,100,1,0", "100.1,-Infinity")
-        expected_result("100.1,2147483647,4,0,0,100,1,0", "100.1,2147483647")
-        expected_result("100.1,500,4,0,0,100,1,0", "100.1,2147483648")
-        expected_result("100.1,0,4,0,0,100,1,0", "100.1,-1")
-        expected_result("100.1,0,4,0,0,100,1,0", "100.1,0")
+        expected_result("100.1,500,4,0,0,100,1,0", "100.1,NaN")
+        expected_result("100.1,1E+100,4,0,0,100,1,0", "100.1,1e100")
+        expected_result("100.1,2147483648,4,0,0,100,1,0", "100.1,2147483648")
+        expected_result("100.1,500,4,0,0,100,1,0", "100.1,-1e100")
+        expected_result("100.1,500,4,0,0,100,1,0", "100.1,-1")
+        expected_result("100.1,500,4,0,0,100,1,0", "100.1,0")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1, 250.1")
 
         // Meter
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,0")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,-1")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,AAA")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,Nan")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,Infinity")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,-Infinity")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,NaN")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,1e100")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,-1e100")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,2147483648")
         expected_result("100.1,250.1,2147483647,0,0,100,1,0", "100.1,250.1,2147483647")
@@ -100,9 +99,9 @@ module OsuBeatmapTests =
         expected_result("100.1,250.1,4,0,0,0,1,0", "100.1,250.1,4,0,0,0")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,AAA")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,Infinity")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,-Infinity")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,Nan")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,1e100")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,-1e100")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,NaN")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,101")
         expected_result("100.1,250.1,4,0,0,50,1,0", "100.1,250.1,4,0,0, 50")
 
@@ -117,7 +116,17 @@ module OsuBeatmapTests =
         expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,AAA")
         expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,")
         expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,0")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,2")
         expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,-1")
+        // Inherited: Multiplier
+        expected_result("100.1,-50,4,0,0,100,0,0", "100.1,-50,4,0,0,100,0")
+        expected_result("100.1,-1,4,0,0,100,0,0", "100.1,-0.1,4,0,0,100,0")
+        expected_result("100.1,-10000,4,0,0,100,0,0", "100.1,-100000,4,0,0,100,0")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,0,4,0,0,100,0")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,NaN,4,0,0,100,0")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,1e100,4,0,0,100,0")
+        expected_result("100.1,-1,4,0,0,100,0,0", "100.1,-1e-100,4,0,0,100,0")
+        expected_result("100.1,-10000,4,0,0,100,0,0", "100.1,-1e100,4,0,0,100,0")
         
         // Effects
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1,-2147483649")
@@ -127,3 +136,17 @@ module OsuBeatmapTests =
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1,")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1,AAA")
         expected_result("100.1,250.1,4,0,0,100,1,1", "100.1,250.1,4,0,0,100,1, 1")
+        
+    [<Test>]
+    let HitSample_ValidParses () =
+
+        let inline expected_result (expected: string, input: string) =
+            let result = HitSample.FromString(input).ToString()
+            Assert.AreEqual(expected, result)
+
+        expected_result("0:0:0:0:", "")
+        expected_result("0:0:0:0:", ":")
+        expected_result("0:0:0:0:", "::")
+        expected_result("0:0:0:0:", ":::")
+        expected_result("0:0:0:0:", "::::")
+        expected_result("0:0:0:0:", ":::::")

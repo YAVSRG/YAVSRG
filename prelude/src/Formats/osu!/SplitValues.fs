@@ -57,15 +57,19 @@ type SplitValues =
             | true, v when v <= Int32.MaxValue && v >= -Int32.MaxValue -> v
             | _ -> failwithf "invalid int value at position %i: %s" index this.Original
 
-    member this.FloatOrDefault(index: int, default_value: float) : float =
+    member this.FloatOrDefault(index: int, default_value: float, allow_infinity: bool) : float =
         if index >= this.Length then
             default_value
         else
             match Double.TryParse(this.[index].Trim(), CultureInfo.InvariantCulture) with
-            | true, v when v <= Int32.MaxValue && v >= -Int32.MaxValue -> v
+            | true, v when allow_infinity || (v <= Int32.MaxValue && v >= -Int32.MaxValue) -> v
             | _ -> default_value
             
-    member this.FloatOrDefault(index: int) : float = this.FloatOrDefault(index, 0.0)
+    member inline this.FloatOrDefault(index: int, default_value: float) : float =
+        this.FloatOrDefault(index, default_value, false)
+    
+    member inline this.FloatOrDefault(index: int) : float =
+        this.FloatOrDefault(index, 0.0, false)
 
     member this.Enum<'T
         when 'T : enum<int>

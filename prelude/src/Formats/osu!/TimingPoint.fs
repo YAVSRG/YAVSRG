@@ -19,7 +19,9 @@ type UninheritedTimingPoint =
         Volume: int
         Effects: TimingEffect
     }
+    
     member this.KiaiMode = int this.Effects &&& int TimingEffect.Kiai <> 0
+    
     override this.ToString() : string =
         sprintf "%s,%s,%i,%i,%i,%i,1,%i"
             (this.Time.ToString(CultureInfo.InvariantCulture))
@@ -29,6 +31,7 @@ type UninheritedTimingPoint =
             this.SampleIndex
             this.Volume
             (int this.Effects)
+            
     static member inline Create(time: ^X, ms_per_beat: ^Y, meter: ^Z) : UninheritedTimingPoint =
         {
             Time = float time
@@ -51,8 +54,11 @@ type InheritedTimingPoint =
         Volume: int
         Effects: TimingEffect
     }
+    
     member this.KiaiMode = int this.Effects &&& int TimingEffect.Kiai <> 0
+    
     member this.OmitFirstBarLine = int this.Effects &&& int TimingEffect.OmitFirstBarline <> 0
+    
     override this.ToString() : string =
         sprintf "%s,%s,4,%i,%i,%i,0,%i"
             (this.Time.ToString(CultureInfo.InvariantCulture))
@@ -61,10 +67,11 @@ type InheritedTimingPoint =
             this.SampleIndex
             this.Volume
             (int this.Effects)
+            
     static member inline Create(time: ^Z, multiplier: ^Y) : InheritedTimingPoint =
         {
             Time = float time
-            Multiplier = float multiplier
+            Multiplier = float multiplier |> min 100.0 |> max 0.01
             SampleSet = SampleSet.Soft
             SampleIndex = 0
             Volume = 10
@@ -96,7 +103,9 @@ type TimingPoint =
         let inline parse_uninherited(values: SplitValues) =
             Uninherited {
                 Time = values.Float(0)
-                MsPerBeat = values.FloatOrDefault(1, 500.0) |> max 0.0
+                MsPerBeat =
+                    let v = values.FloatOrDefault(1, 500.0, true)
+                    if v <= 0 || System.Double.IsNaN(v) then 500.0 else max 0.0 v
                 Meter = values.IntOrDefault(2, 4) |> fun v -> if v <= 0 then 4 else v
                 SampleSet = values.EnumOrDefault(3, SampleSet.Default)
                 SampleIndex = values.IntOrDefault(4, 0)
@@ -108,8 +117,8 @@ type TimingPoint =
             Inherited {
                 Time = values.Float(0)
                 Multiplier =
-                    let v = values.FloatOrDefault(1, 1.0)
-                    if v < 0 then -100.0 / v else 1.0
+                    let v = values.FloatOrDefault(1, 1.0, true)
+                    if v >= 0 || System.Double.IsNaN(v) then 1.0 else -100.0 / v |> min 100.0 |> max 0.01
                 SampleSet = values.EnumOrDefault(3, SampleSet.Default)
                 SampleIndex = values.IntOrDefault(4, 0)
                 Volume = values.IntOrDefault(5, 100)
