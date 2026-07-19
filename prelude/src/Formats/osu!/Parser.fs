@@ -172,7 +172,7 @@ module OsuParser =
         elif values.Length < 2 then
             parse_failure "Failed to parse timing point (needed 2 or more values)" line
         else
-            let is_uninherited = values.StringOrDefault(6, "1").StartsWith('1')
+            let is_uninherited = values.UntrimmedStringOrDefault(6, "1").StartsWith('1')
             if is_uninherited then parse_uninherited(values)
             else parse_inherited(values)
 

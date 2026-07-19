@@ -21,7 +21,7 @@ module OsuBeatmapTests =
             TimingPoint.Uninherited(
                 {
                     Time = 100.1
-                    MsPerBeat = 250.1
+                    MsPerBeat = 500
                     Meter = 4
                     SampleSet = SampleSet.Default
                     SampleIndex = 0
@@ -30,9 +30,8 @@ module OsuBeatmapTests =
                 }
             )
 
-        Assert.AreEqual(default_values, OsuParser.parse_timing_point("100.1,250.1"))
+        Assert.AreEqual(default_values, OsuParser.parse_timing_point("100.1,"))
 
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1, 250.1")
 
         expected_result("## PARSE ERROR", "")
         expected_result("## PARSE ERROR", "100.1")
@@ -58,6 +57,7 @@ module OsuBeatmapTests =
         expected_result("100.1,500,4,0,0,100,1,0", "100.1,2147483648")
         expected_result("100.1,0,4,0,0,100,1,0", "100.1,-1")
         expected_result("100.1,0,4,0,0,100,1,0", "100.1,0")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1, 250.1")
 
         // Meter
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,0")
@@ -112,8 +112,9 @@ module OsuBeatmapTests =
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1A")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1.1")
         // Inherited
-        expected_result("100.1,-100,4,0,0,100,1,0", "100.1,250.1,4,0,0,100, 1") // todo: in lazer this is Uninherited: bug report?
-        expected_result("100.1,-100,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,A")
-        expected_result("100.1,-100,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,")
-        expected_result("100.1,-100,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,0")
-        expected_result("100.1,-100,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,-1")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100, 1") // todo: in lazer this is Uninherited: bug report?
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,\"1\"")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,A")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,0")
+        expected_result("100.1,-100,4,0,0,100,0,0", "100.1,250.1,4,0,0,100,-1")
