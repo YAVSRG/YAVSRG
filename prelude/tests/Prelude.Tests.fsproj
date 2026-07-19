@@ -49,6 +49,7 @@
     <Compile Include="Charts\ChartOriginTests.fs" />
     <Compile Include="Charts\ChartConversionTests.fs" />
     <Compile Include="Charts\ChartRateDetectionTests.fs" />
+    <Compile Include="Formats\OsuBeatmapTests.fs" />
     <Compile Include="Calculator\HoldCoverageTests.fs" />
     <Compile Include="Calculator\DiffCalcColorTests.fs" />
     <Compile Include="Mods\MirrorTests.fs" />
