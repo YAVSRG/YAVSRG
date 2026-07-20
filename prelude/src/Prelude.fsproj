@@ -36,8 +36,8 @@
     <Compile Include="Formats\osu!\SampleSet.fs" />
     <Compile Include="Formats\osu!\TimingPoint.fs" />
     <Compile Include="Formats\osu!\HitSample.fs" />
+    <Compile Include="Formats\osu!\HitObject.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />
-    <Compile Include="Formats\osu!\HitObjects.fs" />
     <Compile Include="Formats\osu!\Events.fs" />
     <Compile Include="Formats\osu!\Parser.fs" />
     <Compile Include="Formats\osu!\Converter.fs" />

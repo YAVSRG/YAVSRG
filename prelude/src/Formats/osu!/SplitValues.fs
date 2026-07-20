@@ -50,7 +50,7 @@ type ParsedValueExtensions =
     [<Extension>]
     static member RejectInfinity(pvalue: ParsedValue<float32>) : ParsedValue<float32> =
         match pvalue with
-        | Valid v -> if Single.IsNaN(v) then Invalid else Valid(v)
+        | Valid v -> if Single.IsInfinity(v) then Invalid else Valid(v)
         | Invalid -> Invalid
         
     [<Extension>]

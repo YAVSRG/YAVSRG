@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Formats.Osu
 
 open System
-open System.Globalization
 open System.IO
 open System.Text
 
@@ -141,132 +140,6 @@ module OsuParser =
             parse_failure "Empty line" line
         else parse(values)
 
-    let parse_hit_object (line: string) : HitObject =
-        let values = line.Split(',')
-        
-        let x = values.ValueAt(0).ParseFloat().RejectNan().RejectInfinity().ClampBetween(0f, 512f).TruncateToInt().ExpectValid(line)
-        let y = values.ValueAt(1).ParseFloat().RejectNan().RejectInfinity().ClampBetween(0f, 512f).TruncateToInt().ExpectValid(line)
-        let time = values.ValueAt(2).ParseFloat().RejectNan().RejectInfinity().TruncateToInt().ExpectValid(line)
-        let obj_type = values.ValueAt(3).ParseInt().ExpectValid(line)
-        let hitsound = values.ValueAt(4).ParseInt().ExpectValid(line) &&& 14 |> enum
-
-        let starts_new_combo = obj_type &&& 4 <> 0
-        let color_hax = (obj_type >>> 4) &&& 7
-        
-        let inline parse_hitsample(index: int) =
-            HitSample.FromString(values.ValueAt(index).DefaultValue("0:0:0:0:"))
-        
-        let inline parse_hitcircle() =
-            HitCircle {
-                X = x
-                Y = y
-                Time = time
-                StartsNewCombo = starts_new_combo
-                ColorHax = color_hax
-                HitSound = hitsound
-                HitSample = parse_hitsample(5)
-            }
-            
-        let inline parse_slider() =
-            let curve_parts = values.ValueAt(5).DefaultValue("").Split('|', 2, StringSplitOptions.TrimEntries)
-            
-            if curve_parts.Length < 2 then
-                parse_failure "Invalid slider curve" line
-                
-            let curve_shape =
-                match curve_parts.[0].ToUpperInvariant() with
-                | "B" -> Bezier
-                | "C" -> Catmull
-                | "L" -> Linear
-                | "P" -> PerfectCircle
-                | _ -> Bezier
-                
-            let curve_points =
-                curve_parts.[1].Split('|', StringSplitOptions.TrimEntries)
-                |> Seq.map (fun coordinate ->
-                    let xy = SplitValues.Parse(coordinate, ':')
-                    xy.IntOrDefault(0, 0), xy.IntOrDefault(1, 0)
-                )
-                |> List.ofSeq
-                
-            let edge_sounds =
-                values.ValueAt(8).DefaultValue("").Split('|', StringSplitOptions.TrimEntries)
-                |> Seq.choose (fun n ->
-                    match Int32.TryParse(n, CultureInfo.InvariantCulture) with
-                    | true, v -> Some (enum v)
-                    | false, _ -> None
-                )
-                |> List.ofSeq
-                
-            let edge_sets =
-                values.ValueAt(9).DefaultValue("").Split("|", StringSplitOptions.TrimEntries)
-                |> Seq.map (fun s ->
-                    let sets = SplitValues.Parse(s, ':')
-                    sets.EnumOrDefault(0, SampleSet.None, false), sets.EnumOrDefault(1, SampleSet.None, false)
-                )
-                |> List.ofSeq
-                    
-            Slider {
-                X = x
-                Y = y
-                Time = time
-                StartsNewCombo = starts_new_combo
-                ColorHax = color_hax
-                HitSound = hitsound
-                CurveType = curve_shape
-                CurvePoints = curve_points
-                Slides = values.ValueAt(6).ParseInt().DefaultValue(1)
-                Length = values.ValueAt(7).ParseFloat().DefaultValue(100.0f)
-                EdgeSounds = edge_sounds
-                EdgeSets = edge_sets
-                HitSample = parse_hitsample(10)
-            }
-            
-        let inline parse_spinner() =
-            Spinner {
-                X = x
-                Y = y
-                Time = time
-                StartsNewCombo = starts_new_combo
-                ColorHax = color_hax
-                HitSound = hitsound
-                EndTime =
-                    values
-                        .ValueAt(6)
-                        .ParseFloat()
-                        .ReplaceNanWith(float32 Int32.MinValue)
-                        .ReplaceOutOfRangeWith(float32 Int32.MinValue, float32 Int32.MaxValue, float32 Int32.MinValue)
-                        .TruncateToInt()
-                        .ExpectValid(line)
-                HitSample = parse_hitsample(6)
-            }
-            
-        let inline parse_hold() =
-            let endtime_and_sample = values.ValueAt(5).ExpectValid(line).Split(':', 2, StringSplitOptions.TrimEntries)
-            Hold {
-                X = x
-                Y = y
-                Time = time
-                StartsNewCombo = starts_new_combo
-                ColorHax = color_hax
-                HitSound = hitsound
-                EndTime =
-                    endtime_and_sample
-                        .ValueAt(0)
-                        .ParseFloat()
-                        .ReplaceNanWith(float32 Int32.MinValue)
-                        .ReplaceOutOfRangeWith(float32 Int32.MinValue, float32 Int32.MaxValue, float32 Int32.MinValue)
-                        .TruncateToInt()
-                        .ExpectValid(line)
-                HitSample = HitSample.FromString(endtime_and_sample.ValueAt(1).DefaultValue("0:0:0:0:"))
-            }
-
-        if obj_type &&& 1 > 0 then parse_hitcircle()
-        elif obj_type &&& 2 > 0 then parse_slider()
-        elif obj_type &&& 8 > 0 then parse_spinner()
-        elif obj_type &&& 128 > 0 then parse_hold()
-        else parse_failure "Unrecognised object type" line
-
     [<Struct>]
     type private ParserState =
         | Nothing
@@ -327,12 +200,8 @@ module OsuParser =
                 line
                 |> parse_storyboard_event
                 |> Option.iter events.Add
-            | TimingPoints ->
-                timing.Add(TimingPoint.FromString(line))
-            | Objects ->
-                line
-                |> parse_hit_object
-                |> objects.Add
+            | TimingPoints -> timing.Add(TimingPoint.FromString(line))
+            | Objects -> objects.Add(HitObject.FromString(line))
             | Colors ->
                 () // todo: support colors header
 
