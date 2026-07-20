@@ -2,7 +2,91 @@
 
 open System
 open System.Globalization
+open System.Runtime.CompilerServices
 
+[<Struct>]
+type ParsedValue<'T> =
+    | Valid of 'T
+    | Invalid
+    
+exception ParseException of args: obj[]
+    
+type ParsedValueExtensions =
+        
+    [<Extension>]
+    static member inline ValueAt(split_values: string array, index: int) : ParsedValue<string> =
+        if index < split_values.Length then Valid(split_values.[index]) else Invalid
+    
+    [<Extension>]
+    static member inline DefaultValue<'T>(pvalue: ParsedValue<'T>, default_value: 'T) : 'T =
+        match pvalue with
+        | Valid v -> v
+        | Invalid -> default_value
+        
+    [<Extension>]
+    static member inline ExpectValid(pvalue: ParsedValue<'T>, [<ParamArray>] args: obj[]) : 'T =
+        match pvalue with
+        | Valid v -> v
+        | Invalid -> raise(ParseException(args))
+        
+    [<Extension>]
+    static member inline ParseFloat(pvalue: ParsedValue<string>) : ParsedValue<double> =
+        match pvalue with
+        | Valid v ->
+            match Double.TryParse(v.Trim(), CultureInfo.InvariantCulture) with
+            | true, parsed -> Valid parsed
+            | false, _ -> Invalid
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member inline ParseInt(pvalue: ParsedValue<string>) : ParsedValue<int> =
+        match pvalue with
+        | Valid v ->
+            match Int32.TryParse(v.Trim(), CultureInfo.InvariantCulture) with
+            | true, parsed -> Valid parsed
+            | false, _ -> Invalid
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member RejectInfinity(pvalue: ParsedValue<double>) : ParsedValue<double> =
+        match pvalue with
+        | Valid v -> if Double.IsNaN(v) then Invalid else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member RejectNan(pvalue: ParsedValue<double>) : ParsedValue<double> =
+        match pvalue with
+        | Valid v -> if Double.IsNaN(v) then Invalid else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceNanWith(pvalue: ParsedValue<double>, replacement_value: double) : ParsedValue<double> =
+        match pvalue with
+        | Valid v -> if Double.IsNaN(v) then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ClampBetween(pvalue: ParsedValue<double>, lo: double, hi: double) : ParsedValue<double> =
+        match pvalue with
+        | Valid v -> Valid(v |> max lo |> min hi)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ClampBetween(pvalue: ParsedValue<int>, lo: int, hi: int) : ParsedValue<int> =
+        match pvalue with
+        | Valid v -> Valid(v |> max lo |> min hi)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member TruncateToInt(pvalue: ParsedValue<double>) : ParsedValue<int> =
+        match pvalue with
+        | Valid v ->
+            if v >= Int32.MinValue && v <= Int32.MaxValue then
+                Valid(int v)
+            else
+                Invalid
+        | Invalid -> Invalid
+    
 [<Struct>]
 type SplitValues =
     { Original: string; Values: string array }
@@ -72,7 +156,7 @@ type SplitValues =
         this.FloatOrDefault(index, 0.0, false)
 
     member this.Enum<'T
-        when 'T : enum<int>
+        when 'T :> Enum
         and 'T : (new: unit -> 'T)
         and 'T : struct
         and 'T :> ValueType>(index: int) : 'T =
@@ -84,9 +168,9 @@ type SplitValues =
             | false, _ -> failwithf "invalid enum value at position %i: %s" index this.Original
 
     member this.EnumOrDefault<'T
-        when 'T : (new: unit -> 'T)
+        when 'T :> Enum
+        and 'T : (new: unit -> 'T)
         and 'T : struct
-        and 'T :> Enum
         and 'T :> ValueType>(index: int, default_value: 'T, allow_undefined: bool) : 'T =
         if index >= this.Length then
             default_value

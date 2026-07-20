@@ -141,17 +141,20 @@ module OsuBeatmapTests =
     let HitSample_ValidParses () =
 
         let inline expected_result (expected: string, input: string) =
-            let result = HitSample.FromString(input).ToString()
+            let result =
+                try
+                    HitSample.FromString(input).ToString()
+                with _ ->
+                    "## PARSE ERROR"
+                    
             Assert.AreEqual(expected, result)
 
-        expected_result("0:0:0:0:", "")
-        expected_result("0:0:0:0:", " ")
-        expected_result("0:0:0:0:", "-1.1")
-        expected_result("0:0:0:0:", "AAA")
-        expected_result("0:0:0:0:", "2147483648")
-        expected_result("0:0:0:0:", "-2147483649")
-        expected_result("-1:0:0:0:", "-1")
-        expected_result("-2147483648:0:0:0:", "-2147483648")
-        expected_result("2147483647:0:0:0:", "2147483647")
-        expected_result("0:5:0:0:File", "A : 5 : 1.1 : -1 :File")
-        expected_result("0:5:0:100: File", "A : 5 : 1.1 : 101 : File")
+        expected_result("## PARSE ERROR", "")
+        expected_result("## PARSE ERROR", " ")
+        expected_result("0:0:0:0:", " 0 :  0  :   0   :    0    :")
+        expected_result("-1:5:-2147483648:100: File", "-1 : 5 : -2147483648 : 101 : File")
+        
+        expected_result("## PARSE ERROR", "0:0:0:-2147483649:")
+        expected_result("## PARSE ERROR", "0:0:0:2147483648:")
+        expected_result("0:0:0:0:", "0:0:0:-2147483648:")
+        expected_result("0:0:0:100:", "0:0:0:2147483647:")
