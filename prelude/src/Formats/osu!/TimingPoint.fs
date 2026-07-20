@@ -107,10 +107,10 @@ type TimingPoint =
                     let v = values.FloatOrDefault(1, 500.0, true)
                     if v <= 0 || System.Double.IsNaN(v) then 500.0 else max 0.0 v
                 Meter = values.IntOrDefault(2, 4) |> fun v -> if v <= 0 then 4 else v
-                SampleSet = values.EnumOrDefault(3, SampleSet.Default)
+                SampleSet = values.EnumOrDefault(3, SampleSet.Default, false)
                 SampleIndex = values.IntOrDefault(4, 0)
                 Volume = values.IntOrDefault(5, 100) |> max 0 |> min 100
-                Effects = values.EnumOrDefault(7, TimingEffect.None)
+                Effects = values.EnumOrDefault(7, TimingEffect.None, true)
             }
             
         let inline parse_inherited(values: SplitValues) =
@@ -119,10 +119,10 @@ type TimingPoint =
                 Multiplier =
                     let v = values.FloatOrDefault(1, 1.0, true)
                     if v >= 0 || System.Double.IsNaN(v) then 1.0 else -100.0 / v |> min 100.0 |> max 0.01
-                SampleSet = values.EnumOrDefault(3, SampleSet.Default)
+                SampleSet = values.EnumOrDefault(3, SampleSet.Default, false)
                 SampleIndex = values.IntOrDefault(4, 0)
                 Volume = values.IntOrDefault(5, 100)
-                Effects = values.EnumOrDefault(7, TimingEffect.None)
+                Effects = values.EnumOrDefault(7, TimingEffect.None, true)
             }
             
         let values = SplitValues.Parse(line, ',')

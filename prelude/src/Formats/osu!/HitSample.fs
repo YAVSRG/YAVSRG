@@ -24,9 +24,9 @@ type HitSample =
     static member FromString(sample: string) : HitSample =
         let values = SplitValues.Parse(sample, ':')
         {
-            NormalSet = values.EnumOrDefault(0, SampleSet.Default)
-            AdditionSet = values.EnumOrDefault(1, SampleSet.Default)
-            Index = values.IntOrDefault(2, 0)
-            Volume = values.IntOrDefault(3, 0)
-            Filename = values.StringOrDefault(4, "")
+            NormalSet = values.EnumOrDefault(0, SampleSet.Default, true)
+            AdditionSet = values.EnumOrDefault(1, SampleSet.Default, true)
+            Index = values.EnumOrDefault(2, SampleSet.Default, true) |> int
+            Volume = values.EnumOrDefault(3, SampleSet.Default, true) |> int |> max 0 |> min 100
+            Filename = values.UntrimmedStringOrDefault(4, "")
         }

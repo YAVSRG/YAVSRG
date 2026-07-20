@@ -118,7 +118,7 @@ module OsuParser =
         let inline parse_sample(values: SplitValues) =
             Sample(
                 values.IntOrDefault(1, 0),
-                values.EnumOrDefault(2, Layer.Background),
+                values.EnumOrDefault(2, Layer.Background, false),
                 values.StringOrDefault(3, ""),
                 values.IntOrDefault(4, 0)
             )
@@ -153,7 +153,7 @@ module OsuParser =
         let y = values.IntOrDefault(1, 0)
         let time = values.IntOrDefault(2, 0)
         let obj_type = values.IntOrDefault(3, 0)
-        let hitsound = values.EnumOrDefault(4, HitSound.Default)
+        let hitsound = values.EnumOrDefault(4, HitSound.Default, false)
 
         let starts_new_combo = obj_type &&& 4 <> 0
         let color_hax = (obj_type >>> 4) &&& 7
@@ -204,7 +204,7 @@ module OsuParser =
                 values.StringOrDefault(9, "").Split("|", StringSplitOptions.TrimEntries)
                 |> Seq.map (fun s ->
                     let sets = SplitValues.Parse(s, ':')
-                    sets.EnumOrDefault(0, SampleSet.None), sets.EnumOrDefault(1, SampleSet.None)
+                    sets.EnumOrDefault(0, SampleSet.None, false), sets.EnumOrDefault(1, SampleSet.None, false)
                 )
                 |> List.ofSeq
                     

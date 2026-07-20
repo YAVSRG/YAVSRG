@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Charts
+namespace Prelude.Tests.Formats
 
 open NUnit.Framework
 open Prelude.Formats.Osu
@@ -43,8 +43,8 @@ module OsuBeatmapTests =
         expected_result("## PARSE ERROR", "1e100,250.1")
         expected_result("## PARSE ERROR", "-1e100,250.1")
         expected_result("## PARSE ERROR", "2147483648,250.1")
-        expected_result("## PARSE ERROR", "-2147483648,250.1")
-        expected_result("-2147483647,250.1,4,0,0,100,1,0", "-2147483647,250.1")
+        expected_result("## PARSE ERROR", "-2147483649,250.1")
+        expected_result("-2147483648,250.1,4,0,0,100,1,0", "-2147483648,250.1")
         expected_result("100.1,250.1,4,0,0,100,1,0", " 100.1,250.1")
 
         // MsPerBeat
@@ -72,12 +72,11 @@ module OsuBeatmapTests =
         expected_result("100.1,250.1,3,0,0,100,1,0", "100.1,250.1, 3")
 
         // SampleSet
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,2147483648")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,-2147483649")
-        expected_result("100.1,250.1,4,2147483647,0,100,1,0", "100.1,250.1,4,2147483647")
-        expected_result("100.1,250.1,4,-2147483648,0,100,1,0", "100.1,250.1,4,-2147483648")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,-1")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,4")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,AAA")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,1.1")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,Default")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,None")
         expected_result("100.1,250.1,4,1,0,100,1,0", "100.1,250.1,4,Normal")
@@ -88,9 +87,9 @@ module OsuBeatmapTests =
         // SampleIndex
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,AAA")
-        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,-2147483648")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,-2147483649")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,2147483648")
-        expected_result("100.1,250.1,4,0,-2147483647,100,1,0", "100.1,250.1,4,0,-2147483647")
+        expected_result("100.1,250.1,4,0,-2147483648,100,1,0", "100.1,250.1,4,0,-2147483648")
         expected_result("100.1,250.1,4,0,2147483647,100,1,0", "100.1,250.1,4,0,2147483647")
         expected_result("100.1,250.1,4,0,2,100,1,0", "100.1,250.1,4,0, 2")
 
@@ -135,6 +134,7 @@ module OsuBeatmapTests =
         expected_result("100.1,250.1,4,0,0,100,1,2147483647", "100.1,250.1,4,0,0,100,1,2147483647")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1,")
         expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1,AAA")
+        expected_result("100.1,250.1,4,0,0,100,1,0", "100.1,250.1,4,0,0,100,1,1.1")
         expected_result("100.1,250.1,4,0,0,100,1,1", "100.1,250.1,4,0,0,100,1, 1")
         
     [<Test>]
@@ -145,8 +145,13 @@ module OsuBeatmapTests =
             Assert.AreEqual(expected, result)
 
         expected_result("0:0:0:0:", "")
-        expected_result("0:0:0:0:", ":")
-        expected_result("0:0:0:0:", "::")
-        expected_result("0:0:0:0:", ":::")
-        expected_result("0:0:0:0:", "::::")
-        expected_result("0:0:0:0:", ":::::")
+        expected_result("0:0:0:0:", " ")
+        expected_result("0:0:0:0:", "-1.1")
+        expected_result("0:0:0:0:", "AAA")
+        expected_result("0:0:0:0:", "2147483648")
+        expected_result("0:0:0:0:", "-2147483649")
+        expected_result("-1:0:0:0:", "-1")
+        expected_result("-2147483648:0:0:0:", "-2147483648")
+        expected_result("2147483647:0:0:0:", "2147483647")
+        expected_result("0:5:0:0:File", "A : 5 : 1.1 : -1 :File")
+        expected_result("0:5:0:100: File", "A : 5 : 1.1 : 101 : File")
