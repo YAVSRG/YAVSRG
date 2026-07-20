@@ -168,3 +168,80 @@ module OsuBeatmapTests =
         expected_result("## PARSE ERROR", "0:0:0:2147483648:")
         expected_result("0:0:0:0:", "0:0:0:-2147483648:")
         expected_result("0:0:0:100:", "0:0:0:2147483647:")
+        
+    [<Test>]
+    let HitObject_ValidParses () =
+        
+        let inline expected_result (expected: string, input: string) =
+            let result =
+                try
+                    HitObject.FromString(input).ToString()
+                with _ ->
+                    "## PARSE ERROR"
+                    
+            Assert.AreEqual(expected, result)
+            
+        expected_result("## PARSE ERROR", " 256,192,0,1,0")
+        expected_result("256,192,0,1,0,0:0:0:0:", "256 , 192 , 0 , 1 , 0")
+        expected_result("256,192,0,1,0,0:0:0:0:", "\t256\t,\t192\t,\t0\t,\t1,\t0\t")
+        expected_result("## PARSE ERROR", "256,192,0,1,0,")
+        expected_result("## PARSE ERROR", "256,192,0,1,0,0:0:0:0")
+        expected_result("256,192,0,1,0,1:1:1:1:", "256,192,0,1,0,1:1:1:1:")
+        
+        // X
+        expected_result("256,192,0,1,0,0:0:0:0:", "256.9,192,0,1,0")
+        expected_result("## PARSE ERROR", "1e40,192,0,1,0")
+        expected_result("512,192,0,1,0,0:0:0:0:", "1e38,192,0,1,0")
+        expected_result("512,192,0,1,0,0:0:0:0:", "2147483648,192,0,1,0")
+        expected_result("512,192,0,1,0,0:0:0:0:", "2147483647,192,0,1,0")
+        expected_result("0,192,0,1,0,0:0:0:0:", "-2147483648,192,0,1,0")
+        expected_result("0,192,0,1,0,0:0:0:0:", "-2147483649,192,0,1,0")
+        expected_result("0,192,0,1,0,0:0:0:0:", "-1e38,192,0,1,0")
+        expected_result("## PARSE ERROR", "-1e40,192,0,1,0")
+        expected_result("## PARSE ERROR", "NaN,192,0,1,0")
+        expected_result("## PARSE ERROR", "AAA,192,0,1,0")
+        expected_result("## PARSE ERROR", ",192,0,1,0")
+        
+        // Y
+        expected_result("256,192,0,1,0,0:0:0:0:", "256,192.9,0,1,0")
+        expected_result("## PARSE ERROR", "256,1e40,0,1,0")
+        expected_result("256,512,0,1,0,0:0:0:0:", "256,1e38,0,1,0")
+        expected_result("256,512,0,1,0,0:0:0:0:", "256,2147483648,0,1,0")
+        expected_result("256,512,0,1,0,0:0:0:0:", "256,2147483647,0,1,0")
+        expected_result("256,0,0,1,0,0:0:0:0:", "256,-2147483648,0,1,0")
+        expected_result("256,0,0,1,0,0:0:0:0:", "256,-2147483649,0,1,0")
+        expected_result("256,0,0,1,0,0:0:0:0:", "256,-1e38,0,1,0")
+        expected_result("## PARSE ERROR", "256,-1e40,0,1,0")
+        expected_result("## PARSE ERROR", "256,NaN,0,1,0")
+        expected_result("## PARSE ERROR", "256,AAA,0,1,0")
+        expected_result("## PARSE ERROR", "256,,0,1,0")
+        
+        // Time
+        expected_result("256,192,100,1,0,0:0:0:0:", "256,192,100.1,1,0")
+        expected_result("## PARSE ERROR", "256,192,1e40,1,0")
+        expected_result("## PARSE ERROR", "256,192,1e38,1,0")
+        expected_result("256,192,2147483647,1,0,0:0:0:0:", "256,192,2147483648,1,0") // todo: Edge case there is no way to verify intent for. leave as is for now
+        expected_result("256,192,2147483647,1,0,0:0:0:0:", "256,192,2147483647,1,0")
+        expected_result("256,192,-2147483648,1,0,0:0:0:0:", "256,192,-2147483648,1,0")
+        expected_result("256,192,-2147483648,1,0,0:0:0:0:", "256,192,-2147483649,1,0")
+        expected_result("## PARSE ERROR", "256,192,-1e38,1,0")
+        expected_result("## PARSE ERROR", "256,192,-1e40,1,0")
+        expected_result("## PARSE ERROR", "256,192,NaN,1,0")
+        expected_result("## PARSE ERROR", "256,192,AAA,1,0")
+        expected_result("## PARSE ERROR", "256,192,,1,0")
+        
+        // Type
+        expected_result("## PARSE ERROR", "256,192,100,0,0")
+        expected_result("## PARSE ERROR", "256,192,100,1.0,0")
+        expected_result("## PARSE ERROR", "256,192,100,,0")
+        expected_result("## PARSE ERROR", "256,192,100,AAA,0")
+        
+        expected_result("256,192,100,1,0,0:0:0:0:", "256,192,100,1,0")
+        expected_result("256,192,100,1,0,0:0:0:0:", "256,192,100,3,0")
+        expected_result("256,192,100,1,0,0:0:0:0:", "256,192,100,9,0")
+        expected_result("256,192,100,1,0,0:0:0:0:", "256,192,100,129,0")
+        expected_result("256,192,100,1,0,0:0:0:0:", "256,192,100,137,0")
+        expected_result("256,192,100,1,0,0:0:0:0:", "256,192,100,139,0")
+        expected_result("256,192,100,5,0,0:0:0:0:", "256,192,100,5,0")
+        expected_result("256,192,100,5,0,0:0:0:0:", "256,192,100,13,0")
+        expected_result("256,192,100,5,0,0:0:0:0:", "256,192,100,133,0")
