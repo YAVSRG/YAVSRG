@@ -142,21 +142,19 @@ module OsuParser =
         else parse(values)
 
     let parse_hit_object (line: string) : HitObject =
-        let values = SplitValues.Parse(line, ',')
+        let values = line.Split(',')
         
-        if values.Length = 0 then
-            parse_failure "Empty line" line
-        elif values.Length < 5 then
-            parse_failure "Failed to parse hit object (needed 5 or more values)" line
-        
-        let x = values.IntOrDefault(0, 0)
-        let y = values.IntOrDefault(1, 0)
-        let time = values.IntOrDefault(2, 0)
-        let obj_type = values.IntOrDefault(3, 0)
-        let hitsound = values.EnumOrDefault(4, HitSound.Default, false)
+        let x = values.ValueAt(0).ParseFloat().RejectNan().RejectInfinity().ClampBetween(0f, 512f).TruncateToInt().ExpectValid(line)
+        let y = values.ValueAt(1).ParseFloat().RejectNan().RejectInfinity().ClampBetween(0f, 512f).TruncateToInt().ExpectValid(line)
+        let time = values.ValueAt(2).ParseFloat().RejectNan().RejectInfinity().TruncateToInt().ExpectValid(line)
+        let obj_type = values.ValueAt(3).ParseInt().ExpectValid(line)
+        let hitsound = values.ValueAt(4).ParseInt().ExpectValid(line) &&& 14 |> enum
 
         let starts_new_combo = obj_type &&& 4 <> 0
         let color_hax = (obj_type >>> 4) &&& 7
+        
+        let inline parse_hitsample(index: int) =
+            HitSample.FromString(values.ValueAt(index).DefaultValue("0:0:0:0:"))
         
         let inline parse_hitcircle() =
             HitCircle {
@@ -166,11 +164,11 @@ module OsuParser =
                 StartsNewCombo = starts_new_combo
                 ColorHax = color_hax
                 HitSound = hitsound
-                HitSample = HitSample.FromString(values.StringOrDefault(5, ""))
+                HitSample = parse_hitsample(5)
             }
             
         let inline parse_slider() =
-            let curve_parts = values.StringOrDefault(5, "").Split('|', 2, StringSplitOptions.TrimEntries)
+            let curve_parts = values.ValueAt(5).DefaultValue("").Split('|', 2, StringSplitOptions.TrimEntries)
             
             if curve_parts.Length < 2 then
                 parse_failure "Invalid slider curve" line
@@ -192,7 +190,7 @@ module OsuParser =
                 |> List.ofSeq
                 
             let edge_sounds =
-                values.StringOrDefault(8, "").Split('|', StringSplitOptions.TrimEntries)
+                values.ValueAt(8).DefaultValue("").Split('|', StringSplitOptions.TrimEntries)
                 |> Seq.choose (fun n ->
                     match Int32.TryParse(n, CultureInfo.InvariantCulture) with
                     | true, v -> Some (enum v)
@@ -201,7 +199,7 @@ module OsuParser =
                 |> List.ofSeq
                 
             let edge_sets =
-                values.StringOrDefault(9, "").Split("|", StringSplitOptions.TrimEntries)
+                values.ValueAt(9).DefaultValue("").Split("|", StringSplitOptions.TrimEntries)
                 |> Seq.map (fun s ->
                     let sets = SplitValues.Parse(s, ':')
                     sets.EnumOrDefault(0, SampleSet.None, false), sets.EnumOrDefault(1, SampleSet.None, false)
@@ -217,11 +215,11 @@ module OsuParser =
                 HitSound = hitsound
                 CurveType = curve_shape
                 CurvePoints = curve_points
-                Slides = values.IntOrDefault(6, 1)
-                Length = values.FloatOrDefault(7, 100.0)
+                Slides = values.ValueAt(6).ParseInt().DefaultValue(1)
+                Length = values.ValueAt(7).ParseFloat().DefaultValue(100.0f)
                 EdgeSounds = edge_sounds
                 EdgeSets = edge_sets
-                HitSample = HitSample.FromString(values.StringOrDefault(10, ""))
+                HitSample = parse_hitsample(10)
             }
             
         let inline parse_spinner() =
@@ -232,12 +230,19 @@ module OsuParser =
                 StartsNewCombo = starts_new_combo
                 ColorHax = color_hax
                 HitSound = hitsound
-                EndTime = values.IntOrDefault(5, time)
-                HitSample = HitSample.FromString(values.StringOrDefault(6, ""))
+                EndTime =
+                    values
+                        .ValueAt(6)
+                        .ParseFloat()
+                        .ReplaceNanWith(float32 Int32.MinValue)
+                        .ReplaceOutOfRangeWith(float32 Int32.MinValue, float32 Int32.MaxValue, float32 Int32.MinValue)
+                        .TruncateToInt()
+                        .ExpectValid(line)
+                HitSample = parse_hitsample(6)
             }
             
         let inline parse_hold() =
-            let endtime_and_sample = values.StringOrDefault(5, "").Split(':', 2, StringSplitOptions.TrimEntries)
+            let endtime_and_sample = values.ValueAt(5).ExpectValid(line).Split(':', 2, StringSplitOptions.TrimEntries)
             Hold {
                 X = x
                 Y = y
@@ -246,10 +251,14 @@ module OsuParser =
                 ColorHax = color_hax
                 HitSound = hitsound
                 EndTime =
-                    match Int32.TryParse(endtime_and_sample.[0], CultureInfo.InvariantCulture) with
-                    | true, v -> v
-                    | false, _ -> time
-                HitSample = HitSample.FromString(if endtime_and_sample.Length > 1 then endtime_and_sample.[1] else "")
+                    endtime_and_sample
+                        .ValueAt(0)
+                        .ParseFloat()
+                        .ReplaceNanWith(float32 Int32.MinValue)
+                        .ReplaceOutOfRangeWith(float32 Int32.MinValue, float32 Int32.MaxValue, float32 Int32.MinValue)
+                        .TruncateToInt()
+                        .ExpectValid(line)
+                HitSample = HitSample.FromString(endtime_and_sample.ValueAt(1).DefaultValue("0:0:0:0:"))
             }
 
         if obj_type &&& 1 > 0 then parse_hitcircle()

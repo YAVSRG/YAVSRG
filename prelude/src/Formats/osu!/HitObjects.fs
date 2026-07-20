@@ -61,7 +61,7 @@ type Slider =
         CurveType: SliderShape
         CurvePoints: (int * int) list
         Slides: int
-        Length: float
+        Length: float32
         EdgeSounds: HitSound list
         EdgeSets: (SampleSet * SampleSet) list
         HitSample: HitSample
