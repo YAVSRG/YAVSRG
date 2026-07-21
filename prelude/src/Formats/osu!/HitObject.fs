@@ -53,6 +53,16 @@ type SliderShape =
         | Catmull -> "C"
         | Bezier -> "B"
         | PerfectCircle -> "P"
+        
+    static member FromString(shape: string) : SliderShape =
+        if shape.Length <> 1 then
+            raise(ParseException([|shape|]))
+        else
+            match shape.[0] with
+            | 'L' -> Linear
+            | 'B' -> Bezier
+            | 'P' -> PerfectCircle
+            | _ -> Catmull
 
 type Slider =
     {
@@ -65,21 +75,29 @@ type Slider =
         CurveType: SliderShape
         CurvePoints: (int * int) list
         Slides: int
-        Length: float32
+        Length: float
         EdgeSounds: HitSound list
         EdgeSets: (SampleSet * SampleSet) list
         HitSample: HitSample
     }
     
+    member this.Repeats = this.Slides - 1
+    
     override this.ToString() : string =
-        sprintf "%i,%i,%i,%i,%i,%O|%s,%i,%s,%s,%s,%O"
+        let inline format_curve_point(x, y) : string =
+            sprintf "%i:%i" x y
+        let inline format_curve_points(ps: _ list) : string =
+            if ps = [] then ""
+            else "|" + (Seq.map format_curve_point ps |> String.concat "|")
+         
+        sprintf "%i,%i,%i,%i,%i,%O%s,%i,%s,%s,%s,%O"
             this.X
             this.Y
             this.Time
             (2 ||| (if this.StartsNewCombo then 4 else 0) ||| (this.ColorHax &&& 7 <<< 4))
             (int this.HitSound)
             this.CurveType
-            (this.CurvePoints |> Seq.map (fun (x, y) -> sprintf "%i:%i" x y) |> String.concat "|")
+            (format_curve_points(this.CurvePoints))
             this.Slides
             (this.Length.ToString(CultureInfo.InvariantCulture))
             (this.EdgeSounds |> Seq.map (int >> sprintf "%i") |> String.concat "|")
@@ -147,6 +165,7 @@ type HitObject =
     | Hold of Hold
     | Slider of Slider
     | Spinner of Spinner
+    
     member this.Time =
         match this with
         | HitCircle x -> x.Time
@@ -195,42 +214,52 @@ type HitObject =
             }
             
         let inline parse_slider() =
-            let curve_parts = values.ValueAt(5).DefaultValue("").Split('|', 2, StringSplitOptions.TrimEntries)
             
-            if curve_parts.Length < 2 then
-                raise(ParseException([|line, "Invalid slider curve"|]))
-                
-            let curve_shape =
-                match curve_parts.[0].ToUpperInvariant() with
-                | "B" -> Bezier
-                | "C" -> Catmull
-                | "L" -> Linear
-                | "P" -> PerfectCircle
-                | _ -> Bezier
-                
+            let curve_parts = values.ValueAt(5).DefaultValue("").Split('|', 2)
+            let curve_shape = SliderShape.FromString(curve_parts.ValueAt(0).DefaultValue(""))
             let curve_points =
-                curve_parts.[1].Split('|', StringSplitOptions.TrimEntries)
-                |> Seq.map (fun coordinate ->
-                    let xy = SplitValues.Parse(coordinate, ':')
-                    xy.IntOrDefault(0, 0), xy.IntOrDefault(1, 0)
-                )
+                
+                let inline curve_point(point: string) =
+                    let split = point.Split(':')
+                    let inline coord(index: int) =
+                        split
+                            .ValueAt(index)
+                            .ParseFloat()
+                            .ReplaceNanWith(float32 Int32.MinValue)
+                            .ReplaceOutOfRangeInclusiveWith(float32 Int32.MinValue, float32 Int32.MaxValue, float32 Int32.MinValue)
+                            .TruncateToInt()
+                            .ExpectValid(line, curve_parts.[1])
+                    coord(0), coord(1)
+                    
+                if curve_parts.Length < 2 then
+                    []
+                else
+                    curve_parts.[1].Split('|')
+                    |> Seq.map curve_point
+                    |> List.ofSeq
+                
+            let slides = values.ValueAt(6).ParseInt().ClampBetween(1, 9001).RejectOutOfRange(1, 9000).ExpectValid(line)
+                
+            let inline edge_sounds(slides: int) : HitSound list =
+                let pipe_separated_sounds = values.ValueAt(8).DefaultValue("").Split('|')
+                
+                let inline edge_sound(index: int) =
+                    pipe_separated_sounds.ValueAt(index).ParseInt().DefaultValue(0) |> enum
+                
+                seq { 0 .. slides }
+                |> Seq.map edge_sound
                 |> List.ofSeq
                 
-            let edge_sounds =
-                values.ValueAt(8).DefaultValue("").Split('|', StringSplitOptions.TrimEntries)
-                |> Seq.choose (fun n ->
-                    match Int32.TryParse(n, CultureInfo.InvariantCulture) with
-                    | true, v -> Some (enum v)
-                    | false, _ -> None
-                )
-                |> List.ofSeq
+            let inline edge_sets(slides: int) : (SampleSet * SampleSet) list =
+                let pipe_separated_sets = values.ValueAt(9).DefaultValue("").Split('|')
                 
-            let edge_sets =
-                values.ValueAt(9).DefaultValue("").Split("|", StringSplitOptions.TrimEntries)
-                |> Seq.map (fun s ->
-                    let sets = SplitValues.Parse(s, ':')
-                    sets.EnumOrDefault(0, SampleSet.None, false), sets.EnumOrDefault(1, SampleSet.None, false)
-                )
+                let inline edge_set_pair(index: int) =
+                    let split = pipe_separated_sets.ValueAt(index).DefaultValue("").Split(':')
+                    split.ValueAt(0).ParseInt().DefaultValue(0) |> enum,
+                    split.ValueAt(1).ParseInt().DefaultValue(0) |> enum
+                    
+                seq { 0 .. slides }
+                |> Seq.map edge_set_pair
                 |> List.ofSeq
                     
             Slider {
@@ -242,10 +271,10 @@ type HitObject =
                 HitSound = hitsound
                 CurveType = curve_shape
                 CurvePoints = curve_points
-                Slides = values.ValueAt(6).ParseInt().DefaultValue(1)
-                Length = values.ValueAt(7).ParseFloat().DefaultValue(100.0f)
-                EdgeSounds = edge_sounds
-                EdgeSets = edge_sets
+                Slides = slides
+                Length = values.ValueAt(7).ParseDouble().ReplaceZeroWith(70.0).RejectOutOfRange(0.0, 1_000_000.0).ExpectValid(line)
+                EdgeSounds = edge_sounds(slides)
+                EdgeSets = edge_sets(slides)
                 HitSample = parse_hitsample(10)
             }
             
@@ -259,7 +288,7 @@ type HitObject =
                 HitSound = hitsound
                 EndTime =
                     values
-                        .ValueAt(6)
+                        .ValueAt(5)
                         .ParseFloat()
                         .ReplaceNanWith(float32 Int32.MinValue)
                         .ReplaceOutOfRangeWith(float32 Int32.MinValue, float32 Int32.MaxValue, float32 Int32.MinValue)

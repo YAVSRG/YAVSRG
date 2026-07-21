@@ -30,6 +30,15 @@ type ParsedValueExtensions =
         | Invalid -> raise(ParseException(args))
         
     [<Extension>]
+    static member inline ParseDouble(pvalue: ParsedValue<string>) : ParsedValue<float> =
+        match pvalue with
+        | Valid v ->
+            match Double.TryParse(v.Trim(), CultureInfo.InvariantCulture) with
+            | true, parsed -> Valid parsed
+            | false, _ -> Invalid
+        | Invalid -> Invalid
+        
+    [<Extension>]
     static member inline ParseFloat(pvalue: ParsedValue<string>) : ParsedValue<float32> =
         match pvalue with
         | Valid v ->
@@ -48,9 +57,21 @@ type ParsedValueExtensions =
         | Invalid -> Invalid
         
     [<Extension>]
+    static member RejectInfinity(pvalue: ParsedValue<float>) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> if Double.IsInfinity(v) then Invalid else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
     static member RejectInfinity(pvalue: ParsedValue<float32>) : ParsedValue<float32> =
         match pvalue with
         | Valid v -> if Single.IsInfinity(v) then Invalid else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member RejectNan(pvalue: ParsedValue<float>) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> if Double.IsNaN(v) then Invalid else Valid(v)
         | Invalid -> Invalid
         
     [<Extension>]
@@ -60,15 +81,93 @@ type ParsedValueExtensions =
         | Invalid -> Invalid
         
     [<Extension>]
+    static member ReplaceZeroWith(pvalue: ParsedValue<float>, replacement_value: float) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> if v = 0.0 then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceZeroWith(pvalue: ParsedValue<float32>, replacement_value: float32) : ParsedValue<float32> =
+        match pvalue with
+        | Valid v -> if v = 0.0f then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceZeroWith(pvalue: ParsedValue<int>, replacement_value: int) : ParsedValue<int> =
+        match pvalue with
+        | Valid v -> if v = 0 then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceNanWith(pvalue: ParsedValue<float>, replacement_value: float) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> if Double.IsNaN(v) then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
     static member ReplaceNanWith(pvalue: ParsedValue<float32>, replacement_value: float32) : ParsedValue<float32> =
         match pvalue with
         | Valid v -> if Single.IsNaN(v) then Valid(replacement_value) else Valid(v)
         | Invalid -> Invalid
         
     [<Extension>]
+    static member ReplaceOutOfRangeInclusiveWith(pvalue: ParsedValue<float>, lo: float, hi: float, replacement_value: float) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> if v <= lo || v >= hi then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceOutOfRangeInclusiveWith(pvalue: ParsedValue<float32>, lo: float32, hi: float32, replacement_value: float32) : ParsedValue<float32> =
+        match pvalue with
+        | Valid v -> if v <= lo || v >= hi then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceOutOfRangeInclusiveWith(pvalue: ParsedValue<int>, lo: int, hi: int, replacement_value: int) : ParsedValue<int> =
+        match pvalue with
+        | Valid v -> if v <= lo || v >= hi then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceOutOfRangeWith(pvalue: ParsedValue<float>, lo: float, hi: float, replacement_value: float) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> if v < lo || v > hi then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
     static member ReplaceOutOfRangeWith(pvalue: ParsedValue<float32>, lo: float32, hi: float32, replacement_value: float32) : ParsedValue<float32> =
         match pvalue with
         | Valid v -> if v < lo || v > hi then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ReplaceOutOfRangeWith(pvalue: ParsedValue<int>, lo: int, hi: int, replacement_value: int) : ParsedValue<int> =
+        match pvalue with
+        | Valid v -> if v < lo || v > hi then Valid(replacement_value) else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member RejectOutOfRange(pvalue: ParsedValue<float>, lo: float, hi: float) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> if v < lo || v > hi then Invalid else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member RejectOutOfRange(pvalue: ParsedValue<float32>, lo: float32, hi: float32) : ParsedValue<float32> =
+        match pvalue with
+        | Valid v -> if v < lo || v > hi then Invalid else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member RejectOutOfRange(pvalue: ParsedValue<int>, lo: int, hi: int) : ParsedValue<int> =
+        match pvalue with
+        | Valid v -> if v < lo || v > hi then Invalid else Valid(v)
+        | Invalid -> Invalid
+        
+    [<Extension>]
+    static member ClampBetween(pvalue: ParsedValue<float>, lo: float, hi: float) : ParsedValue<float> =
+        match pvalue with
+        | Valid v -> Valid(v |> max lo |> min hi)
         | Invalid -> Invalid
         
     [<Extension>]
