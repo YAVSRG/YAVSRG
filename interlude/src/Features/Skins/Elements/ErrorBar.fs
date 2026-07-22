@@ -41,31 +41,45 @@ type ErrorBar(ctx: HudContext) =
 
     let MAX_WINDOW = ctx.State.Ruleset.LargestWindow
 
+    let log_factor = ctx.Config.TimingDisplayLogSensitivity
+
+    static member log_error (delta: float32, width: float32, log_factor: float32, max_window: GameplayTime) =
+        if delta = 0.0f then 0.0f
+        elif log_factor = 0.0f then delta / float32 max_window * width * 0.5f
+        else
+            let sign = if delta < 0.0f then -1.0f else 1.0f
+            let abs_delta = MathF.Abs(delta)
+            let norm = abs_delta / float32 max_window
+            in sign * float32 (Math.Asinh(float (norm * (6.0f * log_factor) ** 1.5f)) / Math.Asinh(float ((6.0f * log_factor) ** 1.5f))) * width * 0.5f 
+
     override this.Init(parent: Widget) =
         if ctx.Config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
             ctx.State.Subscribe(fun ev ->
                 match ev.Inner with
                 | Hit e ->
                     if not e.Missed then
+                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
                         moving_average.Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_average.Target
-                                (e.Delta / MAX_WINDOW * w * 0.5f)
+                                log_hit_err
                 | Hold e ->
                     if not e.Missed then
+                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
                         moving_average.Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_average.Target
-                                (e.Delta / MAX_WINDOW * w * 0.5f)
+                                log_hit_err
                 | Release e ->
                     if not e.Missed then
+                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
                         moving_average.Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_average.Target
-                                (e.Delta / MAX_WINDOW * w * ln_mult)
+                                (log_hit_err * ln_mult)
                 | GhostTap _
                 | DropHold
                 | RegrabHold -> ()
@@ -76,26 +90,29 @@ type ErrorBar(ctx: HudContext) =
                 if ev.Time >= last_seen_time - animation_time then
                     match ev.Inner with
                     | Hit e ->
+                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
                         hits.Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * w * 0.5f
+                                Position =  log_hit_err
                                 IsRelease = false
                                 Judgement = e.Judgement |> Option.map fst
                             }
                     | Hold e ->
+                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW) 
                         hits.Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * w * 0.5f
+                                Position = log_hit_err
                                 IsRelease = false
                                 Judgement = e.Judgement |> Option.map fst
                             }
                     | Release e ->
+                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
                         hits.Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * w * ln_mult
+                                Position = log_hit_err
                                 IsRelease = true
                                 Judgement = e.Judgement |> Option.map fst
                             }
@@ -154,9 +171,10 @@ type ErrorBar(ctx: HudContext) =
                 | None -> ()
 
         let center = this.Bounds.CenterX
+        let w = this.Bounds.Width
+
         let ms_to_x =
-            let w = this.Bounds.Width * 0.5f
-            fun time -> center + time / MAX_WINDOW * w
+            fun (time: float32<ms/rate>) -> center + ErrorBar.log_error (float32 time, w, log_factor, MAX_WINDOW)
         let r time1 time2 = Rect.FromEdges(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
         draw r
 
@@ -167,11 +185,6 @@ type ErrorBar(ctx: HudContext) =
         let bar p1 p2 =
             let center = this.Bounds.CenterX
             Rect.FromEdges(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
-
-        if ctx.Config.TimingDisplayShowGuide then
-            Render.rect
-                (bar (-ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness) (ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness))
-                Color.White
 
         let now = ctx.State.CurrentChartTime()
 
