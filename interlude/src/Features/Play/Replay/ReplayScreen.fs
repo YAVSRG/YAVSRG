@@ -23,12 +23,12 @@ type ReplayScreen =
         let replay_data, is_auto, rate, is_failed =
             match mode with
             | ReplayMode.Auto ->
-                StoredReplay.AutoPlay(info.WithColors.Keys, info.WithMods.Notes) :> IReplay,
+                StoredReplaySource(Autoplay.CreateReplay(info.WithColors)) :> ReplaySource,
                 true,
                 SelectedChart.rate.Value,
                 false
             | ReplayMode.Replay score_info ->
-                StoredReplay(score_info.Replay) :> IReplay,
+                StoredReplaySource(score_info.Replay),
                 false,
                 score_info.Rate,
                 score_info.IsFailed
@@ -41,12 +41,11 @@ type ReplayScreen =
         let mutable last_time = -Time.infinity
         let mutable replay_data = replay_data
 
-        let mutable scoring =
-            ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+        let mutable scoring = ScoreProcessor.Create(ruleset, replay_data, info.WithMods, rate)
 
         let seek_backwards (screen: IPlayScreen) =
-            replay_data <- StoredReplay(replay_data.GetFullReplay())
-            scoring <- ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+            replay_data <- StoredReplaySource(replay_data.GetFullReplay())
+            scoring <- ScoreProcessor.Create(ruleset, replay_data, info.WithMods, rate)
             screen.State.ChangeScoring scoring
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Replay (is_auto, overlay_shown)) with

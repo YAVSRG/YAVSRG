@@ -2,19 +2,16 @@
 
 open System.IO
 open Percyqaz.Common
-open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Calculator
 open Prelude.Gameplay.Rulesets
-open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Endless
 
 let test() =
 
     Directory.SetCurrentDirectory("C:/Interlude/dev") // this is my interlude install location
-    let library = Library.load()
-    let user_db = UserDatabase.create true (Database.from_file "Data/scores.db")
+    let library = Library.Load()
 
     let sc_j4 = SC.create 4
     let sc_j4_id = Ruleset.hash sc_j4
@@ -22,7 +19,6 @@ let test() =
     let ctx : LibraryViewContext =
         {
             Library = library
-            UserDatabase = user_db
             Ruleset = sc_j4
             RulesetId = sc_j4_id
             Rate = 1.0f<rate>
@@ -38,7 +34,6 @@ let test() =
     let mutable suggestion_ctx =
         {
             Library = library
-            UserDatabase = user_db
             BaseChart = start, 1.0f<rate>
             MinimumRate = 1.0f<rate>
             MaximumRate = 1.5f<rate>
@@ -55,10 +50,14 @@ let test() =
         | None -> Logging.Info("Nothing found :("); loop <- false
         | Some next ->
             suggestion_ctx <- next.NextContext
-            printfn "Next chart: %s - %s [%s] by %s ON RATE %.2f" next.Chart.Artist next.Chart.Title next.Chart.DifficultyName next.Chart.Creator next.Rate
+            printfn "Next chart: %s - %s [%s] by %s ON RATE %.2f" next.ChartMeta.Artist next.ChartMeta.Title next.
+                                                                                                                 ChartMeta
+                                                                                                                 .DifficultyName next.
+                                                                                                                                     ChartMeta
+                                                                                                                                     .Creator next.Rate
 
             printfn ""
-            match ChartDatabase.get_chart next.Chart.Hash library.Charts with
+            match library.Charts.GetChart(next.ChartMeta.Hash) with
             | Ok chart ->
-                printfn "This is classed as: %A [%.2f]" next.Chart.Patterns.Category (Difficulty.calculate(1.0f<rate>, chart.Notes).Overall)
+                printfn "This is classed as: %A [%.2f]" next.ChartMeta.Patterns.Category (Difficulty.calculate(1.0f<rate>, chart.ToNoteData()).Overall)
             | Error _ -> ()

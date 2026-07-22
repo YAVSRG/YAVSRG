@@ -218,7 +218,7 @@ module Backbeat =
                                 use stream = message.Content.ReadAsStream()
                                 use br = new System.IO.BinaryReader(stream)
 
-                                match Chart.read_headless chart.Keys br with
+                                match Chart.ReadFromStreamHeadless(chart.Keys, br) with
                                 | Ok chart ->
                                     cache.[hash] <- chart
                                     return Some chart

@@ -17,7 +17,7 @@ let private compare_interlude_implementation_to_osu
     (
         chart: Chart,
         header: ChartImportHeader,
-        replay: ReplayData,
+        replay: Replay,
         rate: Rate,
         chart_od: float,
         score_data: OsuScoreDatabase_Score
@@ -32,14 +32,8 @@ let private compare_interlude_implementation_to_osu
             OsuMania.NoMod
 
     let score_v2 = score_data.ModsUsed &&& Mods.ScoreV2 <> Mods.None
-
-    let metric =
-        ScoreProcessor.run
-            (OsuMania.create (float32 chart_od) window_modifier)
-            chart.Keys
-            (StoredReplay(replay))
-            chart.Notes
-            rate
+    let ruleset = OsuMania.create (float32 chart_od) window_modifier
+    let metric = ScoreProcessor.ProcessEntireReplay(ruleset, replay, chart, rate)
 
     let osu_accuracy =
         let g_300 = if score_v2 then 305.0 else 300.0
@@ -149,12 +143,12 @@ let read_scores () =
                             sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp
                         )
 
-                    let replay_data = OsuReplay.TryReadFile(replay_file).Value
+                    let replay = OsuReplay.TryReadFile(replay_file).Value
 
                     let interlude_replay =
-                        OsuReplay.decode (replay_data, chart.Value.Chart.FirstNote, 1.0f<rate>)
+                        OsuReplay.decode (replay, chart.Value.Chart.FirstNote, 1.0f<rate>)
 
-                    match Mods.to_interlude_rate_and_mods replay_data.ModsUsed with
+                    match Mods.to_interlude_rate_and_mods replay.ModsUsed with
                     | Some(rate, _) ->
                         compare_interlude_implementation_to_osu (
                             chart.Value.Chart,
@@ -162,7 +156,7 @@ let read_scores () =
                             interlude_replay,
                             rate,
                             od,
-                            replay_data
+                            replay
                         )
                     | None -> ()
 

@@ -174,12 +174,12 @@ module private ScoreList =
         { new Async.CancelQueueSeq<int64 * int64 * Ruleset * (Widget -> unit) * (unit -> unit), unit -> unit>() with
             member this.Process((start_time, end_time, ruleset, callback, callback_when_done)) =
                 seq {
-                    for chart_hash, score in UserDatabase.get_scores_between start_time end_time Content.UserData do
-                        match ChartDatabase.get_meta_cached chart_hash Content.Charts with
+                    for chart_hash, score in Content.UserData.GetScoresInTimeRange(start_time, end_time) do
+                        match Content.Charts.TryGetCachedChartMeta(chart_hash) with
                         | Some chart_meta ->
-                            match ChartDatabase.get_chart chart_hash Content.Charts with
+                            match Content.Charts.GetChart(chart_hash) with
                             | Ok chart ->
-                                let score_info = ScoreInfo.from_score chart_meta chart ruleset score
+                                let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset, score)
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
                         | _ -> yield fun () -> callback(MissingScore())

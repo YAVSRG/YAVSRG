@@ -13,9 +13,9 @@ open YAVSRG.CLI
 [<AutoOpen>]
 module Config =
 
-    let BACKBEAT_SETTINGS_PATH = Path.Combine(Utils.YAVSRG_PATH, "backbeat", "settings.json")
+    let BACKBEAT_SETTINGS_PATH = Path.Combine(YAVSRG_PATH, "backbeat", "settings.json")
 
-    let PACK_LIST_PATH = Path.Combine(Utils.YAVSRG_PATH, "backbeat", "archive", "masterlist-sm")
+    let PACK_LIST_PATH = Path.Combine(YAVSRG_PATH, "backbeat", "archive", "masterlist-sm")
 
     [<Json.AutoCodec>]
     type Config =
@@ -49,24 +49,25 @@ module Config =
             API.Client.authenticate(credentials.Token)
         with err -> printfn "%O" err; failwith "Error initialising backbeat utils"
 
-    let interlude_chart_db =
+    let interlude_chart_db : ChartDatabase =
         Directory.SetCurrentDirectory(backbeat_config.InterludePath)
         let db_file = Path.Combine(get_game_folder "Songs", "charts.db")
         if not (File.Exists db_file) then failwith "Couldn't find your interlude charts.db"
         let db = Database.from_file db_file
-        ChartDatabase.create true db
+        ChartDatabase.CreateFullyLoaded(db)
+
+    let interlude_scores_db : UserDatabase =
+        Directory.SetCurrentDirectory(backbeat_config.InterludePath)
+        let db_file = Path.Combine(get_game_folder "Data", "scores.db")
+        if not (File.Exists db_file) then failwith "Couldn't find your interlude scores.db"
+        let db = Database.from_file db_file
+        UserDatabase.CreateLazyLoaded(db)
 
     let interlude_library : Library =
         {
             Charts = interlude_chart_db
             Collections = Unchecked.defaultof<_>
+            UserData = interlude_scores_db
         }
-
-    let interlude_scores_db =
-        Directory.SetCurrentDirectory(backbeat_config.InterludePath)
-        let db_file = Path.Combine(get_game_folder "Data", "scores.db")
-        if not (File.Exists db_file) then failwith "Couldn't find your interlude scores.db"
-        let db = Database.from_file db_file
-        UserDatabase.create false db
 
     let INTERLUDE_SKINS_PATH = Path.Combine(backbeat_config.InterludePath, "Skins")

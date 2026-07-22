@@ -9,7 +9,7 @@ module LocalisationTests =
     [<Test>]
     let Load_BasicFile() =
         let files =
-            LocaleFakeFileSystem
+            VirtualLocaleFileSystem
                 .Create
                 .Add("en_GB", "#root\nkey=value1\nkey.two = value\\n2")
 
@@ -23,7 +23,7 @@ module LocalisationTests =
     [<Test>]
     let Load_InheritedFile() =
         let files =
-            LocaleFakeFileSystem
+            VirtualLocaleFileSystem
                 .Create
                 .Add("en_GB", "#root\nkey=value1\nkey.two=value2\nkey.three=value3")
                 .Add("de_DE", "#inherit en_GB\nkey=value eins\nkey.two=value zwei")
@@ -47,7 +47,7 @@ module LocalisationTests =
     [<Test>]
     let Load_Invalid_BadHeader() =
         let files =
-            LocaleFakeFileSystem
+            VirtualLocaleFileSystem
                 .Create
                 .Add("en_GB", "#bad_header\nkey=value1\nkey.two=value2")
 
@@ -58,7 +58,7 @@ module LocalisationTests =
     [<Test>]
     let Load_Invalid_BadEntry() =
         let files =
-            LocaleFakeFileSystem
+            VirtualLocaleFileSystem
                 .Create
                 .Add("en_GB", "#bad_header\nkey\nkey.two=value2")
 
@@ -69,7 +69,7 @@ module LocalisationTests =
     [<Test>]
     let Load_Invalid_CircularReference() =
         let files =
-            LocaleFakeFileSystem
+            VirtualLocaleFileSystem
                 .Create
                 .Add("en_GB", "#inherit de_DE\nkey=value1\nkey.two=value2")
                 .Add("de_DE", "#inherit en_GB\nkey=value1\nkey.two=value2")
@@ -81,7 +81,7 @@ module LocalisationTests =
     [<Test>]
     let Load_Invalid_ReferenceNotFound() =
         let files =
-            LocaleFakeFileSystem
+            VirtualLocaleFileSystem
                 .Create
                 .Add("en_GB", "#inherit de_DE\nkey=value1\nkey.two=value2")
 
@@ -91,7 +91,7 @@ module LocalisationTests =
 
     [<Test>]
     let Load_Invalid_EntryPointNotFound() =
-        let files = LocaleFakeFileSystem.Create
+        let files = VirtualLocaleFileSystem.Create
 
         match Localisation.load("en_GB", files.GetLocale) with
         | Ok _ -> Assert.Fail()
@@ -99,7 +99,7 @@ module LocalisationTests =
 
     [<Test>]
     let Load_Invalid_Empty() =
-        let files = LocaleFakeFileSystem.Create.Add("en_GB", "")
+        let files = VirtualLocaleFileSystem.Create.Add("en_GB", "")
 
         match Localisation.load("en_GB", files.GetLocale) with
         | Ok _ -> Assert.Fail()

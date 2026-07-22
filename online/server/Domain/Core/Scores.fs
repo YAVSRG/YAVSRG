@@ -25,43 +25,6 @@ type Score =
 
 module Score =
 
-    let internal CREATE_TABLE_OLD: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL =
-                """
-            CREATE TABLE scores (
-                Id INTEGER PRIMARY KEY NOT NULL,
-                UserId INTEGER NOT NULL,
-                ChartId TEXT NOT NULL,
-                RulesetId TEXT NOT NULL,
-                TimePlayed INTEGER NOT NULL,
-                TimeUploaded INTEGER NOT NULL,
-                Rate REAL NOT NULL,
-                Mods TEXT NOT NULL,
-                Ranked INTEGER NOT NULL,
-                Accuracy REAL NOT NULL,
-                Grade INTEGER NOT NULL,
-                Lamp INTEGER NOT NULL,
-                ReplayId INTEGER,
-                FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
-                FOREIGN KEY (ReplayId) REFERENCES replays(Id) ON DELETE SET NULL,
-                UNIQUE (UserId, ChartId, RulesetId, TimePlayed)
-            );
-            """
-        }
-
-    let internal MIGRATE_OLD_TO_NEW: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL =
-                """
-            INSERT INTO replays2 (Id, UserId, ChartId, Persistent, TimePlayed, TimeUploaded, Data)
-            SELECT Id, UserId, ChartId, 0, TimePlayed, TimeUploaded, Data FROM replays;
-
-            INSERT INTO scores2 (Id, UserId, ChartId, TimePlayed, TimeUploaded, Rate, Mods, Ranked, Accuracy, Grade, Lamp, ReplayId)
-            SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Rate, Mods, Ranked, Accuracy, Grade, Lamp, ReplayId FROM scores;
-            """
-        }
-
     let internal CREATE_TABLE: NonQuery<unit> =
         { NonQuery.without_parameters () with
             SQL =
@@ -84,6 +47,28 @@ module Score =
                 UNIQUE (UserId, ChartId, TimePlayed)
             );
             """
+        }
+        
+    let internal LEADERBOARD_BUG_FIX: NonQuery<unit> =
+        { NonQuery.without_parameters() with
+            SQL = """
+                UPDATE scores2 AS s
+                SET ReplayId = (
+                  SELECT r.Id
+                  FROM replays2 AS r
+                  WHERE r.UserId = s.UserId
+                    AND r.ChartId = s.ChartId
+                    AND r.TimePlayed = s.TimePlayed
+                )
+                WHERE s.ReplayId IS NULL
+                  AND EXISTS (
+                    SELECT 1
+                    FROM replays2 AS r
+                    WHERE r.UserId = s.UserId
+                      AND r.ChartId = s.ChartId
+                      AND r.TimePlayed = s.TimePlayed
+                  );
+                """
         }
 
     let create
@@ -121,7 +106,7 @@ module Score =
             ON CONFLICT DO UPDATE SET
                 TimeUploaded = excluded.TimeUploaded,
                 Ranked = excluded.Ranked,
-                ReplayId = excluded.ReplayId
+                ReplayId = COALESCE(excluded.ReplayId, ReplayId)
             RETURNING Id;
             """
             Parameters =

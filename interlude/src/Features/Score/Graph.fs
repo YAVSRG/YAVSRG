@@ -513,7 +513,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         for ev in events do
             let x = this.Bounds.Left + 5.0f + ev.Time * xscale
-            match ev.Action with
+            match ev.Inner with
             | Hit e
             | Hold e ->
 

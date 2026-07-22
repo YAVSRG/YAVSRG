@@ -7,7 +7,6 @@ open Prelude.Charts
 open Prelude.Formats
 open Prelude.Data
 open Prelude.Data.Library
-open Prelude.Data.User
 
 module Imports =
 
@@ -52,7 +51,7 @@ module Imports =
                 }
         }
 
-    let internal convert_song_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
+    let internal convert_song_folder (path: string, config: ConversionOptions, library: Library) : Async<ConversionResult> =
         async {
             let results =
                 Directory.EnumerateFiles path
@@ -70,7 +69,7 @@ module Imports =
                 |> Seq.map (
                     function
                     | Ok import ->
-                        match Chart.check import.Chart with
+                        match import.Chart.CheckForErrors() with
                         | Ok chart -> Ok { import with Chart = chart }
                         | Error reason ->
                             Logging.Error "Conversion produced corrupt chart (%s): %s" import.LoadedFromPath reason
@@ -88,24 +87,24 @@ module Imports =
                 |> List.map (fun c ->
                     let with_pruned_svs = { c.Chart with SV = cleaned_sv c.Chart.SV }
                     if with_pruned_svs.SV.Length < c.Chart.SV.Length then
-                        let before_hash = Chart.hash c.Chart
-                        let after_hash = Chart.hash with_pruned_svs
+                        let before_hash = c.Chart.Hash()
+                        let after_hash = with_pruned_svs.Hash()
                         if before_hash <> after_hash then
-                            match ChartDatabase.get_meta before_hash chart_db with
-                            | Some chart_meta -> ChartDatabase.delete chart_meta chart_db
+                            match library.Charts.GetChartMeta(before_hash) with
+                            | Some chart_meta -> library.Charts.Delete(chart_meta)
                             | None -> ()
-                            if (UserDatabase.get_chart_data before_hash user_db).Scores.Length > 0 then
-                                UserDatabase.transfer_scores before_hash after_hash user_db
+                            if library.UserData.GetChartData(before_hash).Scores.Length > 0 then
+                                library.UserData.TransferScores(before_hash, after_hash)
                     { c with Chart = with_pruned_svs }
                 )
-            ChartDatabase.import charts chart_db
+            library.Charts.Import(charts)
             return {
                 ConvertedCharts = success_count
                 SkippedCharts = filtered |> List.choose (function Error skipped -> Some skipped | _ -> None)
             }
         }
 
-    let internal convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<ConversionResult> =
+    let internal convert_pack_folder (path: string, config: ConversionOptions, library: Library, progress: ProgressCallback) : Async<ConversionResult> =
         async {
             let mutable results = ConversionResult.Empty
             let song_folders =
@@ -115,13 +114,13 @@ module Imports =
                 |> Array.ofSeq
 
             for i, song_folder in Array.indexed song_folders do
-                let! result = convert_song_folder(song_folder, config, chart_db, user_db)
+                let! result = convert_song_folder(song_folder, config, library)
                 results <- ConversionResult.Combine result results
                 progress <| Processing (i + 1, song_folders.Length)
             return results
         }
 
-    let internal convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<ConversionResult> =
+    let internal convert_folder_of_oszs (folder_of_oszs: string, library: Library, progress: ProgressCallback) : Async<ConversionResult> =
         async {
             let config = ConversionOptions.Pack(Path.GetFileName folder_of_oszs, None, CopyAssetFiles)
             let mutable results = ConversionResult.Empty
@@ -142,7 +141,7 @@ module Imports =
                 else
                     try
                         ZipFile.ExtractToDirectory(osz, extracted_folder)
-                        let! result = convert_song_folder(extracted_folder, config, chart_db, user_db)
+                        let! result = convert_song_folder(extracted_folder, config, library)
                         delete_folder.Request(extracted_folder, ignore)
                         results <- ConversionResult.Combine result results
                     with err ->
@@ -152,7 +151,7 @@ module Imports =
             return results
         }
 
-    let internal convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+    let internal convert_stepmania_pack_zip (path: string, pack_name: string, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
@@ -172,8 +171,7 @@ module Imports =
                             convert_pack_folder(
                                 pack_folder,
                                 ConversionOptions.EtternaPack(pack_name, None, CopyAssetFiles),
-                                chart_db,
-                                user_db,
+                                library,
                                 progress
                             )
                         results <- ConversionResult.Combine result results
@@ -185,7 +183,7 @@ module Imports =
                     return Error "Extracted zip does not match the usual structure for a StepMania pack"
         }
 
-    let rec auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+    let rec auto_detect_import (path: string, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 match File.GetAttributes path &&& FileAttributes.Directory |> int with
@@ -201,8 +199,7 @@ module Imports =
                             convert_song_folder(
                                 Path.GetDirectoryName path,
                                 ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
-                                chart_db,
-                                user_db
+                                library
                             )
                         log_conversion result
                         progress Complete
@@ -217,7 +214,7 @@ module Imports =
                             return Error (sprintf "Target extraction folder (%s) already exists" dir)
                         else
                             ZipFile.ExtractToDirectory(path, dir)
-                            let! result = auto_detect_import (dir, chart_db, user_db, progress)
+                            let! result = auto_detect_import (dir, library, progress)
                             delete_folder.Request(dir, ignore)
                             return result
                     | _ ->
@@ -236,8 +233,7 @@ module Imports =
                             convert_song_folder(
                                 path,
                                 ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
-                                chart_db,
-                                user_db
+                                library
                             )
                         log_conversion result
                         progress Complete
@@ -246,8 +242,7 @@ module Imports =
                         let! result =
                             convert_folder_of_oszs(
                                 path,
-                                chart_db,
-                                user_db,
+                                library,
                                 progress
                             )
                         log_conversion result
@@ -269,8 +264,7 @@ module Imports =
                             convert_pack_folder(
                                 path,
                                 ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
-                                chart_db,
-                                user_db,
+                                library,
                                 progress
                             )
                         log_conversion result
@@ -287,8 +281,7 @@ module Imports =
                                 convert_pack_folder(
                                     pack_folder,
                                     ConversionOptions.Pack(pack_name, None, CopyAssetFiles),
-                                    chart_db,
-                                    user_db,
+                                    library,
                                     (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
                                 )
                             results <- ConversionResult.Combine result results

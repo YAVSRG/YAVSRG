@@ -19,13 +19,13 @@ type HitFlagData = TimeArray<struct(GameplayTime array * HitFlags array)>
 
 module HitFlagData =
 
-    let create_gameplay (note_window: GameplayTime) (release_window: GameplayTime) (keys: int) (notes: TimeArray<NoteRow>) : HitFlagData =
-        notes
+    let create_gameplay (note_window: GameplayTime) (release_window: GameplayTime) (note_data: NoteData) : HitFlagData =
+        note_data.Notes
         |> TimeArray.map (fun nr ->
-            let deltas = Array.create keys note_window
-            let statuses = Array.create keys HitFlags.NOTHING
+            let deltas = Array.create note_data.Keys note_window
+            let statuses = Array.create note_data.Keys HitFlags.NOTHING
 
-            for k = 0 to (keys - 1) do
+            for k = 0 to note_data.Keys - 1 do
                 if nr.[k] = NoteType.NORMAL then
                     statuses.[k] <- HitFlags.HIT_REQUIRED
                 elif nr.[k] = NoteType.HOLDHEAD then

@@ -98,7 +98,7 @@ module Mounts =
                 if Directory.Exists mount.SourceFolder then
                     if mount.ImportOnStartup then
                         Logging.Info "Checking for new %s songs to import.." name
-                        let task = Mount.import_new(mount, Content.Charts, Content.UserData, ignore)
+                        let task = Mount.import_new(mount, Content.Library, ignore)
                         import_queue.Request(task, ignore)
                 else
                     Logging.Warn
@@ -131,7 +131,7 @@ module Mounts =
 
         let task_tracking = TaskTracking.add %"mount.import_osu_scores"
         let task =
-            let import_task = Scores.import_osu_scores_async(Path.GetDirectoryName osu_mount.SourceFolder, Content.Charts, Content.UserData, task_tracking.set_Progress)
+            let import_task = Scores.import_osu_scores_async(Path.GetDirectoryName osu_mount.SourceFolder, Content.Library, task_tracking.set_Progress)
             async {
                 let! result = import_task
                 Notifications.task_feedback (

@@ -3,14 +3,13 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Interlude.UI
 
 type SessionPanel =
 
-    static member CreateCurrent() =
-
-        let current_session = CURRENT_SESSION
+    static member CreateCurrent(current_session: CurrentSession) : Container =
 
         Container(NodeType.None)
             .With(

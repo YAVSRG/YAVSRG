@@ -6,14 +6,16 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
+open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Interlude.UI
+open Interlude.Content
 
 type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>) =
     inherit StaticWidget(NodeType.Leaf)
 
     let session_dates =
-        PREVIOUS_SESSIONS
+        Content.Stats.GetPreviousSessions()
         |> Map.filter (fun day _ -> day.Year = year)
         |> Map.map (fun _ sessions ->
             let day_playtime_hours = (sessions |> List.sumBy _.PlayTime) / 3600_000.0
@@ -96,7 +98,7 @@ type AllYearsActivityPage(selected: Setting<(DateOnly * Session) option>) =
     override this.Content() =
         let flow = FlowContainer.Vertical<YearActivityGrid>(200.0f, Spacing = 65.0f)
 
-        for year in PREVIOUS_SESSIONS |> Seq.map (fun kvp -> kvp.Key.Year) |> Seq.distinct |> Seq.sortDescending do
+        for year in Content.Stats.GetPreviousSessions() |> Seq.map _.Key.Year |> Seq.distinct |> Seq.sortDescending do
             flow.Add(YearActivityGrid(year, selected |> Setting.trigger(fun _ -> Menu.Back())))
 
         ScrollContainer(flow)
@@ -109,7 +111,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
     inherit Container(NodeType.Leaf)
 
     let session_dates =
-        PREVIOUS_SESSIONS
+        Content.Stats.GetPreviousSessions()
         |> Map.map (fun _ sessions ->
             let day_playtime_hours = (sessions |> List.sumBy _.PlayTime) / 3600_000.0
             let color =

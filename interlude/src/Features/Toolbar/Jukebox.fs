@@ -18,9 +18,9 @@ type Jukebox() =
     override this.Init(parent: Widget) : unit =
         this
             .Add(
-                Button(Icons.SKIP_BACK, LevelSelect.History.back)
+                Button(Icons.SKIP_BACK, LevelSelectHistory.back)
                     .Hotkey("previous_random_chart")
-                    .Disabled(fun () -> Screen.current_type = ScreenType.Lobby || not (LevelSelect.History.can_go_back()))
+                    .Disabled(fun () -> Screen.current_type = ScreenType.Lobby || not (LevelSelectHistory.can_go_back()))
                     .Position(Position.Shrink(5.0f).SliceL(45.0f)),
 
                 Button(
@@ -33,7 +33,7 @@ type Jukebox() =
                 HotkeyListener("random_chart", fun () -> if Screen.current_type <> ScreenType.Lobby then LevelSelect.random_chart()),
 
                 // Goes forward in history if possible, otherwise it will go random chart, vs hotkey that always goes to random
-                Button(Icons.SKIP_FORWARD, fun () -> if LevelSelect.History.can_go_forward() then LevelSelect.History.forward() else LevelSelect.random_chart())
+                Button(Icons.SKIP_FORWARD, fun () -> if LevelSelectHistory.can_go_forward() then LevelSelectHistory.forward() else LevelSelect.random_chart())
                     .Disabled(fun () -> Screen.current_type = ScreenType.Lobby)
                     .Position(Position.Shrink(5.0f).SliceL(45.0f).Translate(90.0f, 0.0f))
             )

@@ -73,17 +73,11 @@ module OnlineScores =
 
                     for score in scores do
                         let with_mods = ModState.apply score.Mods req.CurrentChart
-                        let replay_data = Replay.decompress_string score.Replay
+                        let replay = Replay.FromBase64String(score.Replay)
 
-                        let scoring =
-                            ScoreProcessor.run
-                                req.Ruleset
-                                with_mods.Keys
-                                (StoredReplay replay_data)
-                                with_mods.Notes
-                                score.Rate
+                        let scoring = ScoreProcessor.ProcessEntireReplay(req.Ruleset, replay, with_mods, score.Rate)
 
-                        let rating = Difficulty.calculate(score.Rate, with_mods.Notes)
+                        let rating = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
                         let score_info: ScoreInfo =
                             {
@@ -95,7 +89,7 @@ module OnlineScores =
                                 TimePlayed = score.Timestamp
                                 Rate = score.Rate
 
-                                Replay = replay_data
+                                Replay = replay
                                 Scoring = scoring
                                 Lamp = Lamp.calculate req.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
                                 Grade = Grade.calculate req.Ruleset.Grades scoring.Accuracy

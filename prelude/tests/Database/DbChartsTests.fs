@@ -19,7 +19,7 @@ module DbChartsTests =
 
     let TEST_CHART_META : ChartMeta =
         {
-            Hash = Chart.hash TEST_CHART
+            Hash = TEST_CHART.Hash()
             Title = "EDM Jumpers ({E+H}DM Reboot)"
             TitleNative = None
             Artist = "Nanahira"
@@ -29,8 +29,8 @@ module DbChartsTests =
             Source = Some "“Guest Tracks” Summary & VIPs 01 (2017)"
             Creator = "Percyqaz"
             Tags = []
-            Background = AssetPath.Missing
-            Audio = AssetPath.Missing
+            Background = AssetLocation.Missing
+            Audio = AssetLocation.Missing
             PreviewTime = 1000.0f<ms>
             Packs = Set.singleton "Singles"
             Origins = Set.singleton (ChartOrigin.Etterna "Bangers and Mash")
@@ -44,7 +44,7 @@ module DbChartsTests =
 
     let TEST_CHART_META_ALT : ChartMeta =
         {
-            Hash = Chart.hash TEST_CHART
+            Hash = TEST_CHART.Hash()
             Title = "EDM Jumpers"
             TitleNative = Some "§"
             Artist = "Camellia ft. Nanahira"
@@ -54,8 +54,8 @@ module DbChartsTests =
             Source = None
             Creator = "Klaius"
             Tags = ["dump"; "jumpstream"]
-            Background = AssetPath.Absolute "C:/path/to/bg.png"
-            Audio = AssetPath.Absolute "C:/path/to/audio.mp3"
+            Background = AssetLocation.Absolute "C:/path/to/bg.png"
+            Audio = AssetLocation.Absolute "C:/path/to/audio.mp3"
             PreviewTime = 2000.0f<ms>
             Packs = Set.singleton "Nanahira Minipack"
             Origins = Set.singleton (ChartOrigin.Etterna "Nanahira Minipack")
@@ -124,7 +124,7 @@ module DbChartsTests =
         let result = DbCharts.get_chart TEST_CHART_META.Hash db
         match result with
         | Ok chart ->
-            Assert.AreEqual(TEST_CHART_META.Hash, Chart.hash chart)
+            Assert.AreEqual(TEST_CHART_META.Hash, chart.Hash())
         | Error reason -> Assert.Fail(reason)
 
         conn.Dispose()

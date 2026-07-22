@@ -36,12 +36,14 @@
     <Content Include="Data\989392 DJ Sharpnel - World Sound.osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Helpers\LocaleFakeFileSystem.fs" />
     <Compile Include="Helpers\ChartFuzzer.fs" />
     <Compile Include="Helpers\NotesBuilder.fs" />
     <Compile Include="Helpers\ReplayBuilder.fs" />
     <Compile Include="Helpers\GameplayEventCollector.fs" />
     <Compile Include="Helpers\ScoringEventCollector.fs" />
+    <Compile Include="Helpers\VirtualLocaleFileSystem.fs" />
+    <Compile Include="Helpers\VirtualAssetStorage.fs" />
+    <Compile Include="Helpers\VirtualClock.fs" />
     <Compile Include="Shared\BitmaskTests.fs" />
     <Compile Include="Shared\LocalisationTests.fs" />
     <Compile Include="Charts\ChartTests.fs" />
@@ -50,15 +52,17 @@
     <Compile Include="Charts\ChartRateDetectionTests.fs" />
     <Compile Include="Calculator\HoldCoverageTests.fs" />
     <Compile Include="Calculator\DiffCalcColorTests.fs" />
-    <Compile Include="Mods\ModTests.fs" />
+    <Compile Include="Mods\MirrorTests.fs" />
+    <Compile Include="Mods\ColumnSwapTests.fs" />
+    <Compile Include="Mods\InverseTests.fs" />
     <Compile Include="Mods\ModStateTests.fs" />
     <Compile Include="Replays\ReplayTests.fs" />
     <Compile Include="Rulesets\RulesetEditingTests.fs" />
     <Compile Include="Rulesets\RulesetValidationTests.fs" />
     <Compile Include="Rulesets\LampTests.fs" />
     <Compile Include="Rulesets\GradeTests.fs" />
-    <Compile Include="Rulesets\GameplayEventTests.fs" />
-    <Compile Include="Rulesets\ScoringTests.fs" />
+    <Compile Include="Rulesets\GameplayEventProcessorTests.fs" />
+    <Compile Include="Rulesets\ScoreProcessorTests.fs" />
     <Compile Include="Rulesets\ScoreScreenStatsTests.fs" />
     <Compile Include="Rulesets\RulesetOsuParityTests.fs" />
     <Compile Include="Rulesets\RulesetQuaverParityTests.fs" />
@@ -72,6 +76,8 @@
     <Compile Include="Database\DbSingletonsTests.fs" />
     <Compile Include="Database\DbSessionsTests.fs" />
     <Compile Include="Database\DbChartsTests.fs" />
+    <Compile Include="Database\ChartDatabaseTests.fs" />
+    <Compile Include="Stats\StatsHelpersTests.fs" />
     <Compile Include="Stats\StatsTests.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>

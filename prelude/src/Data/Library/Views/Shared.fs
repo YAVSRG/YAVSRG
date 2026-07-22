@@ -9,7 +9,7 @@ open Prelude.Data.Library
 [<AutoOpen>]
 module internal Shared =
 
-    let first_character (s: string) =
+    let first_character (s: string) : string =
         if s.Length = 0 then
             "?"
         elif Char.IsAsciiLetterOrDigit s.[0] then
@@ -31,7 +31,7 @@ module internal Shared =
         (local_date_now - local_date).TotalDays |> floor |> int
 
     let format_date_last_played (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
-        let days_ago = days_ago (UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase).LastPlayed
+        let days_ago = days_ago (ctx.Library.UserData.GetChartData(chart_meta.Hash)).LastPlayed
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -65,7 +65,7 @@ module internal Shared =
         else 8, "A long time ago"
 
     let grade_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
-        let data = UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase
+        let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
         match
             data.PersonalBests
@@ -75,7 +75,7 @@ module internal Shared =
         | None -> -2, "No grade achieved"
 
     let lamp_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string  =
-        let data = UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase
+        let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
         match
             data.PersonalBests
@@ -90,7 +90,7 @@ module internal Shared =
     let above_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
         chart_meta.Patterns.LNPercent > threshold
 
-    let has_sv (chart_meta: ChartMeta, _: LibraryViewContext) =
+    let has_sv (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
         chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
 
 [<RequireQualifiedAccess>]

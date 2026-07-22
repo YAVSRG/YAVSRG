@@ -21,7 +21,7 @@ type Judgement(ctx: HudContext) =
 
     override this.Init(parent: Widget) =
         ctx.State.Subscribe(fun ev ->
-            let judge = ev.Action.Judgement |> Option.map fst
+            let judge = ev.Inner.Judgement |> Option.map fst
 
             match judge with
             | Some j when not ctx.Config.JudgementMeterIgnorePerfect || j > 0 ->

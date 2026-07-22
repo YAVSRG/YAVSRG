@@ -16,8 +16,8 @@ type Setup() =
         let db, _conn = Database.in_memory "interlude"
 
         // migrate database (same database can have the tables that are normally split over 2 databases)
-        UserDatabase.create false db |> ignore
-        ChartDatabase.create false db |> ignore
+        UserDatabase.CreateLazyLoaded(db) |> ignore
+        ChartDatabase.CreateLazyLoaded(db) |> ignore
         conn <- _conn // in-memory database persists until teardown where it gets disposed
 
     [<OneTimeTearDown>]

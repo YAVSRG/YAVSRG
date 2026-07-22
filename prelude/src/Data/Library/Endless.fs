@@ -20,7 +20,6 @@ type SuggestionContext =
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
-        UserDatabase: UserDatabase
     }
     member this.LibraryViewContext: LibraryViewContext =
         {
@@ -28,7 +27,6 @@ type SuggestionContext =
             RulesetId = this.RulesetId
             Ruleset = this.Ruleset
             Library = this.Library
-            UserDatabase = this.UserDatabase
         }
 
 module Suggestion =
@@ -104,7 +102,7 @@ module Suggestion =
             )
             |> Seq.filter (fun (chart_meta, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
             |> if ctx.OnlyNewCharts then
-                Seq.filter (fun (chart_meta, (rate, p)) -> now - (UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS)
+                Seq.filter (fun (chart_meta, (rate, p)) -> now - ctx.Library.UserData.GetChartData(chart_meta.Hash).LastPlayed > THIRTY_DAYS)
                else
                 id
             |> ctx.Filter.Apply
@@ -184,7 +182,7 @@ module EndlessModeState =
             |> Seq.indexed
             |> Seq.skip from
             |> Seq.choose (fun (i, (c, info)) ->
-                match ChartDatabase.get_meta c.Hash library.Charts with
+                match library.Charts.GetChartMeta(c.Hash) with
                 | Some chart_meta -> Some(chart_meta, (i, info))
                 | None -> None
             )
@@ -197,7 +195,7 @@ module EndlessModeState =
             playlist.Charts
             |> Seq.indexed
             |> Seq.choose (fun (i, (c, info)) ->
-                match ChartDatabase.get_meta c.Hash library.Charts with
+                match library.Charts.GetChartMeta(c.Hash) with
                 | Some chart_meta -> Some(chart_meta, (i, info))
                 | None -> None
             )
@@ -211,7 +209,7 @@ module EndlessModeState =
 
     type Next =
         {
-            Chart: ChartMeta
+            ChartMeta: ChartMeta
             Rate: Rate
             Mods: ModState
             LibraryContext: LibraryContext
@@ -220,11 +218,11 @@ module EndlessModeState =
 
     let next (ctx: SuggestionContext) (state: EndlessModeState) : Next option =
         match state.Queue with
-        | (chart, (index, playlist_data)) :: xs ->
+        | (chart_meta, (index, playlist_data)) :: xs ->
             state.Queue <- xs
             Some
                 {
-                    Chart = chart
+                    ChartMeta = chart_meta
                     Rate = playlist_data.Rate.Value
                     Mods = playlist_data.Mods.Value
                     LibraryContext = LibraryContext.Playlist(index, state.Playlist, playlist_data)
@@ -235,7 +233,7 @@ module EndlessModeState =
             | Some (next_chart_meta, rate) ->
                 Some
                     {
-                        Chart = next_chart_meta
+                        ChartMeta = next_chart_meta
                         Rate = rate
                         Mods = ctx.Mods
                         LibraryContext = LibraryContext.None

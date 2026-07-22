@@ -7,7 +7,6 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User.Stats
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
@@ -25,6 +24,8 @@ type PracticeScreen =
         let mutable liveplay = Unchecked.defaultof<_>
         let mutable scoring = Unchecked.defaultof<_>
         let mutable resume_from_current_place = false
+        let mutable stats_practice_time = 0.0
+        let mutable stats_notes_hit = 0
 
         let last_allowed_practice_point =
             info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * SelectedChart.rate.Value
@@ -42,18 +43,17 @@ type PracticeScreen =
         let FIRST_NOTE = info.WithMods.FirstNote
 
         let reset_to_practice_point () =
-            liveplay <- LiveReplay FIRST_NOTE
+            liveplay <- GameplayReplaySource FIRST_NOTE
 
-            scoring <-
-                ScoreProcessor.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
+            scoring <- ScoreProcessor.Create(Rulesets.current, liveplay, info.WithMods, SelectedChart.rate.Value)
 
             let ignore_notes_before_time : Time = state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value
             scoring.IgnoreNotesBefore ignore_notes_before_time
 
             scoring.OnEvent.Add(fun h ->
-                match h.Action with
+                match h.Inner with
                 | Hit d
-                | Hold d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
+                | Hold d when not d.Missed -> stats_notes_hit <- stats_notes_hit + 1
                 | _ -> ()
             )
 
@@ -101,6 +101,10 @@ type PracticeScreen =
                 Song.seek state.PracticePoint.Value
                 Song.pause ()
                 DiscordRPC.playing (%"discord_status.practice", info.ChartMeta.Title)
+                
+            override this.OnExit(next: ScreenType) : unit =
+                base.OnExit(next)
+                Content.Stats.AddPracticeTime(stats_practice_time, stats_notes_hit)
 
             override this.OnBack() =
                 Song.resume ()
@@ -151,7 +155,7 @@ type PracticeScreen =
                     else
                         Screen.back Transitions.Default |> ignore
 
-                elif not (liveplay :> IReplay).Finished then
+                elif not (liveplay :> ReplaySource).Finished then
                     Input.pop_gameplay now binds (
                         fun column time is_release ->
                             if is_release then
@@ -165,7 +169,7 @@ type PracticeScreen =
                     this.State.Scoring.Update chart_time
 
                 if not state.Paused.Value then
-                    CURRENT_SESSION.PracticeTime <- CURRENT_SESSION.PracticeTime + elapsed_ms
+                    stats_practice_time <- stats_practice_time + elapsed_ms
                     Input.finish_frame_events()
 
                 base.Update(elapsed_ms, moved)

@@ -53,16 +53,16 @@ type KeysPerSecond(ctx: HudContext) =
         kps <- 0.0f
         let mutable previous = Bitmask.Empty
         let mutable previous_time = now
-        for struct (timestamp, keystate) in recent_events |> Seq.takeWhile (fun _ -> previous_time >= now - TWO_SECONDS) do
-            let keys = previous.Subtract(keystate).Count |> float32
+        for replay_frame in recent_events |> Seq.takeWhile (fun _ -> previous_time >= now - TWO_SECONDS) do
+            let keys = previous.Subtract(replay_frame.PressedKeys).Count |> float32
             kps <- kps + keys * (1f - (now - previous_time) / TWO_SECONDS)
             max_kps <- max max_kps kps
-            previous <- keystate
-            previous_time <- timestamp
+            previous <- replay_frame.PressedKeys
+            previous_time <- replay_frame.Time
 
     override this.Init(parent: Widget) =
         ctx.State.Subscribe(fun h ->
-            match h.Action with
+            match h.Inner with
             | Hit h
             | Hold h -> if not h.Missed then count <- count + 1.0f
             | GhostTap _

@@ -25,7 +25,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
     let full_score_events =
         let x = state.Scoring.Recreate()
-        x.Update Time.infinity
+        x.ProcessEntireReplay()
         x
 
     let accuracy_timeline = Performance.acc_timeline difficulty full_score_events
@@ -33,9 +33,9 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
     let performance_notes =
         difficulty.NoteDifficulty
         |> Array.mapi (fun i nr -> Array.map (Performance.scale_note accuracy_timeline.[i] difficulty.Variety.[i]) nr)
-    let performance_strains = Strain.calculate_finger_strains (state.Scoring.Rate, chart.Notes) performance_notes
-    let performance_rating = Difficulty.weighted_overall_difficulty (performance_strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
-    let ln_coverage = HoldCoverage.calculate_coverage (chart.Keys, chart.Notes, state.Scoring.Rate)
+    let performance_strains = Strain.calculate_finger_strains(state.Scoring.Rate, chart.ToNoteData()) performance_notes
+    let performance_rating = Difficulty.weighted_overall_difficulty(performance_strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
+    let ln_coverage = HoldCoverage.calculate_coverage(chart.ToNoteData(), state.Scoring.Rate)
 
     let mutable seek = 0
     let mutable last_time = state.CurrentChartTime()

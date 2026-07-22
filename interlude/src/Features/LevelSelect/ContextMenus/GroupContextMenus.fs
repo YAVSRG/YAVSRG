@@ -54,9 +54,9 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
                 match ctx with
-                | LibraryGroupContext.Pack p ->
-                    ChartDatabase.delete_many_from_pack charts p Content.Charts
-                | _ -> ChartDatabase.delete_many charts Content.Charts
+                | LibraryGroupContext.Pack pack_name ->
+                    Content.Charts.RemoveFromPack(charts, pack_name)
+                | _ -> Content.Charts.Delete(charts)
                 LevelSelect.refresh_all ()
 
                 if is_submenu then

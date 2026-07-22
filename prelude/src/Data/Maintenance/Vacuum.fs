@@ -12,51 +12,43 @@ module Vacuum =
         async {
             progress (Generic "Vacuuming")
             Logging.Debug "Running SQLite VACUUM command on charts.db"
-            ChartDatabase.sqlite_vacuum chart_db
+            chart_db.VacuumSqlite()
             Logging.Debug "Chart database vacuum started"
-            let asset_hashes = HashSet<string>()
-            for directory in Directory.EnumerateDirectories(chart_db.AssetsPath) do
-                for file in Directory.EnumerateFiles(directory) do
-                    let hash_file_name = Path.GetFileName(file)
-                    asset_hashes.Add hash_file_name |> ignore
-            Logging.Debug "Found %i assets on disk" asset_hashes.Count
+            let unused_asset_hashes = HashSet<string>(chart_db.AssetStorage.Enumerate())
+            Logging.Debug "Found %i assets on disk" unused_asset_hashes.Count
 
             let to_delete = ResizeArray<ChartMeta>()
 
             for entry in chart_db.Entries |> Seq.toArray do
                 if delete_missing_audio then
                     match entry.Audio.Path with
-                    | Some p when not (File.Exists p) -> to_delete.Add(entry)
+                    | Some path when not(File.Exists(path)) -> to_delete.Add(entry)
                     | _ -> ()
 
                 match entry.Audio with
-                | AssetPath.Hash h -> asset_hashes.Remove h |> ignore
+                | AssetLocation.Hash hash -> unused_asset_hashes.Remove(hash) |> ignore
                 | _ -> ()
 
                 match entry.Background with
-                | AssetPath.Hash h -> asset_hashes.Remove h |> ignore
+                | AssetLocation.Hash hash -> unused_asset_hashes.Remove(hash) |> ignore
                 | _ -> ()
 
             if delete_missing_audio && to_delete.Count > 0 then
                 progress (Generic "Deleting charts without audio")
                 Logging.Debug "Found %i charts with misplaced audio files, deleting them..." to_delete.Count
-                ChartDatabase.delete_many to_delete chart_db
+                chart_db.Delete(to_delete)
 
-            if asset_hashes.Count > 0 then
+            if unused_asset_hashes.Count > 0 then
                 progress (Generic "Deleting unused assets")
-                Logging.Debug "Found %i assets not being used by chart database, deleting them..." asset_hashes.Count
+                Logging.Debug "Found %i assets not being used by chart database, deleting them..." unused_asset_hashes.Count
                 let mutable bytes_freed = 0L
                 let mutable files_freed = 0
 
-                for h in asset_hashes do
-                    let path = ChartDatabase.asset_path h chart_db
-                    try
-                        let info = FileInfo(path)
-                        let length = info.Length
-                        info.Delete()
-                        bytes_freed <- bytes_freed + length
+                for hash in unused_asset_hashes do
+                    let freed = chart_db.AssetStorage.Remove(hash)
+                    if freed >= 0 then
+                        bytes_freed <- bytes_freed + freed
                         files_freed <- files_freed + 1
-                    with err -> Logging.Warn "Error deleting file %s: %O" path err
 
                 Logging.Debug "Successfully deleted %i files, freeing at least %i MB" files_freed (bytes_freed / 1024L / 1024L)
             else

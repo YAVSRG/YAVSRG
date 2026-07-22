@@ -44,7 +44,7 @@ type InfoPanel() =
 
                 AngledButton(
                     sprintf "%s %s" Icons.EYE %"levelselect.preview",
-                    (fun () -> SelectedChart.when_loaded false <| fun info -> Preview(info, change_rate).Show()),
+                    (fun () -> SelectedChart.when_loaded false <| fun info -> ChartPreview(info, change_rate).Show()),
                     Palette.MAIN_100
                 )
                     .Hotkey("preview")

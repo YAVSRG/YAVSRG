@@ -65,11 +65,11 @@ type LobbyUI(lobby: Lobby) =
         |+ Text(fun () -> lobby.Settings.Name)
             .Align(Alignment.CENTER)
             .Position(Position.SliceT(90.0f).ShrinkPercentL(0.4f).Shrink(10.0f))
-        |+ PlayerList(lobby)
+        |+ LobbyPlayerList(lobby)
             .Position(Position.SlicePercentL(0.4f).Shrink(50.0f, 100.0f))
         |+ AngledButton(
             sprintf "%s %s" Icons.EYE (%"levelselect.preview"),
-            (fun () -> SelectedChart.if_loaded <| fun info -> Preview(info, ignore).Show()),
+            (fun () -> SelectedChart.if_loaded <| fun info -> ChartPreview(info, ignore).Show()),
             Palette.MAIN_100
         )
             .LeanLeft(false)
@@ -103,9 +103,9 @@ type LobbyUI(lobby: Lobby) =
                     .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
-        |+ SelectedChart(lobby)
+        |+ LobbySelectedChart(lobby)
             .Position(Position.SlicePercentT(0.5f).SlicePercentR(0.5f).ShrinkX(20.0f).ShrinkT(100.0f))
-        |* Chat(lobby)
+        |* LobbyChat(lobby)
             .Position(
                 Position
                     .ShrinkPercentL(0.4f)
@@ -138,18 +138,18 @@ type LobbyUI(lobby: Lobby) =
                 SelectedChart.if_loaded
                 <| fun info ->
 
-                let replay : OnlineReplay = OnlineReplay()
-                let scoring = ScoreProcessor.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes SelectedChart.rate.Value
+                let replay_source : NetworkReplaySource = NetworkReplaySource()
+                let scoring = ScoreProcessor.Create(Rulesets.current, replay_source, info.WithMods, SelectedChart.rate.Value)
                 let replay_info =
                     {
-                        Replay = replay
+                        ReplaySource = replay_source
                         ScoreProcessor = scoring
                         GetScoreInfo = fun () ->
-                            if not (replay :> IReplay).Finished then
-                                replay.Finish()
-                            scoring.Update Time.infinity
+                            if not (replay_source :> ReplaySource).Finished then
+                                replay_source.Finish()
+                            scoring.ProcessEntireReplay()
 
-                            let replay_data = (replay :> IReplay).GetFullReplay()
+                            let replay = (replay_source :> ReplaySource).GetFullReplay()
 
                             {
                                 ChartMeta = info.ChartMeta
@@ -160,7 +160,7 @@ type LobbyUI(lobby: Lobby) =
                                 TimePlayed = Timestamp.now ()
                                 Rate = SelectedChart.rate.Value
 
-                                Replay = replay_data
+                                Replay = replay
                                 Scoring = scoring
                                 Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
                                 Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
@@ -205,7 +205,7 @@ type LobbyScreen() =
 
     override this.OnEnter(_: ScreenType) =
         match Network.lobby with
-        | Some lobby -> LobbyChart.on_screen_enter lobby
+        | Some lobby -> LobbySelectedChart.on_screen_enter lobby
         | None -> ()
 
         Song.on_finish <- SongFinishAction.LoopFromPreview

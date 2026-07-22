@@ -53,7 +53,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
                 let chart_name = sprintf "%s [%s]" score_info.ChartMeta.Title score_info.ChartMeta.DifficultyName
                 ConfirmPage(
                     [ chart_name ] %> "misc.confirmdelete",
-                    fun () -> ChartDatabase.delete score_info.ChartMeta Content.Charts
+                    fun () -> Content.Charts.Delete(score_info.ChartMeta)
                 )
                     .Show()
             )

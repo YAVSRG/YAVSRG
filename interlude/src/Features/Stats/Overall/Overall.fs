@@ -3,8 +3,8 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User.Stats
 open Interlude.UI
+open Interlude.Content
 
 type OverallTab =
 
@@ -30,17 +30,17 @@ type OverallTab =
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(150.0f).SliceT(250.0f).ShrinkX(40.0f)),
 
                 OverallTime(
-                    (fun () -> TOTAL_STATS.GameTime + CURRENT_SESSION.GameTime),
-                    (fun () -> TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime),
-                    (fun () -> TOTAL_STATS.PracticeTime + CURRENT_SESSION.PracticeTime)
+                    (fun () -> Content.Stats.GameTime),
+                    (fun () -> Content.Stats.PlayTime),
+                    (fun () -> Content.Stats.PracticeTime)
                 )
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f)),
 
                 PlayCount(
-                    (fun () -> TOTAL_STATS.PlaysStarted + CURRENT_SESSION.PlaysStarted),
-                    (fun () -> TOTAL_STATS.PlaysCompleted + CURRENT_SESSION.PlaysCompleted),
-                    (fun () -> TOTAL_STATS.PlaysRetried + CURRENT_SESSION.PlaysRetried),
-                    (fun () -> TOTAL_STATS.PlaysQuit + CURRENT_SESSION.PlaysQuit)
+                    (fun () -> Content.Stats.PlaysStarted),
+                    (fun () -> Content.Stats.PlaysCompleted),
+                    (fun () -> Content.Stats.PlaysRetried),
+                    (fun () -> Content.Stats.PlaysQuit)
                  )
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f)),
 

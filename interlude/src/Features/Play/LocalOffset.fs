@@ -26,7 +26,7 @@ module LocalOffset =
         let mutable count = 1.0f
 
         for ev in state.Scoring.Events do
-            match ev.Action with
+            match ev.Inner with
             | Hold x
             | Hit x when not x.Missed ->
                 sum <- sum + x.Delta

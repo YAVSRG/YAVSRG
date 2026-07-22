@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI.Features
+﻿namespace YAVSRG.CLI
 
 open System
 open System.IO
@@ -8,7 +8,6 @@ open Prelude.Skins.HudLayouts
 open Prelude.Skins.Repo
 open Prelude
 open SixLabors.ImageSharp
-open YAVSRG.CLI.Utils
 open YAVSRG.CLI.Features.Backbeat
 
 module Skins =
@@ -39,20 +38,20 @@ module Skins =
         match Noteskin.FromPath noteskin_folder with
         | Error err -> raise err
         | Ok noteskin ->
-            
+
         let validation = noteskin.Validate() |> Array.ofSeq
 
         if validation.Length > 0 then
             for msg in validation do
                 match msg with
-                | ValidationWarning w -> 
+                | ValidationWarning w ->
                     printfn "Warning: '%s': %s" w.Element w.Message
-                    match w.SuggestedFix with 
+                    match w.SuggestedFix with
                     | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
                     | None -> ()
-                | ValidationError e -> 
+                | ValidationError e ->
                     printfn "Error: '%s': %s" e.Element e.Message
-                    match e.SuggestedFix with 
+                    match e.SuggestedFix with
                     | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
                     | None -> ()
             failwith "Fix validation errors before uploading"
@@ -62,20 +61,20 @@ module Skins =
             match HudLayout.FromPath hud_folder with
             | Error err -> raise err
             | Ok hud ->
-            
+
                 let validation = hud.Validate() |> Array.ofSeq
 
                 if validation.Length > 0 then
                     for msg in validation do
                         match msg with
-                        | ValidationWarning w -> 
+                        | ValidationWarning w ->
                             printfn "Warning: '%s': %s" w.Element w.Message
-                            match w.SuggestedFix with 
+                            match w.SuggestedFix with
                             | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
                             | None -> ()
                         | ValidationError e ->
                             printfn "Error: '%s': %s" e.Element e.Message
-                            match e.SuggestedFix with 
+                            match e.SuggestedFix with
                             | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
                             | None -> ()
                     failwith "Fix validation errors before uploading"

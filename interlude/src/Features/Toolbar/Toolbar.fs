@@ -5,7 +5,6 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User.Stats
 open Interlude.Content
 open Interlude.UI
 open Interlude
@@ -31,6 +30,7 @@ type Toolbar() =
     let volume_when_hidden =
         VolumeSlider()
             .Position(Position.ShrinkY(HEIGHT))
+            .Conditional(fun () -> Screen.current_type <> ScreenType.EditHud)
 
     let load_preset (i: int) : unit =
         match Presets.load i with
@@ -172,7 +172,7 @@ type Toolbar() =
 
     override this.Update(elapsed_ms, moved) =
         if Screen.current_type <> ScreenType.SplashScreen then
-            CURRENT_SESSION.GameTime <- CURRENT_SESSION.GameTime + elapsed_ms
+            Content.Stats.AddGameTime(elapsed_ms)
 
         Toolbar.slideout_amount.Update elapsed_ms
 

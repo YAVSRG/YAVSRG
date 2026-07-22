@@ -19,7 +19,7 @@ module OsuReplay =
     /// e.g. if the first note is at ms 150 then the first input should have timestamp 150 to line up
     /// Interlude replay timestamps are lined up so a replay timestamp of 0 = the first note, allowing better portability
     /// `original_osu_file_first_note` and `original_osu_file_rate` are accordingly used to make a correctly synced Interlude replay
-    let decode (replay: OsuReplay, original_osu_file_first_note: Time, original_osu_file_rate: Rate) : ReplayData =
+    let decode (replay: OsuReplay, original_osu_file_first_note: Time, original_osu_file_rate: Rate) : Replay =
         if replay.CompressedReplayBytes.IsNone then
             failwith "No replay data here. Maybe you passed a score directly from the osu! database instead of reading the replay file from disk?"
 
@@ -29,13 +29,13 @@ module OsuReplay =
         let props = Array.zeroCreate 5
         input.Read(props, 0, 5) |> ignore
 
-        let lengthBytes = Array.zeroCreate 8
-        input.Read(lengthBytes, 0, 8) |> ignore
+        let length_bytes = Array.zeroCreate 8
+        input.Read(length_bytes, 0, 8) |> ignore
 
-        let dec = LZMA.Decoder()
-        dec.SetDecoderProperties props
+        let lzma_decoder = LZMA.Decoder()
+        lzma_decoder.SetDecoderProperties props
 
-        dec.Code(input, output, replay.CompressedReplayBytes.Value.Length, BitConverter.ToInt64(lengthBytes, 0), null)
+        lzma_decoder.Code(input, output, replay.CompressedReplayBytes.Value.Length, BitConverter.ToInt64(length_bytes, 0), null)
         output.Flush()
         let string_data = output.ToArray() |> Encoding.UTF8.GetString
 
@@ -52,23 +52,27 @@ module OsuReplay =
                     let state = uint16 parts.[1]
 
                     if state <> last_state then
-                        yield struct ((time - original_osu_file_first_note) * float32 original_osu_file_rate, Bitmask.FromInt16(state))
+                        yield {
+                            Time = (time - original_osu_file_first_note) * float32 original_osu_file_rate
+                            PressedKeys = Bitmask.FromInt16(state)
+                        }
                         last_state <- state
         }
         |> Array.ofSeq
+        |> fun x -> { Frames = x }
 
-    let encode (replay: ReplayData) (first_note: Time) (mods: Mods) (beatmap_hash: string) : OsuReplay =
+    let encode (replay: Replay) (first_note: Time) (mods: Mods) (beatmap_hash: string) : OsuReplay =
 
         let first_note = first_note |> float32 |> round |> int
 
         let input_as_replay_string =
             let mutable previous_time = -first_note
-            replay
-            |> Seq.map (fun (struct (timestamp, key_state)) ->
+            replay.Frames
+            |> Seq.map (fun replay_frame ->
                 let t = previous_time
-                let rounded_time = timestamp |> float32 |> round |> int
+                let rounded_time = replay_frame.Time |> float32 |> round |> int
                 previous_time <- rounded_time
-                sprintf "%i|%i|1|0" (rounded_time - t) (key_state.ToInt16())
+                sprintf "%i|%i|1|0" (rounded_time - t) (replay_frame.PressedKeys.ToInt16())
             )
             |> String.concat ","
 
@@ -110,8 +114,8 @@ module OsuReplay =
             OnlineScoreID = 0
         }
 
-    let to_score (replay: OsuReplay) (chart: Chart) (original_osu_file_first_note: Time) (original_osu_file_rate: float32<rate>) : Result<Score, string> =
-        match Mods.to_interlude_rate_and_mods replay.ModsUsed with
+    let to_score (osu_replay: OsuReplay) (chart: Chart) (original_osu_file_first_note: Time) (original_osu_file_rate: float32<rate>) : Result<Score, string> =
+        match Mods.to_interlude_rate_and_mods osu_replay.ModsUsed with
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 
@@ -125,13 +129,13 @@ module OsuReplay =
         else
 
         try
-            let replay_data = decode(replay, original_osu_file_first_note, original_osu_file_rate)
+            let replay = decode(osu_replay, original_osu_file_first_note, original_osu_file_rate)
 
             Ok {
                 Timestamp =
-                    DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
+                    DateTime.FromFileTimeUtc(osu_replay.Timestamp).ToLocalTime()
                     |> Timestamp.from_datetime
-                Replay = Replay.compress_bytes replay_data
+                Replay = replay.ToByteArray()
                 Rate = combined_rate * 1.0f<rate>
                 Mods = mods
                 IsImported = true

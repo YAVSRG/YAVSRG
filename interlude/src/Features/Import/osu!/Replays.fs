@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import.osu
+﻿namespace Interlude.Features.Import.Osu
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -49,7 +49,7 @@ module Replay =
 
     let show_replay (played_by: string) (chart_meta: ChartMeta) (chart: Chart) (score: Score) : unit =
         let score_info =
-            { ScoreInfo.from_score chart_meta chart Rulesets.current score with
+            { ScoreInfo.CreateFromScore(chart_meta, chart, Rulesets.current, score) with
                 PlayedBy = ScorePlayedBy.Username played_by
             }
         SelectedChart.change(chart_meta, LibraryContext.None, true)
@@ -77,7 +77,7 @@ module Replay =
                 with
                 | None -> None
                 | Some (rate, first_note) ->
-                    match ChartDatabase.get_chart chart_meta.Hash Content.Charts with
+                    match Content.Charts.GetChart(chart_meta.Hash) with
                     | Error reason -> Logging.Error "Failed to load chart matching replay: %s" reason; None
                     | Ok chart -> Some (chart, chart_meta, rate, first_note)
             )

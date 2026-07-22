@@ -40,14 +40,14 @@ module Upload =
         reply.IsSuccessStatusCode
 
     let private upload_chart_to_cdn (chart_meta: ChartMeta) (chart: Chart) : Async<Result<string * int, string>> =
-        match Chart.check chart with
+        match chart.CheckForErrors() with
         | Error msg -> async { return Error (sprintf "Chart is invalid: %s" msg) }
         | Ok chart ->
 
-        let chart_hash = Chart.hash chart
+        let chart_hash = chart.Hash()
 
         match chart_meta.Background, chart_meta.Audio with
-        | AssetPath.Hash background_hash, AssetPath.Hash audio_hash ->
+        | AssetLocation.Hash background_hash, AssetLocation.Hash audio_hash ->
             let upload_notes =
                 task {
                         let file_name = chart_hash
@@ -58,7 +58,7 @@ module Upload =
                             use ms = new MemoryStream()
                             use bw = new BinaryWriter(ms)
 
-                            Chart.write_headless chart bw
+                            chart.WriteToStreamHeadless(bw)
                             bw.Flush()
 
                             let! response = backblaze_client.UploadAsync(BUCKET_ID, file_name, ms)
@@ -79,7 +79,7 @@ module Upload =
                                 backblaze_client.UploadAsync(
                                     BUCKET_ID,
                                     file_name,
-                                    File.OpenRead (chart_meta.Audio.Path).Value
+                                    File.OpenRead(chart_meta.Audio.Path.Value)
                                 )
 
                             response.EnsureSuccessStatusCode() |> ignore
@@ -98,7 +98,7 @@ module Upload =
                                 backblaze_client.UploadAsync(
                                     BUCKET_ID,
                                     file_name,
-                                    File.OpenRead (chart_meta.Background.Path).Value
+                                    File.OpenRead(chart_meta.Background.Path.Value)
                                 )
 
                             response.EnsureSuccessStatusCode() |> ignore
@@ -122,14 +122,14 @@ module Upload =
         | _ ->  async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
     let create_backbeat_data (chart_meta: ChartMeta) (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
-        if chart_meta.Audio = AssetPath.Missing then
+        if chart_meta.Audio = AssetLocation.Missing then
             Error "Missing audio file"
-        elif chart_meta.Background = AssetPath.Missing then
+        elif chart_meta.Background = AssetLocation.Missing then
             Error "Missing background image"
         else
 
         match chart_meta.Audio, chart_meta.Background with
-        | AssetPath.Hash audio_hash, AssetPath.Hash background_hash ->
+        | AssetLocation.Hash audio_hash, AssetLocation.Hash background_hash ->
             if chart_meta.Length < 30000.0f<ms> then
                 Error "Chart is too short"
             else
@@ -210,14 +210,14 @@ module Upload =
     let has_folder (folder_name: string) =
         interlude_chart_db.Entries
         |> Seq.where (fun meta -> meta.Packs.Contains folder_name)
-        |> Seq.map (fun meta -> meta.Origins |> Set.exists _.SuitableForUpload && match meta.Audio with AssetPath.Hash _ -> true | _ -> false)
+        |> Seq.map (fun meta -> meta.Origins |> Set.exists _.SuitableForUpload && match meta.Audio with AssetLocation.Hash _ -> true | _ -> false)
         |> fun s -> not (Seq.isEmpty s) && Seq.forall id s
 
     let upload_folder (folder_name: string) =
         seq {
             for chart_meta in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
                 async {
-                    match ChartDatabase.get_chart chart_meta.Hash interlude_chart_db with
+                    match interlude_chart_db.GetChart(chart_meta.Hash) with
                     | Ok chart ->
                         match! upload_chart chart_meta chart with
                         | Ok () -> Logging.Debug "Uploaded '%s'" chart_meta.Title
@@ -231,7 +231,7 @@ module Upload =
         Logging.Info "Uploading '%s' complete!" folder_name
 
     let get_etterna_pack (pack_name: string) =
-        OnlineImports.download_by_origin (ChartOrigin.Etterna pack_name, interlude_library.Charts, interlude_scores_db, TaskProgress.log_progress_bar pack_name)
+        OnlineImports.download_by_origin (ChartOrigin.Etterna pack_name, interlude_library, TaskProgress.log_progress_bar pack_name)
         |> Async.RunSynchronously
 
     let etterna_pack_aio (pack_name: string) =
@@ -254,8 +254,8 @@ module Upload =
         let top_50 =
             match WebServices.download_json_async<_> "https://api.etternaonline.com/api/packs?page=1&limit=50&sort=-popularity" |> Async.RunSynchronously with
             | WebResult.Ok (response: {| data: {| name: string |} array |}) -> response.data |> Array.map _.name
-            | WebResult.HttpError i -> [||]
-            | WebResult.Exception err -> [||]
+            | WebResult.HttpError _ -> [||]
+            | WebResult.Exception _ -> [||]
             |> Set.ofArray
         let new_list = Set.union on_file top_50
         File.WriteAllLines(PACK_LIST_PATH, new_list)

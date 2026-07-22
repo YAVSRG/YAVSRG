@@ -6,6 +6,7 @@ open FParsec
 open Percyqaz.Common
 open Prelude
 open Prelude.Backbeat.Archive
+open YAVSRG.CLI
 
 // various metadata cleanup tools
 module Metadata =
@@ -94,7 +95,7 @@ module Metadata =
 
     module private Extraction =
 
-        let artists : VerifiedArtists = System.IO.Path.Combine(YAVSRG.CLI.Utils.YAVSRG_PATH, "backbeat", "archive", "artists.json") |> JSON.FromFile |> expect
+        let artists : VerifiedArtists = System.IO.Path.Combine(YAVSRG_PATH, "backbeat", "archive", "artists.json") |> JSON.FromFile |> expect
 
         type ArtistFragment =
             | Verified of string

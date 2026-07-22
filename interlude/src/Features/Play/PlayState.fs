@@ -3,7 +3,6 @@
 open System
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Skins.Noteskins
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Interlude.Content
@@ -37,7 +36,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     member this.OnScoringChanged(action: unit -> unit) : IDisposable =
         scoring_changed.Subscribe action
 
-    member this.Subscribe(handler: GameplayEvent -> unit) : IDisposable =
+    member this.Subscribe(handler: ScoringEvent -> unit) : IDisposable =
         let mutable obj: IDisposable = scoring.OnEvent.Subscribe handler
 
         let resubscribe_on_change = scoring_changed.Subscribe(fun () ->
@@ -48,16 +47,16 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
         { new IDisposable with override this.Dispose() = resubscribe_on_change.Dispose(); obj.Dispose() }
 
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
-        let replay_data = Replay.perfect_replay info.WithColors.Keys info.WithColors.Source.Notes
+        let replay = Autoplay.CreateReplay(info.WithColors)
         let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplay replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+        let scoring = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
 
         let state = PlayState(info, PacemakerState.None, scoring, Song.time_with_offset)
 
         scoring.Update (state.CurrentChartTime())
 
         let reset () =
-            let recreated = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplay replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+            let recreated = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
             recreated.Update (state.CurrentChartTime())
             state.ChangeScoring recreated
 

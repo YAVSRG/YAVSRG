@@ -11,16 +11,16 @@ module UserDatabaseTests =
     let BasicRoundTrip () =
         let db, conn = InMemoryDatabase.Create()
 
-        let score_db = UserDatabase.create false db
+        let user_db = UserDatabase.CreateLazyLoaded(db)
 
-        let example_handle = UserDatabase.get_chart_data "example" score_db
+        let example_handle = user_db.GetChartData("example")
 
         example_handle.Offset <- 5.0f<ms>
         example_handle.Offset <- 10.0f<ms>
 
         printfn "%A" (DbChartData.get "example" db)
 
-        UserDatabase.save_changes score_db
+        user_db.SaveChanges()
 
         Assert.True(List.isEmpty example_handle.Scores)
 
@@ -35,11 +35,11 @@ module UserDatabaseTests =
                 Keys = 4
             }
 
-        UserDatabase.save_score "example" score score_db
+        user_db.SaveScore("example", score)
 
         Assert.False(List.isEmpty example_handle.Scores)
 
-        UserDatabase.save_changes score_db
+        user_db.SaveChanges()
 
         Assert.NotZero((DbScores.by_chart_id "example" db).Length)
         printfn "%A" (DbChartData.get "example" db)

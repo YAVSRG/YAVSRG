@@ -132,7 +132,7 @@ module SelectedChart =
                 match req with
                 | Load(chart_meta, play_audio, rate, mods) ->
                     seq {
-                        match ChartDatabase.get_chart chart_meta.Hash Content.Charts with
+                        match Content.Charts.GetChart(chart_meta.Hash) with
                         | Error reason ->
 
                             Logging.Error "Couldn't load chart: %s" reason
@@ -151,7 +151,7 @@ module SelectedChart =
                         | Ok chart ->
 
                         Background.load chart_meta.Background.Path
-                        let save_data = UserDatabase.get_chart_data chart_meta.Hash Content.UserData
+                        let save_data = Content.UserData.GetChartData(chart_meta.Hash)
 
                         yield
                             fun () ->
@@ -178,7 +178,7 @@ module SelectedChart =
                         let with_mods = ModState.apply mods chart
                         let with_colors = NoteColors.apply Content.NoteskinConfig.NoteColors with_mods
 
-                        let rating = Difficulty.calculate(rate, with_mods.Notes)
+                        let rating = Difficulty.calculate(rate, with_mods.ToNoteData())
                         let patterns = PatternReport.from_chart(rating, with_mods.AsChart)
 
                         let note_counts = format_notecounts with_mods
@@ -211,7 +211,7 @@ module SelectedChart =
                         let with_mods = ModState.apply mods chart
                         let with_colors = NoteColors.apply Content.NoteskinConfig.NoteColors with_mods
 
-                        let rating = Difficulty.calculate(rate, with_mods.Notes)
+                        let rating = Difficulty.calculate(rate, with_mods.ToNoteData())
 
                         let note_counts = format_notecounts with_mods
                         let patterns = PatternReport.from_chart(rating, with_mods.AsChart)
@@ -412,7 +412,7 @@ module SelectedChart =
 
     let init () =
 
-        match ChartDatabase.get_meta options.CurrentChart.Value Content.Charts with
+        match Content.Charts.GetChartMeta(options.CurrentChart.Value) with
         | Some chart_meta -> change (chart_meta, LibraryContext.None, true)
         | None ->
             match
@@ -423,7 +423,6 @@ module SelectedChart =
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current
                         Library = Content.Library
-                        UserDatabase = Content.UserData
                     }
             with
             | Some chart_meta -> change (chart_meta, LibraryContext.None, true)

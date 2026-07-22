@@ -17,18 +17,18 @@ module PersonalBests =
             MergeWithExisting: bool
         }
 
-    let recalculate (rulesets: (string * Ruleset) array, merge_with_existing: bool, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) =
+    let recalculate (rulesets: (string * Ruleset) array, merge_with_existing: bool, library: Library, progress: ProgressCallback) =
         if rulesets.Length = 0 then
             async { progress Complete }
         else
 
         async {
-            let charts = chart_db.Entries |> Seq.toArray
+            let charts = library.Charts.Entries |> Seq.toArray
             for i, chart_meta in Seq.indexed charts do
-                let data = UserDatabase.get_chart_data chart_meta.Hash user_db
+                let data = library.UserData.GetChartData(chart_meta.Hash)
 
                 if not data.Scores.IsEmpty then
-                    match ChartDatabase.get_chart chart_meta.Hash chart_db with
+                    match library.Charts.GetChart(chart_meta.Hash) with
                     | Error reason ->
                         Logging.Debug "Couldn't load '%s' for pb processing: %s" chart_meta.Hash reason
                     | Ok chart ->
@@ -38,7 +38,7 @@ module PersonalBests =
 
                     for score in data.Scores do
                         let _, initial_ruleset = rulesets.[0]
-                        let score_info = ScoreInfo.from_score chart_meta chart initial_ruleset score
+                        let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, initial_ruleset, score)
 
                         if score_info.ModStatus = ModStatus.Ranked then
 
@@ -55,6 +55,6 @@ module PersonalBests =
                         data.PersonalBests <- new_bests
                 progress (Processing (i + 1, charts.Length))
 
-            UserDatabase.save_changes user_db
+            library.UserData.SaveChanges()
             progress Complete
         }

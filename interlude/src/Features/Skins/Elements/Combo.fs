@@ -40,7 +40,7 @@ type Combo(ctx: HudContext) =
 
     override this.Init(parent: Widget) =
         ctx.State.Subscribe(fun ev ->
-            match ev.Combo with
+            match ev.ComboChange with
             | NoChange -> ()
             | _ ->
 

@@ -18,8 +18,8 @@ module Tree =
     let multi_selection() = tree_ctx.MultiSelection
     let clear_multi_selection() = tree_ctx.MultiSelection <- None
 
-    let mutable private groups: GroupItem list = []
-    let mutable private last_item: ChartItem option = None
+    let mutable private groups: TreeGroup list = []
+    let mutable private last_item: TreeChart option = None
     let mutable is_empty = false
     let scroll_fade = Animation.Fade 0.0f
 
@@ -58,7 +58,6 @@ module Tree =
                     Rate = SelectedChart.rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
-                    UserDatabase = Content.UserData
                     Library = Content.Library
                 }
 
@@ -90,12 +89,12 @@ module Tree =
             |> Seq.map (fun (group_name, group) ->
                 group.Charts
                 |> Seq.map (fun (chart_meta, context) ->
-                    let i = ChartItem(tree_ctx, group_name, group.Context, chart_meta, context)
+                    let i = TreeChart(tree_ctx, group_name, group.Context, chart_meta, context)
                     last_item <- Some i
                     i
                 )
                 |> ResizeArray
-                |> fun l -> GroupItem(tree_ctx, group_name, l, group.Context)
+                |> fun l -> TreeGroup(tree_ctx, group_name, l, group.Context)
             )
             |> List.ofSeq
 
@@ -233,7 +232,7 @@ module Tree =
                 tree_ctx.ScrollTo <- ScrollTo.Group tree_ctx.ExpandedGroup
 
             let bottom_edge =
-                List.fold (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsed_ms)) tree_ctx.ScrollPosition.Value groups
+                List.fold (fun t (i: TreeGroup) -> i.Update(t, origin, originB, elapsed_ms)) tree_ctx.ScrollPosition.Value groups
 
             let total_height = originB - origin
             let tree_height = bottom_edge - tree_ctx.ScrollPosition.Value
@@ -273,7 +272,7 @@ module Tree =
         Render.stencil_begin_draw ()
 
         let bottom_edge =
-            List.fold (fun t (i: GroupItem) -> i.Draw(t, origin, originB)) tree_ctx.ScrollPosition.Value groups
+            List.fold (fun t (i: TreeGroup) -> i.Draw(t, origin, originB)) tree_ctx.ScrollPosition.Value groups
 
         Render.stencil_finish ()
 

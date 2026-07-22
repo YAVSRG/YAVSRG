@@ -30,11 +30,11 @@ module Gameplay =
     let private leaderboard_rank_changed_ev = Event<ScoreInfo>()
     let leaderboard_rank_changed = leaderboard_rank_changed_ev.Publish
 
-    let upload_score (score_info: ScoreInfo) =
+    let upload_score (score_info: ScoreInfo) : unit =
         Charts.Scores.Save.post (
             {
                 ChartId = score_info.ChartMeta.Hash
-                Replay = score_info.Replay |> Replay.compress_string
+                Replay = score_info.Replay.ToBase64String()
                 Rate = score_info.Rate
                 Mods = score_info.Mods
                 Timestamp = score_info.TimePlayed
@@ -56,7 +56,7 @@ module Gameplay =
     let score_info_from_gameplay
         (info: LoadedChartInfo)
         (scoring: ScoreProcessor)
-        (replay_data: ReplayData)
+        (replay: Replay)
         (failed: bool)
         : ScoreInfo =
         {
@@ -68,7 +68,7 @@ module Gameplay =
             TimePlayed = Timestamp.now ()
             Rate = SelectedChart.rate.Value
 
-            Replay = replay_data
+            Replay = replay
             Scoring = scoring
             Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
@@ -102,14 +102,12 @@ module Gameplay =
                     | None -> Bests.create score_info, ImprovementFlags.New
 
                 let xp_gain =
-                    if quit_out then
-                        Stats.quitter_penalty Content.UserData
-                    else
-                        Stats.handle_score standardised_score improvement_flags Content.UserData
+                    if quit_out then Content.Stats.HandleQuit()
+                    else Content.Stats.HandleScore(standardised_score, improvement_flags)
 
                 if (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
-                    UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
-                    score_saved_ev.Trigger score_info
+                    Content.UserData.SaveScore(score_info)
+                    score_saved_ev.Trigger(score_info)
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
 
                     if Rulesets.current_hash <> SC_J4_HASH then
@@ -119,12 +117,12 @@ module Gameplay =
                             | None -> Bests.create standardised_score
                         save_data.PersonalBests <- Map.add SC_J4_HASH new_standard_bests save_data.PersonalBests
 
-                    UserDatabase.save_changes Content.UserData
+                    Content.UserData.SaveChanges()
                 improvement_flags, Some xp_gain
 
             elif (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) then
-                UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
-                score_saved_ev.Trigger score_info
+                Content.UserData.SaveScore(score_info)
+                score_saved_ev.Trigger(score_info)
                 ImprovementFlags.None, None
 
             else
@@ -132,9 +130,9 @@ module Gameplay =
         else
             ImprovementFlags.None, None
 
-    let delete_score (score_info: ScoreInfo) =
-        if UserDatabase.delete_score score_info.ChartMeta.Hash score_info.TimePlayed Content.UserData then
-            score_deleted_ev.Trigger score_info.TimePlayed
+    let delete_score (score_info: ScoreInfo) : unit =
+        if Content.UserData.DeleteScore(score_info) then
+            score_deleted_ev.Trigger(score_info.TimePlayed)
             Notifications.action_feedback (Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted", "")
         else
             Logging.Debug("Couldn't find score matching timestamp to delete")

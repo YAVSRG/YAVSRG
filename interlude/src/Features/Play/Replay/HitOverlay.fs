@@ -17,16 +17,14 @@ type private HitOverlay
     (
         rate: Rate,
         chart: ModdedChart,
-        replay_data: ReplayData,
+        replay: Replay,
         state: PlayState,
         playfield: Playfield
     ) =
     inherit StaticWidget(NodeType.None)
 
     let hit_events =
-        let full_score =
-            ScoreProcessor.run state.Ruleset chart.Keys (StoredReplay replay_data) chart.Notes rate
-
+        let full_score = ScoreProcessor.ProcessEntireReplay(state.Ruleset, replay, chart, rate)
         full_score.Events |> Array.ofSeq
 
     let mutable seek = 0
@@ -134,13 +132,13 @@ type private HitOverlay
         |> scroll_direction_pos playfield.Bounds.Bottom
         |> fun a -> Text.fill_b (Style.font, icon, a, (color, Colors.black), 0.5f)
 
-    let draw_event (now: ChartTime) (ev: GameplayEvent) : unit =
+    let draw_event (now: ChartTime) (ev: ScoringEvent) : unit =
         let ms_to_y (time: Time) =
             options.HitPosition.Value
             + (time - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
             + playfield.ColumnWidth * 0.5f
 
-        match ev.Action with
+        match ev.Inner with
 
         | Hit x
         | Hold x ->

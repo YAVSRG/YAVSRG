@@ -26,7 +26,7 @@ module Difficulty =
 
     /// Calculates a single number to represent a set of difficulty data points
     /// This number represents how a player would "perceive" the difficulty overall
-    /// Perception is not a concrete term so I've ruled: In my experience players perception is concentrated on the very hardest parts of a chart
+    /// Perception is not a concrete term, so I've ruled: In my experience players perception is concentrated on the very hardest parts of a chart
     let weighted_overall_difficulty (data: float32 seq) : float32 =
 
         let data_array = data |> Seq.sort |> Array.ofSeq
@@ -43,15 +43,15 @@ module Difficulty =
         // Final transform on the weighted average: Power and rescale it to some arbitrary scale people like and are used to
         MathF.Pow(total / weight, CURVE_POWER) * CURVE_SCALE
 
-    let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : Difficulty =
-        let note_data = NoteDifficulty.calculate_note_ratings (rate, notes)
-        let variety = Variety.calculate_variety (rate, notes) note_data
-        let physical_data = Strain.calculate_finger_strains (rate, notes) note_data
-        let hands = Strain.calculate_hand_strains (rate, notes) note_data
+    let private calculate_uncached (rate: Rate, note_data: NoteData) : Difficulty =
+        let note_difficulty = NoteDifficulty.calculate_note_ratings (rate, note_data)
+        let variety = Variety.calculate_variety (rate, note_data) note_difficulty
+        let physical_data = Strain.calculate_finger_strains (rate, note_data) note_difficulty
+        let hands = Strain.calculate_hand_strains (rate, note_data) note_difficulty
         let physical = weighted_overall_difficulty (physical_data |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f))
 
         {
-            NoteDifficulty = note_data
+            NoteDifficulty = note_difficulty
             Strains = physical_data
             Variety = variety
             Hands = hands

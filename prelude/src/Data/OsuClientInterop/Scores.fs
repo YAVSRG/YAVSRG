@@ -40,14 +40,14 @@ module Scores =
                 match OsuReplay.to_score replay chart original_osu_file_first_note original_osu_file_rate with
                 | Error reason -> Logging.Error "Error with replay '%s': %s" replay_file reason
                 | Ok score ->
-                    let existing_score_replaced = UserDatabase.delete_score chart_hash score.Timestamp user_db
-                    UserDatabase.save_score chart_hash score user_db
+                    let existing_score_replaced = user_db.DeleteScore(chart_hash, score.Timestamp)
+                    user_db.SaveScore(chart_hash, score)
 
                     result.Scores <- result.Scores + 1
                     if not existing_score_replaced then
                         result.NewScores <- result.NewScores + 1
 
-    let private import_osu_scores (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : ScoreImportResult =
+    let private import_osu_scores (osu_root_folder: string, library: Library, progress: ProgressCallback) : ScoreImportResult =
 
         let result =
             {
@@ -87,7 +87,7 @@ module Scores =
         // MD5 -> Imported Interlude data
         let interlude_db_map =
             seq {
-                for entry in chart_db.Entries do
+                for entry in library.Charts.Entries do
                     for origin in entry.Origins do
                         match origin with
                         | ChartOrigin.Osu osu -> yield osu.Md5, (entry.Hash, osu.FirstNoteOffset, osu.SourceRate)
@@ -102,7 +102,7 @@ module Scores =
                 match Map.tryFind beatmap_score_data.Hash interlude_db_map with
                 | Some (interlude_hash, original_osu_file_first_note, original_osu_file_rate) ->
 
-                    match ChartDatabase.get_chart interlude_hash chart_db with
+                    match library.Charts.GetChart(interlude_hash) with
                     | Error reason -> Logging.Error "Error loading chart '%s': %s" interlude_hash reason
                     | Ok chart ->
 
@@ -111,7 +111,7 @@ module Scores =
                         osu_root_folder
                         (beatmap_score_data, original_osu_file_first_note, original_osu_file_rate)
                         (chart, interlude_hash)
-                        user_db
+                        library.UserData
 
                 | None ->
                     match Map.tryFind beatmap_score_data.Hash osu_db_map with
@@ -129,11 +129,11 @@ module Scores =
         progress Complete
         result
 
-    let import_osu_scores_async (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<ScoreImportResult> =
+    let import_osu_scores_async (osu_root_folder: string, library: Library, progress: ProgressCallback) : Async<ScoreImportResult> =
         // todo: make the IO operations actually benefit from async
         async {
             try
-                return import_osu_scores (osu_root_folder, chart_db, user_db, progress)
+                return import_osu_scores (osu_root_folder, library, progress)
             with err ->
                 Logging.Error "Unhandled exception while importing osu! scores: %O" err
                 progress Faulted

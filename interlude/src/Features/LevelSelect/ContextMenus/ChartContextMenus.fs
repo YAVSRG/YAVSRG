@@ -15,7 +15,7 @@ type ChartDeleteMenu(chart_meta: ChartMeta, context: LibraryContext, is_submenu:
     inherit Page()
 
     let delete_from_everywhere() =
-        ChartDatabase.delete chart_meta Content.Charts
+        Content.Charts.Delete(chart_meta)
         LevelSelect.refresh_all ()
 
         if is_submenu then
@@ -25,16 +25,16 @@ type ChartDeleteMenu(chart_meta: ChartMeta, context: LibraryContext, is_submenu:
         page_container()
         |+ seq {
             match context with
-            | LibraryContext.Pack p when chart_meta.Packs.Count > 1 ->
+            | LibraryContext.Pack pack_name when chart_meta.Packs.Count > 1 ->
 
                 let delete_from_pack() =
-                    ChartDatabase.delete_from_pack chart_meta p Content.Charts
+                    Content.Charts.RemoveFromPack(chart_meta, pack_name)
                     LevelSelect.refresh_all ()
 
                     if is_submenu then
                         Menu.Back()
 
-                yield PageButton.Once([p] %> "chart.delete.from_pack", fun () -> delete_from_pack(); Menu.Back()).Pos(3)
+                yield PageButton.Once([pack_name] %> "chart.delete.from_pack", fun () -> delete_from_pack(); Menu.Back()).Pos(3)
                 yield PageButton.Once([chart_meta.Packs.Count.ToString()] %> "chart.delete.from_everywhere", fun () -> delete_from_everywhere(); Menu.Back()).Pos(5)
                 yield PageButton.Once(%"confirm.no", Menu.Back).Pos(7)
             | _ ->

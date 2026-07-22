@@ -11,6 +11,7 @@ open Prelude
 open Prelude.Mods
 open Prelude.Data.Library
 open Interlude.Content
+open Interlude.Resources
 
 type Keymode =
     | ``3K`` = 3
@@ -396,7 +397,7 @@ module Options =
         let get_locale_file(id: string) =
             let locale_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", id + ".txt")
             if EMBEDDED_LOCALES.ContainsKey id then
-                Interlude.Utils.get_embedded_locale id |> Some
+                EmbeddedResource.GetLocale id |> Some
             elif File.Exists(locale_path) then
                 File.OpenRead(locale_path) :> Stream |> Some
             else

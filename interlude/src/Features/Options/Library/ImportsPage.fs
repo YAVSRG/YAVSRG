@@ -6,7 +6,7 @@ open Prelude
 open Interlude.UI
 open Interlude.Features.Mounts
 open Interlude.Features.Import
-open Interlude.Features.Import.osu
+open Interlude.Features.Import.Osu
 open Interlude.Features.Import.Etterna
 open Interlude.Features.Tables.Browser
 open Interlude.Features.Skins.Browser
@@ -29,7 +29,7 @@ type ImportsPage() =
         PageButton(%"tables.browser", fun () -> TableBrowserPage().Show())
 
     static member ImportOsuSkins() : PageButton =
-        PageButton(%"skins.import_from_osu", fun () -> Skins.OsuSkinsListPage().Show())
+        PageButton(%"skins.import_from_osu", fun () -> OsuSkinsListPage(FileDrop.import_osu_skin).Show())
 
     static member ImportFromFile() : PageButton =
         PageButton(%"imports.from_file", fun () ->

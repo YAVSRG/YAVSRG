@@ -16,12 +16,12 @@ open Prelude.Tests.Helpers
 
 let mutable recent_beatmap_hash = ""
 
-let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: float32) (mods: Mods) =
+let generate_scenario (note_data: NoteData) (replay: Replay) (od: float32) (mods: Mods) =
 
     let chart : Chart =
         {
-            Keys = 4
-            Notes = notes
+            Keys = note_data.Keys
+            Notes = note_data.Notes
             BPM = [|{ Time = 0.0f<ms>; Data = { Meter = 4<beat>; MsPerBeat = 500.0f<ms / beat> } }|]
             SV = [||]
         }
@@ -39,8 +39,8 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: floa
             Creator = "Percyqaz"
             Tags = ["Yet"; "Another"; "Vertically"; "Scrolling"; "Rhythm"; "Game"]
 
-            Background = AssetPath.Missing
-            Audio = AssetPath.Missing
+            Background = AssetLocation.Missing
+            Audio = AssetLocation.Missing
             PreviewTime = 0.0f<ms>
 
             Packs = Set.empty
@@ -70,7 +70,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: floa
         Threading.Thread.Sleep(1000)
         recent_beatmap_hash <- beatmap_hash
 
-    let osu_replay = OsuReplay.encode replay notes.[0].Time mods beatmap_hash
+    let osu_replay = OsuReplay.encode replay note_data.Notes.[0].Time mods beatmap_hash
     use fs = File.Open("replay.osr", FileMode.Create)
     use bw = new BinaryWriter(fs)
     osu_replay.Write bw

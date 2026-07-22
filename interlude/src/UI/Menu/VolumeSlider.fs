@@ -21,10 +21,7 @@ type VolumeSlider() =
         fade.Update elapsed_ms
         slider.Update elapsed_ms
 
-        if Screen.current_type = ScreenType.EditHud && not (Dialog.exists()) then
-            fade.Target <- 0.0f
-
-        elif (%%"volume_up").Held() then
+        if (%%"volume_up").Held() then
             fade.Target <- 1.0f
             Setting.app ((+) (0.0003 * elapsed_ms)) volume
             slider.Target <- float32 volume.Value

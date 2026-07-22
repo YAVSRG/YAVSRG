@@ -18,12 +18,12 @@ module BulkActions =
             fun () ->
                 // delete charts selected from packs, just from their packs
                 charts
-                |> Seq.choose (function chart_meta, LibraryContext.Pack p -> Some (chart_meta, p) | _ -> None)
+                |> Seq.choose (function chart_meta, LibraryContext.Pack pack_name -> Some (chart_meta, pack_name) | _ -> None)
                 |> Seq.groupBy snd
-                |> Seq.iter (fun (pack, charts_in_pack) -> ChartDatabase.delete_many_from_pack (charts_in_pack |> Seq.map fst) pack Content.Charts)
+                |> Seq.iter (fun (pack_name, charts_in_pack) -> Content.Charts.RemoveFromPack(charts_in_pack |> Seq.map fst, pack_name))
 
                 // delete charts picked by custom grouping, from all packs
-                ChartDatabase.delete_many (charts |> Seq.filter (function _, LibraryContext.Pack _ -> false | _ -> true ) |> Seq.map fst) Content.Charts
+                Content.Charts.Delete(charts |> Seq.filter (function _, LibraryContext.Pack _ -> false | _ -> true ) |> Seq.map fst)
 
                 LevelSelect.refresh_all ()
                 Menu.Back()
@@ -38,7 +38,7 @@ module BulkActions =
                 let loaded_charts =
                     seq {
                         for chart_meta, _ in charts do
-                            yield ChartDatabase.get_chart chart_meta.Hash Content.Library.Charts, chart_meta
+                            yield Content.Library.Charts.GetChart(chart_meta.Hash), chart_meta
                     }
                 OsuExport.bulk_export loaded_charts options
         )
@@ -51,7 +51,7 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
-                ChartDatabase.delete_many (charts |> Seq.map fst) Content.Charts
+                Content.Charts.Delete(charts |> Seq.map fst)
                 LevelSelect.refresh_all ()
 
                 Menu.Back()

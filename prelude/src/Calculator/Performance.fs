@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Calculator
 
 open Prelude
+open Prelude.Charts
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 
@@ -17,7 +18,7 @@ module Performance =
             while ev.Index > i do
                 output.[i] <- float32 v
                 i <- i + 1
-            match ev.Action.Judgement with
+            match ev.Inner.Judgement with
             | Some (_, value) ->
                 v <- ACC_SENSITIVITY * v + (1.0 - ACC_SENSITIVITY) * value |> max 0.85
             | None -> ()
@@ -58,29 +59,31 @@ module Performance =
         let scoring =
             if SC_J4_HASH <> Ruleset.hash scoring.Ruleset then
                 let on_standard_ruleset = scoring.Recreate(SC_J4)
-                on_standard_ruleset.Update Time.infinity
+                on_standard_ruleset.ProcessEntireReplay()
                 on_standard_ruleset
             else
                 scoring
+                
+        let note_data = scoring.NoteData
 
         let timeline = acc_timeline rr scoring
         let scaled_notes =
             rr.NoteDifficulty
             |> Array.mapi (fun i nr -> Array.map (scale_note timeline.[i] rr.Variety.[i]) nr)
-        let strains = Strain.calculate_finger_strains (scoring.Rate, scoring.Notes) scaled_notes
+        let strains = Strain.calculate_finger_strains (scoring.Rate, note_data) scaled_notes
 
         let note_values =
             seq {
                 for i, s in Seq.indexed strains do
-                    for k = 0 to scoring.Keys - 1 do
+                    for k = 0 to note_data.Keys - 1 do
                         if rr.Strains.[i].NotesV1.[k] > 0.0f then
                             yield s.StrainV1Notes.[k]
             }
 
         Difficulty.weighted_overall_difficulty (note_values |> Array.ofSeq)
 
-    let accuracy_to_rating (accuracy: float32, rate: Rate, notes: TimeArray<_>, rr: Difficulty) : float32 =
+    let accuracy_to_rating (accuracy: float32, rate: Rate, note_data: NoteData, rr: Difficulty) : float32 =
         // naive approach
         let scaled_notes = rr.NoteDifficulty |> Array.mapi (fun i nr -> Array.map (scale_note accuracy rr.Variety.[i]) nr)
-        let strains = Strain.calculate_finger_strains (rate, notes) scaled_notes
+        let strains = Strain.calculate_finger_strains (rate, note_data) scaled_notes
         Difficulty.weighted_overall_difficulty (strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)

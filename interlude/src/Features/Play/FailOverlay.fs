@@ -6,6 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
+open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Pacemaker
 
@@ -51,7 +52,7 @@ type FailOverlay(pacemaker_state: PacemakerState, retry: unit -> unit, score_scr
     let b2_fade = Animation.Fade(0.0f)
     let b3_fade = Animation.Fade(0.0f)
 
-    let pacemaker_desc = PacemakerState.description pacemaker_state
+    let pacemaker_desc = pacemaker_state.Description(Rulesets.current)
 
     let animation =
         Animation.seq [

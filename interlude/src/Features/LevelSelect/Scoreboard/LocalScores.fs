@@ -64,7 +64,7 @@ module LocalScores =
             member this.Process(req: Request) =
                 seq {
                     for score in req.ChartSaveData.Scores do
-                        let score_info = ScoreInfo.from_score req.ChartMeta req.CurrentChart req.Ruleset score
+                        let score_info = ScoreInfo.CreateFromScore(req.ChartMeta, req.CurrentChart, req.Ruleset, score)
                         yield fun () -> load_score score_info
                     yield finish_loading
                 }

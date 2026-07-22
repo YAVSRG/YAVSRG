@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import.osu
+﻿namespace Interlude.Features.Import.Osu
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -40,7 +40,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                 | _ -> ()
                 task_tracking.Progress <- p
 
-            let task = OnlineImports.download_osu_set(sprintf "https://catboy.best/d/%in" data.id, Content.Charts, Content.UserData, progress_callback)
+            let task = OnlineImports.download_osu_set(sprintf "https://catboy.best/d/%in" data.id, Content.Library, progress_callback)
             import_queue.Request(task,
                 function
                 | Ok result ->

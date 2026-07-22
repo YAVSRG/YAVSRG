@@ -21,8 +21,8 @@ type MultiplayerScores(ctx: HudContext) =
             let replays = Dictionary<string, LobbyPlayerReplayInfo>()
             let refresh () =
                 replays.Clear()
-                replays.Add("Player 1", { Replay = Unchecked.defaultof<OnlineReplay>; ScoreProcessor = ctx.State.Scoring; GetScoreInfo = fun () -> failwith "impossible" })
-                replays.Add("Player 2", { Replay = Unchecked.defaultof<OnlineReplay>; ScoreProcessor = ctx.State.Scoring; GetScoreInfo = fun () -> failwith "impossible" })
+                replays.Add("Player 1", { ReplaySource = Unchecked.defaultof<NetworkReplaySource>; ScoreProcessor = ctx.State.Scoring; GetScoreInfo = fun () -> failwith "impossible" })
+                replays.Add("Player 2", { ReplaySource = Unchecked.defaultof<NetworkReplaySource>; ScoreProcessor = ctx.State.Scoring; GetScoreInfo = fun () -> failwith "impossible" })
             refresh()
             ctx.State.OnScoringChanged(refresh) |> ignore
             replays
