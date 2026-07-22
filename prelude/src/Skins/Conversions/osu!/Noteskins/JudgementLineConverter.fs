@@ -11,10 +11,11 @@ module internal JudgementLineConverter =
     let convert_stage_hint(ctx: NoteskinConverterContext) : unit =
         try
             let stage_hint =
-                Texture.find (ctx.KeymodeSettings.StageHint, ctx.DefaultSettings.StageHint, ctx.Source)
-                |> Texture.expect
-                |> Texture.load_single_texture
-                |> _.As2x
+                ctx.FileSystem
+                    .SearchForTexture(ctx.KeymodeSettings.StageHint, ctx.DefaultSettings.StageHint)
+                    .ThrowIfNotFound()
+                    .Load(ctx.FileSystem)
+                    .As2x
             let intended_height_interlude_px = float32 stage_hint.Height
             stage_hint.Save(Path.Combine(ctx.Target, TextureFileName.to_loose "judgementline" (0, 0)))
             ctx.JudgementLineScale <- intended_height_interlude_px / (float32 ctx.KeymodeSettings.ColumnWidth.[0] * 1080f / 480f)

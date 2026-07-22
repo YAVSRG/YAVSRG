@@ -19,15 +19,15 @@ module internal HudFontConverter =
             |> ignore)
         new_bmp
 
-    let convert_font (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<float32, exn> =
+    let convert_font (fs: OsuSkinFileSystem, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<float32, exn> =
         try
             let mutable scale_2x = 1.0f
             let images =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
-                |> Seq.map (fun (id, fallback) -> Texture.find(id, fallback, source) |> Texture.expect)
-                |> Seq.map (function Ok t -> (if t.Is2x then scale_2x <- 2.0f); Ok t | otherwise -> otherwise)
-                |> Seq.map (Texture.load_single_texture >> _.As2x)
+                |> Seq.map (fun (id, fallback) -> fs.SearchForTexture(id, fallback).ThrowIfNotFound())
+                |> Seq.map (function TextureSearchResult.Ok t -> (if t.EndsWith("@2x.png") then scale_2x <- 2.0f); TextureSearchResult.Ok t | otherwise -> otherwise)
+                |> Seq.map _.Load(fs).As2x
                 |> Array.ofSeq
 
             let max_width = images |> Seq.map _.Width |> Seq.max
@@ -36,16 +36,18 @@ module internal HudFontConverter =
             let optional_extras =
                 try
                     let dot =
-                        Texture.find(sprintf "%s-dot" osu_skin_prefix, "score-dot", source)
-                        |> Texture.expect
-                        |> Texture.load_single_texture
-                        |> _.As2x
+                        fs
+                            .SearchForTexture(sprintf "%s-dot" osu_skin_prefix, "score-dot")
+                            .ThrowIfNotFound()
+                            .Load(fs)
+                            .As2x
                     let colon = dot_to_colon dot
                     let percent =
-                        Texture.find(sprintf "%s-percent" osu_skin_prefix, "score-percent", source)
-                        |> Texture.expect
-                        |> Texture.load_single_texture
-                        |> _.As2x
+                        fs
+                            .SearchForTexture(sprintf "%s-percent" osu_skin_prefix, "score-percent")
+                            .ThrowIfNotFound()
+                            .Load(fs)
+                            .As2x
                     percent.Mutate(fun img -> img.Crop(min percent.Width max_width, percent.Height) |> ignore)
                     [|dot; colon; percent|]
                 with _ -> [||]
@@ -57,27 +59,29 @@ module internal HudFontConverter =
         with err ->
             Error err
 
-    let convert_font_with_extras (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<ConvertedFont, exn> =
+    let convert_font_with_extras (fs: OsuSkinFileSystem, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<ConvertedFont, exn> =
         try
             let mutable scale_2x = 1.0f
             let dot =
-                Texture.find(sprintf "%s-dot" osu_skin_prefix, "score-dot", source)
-                |> Texture.expect
-                |> Texture.load_single_texture
-                |> _.As2x
+                fs
+                    .SearchForTexture(sprintf "%s-dot" osu_skin_prefix, "score-dot")
+                    .ThrowIfNotFound()
+                    .Load(fs)
+                    .As2x
             let colon = dot_to_colon dot
             let percent =
-                Texture.find(sprintf "%s-percent" osu_skin_prefix, "score-percent", source)
-                |> Texture.expect
-                |> Texture.load_single_texture
-                |> _.As2x
+                fs
+                    .SearchForTexture(sprintf "%s-percent" osu_skin_prefix, "score-percent")
+                    .ThrowIfNotFound()
+                    .Load(fs)
+                    .As2x
 
             let images =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
-                |> Seq.map (fun (id, fallback) -> Texture.find(id, fallback, source) |> Texture.expect)
-                |> Seq.map (function Ok t -> (if t.Is2x then scale_2x <- 2.0f); Ok t | otherwise -> otherwise)
-                |> Seq.map (Texture.load_single_texture >> _.As2x)
+                |> Seq.map (fun (id, fallback) -> fs.SearchForTexture(id, fallback).ThrowIfNotFound())
+                |> Seq.map (function TextureSearchResult.Ok t -> (if t.EndsWith("@2x.png") then scale_2x <- 2.0f); TextureSearchResult.Ok t | otherwise -> otherwise)
+                |> Seq.map _.Load(fs).As2x
                 |> Array.ofSeq
 
             let max_width = images |> Seq.map _.Width |> Seq.max
@@ -101,7 +105,7 @@ module internal HudFontConverter =
     let convert_all_fonts(ctx: HudConverterContext) : unit =
         match
             convert_font (
-                ctx.Source,
+                ctx.FileSystem,
                 ctx.Target,
                 ctx.SkinIni.Fonts.ComboPrefix,
                 ctx.SkinIni.Fonts.ComboOverlap,
@@ -115,7 +119,7 @@ module internal HudFontConverter =
 
         match
             convert_font_with_extras (
-                ctx.Source,
+                ctx.FileSystem,
                 ctx.Target,
                 ctx.SkinIni.Fonts.ScorePrefix,
                 ctx.SkinIni.Fonts.ScoreOverlap,
@@ -129,7 +133,7 @@ module internal HudFontConverter =
 
         match
             convert_font_with_extras (
-                ctx.Source,
+                ctx.FileSystem,
                 ctx.Target,
                 ctx.SkinIni.Fonts.ScorePrefix,
                 ctx.SkinIni.Fonts.ScoreOverlap,
@@ -143,7 +147,7 @@ module internal HudFontConverter =
 
         match
             convert_font_with_extras (
-                ctx.Source,
+                ctx.FileSystem,
                 ctx.Target,
                 ctx.SkinIni.Fonts.ScorePrefix,
                 ctx.SkinIni.Fonts.ScoreOverlap,

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Rulesets
+namespace Prelude.Tests.Rulesets
 
 open System
 open NUnit.Framework
@@ -10,46 +10,24 @@ module GradeTests =
 
     let GRADES =
         [|
-            {
-                Name = "A-"
-                Accuracy = 0.93995
-                Color = Color.FromArgb(148, 210, 180)
-            }
-            {
-                Name = "A"
-                Accuracy = 0.94995
-                Color = Color.FromArgb(134, 227, 183)
-            }
-            {
-                Name = "A+"
-                Accuracy = 0.95995
-                Color = Color.FromArgb(127, 231, 139)
-            }
-            {
-                Name = "S-"
-                Accuracy = 0.96995
-                Color = Color.FromArgb(237, 205, 140)
-            }
-            {
-                Name = "S"
-                Accuracy = 0.97995
-                Color = Color.FromArgb(246, 234, 128)
-            }
-            {
-                Name = "S+"
-                Accuracy = 0.98995
-                Color = Color.FromArgb(235, 200, 220)
-            }
+            { Name = "A-"; Accuracy = 0.93995; Color = Color.FromArgb(148, 210, 180) }
+            { Name = "A"; Accuracy = 0.94995; Color = Color.FromArgb(134, 227, 183) }
+            { Name = "A+"; Accuracy = 0.95995; Color = Color.FromArgb(127, 231, 139) }
+            { Name = "S-"; Accuracy = 0.96995; Color = Color.FromArgb(237, 205, 140) }
+            { Name = "S"; Accuracy = 0.97995; Color = Color.FromArgb(246, 234, 128) }
+            { Name = "S+"; Accuracy = 0.98995; Color = Color.FromArgb(235, 200, 220) }
         |]
 
     [<Test>]
-    let GradeTestData_Valid() =
+    let GradeTestData_Valid () =
         for a, b in Seq.pairwise GRADES do
-            if not (b.Accuracy > a.Accuracy) then Assert.Fail()
+            if not(b.Accuracy > a.Accuracy) then
+                Assert.Fail()
+
         Assert.Pass()
 
     [<Test>]
-    let Grade_ExpectedResult_NoGrade() =
+    let Grade_ExpectedResult_NoGrade () =
 
         let accuracy = 0.5
 
@@ -60,7 +38,7 @@ module GradeTests =
         Assert.AreEqual(0.43995, Math.Round(result.AccuracyIncreaseForNextGrade.Value, 5))
 
     [<Test>]
-    let Grade_ExpectedResult_AMinus() =
+    let Grade_ExpectedResult_AMinus () =
 
         let accuracy = 0.93995
 
@@ -71,7 +49,7 @@ module GradeTests =
         Assert.AreEqual(0.01, Math.Round(result.AccuracyIncreaseForNextGrade.Value, 5))
 
     [<Test>]
-    let Grade_ExpectedResult_AMinus_2() =
+    let Grade_ExpectedResult_AMinus_2 () =
 
         let accuracy = 0.94
 
@@ -82,7 +60,7 @@ module GradeTests =
         Assert.AreEqual(0.00995, Math.Round(result.AccuracyIncreaseForNextGrade.Value, 5))
 
     [<Test>]
-    let Grade_ExpectedResult_A() =
+    let Grade_ExpectedResult_A () =
 
         let accuracy = 0.955
 
@@ -93,7 +71,7 @@ module GradeTests =
         Assert.AreEqual(0.00495, Math.Round(result.AccuracyIncreaseForNextGrade.Value, 5))
 
     [<Test>]
-    let Grade_ExpectedResult_SPlus() =
+    let Grade_ExpectedResult_SPlus () =
 
         let accuracy = 0.98995
 
@@ -104,7 +82,7 @@ module GradeTests =
         Assert.AreEqual(None, result.AccuracyIncreaseForNextGrade)
 
     [<Test>]
-    let Grade_ExpectedResult_SPlus_2() =
+    let Grade_ExpectedResult_SPlus_2 () =
 
         let accuracy = 1.0
 
@@ -115,7 +93,7 @@ module GradeTests =
         Assert.AreEqual(None, result.AccuracyIncreaseForNextGrade)
 
     [<Test>]
-    let NoGrades_NoError() =
+    let NoGrades_NoError () =
 
         let accuracy = 0.0
 
@@ -126,7 +104,7 @@ module GradeTests =
         Assert.AreEqual(None, result.AccuracyIncreaseForNextGrade)
 
     [<Test>]
-    let NoGrades_NoError_2() =
+    let NoGrades_NoError_2 () =
 
         let accuracy = 1.0
 

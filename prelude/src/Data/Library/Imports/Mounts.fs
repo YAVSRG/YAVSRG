@@ -34,16 +34,13 @@ type MountedChartSource =
 
 module Mount =
 
-    let import_new (source: MountedChartSource, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+    let import (source: MountedChartSource, since: DateTime option, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 match source.Type with
                 | Pack packname ->
                     Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
-                    match source.LastImported with
-                    | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
-                    | None -> ()
-                    let config = ConversionOptions.Pack(packname, source.LastImported, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles)
+                    let config = ConversionOptions.Pack(packname, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles)
                     let! result = Imports.convert_pack_folder(source.SourceFolder, config, library, progress)
 
                     log_conversion result
@@ -53,9 +50,6 @@ module Mount =
 
                 | Library ->
                     Logging.Info "Importing songs library %s" source.SourceFolder
-                    match source.LastImported with
-                    | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
-                    | None -> ()
                     let mutable results = ConversionResult.Empty
                     let pack_folders = Directory.GetDirectories source.SourceFolder
 
@@ -65,7 +59,7 @@ module Mount =
                         let! result =
                             Imports.convert_pack_folder(
                                 pack_folder,
-                                ConversionOptions.Pack(pack_name, source.LastImported, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles),
+                                ConversionOptions.Pack(pack_name, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles),
                                 library,
                                 (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
                             )
@@ -80,11 +74,18 @@ module Mount =
                 progress Faulted
                 return Error err.Message
         }
+        
+    let import_new (source: MountedChartSource, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+        async {
+            match source.LastImported with
+            | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
+            | None -> ()
+            return! import(source, source.LastImported, library, progress)
+        }
 
     let import_all (source: MountedChartSource, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
-            source.LastImported <- None
-            return! import_new(source, library, progress)
+            return! import(source, None, library, progress)
         }
 
     let find_linked_charts (source: MountedChartSource, chart_db: ChartDatabase) : ChartMeta seq =

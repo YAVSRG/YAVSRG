@@ -1,15 +1,15 @@
-﻿namespace Prelude.Tests.Helpers
+namespace Prelude.Tests.Helpers
 
 open System.IO
 open System.Text
 
 type VirtualLocaleFileSystem =
-    private {
-        Files: Map<string, string>
-    }
+    private
+        {
+            Files: Map<string, string>
+        }
 
-    static member Create : VirtualLocaleFileSystem =
-        { Files = Map.empty }
+    static member Create: VirtualLocaleFileSystem = { Files = Map.empty }
 
     member this.Add(name: string, content: string) : VirtualLocaleFileSystem =
         { Files = this.Files.Add(name, content) }

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Helpers
+namespace Prelude.Tests.Helpers
 
 open Prelude
 open Prelude.Charts
@@ -14,7 +14,7 @@ type ScoringEventCollector(ruleset: Ruleset, replay: ReplaySource, note_data: No
     do
         this.OnEvent.Add(fun event ->
             printfn "%A" event
-            events.Add event
+            events.Add(event)
         )
 
     member this.Events = events.AsReadOnly()

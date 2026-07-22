@@ -1,16 +1,12 @@
 name: Continuous integration
 
 on:
-  pull_request:
+  push:
     branches: [ "main" ]
     
-permissions:
-  contents: write
-  pull-requests: write
-    
 jobs:
-  pull-request-ci-checks:
-    if: ${{ !github.event.pull_request.draft }}
+  main-ci-checks:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -35,9 +31,10 @@ jobs:
     - name: Run formatting checks
       run: dotnet tool restore && dotnet fantomas --check .
         
-    - name: Approve PRs from Percyqaz if checks pass
-      if: ${{ github.actor == 'percyqaz' }}
-      run: gh pr review --approve "$PR_URL"
-      env:
-        PR_URL: ${{github.event.pull_request.html_url}}
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - name: Notify of failure in main
+      if: failure() && github.repository == 'YAVSRG/YAVSRG'
+      uses: tsickert/discord-webhook@v5.3.0
+      with:
+        webhook-url: ${{ secrets.DEV_WEBHOOK_URL }}
+        content: |
+          <@165506274820096000> CI checks did not pass in main. Skill issue exists between chair and keyboard

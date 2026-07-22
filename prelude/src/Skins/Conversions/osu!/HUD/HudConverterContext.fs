@@ -13,13 +13,13 @@ type internal ConvertedFont =
      
 type HudConverterContext =
     internal {
+        FileSystem: OsuSkinFileSystem
         SkinIni: SkinIni
         Version: decimal
         Keymode: int
         KeymodeSettings: Mania
         DefaultSettings: Mania
         
-        Source: string
         Target: string
         mutable ComboFontSpacing: float32 option
         mutable AccuracyFont: ConvertedFont option
@@ -30,7 +30,7 @@ type HudConverterContext =
         mutable JudgementCounterTextures: bool
     }
     
-    static member Create(source: string, target: string, ini: SkinIni, keymode: int) : HudConverterContext =
+    static member Create(fs: OsuSkinFileSystem, target: string, ini: SkinIni, keymode: int) : HudConverterContext =
         let version =
             match Decimal.TryParse(ini.General.Version, Globalization.CultureInfo.InvariantCulture) with
             | true, v -> v
@@ -44,13 +44,13 @@ type HudConverterContext =
             |> Option.defaultValue default_settings
             
         {
+            FileSystem = fs
             SkinIni = ini
             Version = version
             Keymode = keymode
             KeymodeSettings = keymode_settings
             DefaultSettings = default_settings
             
-            Source = source
             Target = target
             ComboFontSpacing = None
             AccuracyFont = None

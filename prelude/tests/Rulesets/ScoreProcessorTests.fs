@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Rulesets
+namespace Prelude.Tests.Rulesets
 
 open System
 open NUnit.Framework
@@ -26,7 +26,8 @@ module ScoreProcessorTests =
                 .KeyDownFor(1045.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let result = ScoreProcessor.ProcessEntireReplay(RULESET, replay, note_data, 1.0f<rate>)
+        let result =
+            ScoreProcessor.ProcessEntireReplay(RULESET, replay, note_data, 1.0f<rate>)
 
         printfn "Accuracy: %.2f%%" (result.Accuracy * 100.0)
         printfn "Judgements: %A" result.JudgementCounts
@@ -63,18 +64,18 @@ module ScoreProcessorTests =
         let step time =
             printfn "STEPPING TO %.1fms:" time
 
-            stepper.Update time
+            stepper.Update(time)
 
             printfn "Accuracy: %.2f%%" (stepper.Accuracy * 100.0)
             printfn "Judgements: %A" stepper.JudgementCounts
 
-        Assert.True(stepper.JudgementCounts |> Seq.forall ((=) 0))
+        Assert.True(stepper.JudgementCounts |> Seq.forall((=) 0))
         Assert.AreEqual(1.0, stepper.Accuracy)
         Assert.AreEqual(0, stepper.CurrentCombo)
 
         step -100.0f<ms>
 
-        Assert.True(stepper.JudgementCounts |> Seq.forall ((=) 0))
+        Assert.True(stepper.JudgementCounts |> Seq.forall((=) 0))
         Assert.AreEqual(1.0, stepper.Accuracy)
         Assert.AreEqual(0, stepper.CurrentCombo)
 
@@ -354,10 +355,7 @@ module ScoreProcessorTests =
             let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay =
-                ReplayBuilder()
-                    .KeyDownUntil(offset, 500.0f<ms>)
-                    .KeyDownUntil(501.0f<ms>, 1000.0f<ms>)
-                    .Build()
+                ReplayBuilder().KeyDownUntil(offset, 500.0f<ms>).KeyDownUntil(501.0f<ms>, 1000.0f<ms>).Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
@@ -453,7 +451,7 @@ module ScoreProcessorTests =
 
     let DONUT_HOLE_CHART =
         let beatmap =
-            Beatmap.FromFile "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" |> expect
+            Beatmap.FromFile("./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu") |> expect
 
         (Osu_To_Interlude.convert
             beatmap
@@ -468,15 +466,15 @@ module ScoreProcessorTests =
     let Autoplay_PerfectScores () =
 
         let perfect_replay = Autoplay.CreateReplay(DONUT_HOLE_CHART)
-            
-        let inline ruleset_result(ruleset: Ruleset) : ScoreProcessor =
+
+        let inline ruleset_result (ruleset: Ruleset) : ScoreProcessor =
             ScoreProcessor.ProcessEntireReplay(ruleset, perfect_replay, DONUT_HOLE_CHART, 1.0f<rate>)
-            
-        let inline ensure_perfect_on_ruleset(ruleset: Ruleset) =
+
+        let inline ensure_perfect_on_ruleset (ruleset: Ruleset) =
             let result = ruleset_result(ruleset)
             Assert.AreEqual(1.0, result.Accuracy)
             Assert.AreEqual(0, result.ComboBreaks)
-            
+
         ensure_perfect_on_ruleset(SC.create 4)
         ensure_perfect_on_ruleset(OsuMania.create 10.0f OsuMania.NoMod)
         ensure_perfect_on_ruleset(Wife3.create 4)
@@ -492,10 +490,7 @@ module ScoreProcessorTests =
                 .KeyDownFor(1000.0f<ms>, 10.0f<ms>)
                 .Build()
 
-        let ruleset =
-            { RULESET with
-                Ruleset.HitMechanics.GhostTapJudgement = Some 5
-            }
+        let ruleset = { RULESET with Ruleset.HitMechanics.GhostTapJudgement = Some 5 }
 
         let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
         event_processing.ProcessEntireReplay()
@@ -517,12 +512,7 @@ module ScoreProcessorTests =
                 .Build()
 
         let ruleset =
-            { RULESET with
-                HitMechanics =
-                    { RULESET.HitMechanics with
-                        GhostTapJudgement = Some 2
-                    }
-            }
+            { RULESET with HitMechanics = { RULESET.HitMechanics with GhostTapJudgement = Some 2 } }
 
         let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
         event_processing.ProcessEntireReplay()

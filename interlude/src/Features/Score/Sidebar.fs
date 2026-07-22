@@ -175,13 +175,9 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             )
 
             if show_more_info.Value && i > 0 then
-                let ratio =
-                    if judgement_counts.[i] = 0 then sprintf "%i : 0" judgement_counts.[i - 1]
-                    else sprintf "%.1f : 1" (float32 judgement_counts.[i - 1] / float32 judgement_counts.[i])
-
                 Text.fill_b (
                     Style.font,
-                    ratio,
+                    JudgementRatio.FormatWithSpaces(judgement_counts, i - 1),
                     judgement_box
                         .SliceY(min judgement_box_height JUDGEMENT_TEXT_MAX_HEIGHT)
                         .TranslateY(-judgement_box_height * 0.5f)

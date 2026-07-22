@@ -30,6 +30,7 @@ module ChartRateDetectionTests =
     let RateDetection_Regex_ExpectedValue (difficulty_name: string, expected_value: float32<rate>) =
 
         let result = detect_rate_mod difficulty_name
+
         match result with
         | Some value -> Assert.AreEqual(expected_value, value)
         | None -> Assert.Fail(sprintf "Expected %f to be detected rate" expected_value)
@@ -48,49 +49,55 @@ module ChartRateDetectionTests =
     let RateDetection_Regex_ExpectNoRate (difficulty_name: string) =
 
         let result = detect_rate_mod difficulty_name
+
         match result with
         | Some value -> Assert.Fail(sprintf "%f" value)
         | None -> Assert.Pass()
 
     let FUZZ_REFERENCE_CHART = ChartFuzzer.Generate(7, 1234567)
+
     let simulate_normal_import (rate: Rate) : ImportChart =
         {
-            Header = {
-                Artist = "An artist"
-                ArtistNative = None
-                Title = "A title"
-                TitleNative = None
-                Creator = "Percyqaz"
-                DiffName = sprintf "Example [%.2fx]" rate
-                Subtitle = None
-                Source = None
-                Tags = []
+            Header =
+                {
+                    Artist = "An artist"
+                    ArtistNative = None
+                    Title = "A title"
+                    TitleNative = None
+                    Creator = "Percyqaz"
+                    DiffName = sprintf "Example [%.2fx]" rate
+                    Subtitle = None
+                    Source = None
+                    Tags = []
 
-                PreviewTime = 1000.0f<ms>
-                BackgroundFile = ImportAsset.Missing
-                AudioFile = ImportAsset.Missing
+                    PreviewTime = 1000.0f<ms>
+                    BackgroundFile = ImportAsset.Missing
+                    AudioFile = ImportAsset.Missing
 
-                Origins = Set.singleton (ChartOrigin.Osu {
-                    Md5 = sprintf "h_%.2f" rate
-                    BeatmapSetId = 0
-                    BeatmapId = -1
-                    SourceRate = rate
-                    SourceOD = 8.0f
-                    FirstNoteOffset = 10.0f<ms>
-                })
-            }
+                    Origins =
+                        Set.singleton(
+                            ChartOrigin.Osu(
+                                {
+                                    Md5 = sprintf "h_%.2f" rate
+                                    BeatmapSetId = 0
+                                    BeatmapId = -1
+                                    SourceRate = rate
+                                    SourceOD = 8.0f
+                                    FirstNoteOffset = 10.0f<ms>
+                                }
+                            )
+                        )
+                }
             LoadedFromPath = "C:/file.osu"
             PackName = "osu!"
             Chart = Chart.scale (1.0f / rate) FUZZ_REFERENCE_CHART
         }
 
     let simulate_mislabelled_rate (rate: Rate) : ImportChart =
-        { simulate_normal_import rate with
-            Chart = Chart.scale (1.0f / (rate - 0.2f<rate>)) FUZZ_REFERENCE_CHART
-        }
+        { simulate_normal_import rate with Chart = Chart.scale (1.0f / (rate - 0.2f<rate>)) FUZZ_REFERENCE_CHART }
 
     [<Test>]
-    let RateFiltering_BasicCase() =
+    let RateFiltering_BasicCase () =
 
         let example_data =
             [
@@ -104,16 +111,22 @@ module ChartRateDetectionTests =
         Assert.AreEqual(1, results.Length)
         let single_result = List.head results
         Assert.AreEqual(3, single_result.Header.Origins.Count)
+
         let origins =
             single_result.Header.Origins
-            |> Seq.map (function ChartOrigin.Osu o -> o.Md5, o.SourceRate | _ -> failwith "")
+            |> Seq.map(
+                function
+                | ChartOrigin.Osu o -> o.Md5, o.SourceRate
+                | _ -> failwith ""
+            )
             |> Array.ofSeq
+
         Assert.AreEqual(1.0f<rate>, snd origins.[0])
         Assert.AreEqual(1.1f<rate>, snd origins.[1])
         Assert.AreEqual(1.2f<rate>, snd origins.[2])
 
     [<Test>]
-    let RateFiltering_OddOneOut() =
+    let RateFiltering_OddOneOut () =
 
         let example_data =
             [
@@ -127,21 +140,23 @@ module ChartRateDetectionTests =
         Assert.AreEqual(2, results.Length)
 
     [<Test>]
-    let RateFiltering_RealCase() =
+    let RateFiltering_RealCase () =
 
-        let data = ZipFile.OpenRead("./Data/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz")
+        let data =
+            ZipFile.OpenRead("./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz")
+
         let song_rates =
             data.Entries
-            |> Seq.map (fun (entry : ZipArchiveEntry) ->
+            |> Seq.map(fun (entry: ZipArchiveEntry) ->
                 use stream = entry.Open()
                 OsuParser.beatmap_from_stream stream
             )
-            |> Seq.map (fun beatmap ->
+            |> Seq.map(fun beatmap ->
                 Osu_To_Interlude.convert
                     beatmap
                     {
                         Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
-                        Source = "./Data/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
+                        Source = "./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
                     }
             )
             |> List.ofSeq
@@ -152,21 +167,22 @@ module ChartRateDetectionTests =
         Assert.AreEqual(song_rates.Length, results.Head.Header.Origins.Count)
 
     [<Test>]
-    let RateFiltering_RealCase2() =
+    let RateFiltering_RealCase2 () =
 
-        let data = ZipFile.OpenRead("./Data/989392 DJ Sharpnel - World Sound.osz")
+        let data = ZipFile.OpenRead("./Data/Osz/989392 DJ Sharpnel - World Sound.osz")
+
         let song_rates =
             data.Entries
-            |> Seq.map (fun (entry : ZipArchiveEntry) ->
+            |> Seq.map(fun (entry: ZipArchiveEntry) ->
                 use stream = entry.Open()
                 OsuParser.beatmap_from_stream stream
             )
-            |> Seq.map (fun beatmap ->
+            |> Seq.map(fun beatmap ->
                 Osu_To_Interlude.convert
                     beatmap
                     {
                         Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
-                        Source = "./Data/989392 DJ Sharpnel - World Sound.osz"
+                        Source = "./Data/Osz/989392 DJ Sharpnel - World Sound.osz"
                     }
             )
             |> List.ofSeq

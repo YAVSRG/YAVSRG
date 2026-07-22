@@ -243,7 +243,7 @@ type SelectSkinsPage() =
                 .Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).TranslateY(-10.0f))
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD + " " + %"skins.import_from_osu",
-                (fun () -> OsuSkinsListPage(FileDrop.import_osu_skin).Show())
+                (fun () -> OsuSkinsListPage(FileDrop.import_osu_skin_folder).Show())
             )
                 .Position(page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full))
 

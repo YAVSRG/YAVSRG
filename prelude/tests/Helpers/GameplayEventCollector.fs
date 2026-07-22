@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Helpers
+namespace Prelude.Tests.Helpers
 
 open Prelude
 open Prelude.Charts
@@ -13,6 +13,6 @@ type GameplayEventCollector(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
     override this.HandleEvent(event: GameplayEvent) : unit =
         printfn "%A" event
-        events.Add event
+        events.Add(event)
 
     member this.Events = events.AsReadOnly()

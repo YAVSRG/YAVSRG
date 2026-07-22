@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Database
+namespace Prelude.Tests.Database
 
 open NUnit.Framework
 open Percyqaz.Common
@@ -26,7 +26,7 @@ module UserDatabaseTests =
 
         let score =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.0f<rate>
                 Mods = Map.empty
                 Replay = [| 0uy |]

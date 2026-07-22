@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Charts
+namespace Prelude.Tests.Charts
 
 open NUnit.Framework
 open Prelude
@@ -8,10 +8,11 @@ open Prelude.Tests.Helpers
 module ChartTests =
 
     [<Test>]
-    let Fuzz_CreatesValidCharts() =
+    let Fuzz_CreatesValidCharts () =
 
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
             let chart = ChartFuzzer.Generate(keys, seed)
+
             match chart.CheckForErrors() with
             | Ok _ -> ()
             | Error reason -> Assert.Fail(reason)
@@ -19,7 +20,7 @@ module ChartTests =
         Assert.Pass()
 
     [<Test>]
-    let Fuzz_PrettyPrint() =
+    let Fuzz_PrettyPrint () =
 
         let chart = ChartFuzzer.Generate(5, 0)
 
@@ -28,9 +29,9 @@ module ChartTests =
         Assert.Pass()
 
     [<Test>]
-    let Fuzz_Deterministic_Hashing_Deterministic() =
+    let Fuzz_Deterministic_Hashing_Deterministic () =
 
-        let test_expected_hash(keys: int, seed: int, expected_hash: string) : unit =
+        let test_expected_hash (keys: int, seed: int, expected_hash: string) : unit =
             let chart = ChartFuzzer.Generate(keys, seed)
             Assert.AreEqual(expected_hash, chart.Hash())
 
@@ -41,23 +42,26 @@ module ChartTests =
         Assert.Pass()
 
     [<Test>]
-    let Scale() =
+    let Scale () =
 
         let chart = ChartFuzzer.Generate(4, 123)
-        let twice_as_long = Chart.scale 2.0f</rate> chart
-        let scaled_to_original = Chart.scale 0.5f</rate> twice_as_long
+        let twice_as_long = Chart.scale 2.0f< / rate> chart
+        let scaled_to_original = Chart.scale 0.5f< / rate> twice_as_long
 
         Assert.AreNotEqual(twice_as_long.Hash(), chart.Hash())
         Assert.AreEqual(scaled_to_original.Hash(), chart.Hash())
 
     [<Test>]
-    let Check_NoNotes() =
+    let Check_NoNotes () =
 
         let chart =
             {
                 Keys = 4
                 Notes = [||]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -66,12 +70,18 @@ module ChartTests =
         | Error reason -> Assert.Pass(reason)
 
     [<Test>]
-    let Check_NoBPMs() =
+    let Check_NoBPMs () =
 
         let chart =
             {
                 Keys = 4
-                Notes = [| { Time = 0.0f<ms>; Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |] } |]
+                Notes =
+                    [|
+                        {
+                            Time = 0.0f<ms>
+                            Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
+                        }
+                    |]
                 BPM = [||]
                 SV = [||]
             }
@@ -81,7 +91,7 @@ module ChartTests =
         | Error reason -> Assert.Pass(reason)
 
     [<Test>]
-    let Check_EmptyNoteRows() =
+    let Check_EmptyNoteRows () =
 
         let empty_row =
             {
@@ -97,7 +107,10 @@ module ChartTests =
                             Data = [| NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -123,7 +136,10 @@ module ChartTests =
                             Data = [| NoteType.HOLDTAIL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -134,7 +150,7 @@ module ChartTests =
         Assert.Pass()
 
     [<Test>]
-    let Check_LongNotes() =
+    let Check_LongNotes () =
 
         let correct =
             {
@@ -150,7 +166,10 @@ module ChartTests =
                             Data = [| NoteType.HOLDTAIL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -176,7 +195,10 @@ module ChartTests =
                             Data = [| NoteType.HOLDTAIL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -202,7 +224,10 @@ module ChartTests =
                             Data = [| NoteType.NOTHING; NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -224,7 +249,10 @@ module ChartTests =
                             Data = [| NoteType.NOTHING; NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -250,7 +278,10 @@ module ChartTests =
                             Data = [| NoteType.HOLDTAIL; NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -261,7 +292,7 @@ module ChartTests =
         Assert.Pass()
 
     [<Test>]
-    let Check_NoteTimestamps() =
+    let Check_NoteTimestamps () =
 
         let stacked =
             {
@@ -277,7 +308,10 @@ module ChartTests =
                             Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -299,7 +333,10 @@ module ChartTests =
                             Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -321,7 +358,10 @@ module ChartTests =
                             Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -343,7 +383,10 @@ module ChartTests =
                             Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
                         }
                     |]
-                BPM = [| { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } } |]
+                BPM =
+                    [|
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                    |]
                 SV = [||]
             }
 
@@ -354,7 +397,7 @@ module ChartTests =
         Assert.Pass()
 
     [<Test>]
-    let Check_BPMTimestamps() =
+    let Check_BPMTimestamps () =
 
         let backwards_bpms =
             {
@@ -368,14 +411,8 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 100.0f<ms>
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
-                        {
-                            Time = 0.0f<ms>
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                        { Time = 0.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
                     |]
                 SV = [||]
             }
@@ -396,14 +433,8 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 100.0f<ms>
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
-                        {
-                            Time = Time.infinity
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
+                        { Time = 100.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                        { Time = Time.infinity; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
                     |]
                 SV = [||]
             }
@@ -424,14 +455,8 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 0.0f<ms>
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
-                        {
-                            Time = 0.0f<ms> / 0.0f
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
+                        { Time = 0.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
+                        { Time = 0.0f<ms> / 0.0f; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
                     |]
                 SV = [||]
             }
@@ -443,7 +468,7 @@ module ChartTests =
         Assert.Pass()
 
     [<Test>]
-    let Check_InvalidBPMs() =
+    let Check_InvalidBPMs () =
 
         let negative_bpm =
             {
@@ -457,10 +482,7 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 0.0f<ms>
-                            Data = { MsPerBeat = -50.0f<ms / beat>; Meter = 4<beat> }
-                        }
+                        { Time = 0.0f<ms>; Data = { MsPerBeat = -50.0f<ms / beat>; Meter = 4<beat> } }
                     |]
                 SV = [||]
             }
@@ -481,10 +503,7 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 0.0f<ms>
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 0<beat> }
-                        }
+                        { Time = 0.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 0<beat> } }
                     |]
                 SV = [||]
             }
@@ -505,10 +524,7 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 0.0f<ms>
-                            Data = { MsPerBeat = nanf * 1.0f<ms / beat>; Meter = 4<beat> }
-                        }
+                        { Time = 0.0f<ms>; Data = { MsPerBeat = nanf * 1.0f<ms / beat>; Meter = 4<beat> } }
                     |]
                 SV = [||]
             }
@@ -516,9 +532,9 @@ module ChartTests =
         match nan_bpm.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
-        
+
     [<Test>]
-    let Check_InvalidSVs() =
+    let Check_InvalidSVs () =
         let nan_sv =
             {
                 Keys = 4
@@ -531,10 +547,7 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 0.0f<ms>
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
+                        { Time = 0.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
                     |]
                 SV = [| { Time = 0.0f<ms>; Data = nanf } |]
             }
@@ -542,7 +555,7 @@ module ChartTests =
         match nan_sv.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
-        
+
         let backwards_sv =
             {
                 Keys = 4
@@ -555,18 +568,11 @@ module ChartTests =
                     |]
                 BPM =
                     [|
-                        {
-                            Time = 0.0f<ms>
-                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
-                        }
+                        { Time = 0.0f<ms>; Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> } }
                     |]
-                SV =
-                    [|
-                        { Time = 5.0f<ms>; Data = 1.0f }
-                        { Time = 0.0f<ms>; Data = 1.0f }
-                    |]
+                SV = [| { Time = 5.0f<ms>; Data = 1.0f }; { Time = 0.0f<ms>; Data = 1.0f } |]
             }
-            
+
         match backwards_sv.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason

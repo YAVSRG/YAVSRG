@@ -175,6 +175,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
         let judgement_count = Array.sum info.Judgements
 
+        let ma = sprintf "  •  MA: %s" (JudgementRatio.Format(info.Judgements, 0))
+        let pa = sprintf "  •  PA: %s" (JudgementRatio.Format(info.Judgements, 1))
+
         Text.fill_b (
             Style.font,
             sprintf "%.4f%%, %ix" (info.Accuracy * 100.0) info.Combo,
@@ -193,7 +196,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "G: %i" info.GhostTaps,
+            sprintf "G: %i%s%s" info.GhostTaps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
@@ -255,6 +258,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             |> sqrt
         let ghost_taps = post.GhostTaps - pre.GhostTaps
 
+        let ma = sprintf "  •  MA: %s" (JudgementRatio.Format(judgement_diff, 0))
+        let pa = sprintf "  •  PA: %s" (JudgementRatio.Format(judgement_diff, 1))
+
         Text.fill_b (
             Style.font,
             sprintf "%.4f%% %ix" (accuracy * 100.0) combo,
@@ -273,7 +279,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "G: %i" ghost_taps,
+            sprintf "G: %i%s%s" ghost_taps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
@@ -465,7 +471,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         | ScoreGraphLineMode.MA when stats.Value.GraphPoints.Length > 0 && score_info.Scoring.JudgementCounts.Length > 1 ->
 
-            let ma (ss: GraphPoint) = if ss.Judgements.[1] = 0 then float32 ss.Judgements.[0] else float32 ss.Judgements.[0] / float32 ss.Judgements.[1]
+            let ma (ss: GraphPoint) = let r, _ = JudgementRatio.Calculate(ss.Judgements, 0) in r
             let ratios = stats.Value.GraphPoints |> Seq.map ma
             let max_ratio = ratios |> Seq.max
             let min_ratio = ratios |> Seq.min
@@ -475,7 +481,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         | ScoreGraphLineMode.PA when stats.Value.GraphPoints.Length > 0 && score_info.Scoring.JudgementCounts.Length > 2 ->
 
-            let pa (ss: GraphPoint) = if ss.Judgements.[2] = 0 then float32 ss.Judgements.[1] else float32 ss.Judgements.[1] / float32 ss.Judgements.[2]
+            let pa (ss: GraphPoint) = let r, _ = JudgementRatio.Calculate(ss.Judgements, 1) in r
             let ratios = stats.Value.GraphPoints |> Seq.map pa
             let max_ratio = ratios |> Seq.max
             let min_ratio = ratios |> Seq.min

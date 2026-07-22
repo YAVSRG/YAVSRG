@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Mods
+namespace Prelude.Tests.Mods
 
 open NUnit.Framework
 open Prelude.Mods
@@ -6,9 +6,9 @@ open Prelude.Mods
 module ModStateTests =
 
     [<Test>]
-    let Basic_Usage() =
+    let Basic_Usage () =
 
-        let empty : ModState = Map.empty
+        let empty: ModState = Map.empty
 
         let result1 = ModState.cycle_fd "mirror" empty
         Assert.AreEqual(empty.Add("mirror", 0), result1)
@@ -23,60 +23,60 @@ module ModStateTests =
         Assert.AreEqual(result2, result4)
 
     [<Test>]
-    let Random_Seed() =
+    let Random_Seed () =
 
         let mod_state = ModState.cycle_fd "mirror" Map.empty
 
         let result = ModState.cycle_fd "random" mod_state
-        Assert.True(result.ContainsKey "random")
+        Assert.True(result.ContainsKey("random"))
 
         printfn "%A" result
 
         let result2 = ModState.cycle_fd "random" result
-        Assert.False(result2.ContainsKey "random")
+        Assert.False(result2.ContainsKey("random"))
 
         printfn "%A" result2
 
     [<Test>]
-    let Mutual_Exclusion() =
+    let Mutual_Exclusion () =
 
         let mod_state = ModState.cycle_fd "mirror" Map.empty
 
         let result = ModState.cycle_fd "random" mod_state
-        Assert.True(result.ContainsKey "random")
+        Assert.True(result.ContainsKey("random"))
 
         printfn "%A" result
 
         let result2 = ModState.cycle_fd "shuffle" result
-        Assert.False(result2.ContainsKey "random")
-        Assert.True(result2.ContainsKey "shuffle")
+        Assert.False(result2.ContainsKey("random"))
+        Assert.True(result2.ContainsKey("shuffle"))
 
         printfn "%A" result2
 
     [<Test>]
-    let Check() =
+    let Check () =
 
         match ModState.check Map.empty with
         | Ok ModStatus.Ranked -> ()
         | unexpected -> Assert.Fail("Expected Ranked status", unexpected)
 
-        match ModState.check (Map.ofList ["mirror", 0]) with
+        match ModState.check(Map.ofList [ "mirror", 0 ]) with
         | Ok ModStatus.Ranked -> ()
         | unexpected -> Assert.Fail("Expected Ranked status", unexpected)
 
-        match ModState.check (Map.ofList ["nosv", 0]) with
+        match ModState.check(Map.ofList [ "nosv", 0 ]) with
         | Ok ModStatus.Unranked -> ()
         | unexpected -> Assert.Fail("Expected Unranked status", unexpected)
 
-        match ModState.check (Map.ofList ["mirror", 1]) with
+        match ModState.check(Map.ofList [ "mirror", 1 ]) with
         | Error reason -> printfn "%s" reason
         | unexpected -> Assert.Fail("Expected Ranked status", unexpected)
 
-        match ModState.check (Map.ofList ["random", 1; "shuffle", 1]) with
+        match ModState.check(Map.ofList [ "random", 1; "shuffle", 1 ]) with
         | Error reason -> printfn "%s" reason
         | unexpected -> Assert.Fail("Expected Ranked status", unexpected)
 
-        match ModState.check (Map.ofList ["mirror", 0; "nosv", 0; "DOES NOT EXIST", 0]) with
+        match ModState.check(Map.ofList [ "mirror", 0; "nosv", 0; "DOES NOT EXIST", 0 ]) with
         | Error reason -> printfn "%s" reason
         | unexpected -> Assert.Fail("Expected Ranked status", unexpected)
 

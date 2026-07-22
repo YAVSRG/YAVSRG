@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Skins.Noteskins
+namespace Prelude.Tests.Skins.Noteskins
 
 open NUnit.Framework
 open Prelude
@@ -13,7 +13,7 @@ module NoteskinValidationTests =
     [<Test>]
     let MissingTextures () =
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
@@ -48,7 +48,7 @@ module NoteskinValidationTests =
     [<Test>]
     let WithRequiredTextures_Grid () =
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -65,7 +65,7 @@ module NoteskinValidationTests =
     [<Test>]
     let WithRequiredTextures_Loose () =
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead-0-0.png", ONEPIXELIMAGE)
@@ -82,7 +82,7 @@ module NoteskinValidationTests =
     [<Test>]
     let WithRequiredTextures_Loose_Multiple () =
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("note-0-1.png", ONEPIXELIMAGE)
                 .AddImageFile("note-1-0.png", ONEPIXELIMAGE)
@@ -102,7 +102,7 @@ module NoteskinValidationTests =
     [<Test>]
     let WithRequiredTextures_Loose_OneMissing () =
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("note-0-1.png", ONEPIXELIMAGE)
                 .AddImageFile("note-1-1.png", ONEPIXELIMAGE)
@@ -131,11 +131,7 @@ module NoteskinValidationTests =
     [<Test>]
     let WithExtraTextures () =
         let noteskin =
-            InMemoryNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    EnableColumnLight = false
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with EnableColumnLight = false })
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -175,7 +171,7 @@ module NoteskinValidationTests =
     [<Ignore("Currently the user can mix textures this way and not get an error")>] // todo: validate against this
     let WithMixedGridAndLooseFiles () =
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
@@ -203,8 +199,9 @@ module NoteskinValidationTests =
     [<Test>]
     let WithMixedGridFiles () =
         use receptor_grid_bmp = new Bitmap(16, 3)
+
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -234,7 +231,7 @@ module NoteskinValidationTests =
         use receptor_grid_bmp = new Bitmap(16, 3)
 
         let noteskin =
-            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+            VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -263,11 +260,7 @@ module NoteskinValidationTests =
         use receptor_grid_bmp = new Bitmap(16, 24)
 
         let noteskin =
-            InMemoryNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Receptors
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with ReceptorStyle = ReceptorStyle.Receptors })
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -296,11 +289,7 @@ module NoteskinValidationTests =
         use receptor_grid_bmp = new Bitmap(200, 700)
 
         let noteskin =
-            InMemoryNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Receptors
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with ReceptorStyle = ReceptorStyle.Receptors })
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -329,11 +318,7 @@ module NoteskinValidationTests =
         use note_grid_bmp = new Bitmap(64, 16)
 
         let noteskin =
-            InMemoryNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Receptors
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with ReceptorStyle = ReceptorStyle.Receptors })
                 .AddImageFile("note[1x4].png", note_grid_bmp)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
