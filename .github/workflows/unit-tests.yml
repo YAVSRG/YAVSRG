@@ -36,7 +36,7 @@ jobs:
       run: dotnet tool restore && dotnet fantomas --check .
         
     - name: Approve PRs from Percyqaz if checks pass
-      if: ${{ github.actor == 'percyqaz' }}
+      if: github.event.pull_request.user.login == 'percyqaz'
       run: gh pr review --approve "$PR_URL"
       env:
         PR_URL: ${{github.event.pull_request.html_url}}
