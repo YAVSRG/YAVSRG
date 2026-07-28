@@ -22,6 +22,12 @@ type ParsedValueExtensions =
         match pvalue with
         | Valid v -> v
         | Invalid -> default_value
+    
+    [<Extension>]
+    static member inline ReplaceInvalidWith<'T>(pvalue: ParsedValue<'T>, default_value: 'T) : ParsedValue<'T> =
+        match pvalue with
+        | Valid v -> Valid v
+        | Invalid -> Valid default_value
         
     [<Extension>]
     static member inline ExpectValid(pvalue: ParsedValue<'T>, [<ParamArray>] args: obj[]) : 'T =

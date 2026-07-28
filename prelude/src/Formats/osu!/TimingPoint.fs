@@ -99,38 +99,42 @@ type TimingPoint =
         | Inherited x -> x.ToString()
         
     static member FromString(line: string) : TimingPoint =
+        let values = line.Split(',')
         
-        let inline parse_uninherited(values: SplitValues) =
-            Uninherited {
-                Time = values.Float(0)
-                MsPerBeat =
-                    let v = values.FloatOrDefault(1, 500.0, true)
-                    if v <= 0 || System.Double.IsNaN(v) then 500.0 else max 0.0 v
-                Meter = values.IntOrDefault(2, 4) |> fun v -> if v <= 0 then 4 else v
-                SampleSet = values.EnumOrDefault(3, SampleSet.Default, false)
-                SampleIndex = values.IntOrDefault(4, 0)
-                Volume = values.IntOrDefault(5, 100) |> max 0 |> min 100
-                Effects = values.EnumOrDefault(7, TimingEffect.None, true)
-            }
-            
-        let inline parse_inherited(values: SplitValues) =
-            Inherited {
-                Time = values.Float(0)
-                Multiplier =
-                    let v = values.FloatOrDefault(1, 1.0, true)
-                    if v >= 0 || System.Double.IsNaN(v) then 1.0 else -100.0 / v |> min 100.0 |> max 0.01
-                SampleSet = values.EnumOrDefault(3, SampleSet.Default, false)
-                SampleIndex = values.IntOrDefault(4, 0)
-                Volume = values.IntOrDefault(5, 100)
-                Effects = values.EnumOrDefault(7, TimingEffect.None, true)
-            }
-            
-        let values = SplitValues.Parse(line, ',')
         if values.Length = 0 then
             failwith "Invalid timing point: empty line"
-        elif values.Length < 2 then
-            failwithf "Invalid timing point, needs a comma separating 2+ values: %s" line
-        else
-            let is_uninherited = values.UntrimmedStringOrDefault(6, "1").StartsWith('1')
-            if is_uninherited then parse_uninherited(values)
-            else parse_inherited(values)
+        elif values.Length = 3 then
+            failwithf "Invalid timing point, osu! accepts either 2 values or 4+: %s" line
+            
+        let time = values.ValueAt(0).ParseDouble().RejectNan().RejectInfinity().ExpectValid(line)
+        let meter = values.ValueAt(2).ReplaceInvalidWith("4").ParseInt().ReplaceZeroWith(4).ExpectValid(line)
+        let sample_set = values.ValueAt(3).ReplaceInvalidWith("2").ParseInt().ReplaceZeroWith(2).ExpectValid(line) |> enum
+        let sample_index = values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid(line)
+        let volume = values.ValueAt(5).ReplaceInvalidWith("100").ParseInt().ClampBetween(1, 100).ExpectValid(line)
+        let effects = values.ValueAt(7).ReplaceInvalidWith("0").ParseInt().ExpectValid(line) |> enum
+        
+        let inline parse_uninherited() =
+            Uninherited {
+                Time = time
+                MsPerBeat = values.ValueAt(1).ParseDouble().ReplaceZeroWith(infinity).RejectInfinity().ExpectValid(line)
+                Meter = meter
+                SampleSet = sample_set
+                SampleIndex = sample_index
+                Volume = volume
+                Effects = effects
+            }
+            
+        let inline parse_inherited() =
+            Inherited {
+                Time = time
+                Multiplier =
+                    let v = values.ValueAt(1).ParseDouble().RejectInfinity().ExpectValid(line)
+                    if v >= 0 || System.Double.IsNaN(v) then 1.0 else -100.0 / v |> min 100.0 |> max 0.01
+                SampleSet = sample_set
+                SampleIndex = sample_index
+                Volume = volume
+                Effects = effects
+            }
+            
+        let is_uninherited = values.ValueAt(6).DefaultValue("1").StartsWith('1')
+        if is_uninherited then parse_uninherited() else parse_inherited()
