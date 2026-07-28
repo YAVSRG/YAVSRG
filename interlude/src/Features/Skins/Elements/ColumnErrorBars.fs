@@ -27,6 +27,8 @@ type ColumnErrorBars(ctx: HudContext) =
 
     let MAX_WINDOW = ctx.State.Ruleset.LargestWindow
 
+    let log_factor = ctx.Config.ColumnErrorBarsLogSensitivity
+
     override this.Init(parent: Widget) =
         if ctx.Config.ColumnErrorBarsMovingAverage then
             ctx.State.Subscribe(fun ev ->
@@ -37,21 +39,21 @@ type ColumnErrorBars(ctx: HudContext) =
                             lerp
                                 moving_average_sensitivity
                                 moving_averages.[ev.Column].Target
-                                (e.Delta / MAX_WINDOW * h * 0.5f)
+                                (ErrorBar.log_error (float32 e.Delta, h, log_factor, MAX_WINDOW))
                 | Hold e ->
                     if not e.Missed then
                         moving_averages.[ev.Column].Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_averages.[ev.Column].Target
-                                (e.Delta / MAX_WINDOW * h * 0.5f)
+                                (ErrorBar.log_error (float32 e.Delta, h, log_factor, MAX_WINDOW))
                 | Release e ->
                     if not e.Missed then
                         moving_averages.[ev.Column].Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_averages.[ev.Column].Target
-                                (e.Delta / MAX_WINDOW * h * ctx.Config.ColumnErrorBarsReleasesYScale)
+                                (ErrorBar.log_error (float32 e.Delta, h, log_factor, MAX_WINDOW) * ctx.Config.ColumnErrorBarsReleasesYScale)
                 | GhostTap _
                 | DropHold
                 | RegrabHold -> ()
@@ -62,26 +64,29 @@ type ColumnErrorBars(ctx: HudContext) =
                 if ev.Time >= last_seen_time - animation_time then
                     match ev.Inner with
                     | Hit e ->
+                        let log_hit_err= ErrorBar.log_error (float32 e.Delta, h, log_factor, MAX_WINDOW)
                         hits.[ev.Column].Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * h * 0.5f
+                                Position = log_hit_err
                                 IsRelease = false
                                 Judgement = e.Judgement |> Option.map fst
                             }
                     | Hold e ->
+                        let log_hit_err= ErrorBar.log_error (float32 e.Delta, h, log_factor, MAX_WINDOW)
                         hits.[ev.Column].Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * h * 0.5f
+                                Position = log_hit_err
                                 IsRelease = false
                                 Judgement = e.Judgement |> Option.map fst
                             }
                     | Release e ->
+                        let log_hit_err= ErrorBar.log_error (float32 e.Delta, h, log_factor, MAX_WINDOW)
                         hits.[ev.Column].Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * h * ctx.Config.ColumnErrorBarsReleasesYScale
+                                Position = log_hit_err * ctx.Config.ColumnErrorBarsReleasesYScale
                                 IsRelease = true
                                 Judgement = e.Judgement |> Option.map fst
                             }
@@ -144,8 +149,9 @@ type ColumnErrorBars(ctx: HudContext) =
 
         let center = this.Bounds.CenterY
         let ms_to_y =
-            let h = this.Bounds.Height * 0.5f
-            fun time -> center + time / MAX_WINDOW * h
+            let h = this.Bounds.Height
+            fun (time: float32<ms/rate>) ->
+                center + ErrorBar.log_error (float32 time, h, log_factor, MAX_WINDOW)
         let r k time1 time2 =
             let left_edge = ctx.Playfield.Bounds.Left + ctx.Playfield.ColumnPositions.[k]
             Rect.FromEdges(left_edge, ms_to_y time1, left_edge + ctx.Playfield.ColumnWidth, ms_to_y time2).SliceX(ctx.Config.ColumnErrorBarsWidth)
