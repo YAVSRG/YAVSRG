@@ -5,14 +5,14 @@ open Prelude.Formats.Osu
 
 module OsuBeatmapTests =
 
-    // All test cases are intended to match osu!stable when tested experimentally
-    // Each test case represents what osu! would do if it parsed this input, and then wrote it back to an .osu file
+    // Most test cases represent what osu! would do if it parsed this input, and then wrote it back to an .osu file
     // Try pasting these test cases into your .osu files, hitting CTRL-L in the editor, then CTRL-S and seeing what the client writes back
 
-    // ## PARSE ERROR indicates that osu! editor reports an error on load for this input,
-    // OR in certain cases I have make a choice to reject:
-    // a) osu! will refuse to play a file containing data loaded like this (try F5 in the editor)
-    // b) osu! will skip over/ignore this line on load and it is removed when writing back
+    // ## PARSE ERROR indicates that:
+    // osu! editor reports an error on load for this input
+    // OR osu! will refuse to play a file containing data loaded like this (try F5 in the editor)
+    // OR osu! will skip over/ignore this line on load and it is removed when writing back
+    // OR I have ruled that accepting this input is not a good idea even when allowed by osu!
 
     [<Test>]
     let TimingPoint_ValidParses () =
