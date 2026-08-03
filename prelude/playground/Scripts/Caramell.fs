@@ -43,7 +43,7 @@ let chorus3_1 = 101.0f<measure> // blake
 let chorus3_2 = 109.0f<measure> // josh
 let end_of_song = 117.0f<measure>
 
-let sb = ResizeArray<StoryboardObject>()
+let sb = ResizeArray<StoryboardEvent>()
 
 // 90 60 130 60  = 340
 let frame_times =

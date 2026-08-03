@@ -22,7 +22,7 @@ type Beatmap =
         Editor: Editor
         Metadata: Metadata
         Difficulty: Difficulty
-        Events: StoryboardObject list
+        Events: StoryboardEvent list
         Objects: HitObject list
         Timing: TimingPoint list
     }
@@ -101,7 +101,7 @@ type Beatmap =
 
         let objects = ResizeArray<HitObject>()
         let timing = ResizeArray<TimingPoint>()
-        let events = ResizeArray<StoryboardObject>()
+        let events = ResizeArray<StoryboardEvent>()
 
         while reader.Peek() >= 0 do
             let line = reader.ReadLine().TrimEnd()
@@ -134,7 +134,7 @@ type Beatmap =
 
                 if parts.Length = 2 then
                     section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
-            | Events -> Option.iter events.Add (StoryboardObject.TryParse(line))
+            | Events -> Option.iter events.Add (StoryboardEvent.TryParse(line))
             | TimingPoints -> timing.Add(TimingPoint.FromString(line))
             | Objects -> objects.Add(HitObject.FromString(line))
             | Colors -> () // todo: support colors header

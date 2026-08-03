@@ -149,7 +149,6 @@ module OsuBeatmapTests =
         parse_tp("100.1,-100,4,2,0,100,0,0", "100.1,250.1,4,2,0,100,-1")
         parse_tp("## PARSE ERROR", "100.1,-100,EVEN_THOUGH_IGNORED,2,0,100,0")
 
-
     [<Test>]
     let TimingPoint_ValidParses_Inherited_Multiplier () =
         parse_tp("100.1,-50,4,2,0,100,0,0", "100.1,-50,4,2,0,100,0")
@@ -407,7 +406,7 @@ module OsuBeatmapTests =
     let parse_evt (expected: string, input: string) =
         let result =
             try
-                match StoryboardObject.TryParse(input) with
+                match StoryboardEvent.TryParse(input) with
                 | Some v -> v.ToString()
                 | None -> "## UNSUPPORTED"
             with _ ->
@@ -416,13 +415,13 @@ module OsuBeatmapTests =
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    let Event_ValidParses_Background () =
+    let StoryboardEvent_ValidParses_Background () =
 
         parse_evt("""0,0,"bg.png",0,0""", "0,0,\"bg.png\",0,0")
         parse_evt("""0,0,"bg.png",0,0""", "0,0,bg.png,0,0")
         parse_evt("""0,0,"bg.png",0,0""", "0,0,bg.png")
-        parse_evt("## PARSE ERROR", " 0,0,\"bg.png\",0,0")
-        parse_evt("## PARSE ERROR", "_0,0,\"bg.png\",0,0")
+        parse_evt("## UNSUPPORTED", " 0,0,\"bg.png\",0,0")
+        parse_evt("## UNSUPPORTED", "_0,0,\"bg.png\",0,0")
         parse_evt("""0,0,"bg.png",0,0""", "\t0,0,bg.png,0,0")
         // osu! seems to use Int32.Parse and then write it back as a Single, for whatever reason
         //parse_evt("""0,0,"bg.png",-2.147484E+09,2.147484E+09""", "0,0,bg.png,-2147483648,2147483647")

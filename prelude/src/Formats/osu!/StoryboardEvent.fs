@@ -177,7 +177,7 @@ type Animation =
         }
         |> String.concat "\n"
 
-type StoryboardObject =
+type StoryboardEvent =
     | Sprite of Sprite
     | Animation of Animation
     | Sample of int * Layer * string * int
@@ -194,7 +194,7 @@ type StoryboardObject =
         | Video(time, filename, x, y) -> sprintf "1,%i,%A,%i,%i" time filename x y
         | Break(start, finish) -> sprintf "2,%i,%i" start finish
 
-    static member TryParse(line: string) : StoryboardObject option =
+    static member TryParse(line: string) : StoryboardEvent option =
         let values = line.Split(',')
 
         let inline unsupported () = None
@@ -228,7 +228,8 @@ type StoryboardObject =
             )
 
         if line.StartsWith(' ') || line.StartsWith('_') then
-            raise(ParseException([| line, "Nested events not supported" |]))
+            unsupported()
+        else
 
         match values.[0].Trim() with
         | "0"
@@ -238,6 +239,7 @@ type StoryboardObject =
         | "2"
         | "Break" -> Some(parse_break())
         | "Sample" -> Some(parse_sample())
+        | "3"
         | "Sprite"
         | "Animation" -> unsupported()
         | _ -> raise(ParseException([| line, "Unrecognised event type" |]))
