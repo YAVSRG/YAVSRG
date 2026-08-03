@@ -152,7 +152,7 @@ module ChartRateDetectionTests =
                 Beatmap.FromStream(stream)
             )
             |> Seq.map(fun beatmap ->
-                Osu_To_Interlude.convert
+                OsuConverter.convert
                     beatmap
                     {
                         Config = ConversionOptions.Pack("osu!", None, Link)
@@ -178,7 +178,7 @@ module ChartRateDetectionTests =
                 Beatmap.FromStream(stream)
             )
             |> Seq.map(fun beatmap ->
-                Osu_To_Interlude.convert
+                OsuConverter.convert
                     beatmap
                     {
                         Config = ConversionOptions.Pack("osu!", None, Link)

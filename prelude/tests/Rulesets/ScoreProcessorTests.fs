@@ -453,7 +453,7 @@ module ScoreProcessorTests =
         let beatmap =
             Beatmap.TryReadFromFile("./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu") |> expect
 
-        (Osu_To_Interlude.convert
+        (OsuConverter.convert
             beatmap
             {
                 Config = ConversionOptions.Pack("osu!", None, Link)

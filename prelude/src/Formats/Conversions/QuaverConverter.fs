@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Formats.Quaver
 
-module Quaver_To_Interlude =
+module QuaverConverter =
 
     let private convert_hit_objects (objects: QuaverHitObject list) (keys: int) : TimeArray<NoteRow> =
         let output = List<TimeItem<NoteRow>>()

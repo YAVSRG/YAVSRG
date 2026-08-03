@@ -20,7 +20,7 @@ module ChartConversionTests =
             let chart = ChartFuzzer.Generate(keys, seed)
 
             let osu_notes = OsuExport.notes_to_hitobjects chart.Notes chart.Keys
-            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes chart.Keys
+            let interlude_notes = OsuConverter.convert_hit_objects osu_notes chart.Keys
 
             Assert.AreEqual(chart.Notes, interlude_notes)
 
@@ -47,7 +47,7 @@ module ChartConversionTests =
             let osu_points = OsuExport.convert_timing_points chart.BPM chart.SV most_common_mspb
 
             let interlude_bpm, interlude_sv =
-                Osu_To_Interlude.convert_timing_points osu_points chart.LastNote
+                OsuConverter.convert_timing_points osu_points chart.LastNote
 
             Assert.AreEqual(chart.BPM, interlude_bpm)
             Assert.AreEqual(simplified_sv chart.SV, simplified_sv interlude_sv)
@@ -63,8 +63,7 @@ module ChartConversionTests =
                 TimingPoint.CreateSV(100f<ms>, 2.0f)
             ]
 
-        let result_bpm, result_sv =
-            Osu_To_Interlude.convert_timing_points points 2000.0f<ms>
+        let result_bpm, result_sv = OsuConverter.convert_timing_points points 2000.0f<ms>
 
         printfn "%A" result_bpm
         printfn "%A" result_sv
@@ -80,7 +79,7 @@ module ChartConversionTests =
         let osu_points = OsuExport.convert_timing_points one_bpm [||] 500.0f<ms / beat>
 
         let interlude_bpm, interlude_sv =
-            Osu_To_Interlude.convert_timing_points osu_points 1000.0f<ms>
+            OsuConverter.convert_timing_points osu_points 1000.0f<ms>
 
         printfn "%A" osu_points
 
@@ -102,7 +101,7 @@ module ChartConversionTests =
         let osu_points = OsuExport.convert_timing_points many_bpms [||] 500.0f<ms / beat>
 
         let interlude_bpm, interlude_sv =
-            Osu_To_Interlude.convert_timing_points osu_points 1000.0f<ms>
+            OsuConverter.convert_timing_points osu_points 1000.0f<ms>
 
         printfn "%A" osu_points
 
@@ -119,7 +118,7 @@ module ChartConversionTests =
             ]
 
         try
-            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let interlude_notes = OsuConverter.convert_hit_objects osu_notes 4
             Chart.pretty_print interlude_notes
             Assert.AreEqual(2, interlude_notes.Length)
         with ConversionSkipException reason ->
@@ -135,7 +134,7 @@ module ChartConversionTests =
             ]
 
         try
-            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let interlude_notes = OsuConverter.convert_hit_objects osu_notes 4
             Chart.pretty_print interlude_notes
             Assert.AreEqual(3, interlude_notes.Length)
         with ConversionSkipException reason ->
@@ -151,7 +150,7 @@ module ChartConversionTests =
             ]
 
         try
-            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let interlude_notes = OsuConverter.convert_hit_objects osu_notes 4
             Chart.pretty_print interlude_notes
             Assert.AreEqual(3, interlude_notes.Length)
         with ConversionSkipException reason ->
@@ -166,7 +165,7 @@ module ChartConversionTests =
             ]
 
         try
-            let _ = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let _ = OsuConverter.convert_hit_objects osu_notes 4
             Assert.Fail()
         with ConversionSkipException reason ->
             Assert.Pass(reason)
@@ -180,7 +179,7 @@ module ChartConversionTests =
             ]
 
         try
-            let _ = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let _ = OsuConverter.convert_hit_objects osu_notes 4
             Assert.Fail()
         with ConversionSkipException reason ->
             Assert.Pass(reason)
@@ -194,7 +193,7 @@ module ChartConversionTests =
             ]
 
         try
-            let _ = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let _ = OsuConverter.convert_hit_objects osu_notes 4
             Assert.Fail()
         with ConversionSkipException reason ->
             Assert.Pass(reason)
@@ -208,7 +207,7 @@ module ChartConversionTests =
             ]
 
         try
-            let _ = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let _ = OsuConverter.convert_hit_objects osu_notes 4
             Assert.Fail()
         with ConversionSkipException reason ->
             Assert.Pass(reason)
@@ -226,7 +225,7 @@ module ChartConversionTests =
 
         printfn "%A" points
 
-        let bpm, sv = Osu_To_Interlude.convert_timing_points points 200000.0f<ms>
+        let bpm, sv = OsuConverter.convert_timing_points points 200000.0f<ms>
 
         Assert.AreEqual(
             [|
@@ -253,7 +252,7 @@ module ChartConversionTests =
             Beatmap.TryReadFromFile("./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu") |> expect
 
         let converted =
-            Osu_To_Interlude.convert
+            OsuConverter.convert
                 beatmap
                 {
                     Config = ConversionOptions.Pack("osu!", None, Link)
@@ -274,7 +273,7 @@ module ChartConversionTests =
             OsuExport.convert { HP = 8; OD = 8 } converted.Chart chart_meta
 
         let round_trip =
-            Osu_To_Interlude.convert
+            OsuConverter.convert
                 exported_beatmap
                 {
                     Config = ConversionOptions.Pack("osu!", None, Link)

@@ -8,7 +8,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Formats.StepMania
 
-module StepMania_To_Interlude =
+module StepManiaConverter =
 
     let private convert_measures
         (steps_type: StepManiaChartType)

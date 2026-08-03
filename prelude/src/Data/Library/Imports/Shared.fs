@@ -102,18 +102,18 @@ module Shared =
         match Path.GetExtension(ctx.OriginalPath).ToLower() with
         | ".sm" ->
             match StepMania.FromFile(ctx.OriginalPath) with
-            | Ok data -> StepMania_To_Interlude.convert data ctx
+            | Ok data -> StepManiaConverter.convert data ctx
             | Error msg -> parse_error(msg)
 
         | ".qua" ->
             match QuaverChart.FromFile(ctx.OriginalPath) with
-            | Ok quaver_chart -> [ Quaver_To_Interlude.convert quaver_chart ctx ]
+            | Ok quaver_chart -> [ QuaverConverter.convert quaver_chart ctx ]
             | Error msg -> parse_error(msg)
 
         | ".osu" ->
             match Beatmap.TryReadFromFile(ctx.OriginalPath) with
             | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
-            | Ok beatmap -> [ Osu_To_Interlude.convert_internal beatmap ctx ]
+            | Ok beatmap -> [ OsuConverter.convert_internal beatmap ctx ]
             | Error msg -> parse_error(msg)
 
         | _ -> []

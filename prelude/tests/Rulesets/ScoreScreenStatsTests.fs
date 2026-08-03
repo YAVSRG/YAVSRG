@@ -17,7 +17,7 @@ module ScoreScreenStatsTests =
         let beatmap = Beatmap.TryReadFromFile(beatmap_path) |> expect
 
         let chart =
-            (Osu_To_Interlude.convert
+            (OsuConverter.convert
                 beatmap
                 { Config = ConversionOptions.Pack("osu!", None, Link); OriginalPath = beatmap_path }
              |> expect)

@@ -14,7 +14,7 @@ module ChartDatabaseTests =
     let TEST_OSU_FILE = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
 
     let TEST_IMPORT =
-        (Osu_To_Interlude.convert
+        (OsuConverter.convert
             TEST_OSU_FILE
             { Config = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH }
          |> expect)

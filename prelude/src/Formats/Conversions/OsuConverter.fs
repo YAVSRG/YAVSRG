@@ -9,7 +9,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Formats.Osu
 
-module Osu_To_Interlude =
+module OsuConverter =
 
     let convert_hit_objects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
         let output = List<TimeItem<NoteRow>>()
