@@ -192,7 +192,7 @@ type HitObject =
         
         let x = values.ValueAt(0).ParseFloat().RejectNan().RejectInfinity().ClampBetween(0f, 512f).TruncateToInt().ExpectValid(line)
         let y = values.ValueAt(1).ParseFloat().RejectNan().RejectInfinity().ClampBetween(0f, 512f).TruncateToInt().ExpectValid(line)
-        let time = values.ValueAt(2).ParseFloat().RejectNan().RejectInfinity().TruncateToInt().ExpectValid(line)
+        let time = values.ValueAt(2).ParseFloat().RejectOutOfRange(0.0f, infinityf).RejectNan().RejectInfinity().TruncateToInt().ExpectValid(line)
         let obj_type = values.ValueAt(3).ParseInt().ExpectValid(line)
         let hitsound = values.ValueAt(4).ParseInt().ExpectValid(line) &&& 14 |> enum
 

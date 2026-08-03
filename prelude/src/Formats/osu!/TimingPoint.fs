@@ -116,7 +116,7 @@ type TimingPoint =
         let inline parse_uninherited() =
             Uninherited {
                 Time = time
-                MsPerBeat = values.ValueAt(1).ParseDouble().ReplaceZeroWith(infinity).RejectInfinity().ExpectValid(line)
+                MsPerBeat = values.ValueAt(1).ParseDouble().RejectOutOfRange(0.0, infinity).RejectNan().ReplaceZeroWith(infinity).RejectInfinity().ExpectValid(line)
                 Meter = meter
                 SampleSet = sample_set
                 SampleIndex = sample_index
