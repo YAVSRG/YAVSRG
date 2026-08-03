@@ -18,7 +18,7 @@ module OsuBeatmapTests =
 
     [<Test>]
     let TimingPoint_Defaults () =
-        
+
         let default_values =
             TimingPoint.Uninherited(
                 {
@@ -33,7 +33,7 @@ module OsuBeatmapTests =
             )
 
         Assert.AreEqual(default_values, TimingPoint.FromString("100.1,250.1"))
-        
+
     let inline parse_tp (expected: string, input: string) =
         let result =
             try
@@ -42,15 +42,13 @@ module OsuBeatmapTests =
                 "## PARSE ERROR"
 
         Assert.AreEqual(expected, result)
-    
-    [<Test>]
-    let TimingPoint_ValidParses () =
 
+    [<Test>]
+    let TimingPoint_ValidParses_Time () =
         parse_tp("## PARSE ERROR", "")
         parse_tp("## PARSE ERROR", "100.1")
         parse_tp("## PARSE ERROR", "100.1,")
 
-        // Time
         parse_tp("## PARSE ERROR", ",250.1")
         parse_tp("## PARSE ERROR", "AAA,250.1")
         parse_tp("## PARSE ERROR", "NaN,250.1")
@@ -62,7 +60,8 @@ module OsuBeatmapTests =
         parse_tp("100.1,250.1,4,2,0,100,1,0", " 100.1 ,250.1")
         parse_tp("2147483647,250,4,2,0,100,1,0", "2147483647,250,4,2,0,100,1,0")
 
-        // MsPerBeat
+    [<Test>]
+    let TimingPoint_ValidParses_MsPerBeat () =
         parse_tp("## PARSE ERROR", "100.1,")
         parse_tp("## PARSE ERROR", "100.1,AAA")
         parse_tp("## PARSE ERROR", "100.1,0")
@@ -76,7 +75,8 @@ module OsuBeatmapTests =
         parse_tp("## PARSE ERROR", "100.1,-1")
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1, \t250.1 ")
 
-        // Meter
+    [<Test>]
+    let TimingPoint_ValidParses_Meter () =
         parse_tp("## PARSE ERROR", "100.1,250.1,4")
         parse_tp("## PARSE ERROR", "100.1,250.1,,2,0,100,1,0")
         parse_tp("## PARSE ERROR", "100.1,250.1,1.1,2,0,100,1,0")
@@ -93,7 +93,8 @@ module OsuBeatmapTests =
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1,250.1,0,2,0,100,1,0")
         parse_tp("100.1,250.1,-1,2,0,100,1,0", "100.1,250.1,-1,2,0,100,1,0")
 
-        // SampleSet
+    [<Test>]
+    let TimingPoint_ValidParses_SampleSet () =
         parse_tp("## PARSE ERROR", "100.1,250.1,4,2147483648,0,100,1,0")
         parse_tp("100.1,250.1,4,2147483647,0,100,1,0", "100.1,250.1,4,2147483647,0,100,1,0")
         parse_tp("100.1,250.1,4,-1,0,100,1,0", "100.1,250.1,4,-1,0,100,1,0")
@@ -105,7 +106,8 @@ module OsuBeatmapTests =
         parse_tp("100.1,250.1,4,1,0,100,1,0", "100.1,250.1,4,  1  ,0,100,1,0")
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1,250.1,4,0,0,100,1,0")
 
-        // SampleIndex
+    [<Test>]
+    let TimingPoint_ValidParses_SampleIndex () =
         parse_tp("## PARSE ERROR", "100.1,250.1,4,0,2147483648,100,1,0")
         parse_tp("100.1,250.1,4,2,2147483647,100,1,0", "100.1,250.1,4,2,2147483647,100,1,0")
         parse_tp("100.1,250.1,4,2,-1,100,1,0", "100.1,250.1,4,2,-1,100,1,0")
@@ -116,7 +118,8 @@ module OsuBeatmapTests =
         parse_tp("## PARSE ERROR", "100.1,250.1,4,2,AAA,100,1,0")
         parse_tp("100.1,250.1,4,2,1,100,1,0", "100.1,250.1,4,2,  1  ,100,1,0")
 
-        // Volume
+    [<Test>]
+    let TimingPoint_ValidParses_Volume () =
         parse_tp("100.1,250.1,4,2,0,1,1,0", "100.1,250.1,4,2,0,-1")
         parse_tp("100.1,250.1,4,2,0,1,1,0", "100.1,250.1,4,2,0,0")
         parse_tp("## PARSE ERROR", "100.1,250.1,4,2,0,")
@@ -128,12 +131,14 @@ module OsuBeatmapTests =
         parse_tp("## PARSE ERROR", "100.1,250.1,4,2,0,2147483648")
         parse_tp("100.1,250.1,4,2,0,50,1,0", "100.1,250.1,4,2,0, 50")
 
-        // Uninherited
+    [<Test>]
+    let TimingPoint_ValidParses_Is_Uninherited () =
+        // These are uninherited in osu!stable
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1,250.1,4,2,0,100,1")
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1,250.1,4,2,0,100,100")
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1,250.1,4,2,0,100,1A")
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1,250.1,4,2,0,100,1.1")
-        // Inherited
+        // There are inherited in osu!stable
         parse_tp("100.1,-100,4,2,0,100,0,0", "100.1,250.1,4,2,0,100,\"1\"")
         // In osu!lazer this test case parses as Uninherited -- todo: bug report?
         parse_tp("100.1,-100,4,2,0,100,0,0", "100.1,250.1,4,2,0,100, 1")
@@ -143,7 +148,10 @@ module OsuBeatmapTests =
         parse_tp("100.1,-100,4,2,0,100,0,0", "100.1,250.1,4,2,0,100,2")
         parse_tp("100.1,-100,4,2,0,100,0,0", "100.1,250.1,4,2,0,100,-1")
         parse_tp("## PARSE ERROR", "100.1,-100,EVEN_THOUGH_IGNORED,2,0,100,0")
-        // Inherited: Multiplier
+
+
+    [<Test>]
+    let TimingPoint_ValidParses_Inherited_Multiplier () =
         parse_tp("100.1,-50,4,2,0,100,0,0", "100.1,-50,4,2,0,100,0")
         parse_tp("100.1,-1,4,2,0,100,0,0", "100.1,-0.1,4,2,0,100,0")
         parse_tp("100.1,-10000,4,2,0,100,0,0", "100.1,-100000,4,2,0,100,0")
@@ -154,7 +162,8 @@ module OsuBeatmapTests =
         parse_tp("100.1,-1,4,2,0,100,0,0", "100.1,-1e-100,4,2,0,100,0")
         parse_tp("100.1,-10000,4,2,0,100,0,0", "100.1,-1e100,4,2,0,100,0")
 
-        // Effects
+    [<Test>]
+    let TimingPoint_ValidParses_Effects () =
         parse_tp("## PARSE ERROR", "100.1,250.1,4,2,0,100,1,-2147483649")
         parse_tp("## PARSE ERROR", "100.1,250.1,4,2,0,100,1,2147483648")
         parse_tp("100.1,250.1,4,2,0,100,1,-2147483648", "100.1,250.1,4,2,0,100,1,-2147483648")
