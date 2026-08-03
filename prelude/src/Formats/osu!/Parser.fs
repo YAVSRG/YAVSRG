@@ -91,54 +91,55 @@ module OsuParser =
 
     let parse_storyboard_event (line: string) : StoryboardObject option =
         
+        let values = line.Split(',')
+        
         let inline unsupported() = None
         
-        let inline parse_background(values: SplitValues) =
+        let inline parse_background() =
             Background(
-                values.StringOrDefault(2, ""),
-                values.IntOrDefault(3, 0),
-                values.IntOrDefault(4, 0)
+                values.ValueAt(2).DefaultValue("").Trim(),
+                values.ValueAt(3).ParseInt().DefaultValue(0),
+                values.ValueAt(4).ParseInt().DefaultValue(0)
             )
             
-        let inline parse_video(values: SplitValues) =
+        let inline parse_video() =
             Video(
-                values.IntOrDefault(1, 0),
-                values.StringOrDefault(2, ""),
-                values.IntOrDefault(3, 0),
-                values.IntOrDefault(4, 0)
+                values.ValueAt(1).ParseInt().DefaultValue(0),
+                values.ValueAt(2).DefaultValue("").Trim(),
+                values.ValueAt(3).ParseInt().DefaultValue(0),
+                values.ValueAt(4).ParseInt().DefaultValue(0)
             )
             
-        let inline parse_break(values: SplitValues) =
+        let inline parse_break() =
             Break(
-                values.IntOrDefault(1, 0),
-                values.IntOrDefault(2, 0)
+                values.ValueAt(1).ParseInt().DefaultValue(0),
+                values.ValueAt(2).ParseInt().DefaultValue(0)
             )
             
-        let inline parse_sample(values: SplitValues) =
+        let inline parse_sample() =
             Sample(
-                values.IntOrDefault(1, 0),
-                values.EnumOrDefault(2, Layer.Background, false),
-                values.StringOrDefault(3, ""),
-                values.IntOrDefault(4, 0)
+                values.ValueAt(1).ParseInt().DefaultValue(0),
+                values.ValueAt(2).ParseInt().DefaultValue(0) |> enum,
+                values.ValueAt(3).DefaultValue("").Trim(),
+                values.ValueAt(4).ParseInt().DefaultValue(0)
             )
         
-        let inline parse(values: SplitValues) =
-            match values.[0].ToLowerInvariant() with
+        let inline parse() =
+            match values.[0].Trim().ToLowerInvariant() with
             | "0"
-            | "background" -> Some(parse_background(values))
+            | "background" -> Some(parse_background())
             | "1"
-            | "video" -> Some(parse_video(values))
+            | "video" -> Some(parse_video())
             | "2"
-            | "break" -> Some(parse_break(values))
-            | "sample" -> Some(parse_sample(values))
+            | "break" -> Some(parse_break())
+            | "sample" -> Some(parse_sample())
             | "sprite"
             | "animation"
             | _ -> unsupported()
         
-        let values = SplitValues.Parse(line, ',')
         if values.Length = 0 then
             parse_failure "Empty line" line
-        else parse(values)
+        else parse()
 
     [<Struct>]
     type private ParserState =

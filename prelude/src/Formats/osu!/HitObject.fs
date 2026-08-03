@@ -243,7 +243,7 @@ type HitObject =
             let inline edge_sounds(slides: int) : HitSound list =
                 let pipe_separated_sounds = values.ValueAt(8).DefaultValue("").Split('|')
                 
-                let inline edge_sound(index: int) =
+                let inline edge_sound(index: int) : HitSound =
                     pipe_separated_sounds.ValueAt(index).ParseInt().DefaultValue(0) |> enum
                 
                 seq { 0 .. slides }
@@ -251,16 +251,26 @@ type HitObject =
                 |> List.ofSeq
                 
             let inline edge_sets(slides: int) : (SampleSet * SampleSet) list =
-                let pipe_separated_sets = values.ValueAt(9).DefaultValue("").Split('|')
+                let pipe_separated_sets = values.ValueAt(9).ReplaceWhitespaceWith("0:0").DefaultValue("0:0").Split('|')
                 
-                let inline edge_set_pair(index: int) =
-                    let split = pipe_separated_sets.ValueAt(index).DefaultValue("").Split(':')
-                    split.ValueAt(0).ParseInt().DefaultValue(0) |> enum,
-                    split.ValueAt(1).ParseInt().DefaultValue(0) |> enum
+                let inline edge_set_pair(index: int) : SampleSet * SampleSet =
+                    let split = pipe_separated_sets.ValueAt(index).DefaultValue("0:0").Split(':')
+                    split.ValueAt(0).ParseInt().ExpectValid(line) |> enum,
+                    split.ValueAt(1).ParseInt().ExpectValid(line) |> enum
                     
-                seq { 0 .. slides }
-                |> Seq.map edge_set_pair
-                |> List.ofSeq
+                let inline other_pairs_must_parse() =
+                    seq { slides + 1 .. pipe_separated_sets.Length - 1 }
+                    |> Seq.map edge_set_pair
+                    |> Seq.length
+                    |> ignore
+                    
+                let inline pairs_used_by_slides() =
+                    seq { 0 .. slides }
+                    |> Seq.map edge_set_pair
+                    |> List.ofSeq
+                    
+                other_pairs_must_parse()
+                pairs_used_by_slides()
                     
             Slider {
                 X = x

@@ -11,11 +11,12 @@ open Prelude.Formats.Osu
 [<AutoOpen>]
 module OsuSkinHelpers =
 
+    // todo: actually verify what osu does in various cases for colors
     let rgb_or (default_color: Color) (color: string) : Color =
-        let values = SplitValues.Parse(color, ',')
+        let values = color.Split(',')
         
         let inline color_component(i: int) =
-            values.IntOrDefault(i, 255) |> min 255 |> max 0
+            values.ValueAt(i).ParseInt().DefaultValue(255) |> min 255 |> max 0
             
         if values.Length >= 3 then
             Color.FromArgb(color_component(0), color_component(1), color_component(2))
@@ -23,10 +24,10 @@ module OsuSkinHelpers =
             default_color
 
     let rgba_or (default_color: Color) (color: string) : Color =
-        let values = SplitValues.Parse(color, ',')
+        let values = color.Split(',')
         
         let inline color_component(i: int) =
-            values.IntOrDefault(i, 255) |> min 255 |> max 0
+            values.ValueAt(i).ParseInt().DefaultValue(255) |> min 255 |> max 0
             
         if values.Length >= 3 then
             Color.FromArgb(color_component(3), color_component(0), color_component(1), color_component(2))
@@ -34,7 +35,7 @@ module OsuSkinHelpers =
             default_color
 
     let parse_comma_ints_or (default_value: int list) (s: string) : int list =
-        s.Split(",", StringSplitOptions.TrimEntries)
+        s.Split(',', StringSplitOptions.TrimEntries)
         |> Seq.choose (fun s ->
             match Single.TryParse(s, CultureInfo.InvariantCulture) with
             | true, v -> Some (int v)

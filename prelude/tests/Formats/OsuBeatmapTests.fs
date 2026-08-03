@@ -14,6 +14,8 @@ module OsuBeatmapTests =
     // OR osu! will skip over/ignore this line on load and it is removed when writing back
     // OR I have ruled that accepting this input is not a good idea even when allowed by osu!
 
+    // Therefore Interlude accepts a subset of what osu!stable accepts
+
     [<Test>]
     let TimingPoint_ValidParses () =
 
@@ -235,7 +237,7 @@ module OsuBeatmapTests =
         hitobject_tc("256,192,100,1,0,0:0:0:0:", "256,192,100.1,1,0")
         hitobject_tc("## PARSE ERROR", "256,192,1e40,1,0")
         hitobject_tc("## PARSE ERROR", "256,192,1e38,1,0")
-        // osu! will strip out notes that are beyond the end of the audio file or have negative timestamps
+        // osu! will strip out notes that are beyond the end of the audio file
         // Interlude will not but would reject them later as part of conversion
         // Therefore no real way to verify what is intended behaviour here
         hitobject_tc("256,192,2147483647,1,0,0:0:0:0:", "256,192,2147483648,1,0")
