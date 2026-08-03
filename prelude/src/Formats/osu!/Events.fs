@@ -90,7 +90,7 @@ type StoryboardCommandGuts =
         | VectorScale _ -> "V"
         | Rotate _ -> "R"
         | Color _ -> "C"
-    override this.ToString() =
+    override this.ToString() : string =
         match this with
         | Fade (a, b) -> sprintf "%O,%O" a b
         | Move ((x1, y1), (x2, y2)) -> sprintf "%i,%i,%i,%i" x1 y1 x2 y2
@@ -128,7 +128,7 @@ type Sprite =
         Y: int
         Commands: StoryboardCommand list
     }
-    override this.ToString() =
+    override this.ToString() : string =
         seq {
             yield sprintf "Sprite,%O,%O,%A,%i,%i"
                 this.Layer
@@ -154,7 +154,7 @@ type Animation =
         LoopType: LoopType
         Commands: StoryboardCommand list
     }
-    override this.ToString() =
+    override this.ToString() : string =
         seq {
             yield sprintf "Animation,%O,%O,%A,%i,%i,%i,%i,%i"
                 this.Layer
@@ -178,7 +178,8 @@ type StoryboardObject =
     | Background of string * int * int
     | Video of int * string * int * int
     | Break of int * int
-    override this.ToString() =
+    
+    override this.ToString() : string =
         match this with
         | Sprite sprite -> sprite.ToString()
         | Animation animation -> animation.ToString()

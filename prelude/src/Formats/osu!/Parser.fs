@@ -96,18 +96,19 @@ module OsuParser =
         let inline unsupported() = None
         
         let inline parse_background() =
+            ignore(values.ValueAt(1).ParseInt().ExpectValid())
             Background(
-                values.ValueAt(2).DefaultValue("").Trim(),
-                values.ValueAt(3).ParseInt().DefaultValue(0),
-                values.ValueAt(4).ParseInt().DefaultValue(0)
+                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
+                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
+                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
             )
             
         let inline parse_video() =
             Video(
-                values.ValueAt(1).ParseInt().DefaultValue(0),
-                values.ValueAt(2).DefaultValue("").Trim(),
-                values.ValueAt(3).ParseInt().DefaultValue(0),
-                values.ValueAt(4).ParseInt().DefaultValue(0)
+                values.ValueAt(1).ParseInt().ExpectValid(),
+                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
+                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
+                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
             )
             
         let inline parse_break() =
@@ -120,24 +121,26 @@ module OsuParser =
             Sample(
                 values.ValueAt(1).ParseInt().DefaultValue(0),
                 values.ValueAt(2).ParseInt().DefaultValue(0) |> enum,
-                values.ValueAt(3).DefaultValue("").Trim(),
+                values.ValueAt(3).DefaultValue("").Trim('"').Trim(),
                 values.ValueAt(4).ParseInt().DefaultValue(0)
             )
         
         let inline parse() =
-            match values.[0].Trim().ToLowerInvariant() with
+            match values.[0].Trim() with
             | "0"
-            | "background" -> Some(parse_background())
+            | "Background" -> Some(parse_background())
             | "1"
-            | "video" -> Some(parse_video())
+            | "Video" -> Some(parse_video())
             | "2"
-            | "break" -> Some(parse_break())
-            | "sample" -> Some(parse_sample())
-            | "sprite"
-            | "animation"
-            | _ -> unsupported()
+            | "Break" -> Some(parse_break())
+            | "Sample" -> Some(parse_sample())
+            | "Sprite"
+            | "Animation" -> unsupported()
+            | _ -> parse_failure "Unrecognised event type" line
         
-        if values.Length = 0 then
+        if line.StartsWith(' ') || line.StartsWith('_') then
+            parse_failure "Nested events not supported" line
+        elif values.Length = 0 then
             parse_failure "Empty line" line
         else parse()
 
@@ -165,7 +168,7 @@ module OsuParser =
         let events = ResizeArray<StoryboardObject>()
 
         while reader.Peek() >= 0 do
-            let line = reader.ReadLine().Trim()
+            let line = reader.ReadLine().TrimEnd()
             match line with
             | "" -> ()
             | _ when line.StartsWith("//") -> ()
@@ -194,7 +197,7 @@ module OsuParser =
             match state with
             | Nothing -> ()
             | Header ->
-                let parts = line.Split([|':'|], 2, StringSplitOptions.TrimEntries)
+                let parts = line.Split(':', 2, StringSplitOptions.TrimEntries)
                 if parts.Length = 2 then
                     section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
             | Events ->
