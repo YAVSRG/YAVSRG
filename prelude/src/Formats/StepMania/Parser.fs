@@ -108,7 +108,7 @@ module StepmaniaParser =
                 }
             | "SELECTABLE", "YES" :: _ -> { s with SELECTABLE = true }
             | "SELECTABLE", "NO" :: _ -> { s with SELECTABLE = false }
-            | "NOTES", steps_type :: author :: difficulty_type :: foot_meter :: groove :: notes :: _ ->
+            | "NOTES", steps_type :: author :: difficulty_type :: foot_meter :: _groove :: notes :: _ ->
                 match run parse_measures notes with
                 | Success(parsedNotes, _, _) ->
                     { s with

@@ -4,7 +4,7 @@ open Prelude
 open Prelude.Formats.Osu
 
 let trendy =
-    Beatmap.FromFile
+    Beatmap.TryReadFromFile
         @"C:\Users\percy\AppData\Local\osu!\Songs\1010949 greyl - Trendy\greyl - Trendy (Percyqaz) [Uncut Ver.].osu"
     |> Result.toOption
     |> Option.get
@@ -157,5 +157,5 @@ let main () =
                 Version = "Faster"
                 BeatmapID = 0
             }
-    }.ToFile
+    }.WriteToFile
         @"C:\Users\percy\AppData\Local\osu!\Songs\1010949 greyl - Trendy\greyl - Trendy (Percyqaz) [Faster].osu"

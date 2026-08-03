@@ -11,21 +11,31 @@ open Prelude.Formats.Osu
 [<AutoOpen>]
 module OsuSkinHelpers =
 
-    let rgb_or (default_color: Color) (s: string) : Color =
-        let split = s.Split(",", StringSplitOptions.TrimEntries)
-        match split |> List.ofArray with
-        | _ :: _ :: _ :: _ -> Color.FromArgb(CsvHelpers.int_or 0 255 split, CsvHelpers.int_or 1 255 split, CsvHelpers.int_or 2 255 split)
-        | _ -> default_color
+    // todo: actually verify what osu does in various cases for colors
+    let rgb_or (default_color: Color) (color: string) : Color =
+        let values = color.Split(',')
+        
+        let inline color_component(i: int) =
+            values.ValueAt(i).ParseInt().DefaultValue(255) |> min 255 |> max 0
+            
+        if values.Length >= 3 then
+            Color.FromArgb(color_component(0), color_component(1), color_component(2))
+        else
+            default_color
 
-    let rgba_or (default_color: Color) (s: string) : Color =
-        let split = s.Split(",", StringSplitOptions.TrimEntries)
-        match split |> List.ofArray with
-        | _ :: _ :: _ :: _ :: _ -> Color.FromArgb(CsvHelpers.int_or 3 255 split, CsvHelpers.int_or 0 255 split, CsvHelpers.int_or 1 255 split, CsvHelpers.int_or 2 255 split)
-        | _ :: _ :: _ :: _ -> Color.FromArgb(CsvHelpers.int_or 0 255 split, CsvHelpers.int_or 1 255 split, CsvHelpers.int_or 2 255 split)
-        | _ -> default_color
+    let rgba_or (default_color: Color) (color: string) : Color =
+        let values = color.Split(',')
+        
+        let inline color_component(i: int) =
+            values.ValueAt(i).ParseInt().DefaultValue(255) |> min 255 |> max 0
+            
+        if values.Length >= 3 then
+            Color.FromArgb(color_component(3), color_component(0), color_component(1), color_component(2))
+        else
+            default_color
 
     let parse_comma_ints_or (default_value: int list) (s: string) : int list =
-        s.Split(",", StringSplitOptions.TrimEntries)
+        s.Split(',', StringSplitOptions.TrimEntries)
         |> Seq.choose (fun s ->
             match Single.TryParse(s, CultureInfo.InvariantCulture) with
             | true, v -> Some (int v)

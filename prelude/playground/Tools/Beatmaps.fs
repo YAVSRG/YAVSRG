@@ -9,9 +9,9 @@ let main() =
         for file in Directory.EnumerateFiles(folder) do
             if file.ToLowerInvariant().EndsWith(".osu") then
                 File.Copy(file, "C:/Users/percy/Desktop/compare_original.osu", true)
-                match Beatmap.FromFile(file) with
+                match Beatmap.TryReadFromFile(file) with
                 | Ok b ->
-                    b.ToFile("C:/Users/percy/Desktop/compare_new.osu")
+                    b.WriteToFile("C:/Users/percy/Desktop/compare_new.osu")
                     printfn "Converted %s.\nCheck files for correctness" file
                     System.Console.ReadLine() |> ignore
                 | Error reason -> failwithf "Failed to parse %s: %s" file reason

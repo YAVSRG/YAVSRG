@@ -19,7 +19,7 @@ module RulesetOsuParityTests =
     let TEST_OSU_FILE_HASH =
         Beatmap.HashFromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_OSU_FILE =
-        Beatmap.FromFile(TEST_OSU_FILE_PATH) |> expect
+        Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_CHART =
         (Osu_To_Interlude.convert TEST_OSU_FILE { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = TEST_OSU_FILE_PATH } |> expect).Chart
 
@@ -29,7 +29,7 @@ module RulesetOsuParityTests =
     let TEST_OSU_FILE_HASH_2 =
         Beatmap.HashFromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_OSU_FILE_2 =
-        Beatmap.FromFile(TEST_OSU_FILE_PATH_2) |> expect
+        Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_CHART_2 =
         (Osu_To_Interlude.convert TEST_OSU_FILE_2 { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = TEST_OSU_FILE_PATH_2 } |> expect).Chart
 

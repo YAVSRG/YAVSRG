@@ -15,7 +15,7 @@ let osu_file =
         "Caramell - Caramelldansen (Speedycake Remix) (Pope Gadget) [THE POPE GADGET VS. PERCYQAZ SHUFFLEGANZA 1.05x].osu"
     )
 
-let dansen = Beatmap.FromFile osu_file |> Result.toOption |> Option.get
+let dansen = Beatmap.TryReadFromFile osu_file |> Result.toOption |> Option.get
 
 let mutable _msPerBeat = Unchecked.defaultof<_>
 
@@ -43,7 +43,7 @@ let chorus3_1 = 101.0f<measure> // blake
 let chorus3_2 = 109.0f<measure> // josh
 let end_of_song = 117.0f<measure>
 
-let sb = ResizeArray<StoryboardObject>()
+let sb = ResizeArray<StoryboardEvent>()
 
 // 90 60 130 60  = 340
 let frame_times =

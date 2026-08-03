@@ -78,6 +78,7 @@ module Localisation =
 
         Logging.Debug "Loaded locale '%s': %i strings" ctx.Name locale.Entries.Count
         ctx.Loaded
+        
     let try_load_file(name: string, path: string) : Result<LocaleFile, string> =
         try
             use stream = File.OpenRead(path)

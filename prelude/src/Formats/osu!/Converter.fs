@@ -132,7 +132,7 @@ module Osu_To_Interlude =
         match uninherited with
         | [] -> skip_conversion "Beatmap has no BPM points set"
         | x :: xs ->
-            let mutable current: float32<ms / beat> = float32 x.MsPerBeat * 1.0f<ms / beat>
+            let mutable current: float32<ms / beat> = abs(float32 x.MsPerBeat) * 1.0f<ms / beat>
             let mutable time = Time.of_number x.Time
 
             for b in xs do
@@ -141,7 +141,7 @@ module Osu_To_Interlude =
 
                 data.[current] <- data.[current] + Time.of_number b.Time - time
                 time <- Time.of_number b.Time
-                current <- float32 b.MsPerBeat * 1.0f<ms / beat>
+                current <- abs(float32 b.MsPerBeat) * 1.0f<ms / beat>
 
             if (not (data.ContainsKey current)) then
                 data.Add(current, 0.0f<ms>)
@@ -168,7 +168,7 @@ module Osu_To_Interlude =
         for p in points do
             match p with
             | Uninherited b ->
-                let mspb = float32 b.MsPerBeat * 1.0f<ms / beat>
+                let mspb = abs(float32 b.MsPerBeat) * 1.0f<ms / beat>
                 bpm.Add { Time = Time.of_number b.Time; Data = { Meter = b.Meter * 1<beat>; MsPerBeat = mspb } }
                 current_bpm_mult <- most_common_mspb / mspb
                 sv.Add { Time = Time.of_number b.Time; Data = current_bpm_mult }

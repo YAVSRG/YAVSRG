@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Osu
+namespace Prelude.Formats.Osu
 
 open System
 open System.Globalization
@@ -20,13 +20,6 @@ type Countdown =
     | Half = 2
     | Double = 3
 
-type SampleSet =
-    | None = 0
-    | Default = 0
-    | Normal = 1
-    | Soft = 2
-    | Drum = 3
-
 type General =
     {
         AudioFilename: string
@@ -46,7 +39,8 @@ type General =
         WidescreenStoryboard: bool
         SamplesMatchPlaybackRate: bool
     }
-    static member FromMap (properties: Map<string, string>) =
+
+    static member FromMap(properties: Map<string, string>) : General =
         {
             AudioFilename = MapHelpers.string_or "AudioFilename" "" properties
             AudioLeadIn = MapHelpers.int_or "AudioLeadIn" 0 properties
@@ -65,7 +59,8 @@ type General =
             WidescreenStoryboard = MapHelpers.int_or "WidescreenStoryboard" 0 properties <> 0
             SamplesMatchPlaybackRate = MapHelpers.int_or "SamplesMatchPlaybackRate" 0 properties <> 0
         }
-    member this.ToMap : (string * string) seq =
+
+    member this.ToMap: (string * string) seq =
         seq {
             yield "AudioFilename", this.AudioFilename
             yield "AudioLeadIn", this.AudioLeadIn.ToString()
@@ -93,6 +88,7 @@ type Editor =
         GridSize: int
         TimelineZoom: float
     }
+
     static member Default =
         {
             Bookmarks = []
@@ -101,12 +97,17 @@ type Editor =
             GridSize = 4
             TimelineZoom = 1.0
         }
-    static member FromMap (properties: Map<string, string>) =
+
+    static member FromMap(properties: Map<string, string>) : Editor =
         {
             Bookmarks =
                 MapHelpers.string_or "Bookmarks" "" properties
-                |> fun s -> s.Trim().Trim(',').Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
-                |> Seq.choose (fun s ->
+                |> fun s ->
+                    s
+                        .Trim()
+                        .Trim(',')
+                        .Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+                |> Seq.choose(fun s ->
                     match Int32.TryParse(s, CultureInfo.InvariantCulture) with
                     | true, v -> Some v
                     | false, _ -> None
@@ -117,7 +118,8 @@ type Editor =
             GridSize = MapHelpers.int_or "GridSize" 4 properties
             TimelineZoom = MapHelpers.float_or "TimelineZoom" 1.0 properties
         }
-    member this.ToMap : (string * string) seq =
+
+    member this.ToMap: (string * string) seq =
         seq {
             yield "Bookmarks", (this.Bookmarks |> Seq.map string |> String.concat ",")
             yield "DistanceSpacing", this.DistanceSpacing.ToString(CultureInfo.InvariantCulture)
@@ -139,6 +141,7 @@ type Metadata =
         BeatmapID: int
         BeatmapSetID: int
     }
+
     static member Default =
         {
             Title = ""
@@ -152,7 +155,8 @@ type Metadata =
             BeatmapID = 0
             BeatmapSetID = -1
         }
-    static member FromMap (properties: Map<string, string>) =
+
+    static member FromMap(properties: Map<string, string>) : Metadata =
         {
             Title = MapHelpers.string_or "Title" "" properties
             TitleUnicode = MapHelpers.string_or "TitleUnicode" "" properties
@@ -168,7 +172,8 @@ type Metadata =
             BeatmapID = MapHelpers.int_or "BeatmapID" 0 properties
             BeatmapSetID = MapHelpers.int_or "BeatmapSetID" -1 properties
         }
-    member this.ToMap : (string * string) seq =
+
+    member this.ToMap: (string * string) seq =
         seq {
             yield "Title", this.Title
             yield "TitleUnicode", this.TitleUnicode
@@ -191,7 +196,8 @@ type Difficulty =
         SliderMultiplier: float
         SliderTickRate: float
     }
-    static member FromMap (properties: Map<string, string>) =
+
+    static member FromMap(properties: Map<string, string>) : Difficulty =
         {
             HPDrainRate = MapHelpers.float_or "HPDrainRate" 5.0 properties
             CircleSize = MapHelpers.float_or "CircleSize" 5.0 properties
@@ -200,7 +206,8 @@ type Difficulty =
             SliderMultiplier = MapHelpers.float_or "SliderMultiplier" 1.4 properties
             SliderTickRate = MapHelpers.float_or "SliderTickRate" 1.0 properties
         }
-    member this.ToMap : (string * string) seq =
+
+    member this.ToMap: (string * string) seq =
         seq {
             yield "HPDrainRate", this.HPDrainRate.ToString(CultureInfo.InvariantCulture)
             yield "CircleSize", this.CircleSize.ToString(CultureInfo.InvariantCulture)

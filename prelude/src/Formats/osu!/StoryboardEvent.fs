@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Osu
+namespace Prelude.Formats.Osu
 
 type Easing =
     | Linear = 0
@@ -80,6 +80,7 @@ type StoryboardCommandGuts =
     | VectorScale of start_scale: (float * float) * end_scale: (float * float)
     | Rotate of start_radians: float * end_radians: float
     | Color of start_color: (int * int * int) * end_color: (int * int * int)
+
     member this.Shorthand =
         match this with
         | Fade _ -> "F"
@@ -90,16 +91,17 @@ type StoryboardCommandGuts =
         | VectorScale _ -> "V"
         | Rotate _ -> "R"
         | Color _ -> "C"
-    override this.ToString() =
+
+    override this.ToString() : string =
         match this with
-        | Fade (a, b) -> sprintf "%O,%O" a b
-        | Move ((x1, y1), (x2, y2)) -> sprintf "%i,%i,%i,%i" x1 y1 x2 y2
-        | Move_X (a, b) -> sprintf "%i,%i" a b
-        | Move_Y (a, b) -> sprintf "%i,%i" a b
-        | Scale (a, b) -> sprintf "%O,%O" a b
-        | VectorScale ((x1, y1), (x2, y2)) -> sprintf "%O,%O,%O,%O" x1 y1 x2 y2
-        | Rotate (a, b) -> sprintf "%O,%O" a b
-        | Color ((r1, g1, b1), (r2, g2, b2)) -> sprintf "%i,%i,%i,%i,%i,%i" r1 g1 b1 r2 g2 b2
+        | Fade(a, b) -> sprintf "%O,%O" a b
+        | Move((x1, y1), (x2, y2)) -> sprintf "%i,%i,%i,%i" x1 y1 x2 y2
+        | Move_X(a, b) -> sprintf "%i,%i" a b
+        | Move_Y(a, b) -> sprintf "%i,%i" a b
+        | Scale(a, b) -> sprintf "%O,%O" a b
+        | VectorScale((x1, y1), (x2, y2)) -> sprintf "%O,%O,%O,%O" x1 y1 x2 y2
+        | Rotate(a, b) -> sprintf "%O,%O" a b
+        | Color((r1, g1, b1), (r2, g2, b2)) -> sprintf "%i,%i,%i,%i,%i,%i" r1 g1 b1 r2 g2 b2
 
 // todo: normal/trigger/loop DU
 type StoryboardCommand =
@@ -109,14 +111,17 @@ type StoryboardCommand =
         EndTime: int
         Command: StoryboardCommandGuts
     }
-    member this.Format : string seq =
+
+    member this.Format: string seq =
         seq {
-            yield sprintf "%s,%i,%i,%i,%O"
-                this.Command.Shorthand
-                (int this.Easing)
-                this.StartTime
-                this.EndTime
-                this.Command
+            yield
+                sprintf
+                    "%s,%i,%i,%i,%O"
+                    this.Command.Shorthand
+                    (int this.Easing)
+                    this.StartTime
+                    this.EndTime
+                    this.Command
         }
 
 type Sprite =
@@ -128,14 +133,11 @@ type Sprite =
         Y: int
         Commands: StoryboardCommand list
     }
-    override this.ToString() =
+
+    override this.ToString() : string =
         seq {
-            yield sprintf "Sprite,%O,%O,%A,%i,%i"
-                this.Layer
-                this.Origin
-                this.File
-                this.X
-                this.Y
+            yield sprintf "Sprite,%O,%O,%A,%i,%i" this.Layer this.Origin this.File this.X this.Y
+
             for command in this.Commands do
                 for f in command.Format do
                     yield " " + f
@@ -154,35 +156,90 @@ type Animation =
         LoopType: LoopType
         Commands: StoryboardCommand list
     }
-    override this.ToString() =
+
+    override this.ToString() : string =
         seq {
-            yield sprintf "Animation,%O,%O,%A,%i,%i,%i,%i,%i"
-                this.Layer
-                this.Origin
-                this.File
-                this.X
-                this.Y
-                this.FrameCount
-                this.MsPerFrame
-                (int this.LoopType)
+            yield
+                sprintf
+                    "Animation,%O,%O,%A,%i,%i,%i,%i,%i"
+                    this.Layer
+                    this.Origin
+                    this.File
+                    this.X
+                    this.Y
+                    this.FrameCount
+                    this.MsPerFrame
+                    (int this.LoopType)
+
             for command in this.Commands do
                 for f in command.Format do
                     yield " " + f
         }
         |> String.concat "\n"
 
-type StoryboardObject =
+type StoryboardEvent =
     | Sprite of Sprite
     | Animation of Animation
     | Sample of int * Layer * string * int
     | Background of string * int * int
     | Video of int * string * int * int
     | Break of int * int
-    override this.ToString() =
+
+    override this.ToString() : string =
         match this with
         | Sprite sprite -> sprite.ToString()
         | Animation animation -> animation.ToString()
-        | Sample (time, layer, filename, volume) -> sprintf "Sample,%i,%i,%A,%i" time (int layer) filename volume
+        | Sample(time, layer, filename, volume) -> sprintf "Sample,%i,%i,%A,%i" time (int layer) filename volume
         | Background(filename, x, y) -> sprintf "0,0,%A,%i,%i" filename x y
         | Video(time, filename, x, y) -> sprintf "1,%i,%A,%i,%i" time filename x y
         | Break(start, finish) -> sprintf "2,%i,%i" start finish
+
+    static member TryParse(line: string) : StoryboardEvent option =
+        let values = line.Split(',')
+
+        let inline unsupported () = None
+
+        let inline parse_background () =
+            ignore(values.ValueAt(1).ParseInt().ExpectValid())
+
+            Background(
+                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
+                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
+                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
+            )
+
+        let inline parse_video () =
+            Video(
+                values.ValueAt(1).ParseInt().ExpectValid(),
+                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
+                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
+                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
+            )
+
+        let inline parse_break () =
+            Break(values.ValueAt(1).ParseInt().DefaultValue(0), values.ValueAt(2).ParseInt().DefaultValue(0))
+
+        let inline parse_sample () =
+            Sample(
+                values.ValueAt(1).ParseInt().DefaultValue(0),
+                values.ValueAt(2).ParseInt().DefaultValue(0) |> enum,
+                values.ValueAt(3).DefaultValue("").Trim('"').Trim(),
+                values.ValueAt(4).ParseInt().DefaultValue(0)
+            )
+
+        if line.StartsWith(' ') || line.StartsWith('_') then
+            unsupported()
+        else
+
+        match values.[0].Trim() with
+        | "0"
+        | "Background" -> Some(parse_background())
+        | "1"
+        | "Video" -> Some(parse_video())
+        | "2"
+        | "Break" -> Some(parse_break())
+        | "Sample" -> Some(parse_sample())
+        | "3"
+        | "Sprite"
+        | "Animation" -> unsupported()
+        | _ -> raise(ParseException([| line, "Unrecognised event type" |]))

@@ -14,7 +14,7 @@ module ScoreScreenStatsTests =
 
     let TEST_SCORE =
         let beatmap_path = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
-        let beatmap = Beatmap.FromFile(beatmap_path) |> expect
+        let beatmap = Beatmap.TryReadFromFile(beatmap_path) |> expect
 
         let chart =
             (Osu_To_Interlude.convert

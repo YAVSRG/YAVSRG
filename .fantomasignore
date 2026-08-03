@@ -1,8 +1,12 @@
+**/bin
+**/obj
 interlude
 engine
 libraries
 prelude/src
 prelude/playground
 prelude/tests/Rulesets/RulesetOsuParityTests.fs
+!prelude/src/Formats/osu!
+prelude/src/Formats/osu!/Converter.fs
 tools
 online

@@ -164,8 +164,8 @@ module Exports =
         try
             let beatmap = OsuExport.convert options chart chart_meta
 
-            let file_name = beatmap.Filename
-            let archive_file_name = beatmap.Filename.Replace(".osu", ".osz")
+            let file_name = beatmap.Filename()
+            let archive_file_name = file_name.Replace(".osu", ".osz")
             let archive_path = Path.Combine(export_folder, archive_file_name)
 
             use fs = File.Open(archive_path, FileMode.Create)
@@ -174,7 +174,7 @@ module Exports =
             do
                 let osu_file_entry = archive.CreateEntry(file_name)
                 use osu_file_stream = osu_file_entry.Open()
-                beatmap.ToStream (osu_file_stream, false)
+                beatmap.WriteToStream (osu_file_stream, false)
 
             do
                 match chart_meta.Background.Path with

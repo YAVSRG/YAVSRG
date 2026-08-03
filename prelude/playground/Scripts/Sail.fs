@@ -6,7 +6,7 @@ open Prelude.Formats.Osu
 let source =
     @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637823398692216004-AWOLNATION - Sail (Official Music Video)\AWOLNATION - Sail (Percyqaz) [SAIL WITH ME INTO THE DARK].osu"
 
-let sail = Beatmap.FromFile source |> Result.toOption |> Option.get
+let sail = Beatmap.TryReadFromFile(source) |> Result.toOption |> Option.get
 
 let note_gradient (start_nps, end_nps, start_time, end_time) =
 
@@ -159,4 +159,4 @@ let renderedLines = lines |> List.concat |> List.map line
 let main () =
     { sail with
         Timing = (line start) :: renderedLines
-    }.ToFile source
+    }.WriteToFile source

@@ -11,7 +11,7 @@ module ChartDatabaseTests =
 
     let TEST_OSU_FILE_PATH = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
     let TEST_OSU_FILE_HASH = Beatmap.HashFromFile(TEST_OSU_FILE_PATH) |> expect
-    let TEST_OSU_FILE = Beatmap.FromFile(TEST_OSU_FILE_PATH) |> expect
+    let TEST_OSU_FILE = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
 
     let TEST_IMPORT =
         (Osu_To_Interlude.convert

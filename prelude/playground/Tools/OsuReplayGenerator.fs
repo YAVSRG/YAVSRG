@@ -6,7 +6,6 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts
-open Prelude.Formats.Osu
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.OsuClientInterop
@@ -64,7 +63,7 @@ let generate_scenario (note_data: NoteData) (replay: Replay) (od: float32) (mods
         .Start(Diagnostics.ProcessStartInfo(file_name, UseShellExecute = true))
         .WaitForExit()
 
-    let beatmap_hash = Beatmap.Hash beatmap
+    let beatmap_hash = beatmap.GenerateExportHash()
 
     if recent_beatmap_hash <> beatmap_hash then
         Threading.Thread.Sleep(1000)
