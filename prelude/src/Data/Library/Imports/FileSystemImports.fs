@@ -8,8 +8,9 @@ open Prelude.Formats
 open Prelude.Data
 open Prelude.Data.Library
 
-module Imports =
+module FileSystemImports =
 
+    // todo: these are not imports, they should go somewhere else
     let delete_folder =
         { new Async.Queue<string, bool>() with
             override this.Handle(path: string) =

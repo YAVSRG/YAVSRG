@@ -32,13 +32,13 @@ module OnlineImports =
                     progress Faulted
                     return Error "Download failure"
                 | true ->
-                    match! Imports.convert_stepmania_pack_zip(target, name, library, progress) with
+                    match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, progress) with
                     | Ok result ->
-                        Imports.delete_file.Request(target, ignore)
+                        FileSystemImports.delete_file.Request(target, ignore)
                         progress Complete
                         return Ok result
                     | Error reason ->
-                        Imports.delete_file.Request(target, ignore)
+                        FileSystemImports.delete_file.Request(target, ignore)
                         progress Faulted
                         return Error reason
             with err ->
@@ -56,13 +56,13 @@ module OnlineImports =
                     progress Faulted
                     return Error "Download failure"
                 | true ->
-                    match! Imports.auto_detect_import(target, library, progress) with
+                    match! FileSystemImports.auto_detect_import(target, library, progress) with
                     | Ok result ->
-                        Imports.delete_file.Request(target, ignore)
+                        FileSystemImports.delete_file.Request(target, ignore)
                         progress Complete
                         return Ok result
                     | Error reason ->
-                        Imports.delete_file.Request(target, ignore)
+                        FileSystemImports.delete_file.Request(target, ignore)
                         progress Faulted
                         return Error reason
             with err ->

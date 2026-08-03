@@ -151,7 +151,7 @@
     <Compile Include="Data\Library\Views\Filtering.fs" />
     <Compile Include="Data\Library\Views\Sorting.fs" />
     <Compile Include="Data\Library\Imports\Shared.fs" />
-    <Compile Include="Data\Library\Imports\FileSystem.fs" />
+    <Compile Include="Data\Library\Imports\FileSystemImports.fs" />
     <Compile Include="Data\Library\Imports\Mounts.fs" />
     <Compile Include="Data\Library\Imports\OnlineImports.fs" />
     <Compile Include="Data\Library\Exports.fs" />

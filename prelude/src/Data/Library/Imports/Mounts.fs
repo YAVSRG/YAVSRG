@@ -41,7 +41,7 @@ module Mount =
                 | Pack packname ->
                     Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
                     let config = ConversionOptions.Pack(packname, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles)
-                    let! result = Imports.convert_pack_folder(source.SourceFolder, config, library, progress)
+                    let! result = FileSystemImports.convert_pack_folder(source.SourceFolder, config, library, progress)
 
                     log_conversion result
                     source.LastImported <- Some DateTime.UtcNow
@@ -57,7 +57,7 @@ module Mount =
                         let pack_name = Path.GetFileName pack_folder
 
                         let! result =
-                            Imports.convert_pack_folder(
+                            FileSystemImports.convert_pack_folder(
                                 pack_folder,
                                 ConversionOptions.Pack(pack_name, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles),
                                 library,
