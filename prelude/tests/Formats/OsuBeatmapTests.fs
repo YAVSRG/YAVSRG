@@ -34,7 +34,7 @@ module OsuBeatmapTests =
 
         Assert.AreEqual(default_values, TimingPoint.FromString("100.1,250.1"))
 
-    let inline parse_tp (expected: string, input: string) =
+    let parse_tp (expected: string, input: string) =
         let result =
             try
                 TimingPoint.FromString(input).ToString()
@@ -196,7 +196,7 @@ module OsuBeatmapTests =
         hitsample_tc("0:0:0:0:", "0:0:0:-2147483648:")
         hitsample_tc("0:0:0:100:", "0:0:0:2147483647:")
 
-    let inline parse_hobj (expected: string, input: string) =
+    let parse_hobj (expected: string, input: string) =
         let result =
             try
                 HitObject.FromString(input).ToString()
@@ -403,3 +403,38 @@ module OsuBeatmapTests =
         parse_hobj("## PARSE ERROR", "0,0,1,2,0,B,0,70,0|0,0:0|0:0|AAA")
         parse_hobj("0,0,1,2,0,B,1,70,0|0,2147483647:0|0:0,0:0:0:0:", "0,0,1,2,0,B,0,70,0|0,2147483647:0")
         parse_hobj("## PARSE ERROR", "0,0,1,2,0,B,0,70,0|0,2147483648:0")
+
+    let parse_evt (expected: string, input: string) =
+        let result =
+            try
+                match OsuParser.parse_storyboard_event(input) with
+                | Some v -> v.ToString()
+                | None -> "## UNSUPPORTED"
+            with _ ->
+                "## PARSE ERROR"
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    let Event_ValidParses_Background () =
+        
+        parse_evt("""0,0,"bg.png",0,0""", "0,0,\"bg.png\",0,0")
+        parse_evt("""0,0,"bg.png",0,0""", "0,0,bg.png,0,0")
+        parse_evt("""0,0,"bg.png",0,0""", "0,0,bg.png")
+        parse_evt("## PARSE ERROR", " 0,0,\"bg.png\",0,0")
+        parse_evt("## PARSE ERROR", "_0,0,\"bg.png\",0,0")
+        parse_evt("""0,0,"bg.png",0,0""", "\t0,0,bg.png,0,0")
+        // osu! seems to use Int32.Parse and then write it back as a Single, for whatever reason
+        //parse_evt("""0,0,"bg.png",-2.147484E+09,2.147484E+09""", "0,0,bg.png,-2147483648,2147483647")
+        parse_evt("""0,0,"bg.png",-2147483648,2147483647""", "0,0,bg.png,-2147483648,2147483647")
+        parse_evt("## PARSE ERROR", "0,0,bg.png,-2147483649,2147483647")
+        parse_evt("## PARSE ERROR", "0,0,bg.png,-2147483648,2147483648")
+        parse_evt("""0,0,"bg.png",0,0""", "Background,0,bg.png,0,0")
+        parse_evt("""0,0,"bg.png",0,0""", "\tBackground,0,bg.png,0,0")
+        parse_evt("""0,0,"bg.png",0,0""", "\tBackground\t,0,bg.png,0,0")
+        parse_evt("## PARSE ERROR", "background,0,bg.png,0,0")
+        // osu! accepts this
+        parse_evt("## PARSE ERROR", "00,0,bg.png,0,0")
+        // This thing has to parse as an Int32 but is discarded
+        parse_evt("""0,0,"bg.png",0,0""", "0,-2147483648,bg.png,0,0")
+        parse_evt("## PARSE ERROR", "0,-2147483649,bg.png,0,0")
