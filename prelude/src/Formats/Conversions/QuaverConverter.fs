@@ -107,7 +107,7 @@ module Quaver_To_Interlude =
         finish_holds Time.infinity
         output.ToArray()
 
-    let convert (b: QuaverChart) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
+    let convert (b: QuaverChart) (action: ConversionContext) : Result<ImportChart, SkippedConversion> =
         try
             let keys = int b.Mode
 
@@ -117,10 +117,10 @@ module Quaver_To_Interlude =
             if b.HitObjects.Length < 20 then
                 skip_conversion "Chart has less than 20 notes"
 
-            let path = Path.GetDirectoryName action.Source
+            let path = Path.GetDirectoryName action.OriginalPath
 
             let md5 =
-                match QuaverChart.HashFromFile action.Source with
+                match QuaverChart.HashFromFile action.OriginalPath with
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .qua file: %s" reason)
 
@@ -203,7 +203,7 @@ module Quaver_To_Interlude =
 
             Ok {
                 Header = header
-                LoadedFromPath = action.Source
+                LoadedFromPath = action.OriginalPath
                 PackName = action.Config.PackName
                 Chart = {
                     Keys = keys
@@ -214,7 +214,7 @@ module Quaver_To_Interlude =
             }
         with
         | :? ConversionSkipException as skip_reason ->
-            Error (action.Source, skip_reason.msg)
+            Error { OriginalPath = action.OriginalPath; Reason = skip_reason.Reason }
         | other_error ->
-            Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
-            Error (action.Source, other_error.Message)
+            Logging.Debug "Unexpected error converting %s: %O" action.OriginalPath other_error
+            Error { OriginalPath = action.OriginalPath; Reason = other_error.Message }

@@ -119,7 +119,7 @@ let read_scores () =
                     beatmap
                     {
                         Config = ConversionOptions.Pack("osu!", None, Link)
-                        Source = osu_file
+                        OriginalPath = osu_file
                     }
                 |> expect
                 |> Some,

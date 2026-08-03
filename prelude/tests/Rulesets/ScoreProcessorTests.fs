@@ -457,7 +457,7 @@ module ScoreProcessorTests =
             beatmap
             {
                 Config = ConversionOptions.Pack("osu!", None, Link)
-                Source = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+                OriginalPath = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
             }
          |> expect)
             .Chart

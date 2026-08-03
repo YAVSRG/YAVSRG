@@ -177,7 +177,7 @@ module Osu_To_Interlude =
 
         bpm.ToArray(), sv.ToArray()
 
-    let internal convert_internal (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
+    let internal convert_internal (b: Beatmap) (action: ConversionContext) : Result<ImportChart, SkippedConversion> =
         try
             let keys = b.Difficulty.CircleSize |> int
 
@@ -190,7 +190,7 @@ module Osu_To_Interlude =
             if b.Objects.Length < 20 then
                 skip_conversion "Beatmap has less than 20 notes"
 
-            let path = Path.GetDirectoryName action.Source
+            let path = Path.GetDirectoryName action.OriginalPath
 
             let rec find_background_file e =
                 match e with
@@ -199,7 +199,7 @@ module Osu_To_Interlude =
                 | [] -> ""
 
             let md5 =
-                match Beatmap.HashFromFile action.Source with
+                match Beatmap.HashFromFile action.OriginalPath with
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .osu file: %s" reason)
 
@@ -266,7 +266,7 @@ module Osu_To_Interlude =
 
             Ok {
                 Header = header
-                LoadedFromPath = action.Source
+                LoadedFromPath = action.OriginalPath
                 PackName = action.Config.PackName
                 Chart = {
                     Keys = keys
@@ -277,12 +277,12 @@ module Osu_To_Interlude =
             }
         with
         | :? ConversionSkipException as skip_reason ->
-            Error (action.Source, skip_reason.msg)
+            Error { OriginalPath = action.OriginalPath; Reason = skip_reason.Reason }
         | other_error ->
-            Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
-            Error (action.Source, other_error.Message)
+            Logging.Debug "Unexpected error converting %s: %O" action.OriginalPath other_error
+            Error { OriginalPath = action.OriginalPath; Reason = other_error.Message }
 
-    let convert (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
+    let convert (b: Beatmap) (action: ConversionContext) : Result<ImportChart, SkippedConversion> =
         match convert_internal b action with
         | Ok x -> Ok { x with ImportChart.Chart.SV = cleaned_sv x.Chart.SV }
         | error -> error

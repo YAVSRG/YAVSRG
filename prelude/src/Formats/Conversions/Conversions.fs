@@ -33,13 +33,20 @@ type ConversionOptions =
             PackName = pack_name
         }
 
-type ConversionAction =
+type ConversionContext =
     {
         Config: ConversionOptions
-        Source: string
+        OriginalPath: string
     }
 
-type SkippedConversion = string * string
+[<Struct>]
+type SkippedConversion =
+    {
+        OriginalPath: string
+        Reason: string
+    }
+    override this.ToString() = sprintf "%s -> %s" this.OriginalPath this.Reason
+    
 type ConversionResult =
     {
         ConvertedCharts: int
@@ -52,7 +59,7 @@ type ConversionResult =
             SkippedCharts = res1.SkippedCharts @ res2.SkippedCharts
         }
 
-exception ConversionSkipException of msg: string
+exception ConversionSkipException of Reason: string
 
 (*
     Overall utilities to dynamically load different chart files and convert to Interlude format

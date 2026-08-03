@@ -20,7 +20,7 @@ module FileSystemImports =
                         let mutable remaining_retries = 3
                         while remaining_retries > 0 do
                             try
-                                Directory.Delete (path, true)
+                                Directory.Delete(path, true)
                                 remaining_retries <- -1
                             with err ->
                                 remaining_retries <- remaining_retries - 1
@@ -59,12 +59,8 @@ module FileSystemImports =
                 |> Seq.collect (
                     function
                     | ChartFile _ as file ->
-                        let action = { Config = config; Source = file }
-                        try
-                            convert_chart_file action
-                        with err ->
-                            Logging.Error "Unhandled exception converting '%s': %O" file err
-                            []
+                        let ctx = { Config = config; OriginalPath = file }
+                        convert_chart_file(ctx)
                     | _ -> []
                 )
                 |> Seq.map (
@@ -73,8 +69,7 @@ module FileSystemImports =
                         match import.Chart.CheckForErrors() with
                         | Ok chart -> Ok { import with Chart = chart }
                         | Error reason ->
-                            Logging.Error "Conversion produced corrupt chart (%s): %s" import.LoadedFromPath reason
-                            Error (import.LoadedFromPath, sprintf "Corrupt (%s)" reason)
+                            Error { OriginalPath = import.LoadedFromPath; Reason = sprintf "Conversion produced corrupt chart (%s)" reason }
                     | Error skipped_conversion -> Error skipped_conversion
                 )
                 |> List.ofSeq
@@ -138,7 +133,7 @@ module FileSystemImports =
                     && Directory.EnumerateFileSystemEntries(extracted_folder) |> Seq.isEmpty |> not
                 then
                     Logging.Error "Can't extract osz to %s because that folder exists already" extracted_folder
-                    results <- { results with SkippedCharts = (osz, "Extraction failed") :: results.SkippedCharts }
+                    results <- { results with SkippedCharts = { OriginalPath = osz; Reason = "Extraction failed" } :: results.SkippedCharts }
                 else
                     try
                         ZipFile.ExtractToDirectory(osz, extracted_folder)
@@ -147,7 +142,7 @@ module FileSystemImports =
                         results <- ConversionResult.Combine result results
                     with err ->
                         Logging.Error "Unexpected error in '%s': %O" extracted_folder err
-                        results <- { results with SkippedCharts = (extracted_folder, sprintf "Unexpected error: %s" err.Message) :: results.SkippedCharts }
+                        results <- { results with SkippedCharts = { OriginalPath = extracted_folder; Reason = sprintf "Unexpected error: %s" err.Message } :: results.SkippedCharts }
                 progress <| Processing (i + 1, files.Length)
             return results
         }

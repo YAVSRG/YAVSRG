@@ -16,7 +16,7 @@ let main () =
                 for converted in
                     convert_chart_file
                         {
-                            Source = file
+                            OriginalPath = file
                             Config = ConversionOptions.Pack("osu!", None, Link)
                         } do
                     match converted with

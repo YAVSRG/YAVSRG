@@ -224,9 +224,9 @@ module StepMania_To_Interlude =
 
         keys, states |> Array.ofSeq, points |> Array.ofSeq
 
-    let convert (sm: StepManiaFile) (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
+    let convert (sm: StepManiaFile) (action: ConversionContext) : Result<ImportChart, SkippedConversion> list =
 
-        let path = Path.GetDirectoryName action.Source
+        let path = Path.GetDirectoryName action.OriginalPath
 
         let rec metadata_fallback (choices: string list) : string =
             match choices with
@@ -376,7 +376,7 @@ module StepMania_To_Interlude =
 
                 Ok {
                     Header = header
-                    LoadedFromPath = action.Source
+                    LoadedFromPath = action.OriginalPath
                     PackName = action.Config.PackName
                     Chart = {
                         Keys = keys
@@ -387,9 +387,9 @@ module StepMania_To_Interlude =
                 }
             with
             | :? ConversionSkipException as skip_reason ->
-                Error (action.Source, skip_reason.msg)
+                Error { OriginalPath = action.OriginalPath; Reason = skip_reason.Reason }
             | other_error ->
-                Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
-                Error (action.Source, other_error.Message)
+                Logging.Debug "Unexpected error converting %s: %O" action.OriginalPath other_error
+                Error { OriginalPath = action.OriginalPath; Reason = other_error.Message }
 
         sm.Charts |> List.map convert_difficulty

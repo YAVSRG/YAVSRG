@@ -156,7 +156,7 @@ module ChartRateDetectionTests =
                     beatmap
                     {
                         Config = ConversionOptions.Pack("osu!", None, Link)
-                        Source = "./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
+                        OriginalPath = "./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
                     }
             )
             |> List.ofSeq
@@ -182,7 +182,7 @@ module ChartRateDetectionTests =
                     beatmap
                     {
                         Config = ConversionOptions.Pack("osu!", None, Link)
-                        Source = "./Data/Osz/989392 DJ Sharpnel - World Sound.osz"
+                        OriginalPath = "./Data/Osz/989392 DJ Sharpnel - World Sound.osz"
                     }
             )
             |> List.ofSeq
