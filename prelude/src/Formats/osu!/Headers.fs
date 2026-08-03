@@ -46,7 +46,7 @@ type General =
             AudioLeadIn = MapHelpers.int_or "AudioLeadIn" 0 properties
             PreviewTime = MapHelpers.int_or "PreviewTime" -1 properties
             Countdown = MapHelpers.int_or "Countdown" 1 properties |> enum
-            SampleSet = MapHelpers.enum_or "SampleSet" SampleSet.Normal properties
+            SampleSet = MapHelpers.enum_or "SampleSet" SampleSet.Soft properties
             StackLeniency = MapHelpers.float_or "StackLeniency" 0.7 properties
             Mode = MapHelpers.enum_or "Mode" Gamemode.OSU properties
             LetterboxInBreaks = MapHelpers.int_or "LetterBoxInBreaks" 0 properties <> 0
@@ -92,8 +92,8 @@ type Editor =
     static member Default =
         {
             Bookmarks = []
-            DistanceSpacing = 1.0
-            BeatDivisor = 8
+            DistanceSpacing = 0.8
+            BeatDivisor = 4
             GridSize = 4
             TimelineZoom = 1.0
         }
@@ -199,9 +199,9 @@ type Difficulty =
 
     static member FromMap(properties: Map<string, string>) : Difficulty =
         {
-            HPDrainRate = MapHelpers.float_or "HPDrainRate" 5.0 properties
-            CircleSize = MapHelpers.float_or "CircleSize" 5.0 properties
-            OverallDifficulty = MapHelpers.float_or "OverallDifficulty" 5.0 properties
+            HPDrainRate = MapHelpers.float_or "HPDrainRate" 8.0 properties
+            CircleSize = MapHelpers.float_or "CircleSize" 4.0 properties
+            OverallDifficulty = MapHelpers.float_or "OverallDifficulty" 8.0 properties
             ApproachRate = MapHelpers.float_or "ApproachRate" 5.0 properties
             SliderMultiplier = MapHelpers.float_or "SliderMultiplier" 1.4 properties
             SliderTickRate = MapHelpers.float_or "SliderTickRate" 1.0 properties
