@@ -1,10 +1,10 @@
-﻿namespace Prelude.Tests.Formats
+namespace Prelude.Tests.Formats
 
 open NUnit.Framework
 open Prelude.Formats.Osu
 
 module StoryboardEventTests =
-    
+
     // Prelude can only parse Background/Video/Sample events, events used in full storyboards are skipped on parse
     // Prelude has a representation for more complicated storyboard events (but not loops) and can write them to file
     // (I used to use it as a storyboard generator for a few projects)

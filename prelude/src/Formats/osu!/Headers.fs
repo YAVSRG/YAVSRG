@@ -42,22 +42,22 @@ type General =
 
     static member FromMap(properties: Map<string, string>) : General =
         {
-            AudioFilename = MapHelpers.string_or "AudioFilename" "" properties
-            AudioLeadIn = MapHelpers.int_or "AudioLeadIn" 0 properties
-            PreviewTime = MapHelpers.int_or "PreviewTime" -1 properties
-            Countdown = MapHelpers.int_or "Countdown" 1 properties |> enum
-            SampleSet = MapHelpers.enum_or "SampleSet" SampleSet.Soft properties
-            StackLeniency = MapHelpers.float_or "StackLeniency" 0.7 properties
-            Mode = MapHelpers.enum_or "Mode" Gamemode.OSU properties
-            LetterboxInBreaks = MapHelpers.int_or "LetterBoxInBreaks" 0 properties <> 0
-            UseSkinSprites = MapHelpers.int_or "UseSkinSprites" 0 properties <> 0
-            OverlayPosition = MapHelpers.enum_or "OverlayPosition" OverlayPosition.NoChange properties
-            SkinPreference = MapHelpers.string_or "SkinPreference" "" properties
-            EpilepsyWarning = MapHelpers.int_or "EpilepsyWarning" 0 properties <> 0
-            CountdownOffset = MapHelpers.int_or "CountdownOffset" 0 properties
-            SpecialStyle = MapHelpers.int_or "SpecialStyle" 0 properties <> 0
-            WidescreenStoryboard = MapHelpers.int_or "WidescreenStoryboard" 0 properties <> 0
-            SamplesMatchPlaybackRate = MapHelpers.int_or "SamplesMatchPlaybackRate" 0 properties <> 0
+            AudioFilename = properties.StringOrDefault("AudioFilename", "")
+            AudioLeadIn = properties.IntOrDefault("AudioLeadIn", 0)
+            PreviewTime = properties.IntOrDefault("PreviewTime", -1)
+            Countdown = properties.IntOrDefault("Countdown", 1) |> enum
+            SampleSet = properties.EnumOrDefault("SampleSet", SampleSet.Soft)
+            StackLeniency = properties.DoubleOrDefault("StackLeniency", 0.7)
+            Mode = properties.EnumOrDefault("Mode", Gamemode.OSU)
+            LetterboxInBreaks = properties.IntOrDefault("LetterBoxInBreaks", 0) <> 0
+            UseSkinSprites = properties.IntOrDefault("UseSkinSprites", 0) <> 0
+            OverlayPosition = properties.EnumOrDefault("OverlayPosition", OverlayPosition.NoChange)
+            SkinPreference = properties.StringOrDefault("SkinPreference", "")
+            EpilepsyWarning = properties.IntOrDefault("EpilepsyWarning", 0) <> 0
+            CountdownOffset = properties.IntOrDefault("CountdownOffset", 0)
+            SpecialStyle = properties.IntOrDefault("SpecialStyle", 0) <> 0
+            WidescreenStoryboard = properties.IntOrDefault("WidescreenStoryboard", 0) <> 0
+            SamplesMatchPlaybackRate = properties.IntOrDefault("SamplesMatchPlaybackRate", 0) <> 0
         }
 
     member this.ToMap: (string * string) seq =
@@ -101,27 +101,26 @@ type Editor =
     static member FromMap(properties: Map<string, string>) : Editor =
         {
             Bookmarks =
-                MapHelpers.string_or "Bookmarks" "" properties
-                |> fun s ->
-                    s
-                        .Trim()
-                        .Trim(',')
-                        .Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+                properties
+                    .StringOrDefault("Bookmarks", "")
+                    .Trim()
+                    .Trim(',')
+                    .Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
                 |> Seq.choose(fun s ->
                     match Int32.TryParse(s, CultureInfo.InvariantCulture) with
                     | true, v -> Some v
                     | false, _ -> None
                 )
                 |> List.ofSeq
-            DistanceSpacing = MapHelpers.float_or "DistanceSpacing" 1.0 properties
-            BeatDivisor = MapHelpers.int_or "BeatDivisor" 8 properties
-            GridSize = MapHelpers.int_or "GridSize" 4 properties
-            TimelineZoom = MapHelpers.float_or "TimelineZoom" 1.0 properties
+            DistanceSpacing = properties.DoubleOrDefault("DistanceSpacing", 1.0)
+            BeatDivisor = properties.IntOrDefault("BeatDivisor", 8)
+            GridSize = properties.IntOrDefault("GridSize", 4)
+            TimelineZoom = properties.DoubleOrDefault("TimelineZoom", 1.0)
         }
 
     member this.ToMap: (string * string) seq =
         seq {
-            yield "Bookmarks", (this.Bookmarks |> Seq.map string |> String.concat ",")
+            yield "Bookmarks", this.Bookmarks |> Seq.map _.ToString() |> String.concat ","
             yield "DistanceSpacing", this.DistanceSpacing.ToString(CultureInfo.InvariantCulture)
             yield "BeatDivisor", this.BeatDivisor.ToString()
             yield "GridSize", this.GridSize.ToString()
@@ -158,19 +157,20 @@ type Metadata =
 
     static member FromMap(properties: Map<string, string>) : Metadata =
         {
-            Title = MapHelpers.string_or "Title" "" properties
-            TitleUnicode = MapHelpers.string_or "TitleUnicode" "" properties
-            Artist = MapHelpers.string_or "Artist" "" properties
-            ArtistUnicode = MapHelpers.string_or "ArtistUnicode" "" properties
-            Creator = MapHelpers.string_or "Creator" "" properties
-            Version = MapHelpers.string_or "Version" "" properties
-            Source = MapHelpers.string_or "Source" "" properties
+            Title = properties.StringOrDefault("Title", "")
+            TitleUnicode = properties.StringOrDefault("TitleUnicode", "")
+            Artist = properties.StringOrDefault("Artist", "")
+            ArtistUnicode = properties.StringOrDefault("ArtistUnicode", "")
+            Creator = properties.StringOrDefault("Creator", "")
+            Version = properties.StringOrDefault("Version", "")
+            Source = properties.StringOrDefault("Source", "")
             Tags =
-                MapHelpers.string_or "Tags" "" properties
-                |> fun s -> s.Split(' ', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+                properties
+                    .StringOrDefault("Tags", "")
+                    .Split(' ', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
                 |> List.ofSeq
-            BeatmapID = MapHelpers.int_or "BeatmapID" 0 properties
-            BeatmapSetID = MapHelpers.int_or "BeatmapSetID" -1 properties
+            BeatmapID = properties.IntOrDefault("BeatmapID", 0)
+            BeatmapSetID = properties.IntOrDefault("BeatmapSetID", -1)
         }
 
     member this.ToMap: (string * string) seq =
@@ -182,7 +182,7 @@ type Metadata =
             yield "Creator", this.Creator
             yield "Version", this.Version
             yield "Source", this.Source
-            yield "Tags", (this.Tags |> String.concat " ")
+            yield "Tags", this.Tags |> String.concat " "
             yield "BeatmapID", this.BeatmapID.ToString()
             yield "BeatmapSetID", this.BeatmapSetID.ToString()
         }
@@ -199,12 +199,12 @@ type Difficulty =
 
     static member FromMap(properties: Map<string, string>) : Difficulty =
         {
-            HPDrainRate = MapHelpers.float_or "HPDrainRate" 8.0 properties
-            CircleSize = MapHelpers.float_or "CircleSize" 4.0 properties
-            OverallDifficulty = MapHelpers.float_or "OverallDifficulty" 8.0 properties
-            ApproachRate = MapHelpers.float_or "ApproachRate" 5.0 properties
-            SliderMultiplier = MapHelpers.float_or "SliderMultiplier" 1.4 properties
-            SliderTickRate = MapHelpers.float_or "SliderTickRate" 1.0 properties
+            HPDrainRate = properties.DoubleOrDefault("HPDrainRate", 8.0)
+            CircleSize = properties.DoubleOrDefault("CircleSize", 4.0)
+            OverallDifficulty = properties.DoubleOrDefault("OverallDifficulty", 8.0)
+            ApproachRate = properties.DoubleOrDefault("ApproachRate", 5.0)
+            SliderMultiplier = properties.DoubleOrDefault("SliderMultiplier", 1.4)
+            SliderTickRate = properties.DoubleOrDefault("SliderTickRate", 1.0)
         }
 
     member this.ToMap: (string * string) seq =

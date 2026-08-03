@@ -100,18 +100,18 @@ type General =
         }
     static member FromMap (properties: Map<string, string>) =
         {
-            Name = MapHelpers.string_or "Name" "" properties
-            Author = MapHelpers.string_or "Author" "" properties
-            Version = MapHelpers.string_or "Version" "" properties
-            AnimationFramerate = MapHelpers.int_or "AnimationFramerate" -1 properties
-            AllowSliderBallTint = MapHelpers.int_or "AllowSliderBallTint" 0 properties <> 0
-            ComboBurstRandom = MapHelpers.int_or "ComboBurstRandom" 0 properties <> 0
-            CursorCentre = MapHelpers.int_or "CursorCentre" 1 properties <> 0
-            CursorExpand = MapHelpers.int_or "CursorExpand" 1 properties <> 0
-            CursorRotate = MapHelpers.int_or "CursorRotate" 1 properties <> 0
-            CursorTrailRotate = MapHelpers.int_or "CursorTrailRotate" 1 properties <> 0
+            Name = properties.StringOrDefault("Name", "")
+            Author = properties.StringOrDefault("Author", "")
+            Version = properties.StringOrDefault("Version", "")
+            AnimationFramerate = properties.IntOrDefault("AnimationFramerate", -1)
+            AllowSliderBallTint = properties.IntOrDefault("AllowSliderBallTint", 0) <> 0
+            ComboBurstRandom = properties.IntOrDefault("ComboBurstRandom", 0) <> 0
+            CursorCentre = properties.IntOrDefault("CursorCentre", 1) <> 0
+            CursorExpand = properties.IntOrDefault("CursorExpand", 1) <> 0
+            CursorRotate = properties.IntOrDefault("CursorRotate", 1) <> 0
+            CursorTrailRotate = properties.IntOrDefault("CursorTrailRotate", 1) <> 0
             CustomComboBurstSounds =
-                MapHelpers.string_or "CustomComboBurstSounds" "" properties
+                properties.StringOrDefault("CustomComboBurstSounds", "")
                 |> fun s -> s.Split(',', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
                 |> Seq.choose (fun s ->
                     match Int32.TryParse(s, CultureInfo.InvariantCulture) with
@@ -119,12 +119,12 @@ type General =
                     | false, _ -> None
                 )
                 |> List.ofSeq
-            HitCircleOverlayAboveNumber = MapHelpers.int_or "HitCircleOverlayAboveNumber" 1 properties <> 0
-            LayeredHitSounds = MapHelpers.int_or "LayeredHitSounds" 1 properties <> 0
-            SliderBallFlip = MapHelpers.int_or "SliderBallFlip" 1 properties <> 0
-            SpinnerFadePlayfield = MapHelpers.int_or "SpinnerFadePlayfield" 0 properties <> 0
-            SpinnerFrequencyModulate = MapHelpers.int_or "SpinnerFrequencyModulate" 1 properties <> 0
-            SpinnerNoBlink = MapHelpers.int_or "SpinnerNoBlink" 0 properties <> 0
+            HitCircleOverlayAboveNumber = properties.IntOrDefault("HitCircleOverlayAboveNumber", 1) <> 0
+            LayeredHitSounds = properties.IntOrDefault("LayeredHitSounds", 1) <> 0
+            SliderBallFlip = properties.IntOrDefault("SliderBallFlip", 1) <> 0
+            SpinnerFadePlayfield = properties.IntOrDefault("SpinnerFadePlayfield", 0) <> 0
+            SpinnerFrequencyModulate = properties.IntOrDefault("SpinnerFrequencyModulate", 1) <> 0
+            SpinnerNoBlink = properties.IntOrDefault("SpinnerNoBlink", 0) <> 0
         }
 
 type Colours =
@@ -189,12 +189,12 @@ type Fonts =
         }
     static member FromMap (properties: Map<string, string>) =
         {
-            HitCirclePrefix = MapHelpers.string_or "HitCirclePrefix" "default" properties
-            HitCircleOverlap = MapHelpers.int_or "HitCircleOverlap" -2 properties
-            ScorePrefix = MapHelpers.string_or "ScorePrefix" "score" properties
-            ScoreOverlap = MapHelpers.int_or "ScoreOverlap" -2 properties
-            ComboPrefix = MapHelpers.string_or "ComboPrefix" "score" properties
-            ComboOverlap = MapHelpers.int_or "ComboOverlap" -2 properties
+            HitCirclePrefix = properties.StringOrDefault("HitCirclePrefix", "default")
+            HitCircleOverlap = properties.IntOrDefault("HitCircleOverlap", -2)
+            ScorePrefix = properties.StringOrDefault("ScorePrefix", "score")
+            ScoreOverlap = properties.IntOrDefault("ScoreOverlap", -2)
+            ComboPrefix = properties.StringOrDefault("ComboPrefix", "score")
+            ComboOverlap = properties.IntOrDefault("ComboOverlap", -2)
         }
 
 type CatchTheBeat =
@@ -338,68 +338,68 @@ type Mania =
             Hit300g = "mania-hit300g"
         }
     static member FromMap (properties: Map<string, string>) =
-        let keys = MapHelpers.int_or "Keys" 0 properties
+        let keys = properties.IntOrDefault("Keys", 0)
         {
             Keys = keys
-            ColumnStart = MapHelpers.int_or "ColumnStart" 136 properties
-            ColumnRight = MapHelpers.int_or "ColumnRight" 19 properties
-            ColumnSpacing = MapHelpers.string_or "ColumnSpacing" "" properties |> parse_comma_ints_or [0]
-            ColumnWidth = MapHelpers.string_or "ColumnWidth" "" properties |> parse_comma_ints_or [30]
-            ColumnLineWidth = MapHelpers.string_or "ColumnLineWidth" "" properties |> parse_comma_ints_or [2]
-            BarlineHeight = MapHelpers.float_or "BarlineHeight" 1.2 properties
-            LightingNWidth = MapHelpers.string_or "LightingNWidth" "" properties |> parse_comma_ints_or []
-            LightingLWidth = MapHelpers.string_or "LightingLWidth" "" properties |> parse_comma_ints_or []
-            WidthForNoteHeightScale = MapHelpers.int_opt "WidthForNoteHeightScale" properties
-            HitPosition = MapHelpers.int_or "HitPosition" 402 properties
-            LightPosition = MapHelpers.int_or "LightPosition" 413 properties
-            ScorePosition = MapHelpers.int_or "ScorePosition" 80 properties
-            ComboPosition = MapHelpers.int_or "ComboPosition" 180 properties
-            JudgementLine = MapHelpers.int_or "JudgementLine" 0 properties <> 0
-            SpecialStyle = MapHelpers.int_or "SpecialStyle" 0 properties
-            ComboBurstStyle = MapHelpers.int_or "ComboBurstStyle" 1 properties
-            SplitStages = MapHelpers.int_opt "SplitStages" properties |> Option.map ((<>) 0)
-            StageSeparation = MapHelpers.int_or "StageSeparation" 40 properties
-            SeparateScore = MapHelpers.int_or "SeparateScore" 1 properties <> 0
-            KeysUnderNotes = MapHelpers.int_or "KeysUnderNotes" 0 properties <> 0
-            UpsideDown = MapHelpers.int_or "UpsideDown" 0 properties <> 0
-            KeyFlipWhenUpsideDown = MapHelpers.int_or "KeyFlipWhenUpsideDown" 0 properties <> 0
-            KeyFlipWhenUpsideDownΔ = Array.init keys (fun i -> MapHelpers.int_or (sprintf "KeyFlipWhenUpsideDown%i" i) 1 properties <> 0)
-            NoteFlipWhenUpsideDown = MapHelpers.int_or "NoteFlipWhenUpsideDown" 1 properties <> 0
-            KeyFlipWhenUpsideDownΔD = Array.init keys (fun i -> MapHelpers.int_or (sprintf "KeyFlipWhenUpsideDown%iD" i) 1 properties <> 0)
-            NoteFlipWhenUpsideDownΔ = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%i" i) 1 properties <> 0)
-            NoteFlipWhenUpsideDownΔH = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%iH" i) 1 properties <> 0)
-            NoteFlipWhenUpsideDownΔL = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%iL" i) 1 properties <> 0)
-            NoteFlipWhenUpsideDownΔT = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%iT" i) 1 properties <> 0)
-            NoteBodyStyle = MapHelpers.int_or "NoteBodyStyle" 1 properties
-            NoteBodyStyleΔ = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteBodyStyle%i" i) 1 properties)
-            ColourΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "Colour%i" (i + 1)) "" properties |> rgba_or Color.Black)
-            ColourLightΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "ColourLight%i" (i + 1)) "" properties |> rgba_or Color.White)
-            ColourColumnLine = MapHelpers.string_or "ColourColumnLine" "" properties |> rgba_or Color.White
-            ColourBarline = MapHelpers.string_or "ColourBarline" "" properties |> rgba_or Color.White
-            ColourJudgementLine = MapHelpers.string_or "ColourJudgementLine" "" properties |> rgb_or Color.White
-            ColourKeyWarning = MapHelpers.string_or "ColourKeyWarning" "" properties |> rgb_or Color.Black
-            ColourHold = MapHelpers.string_or "ColourHold" "" properties |> rgba_or (Color.FromArgb(255, 191, 51))
-            ColourBreak = MapHelpers.string_or "ColourBreak" "" properties |> rgb_or (Color.FromArgb(255, 0, 0))
-            KeyImageΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "KeyImage%i" i) (sprintf "mania-key%s" (key_texture keys i)) properties)
-            KeyImageΔD = Array.init keys (fun i -> MapHelpers.string_or (sprintf "KeyImage%iD" i) (sprintf "mania-key%sD" (key_texture keys i)) properties)
-            NoteImageΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%i" i) (sprintf "mania-note%s" (key_texture keys i)) properties)
-            NoteImageΔH = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%iH" i) (sprintf "mania-note%sH" (key_texture keys i)) properties)
-            NoteImageΔL = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%iL" i) (sprintf "mania-note%sL" (key_texture keys i)) properties)
-            NoteImageΔT = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%iT" i) (sprintf "mania-note%sT" (key_texture keys i)) properties)
-            StageLeft = MapHelpers.string_or "StageLeft" "mania-stage-left" properties
-            StageRight = MapHelpers.string_or "StageRight" "mania-stage-right" properties
-            StageBottom = MapHelpers.string_or "StageBottom" "mania-stage-bottom" properties
-            StageHint = MapHelpers.string_or "StageHint" "mania-stage-hint" properties
-            StageLight = MapHelpers.string_or "StageLight" "mania-stage-light" properties
-            LightingN = MapHelpers.string_or "LightingN" "lightingN" properties
-            LightingL = MapHelpers.string_or "LightingL" "lightingL" properties
-            WarningArrow = MapHelpers.string_or "WarningArrow" "" properties
-            Hit0 = MapHelpers.string_or "Hit0" "mania-hit0" properties
-            Hit50 = MapHelpers.string_or "Hit50" "mania-hit50" properties
-            Hit100 = MapHelpers.string_or "Hit100" "mania-hit100" properties
-            Hit200 = MapHelpers.string_or "Hit200" "mania-hit200" properties
-            Hit300 = MapHelpers.string_or "Hit300" "mania-hit300" properties
-            Hit300g = MapHelpers.string_or "Hit300g" "mania-hit300g" properties
+            ColumnStart = properties.IntOrDefault("ColumnStart", 136)
+            ColumnRight = properties.IntOrDefault("ColumnRight", 19)
+            ColumnSpacing = properties.StringOrDefault("ColumnSpacing", "") |> parse_comma_ints_or [0]
+            ColumnWidth = properties.StringOrDefault("ColumnWidth", "") |> parse_comma_ints_or [30]
+            ColumnLineWidth = properties.StringOrDefault("ColumnLineWidth", "") |> parse_comma_ints_or [2]
+            BarlineHeight = properties.DoubleOrDefault("BarlineHeight", 1.2)
+            LightingNWidth = properties.StringOrDefault("LightingNWidth", "") |> parse_comma_ints_or []
+            LightingLWidth = properties.StringOrDefault("LightingLWidth", "") |> parse_comma_ints_or []
+            WidthForNoteHeightScale = properties.TryInt("WidthForNoteHeightScale")
+            HitPosition = properties.IntOrDefault("HitPosition", 402)
+            LightPosition = properties.IntOrDefault("LightPosition", 413)
+            ScorePosition = properties.IntOrDefault("ScorePosition", 80)
+            ComboPosition = properties.IntOrDefault("ComboPosition", 180)
+            JudgementLine = properties.IntOrDefault("JudgementLine", 0) <> 0
+            SpecialStyle = properties.IntOrDefault("SpecialStyle", 0)
+            ComboBurstStyle = properties.IntOrDefault("ComboBurstStyle", 1)
+            SplitStages = properties.TryInt("SplitStages") |> Option.map ((<>) 0)
+            StageSeparation = properties.IntOrDefault("StageSeparation", 40)
+            SeparateScore = properties.IntOrDefault("SeparateScore", 1) <> 0
+            KeysUnderNotes = properties.IntOrDefault("KeysUnderNotes", 0) <> 0
+            UpsideDown = properties.IntOrDefault("UpsideDown", 0) <> 0
+            KeyFlipWhenUpsideDown = properties.IntOrDefault("KeyFlipWhenUpsideDown", 0) <> 0
+            KeyFlipWhenUpsideDownΔ = Array.init keys (fun i -> properties.IntOrDefault((sprintf "KeyFlipWhenUpsideDown%i" i), 1) <> 0)
+            NoteFlipWhenUpsideDown = properties.IntOrDefault("NoteFlipWhenUpsideDown", 1) <> 0
+            KeyFlipWhenUpsideDownΔD = Array.init keys (fun i -> properties.IntOrDefault((sprintf "KeyFlipWhenUpsideDown%iD" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔ = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%i" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔH = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iH" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔL = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iL" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔT = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iT" i), 1) <> 0)
+            NoteBodyStyle = properties.IntOrDefault("NoteBodyStyle", 1)
+            NoteBodyStyleΔ = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteBodyStyle%i" i), 1))
+            ColourΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "Colour%i" (i + 1)), "") |> rgba_or Color.Black)
+            ColourLightΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "ColourLight%i" (i + 1)), "") |> rgba_or Color.White)
+            ColourColumnLine = properties.StringOrDefault("ColourColumnLine", "") |> rgba_or Color.White
+            ColourBarline = properties.StringOrDefault("ColourBarline", "") |> rgba_or Color.White
+            ColourJudgementLine = properties.StringOrDefault("ColourJudgementLine", "") |> rgb_or Color.White
+            ColourKeyWarning = properties.StringOrDefault("ColourKeyWarning", "") |> rgb_or Color.Black
+            ColourHold = properties.StringOrDefault("ColourHold", "") |> rgba_or (Color.FromArgb(255, 191, 51))
+            ColourBreak = properties.StringOrDefault("ColourBreak", "") |> rgb_or (Color.FromArgb(255, 0, 0))
+            KeyImageΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "KeyImage%i" i), (sprintf "mania-key%s" (key_texture keys i))))
+            KeyImageΔD = Array.init keys (fun i -> properties.StringOrDefault((sprintf "KeyImage%iD" i), (sprintf "mania-key%sD" (key_texture keys i))))
+            NoteImageΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%i" i), (sprintf "mania-note%s" (key_texture keys i))))
+            NoteImageΔH = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%iH" i), (sprintf "mania-note%sH" (key_texture keys i))))
+            NoteImageΔL = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%iL" i), (sprintf "mania-note%sL" (key_texture keys i))))
+            NoteImageΔT = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%iT" i), (sprintf "mania-note%sT" (key_texture keys i))))
+            StageLeft = properties.StringOrDefault("StageLeft", "mania-stage-left")
+            StageRight = properties.StringOrDefault("StageRight", "mania-stage-right")
+            StageBottom = properties.StringOrDefault("StageBottom", "mania-stage-bottom")
+            StageHint = properties.StringOrDefault("StageHint", "mania-stage-hint")
+            StageLight = properties.StringOrDefault("StageLight", "mania-stage-light")
+            LightingN = properties.StringOrDefault("LightingN", "lightingN")
+            LightingL = properties.StringOrDefault("LightingL", "lightingL")
+            WarningArrow = properties.StringOrDefault("WarningArrow", "")
+            Hit0 = properties.StringOrDefault("Hit0", "mania-hit0")
+            Hit50 = properties.StringOrDefault("Hit50", "mania-hit50")
+            Hit100 = properties.StringOrDefault("Hit100", "mania-hit100")
+            Hit200 = properties.StringOrDefault("Hit200", "mania-hit200")
+            Hit300 = properties.StringOrDefault("Hit300", "mania-hit300")
+            Hit300g = properties.StringOrDefault("Hit300g", "mania-hit300g")
         }
 
 type SkinIni =

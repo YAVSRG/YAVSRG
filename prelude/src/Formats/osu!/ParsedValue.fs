@@ -9,6 +9,11 @@ type ParsedValue<'T> =
     | Valid of 'T
     | Invalid
 
+    member this.ToOption() : 'T option =
+        match this with
+        | Valid x -> Some x
+        | Invalid -> None
+
 exception ParseException of args: obj[]
 
 type ParsedValueExtensions =

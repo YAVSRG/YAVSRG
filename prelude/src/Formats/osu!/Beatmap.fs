@@ -87,7 +87,7 @@ type Beatmap =
 
             yield ""
         }
-        
+
     static member FromLines(lines: string seq) : Beatmap =
         let mutable state = Nothing
         let general = ref Map.empty

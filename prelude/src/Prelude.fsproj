@@ -28,7 +28,7 @@
     <Compile Include="Charts\Chart.fs" />
     <Compile Include="Charts\Imports.fs" />
     <Compile Include="Formats\osu!\ParsedValue.fs" />
-    <Compile Include="Formats\osu!\MapHelpers.fs" />
+    <Compile Include="Formats\osu!\MapExtensions.fs" />
     <Compile Include="Formats\osu!\SampleSet.fs" />
     <Compile Include="Formats\osu!\TimingPoint.fs" />
     <Compile Include="Formats\osu!\HitSample.fs" />
