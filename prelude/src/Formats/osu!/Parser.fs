@@ -86,64 +86,6 @@ type Storyboard =
 
 module OsuParser =
 
-    let private parse_failure (message: string) (line: string) =
-        failwithf "osu! parse error: %s\nat: %s" message line
-
-    let parse_storyboard_event (line: string) : StoryboardObject option =
-        
-        let values = line.Split(',')
-        
-        let inline unsupported() = None
-        
-        let inline parse_background() =
-            ignore(values.ValueAt(1).ParseInt().ExpectValid())
-            Background(
-                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
-                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
-                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
-            )
-            
-        let inline parse_video() =
-            Video(
-                values.ValueAt(1).ParseInt().ExpectValid(),
-                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
-                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
-                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
-            )
-            
-        let inline parse_break() =
-            Break(
-                values.ValueAt(1).ParseInt().DefaultValue(0),
-                values.ValueAt(2).ParseInt().DefaultValue(0)
-            )
-            
-        let inline parse_sample() =
-            Sample(
-                values.ValueAt(1).ParseInt().DefaultValue(0),
-                values.ValueAt(2).ParseInt().DefaultValue(0) |> enum,
-                values.ValueAt(3).DefaultValue("").Trim('"').Trim(),
-                values.ValueAt(4).ParseInt().DefaultValue(0)
-            )
-        
-        let inline parse() =
-            match values.[0].Trim() with
-            | "0"
-            | "Background" -> Some(parse_background())
-            | "1"
-            | "Video" -> Some(parse_video())
-            | "2"
-            | "Break" -> Some(parse_break())
-            | "Sample" -> Some(parse_sample())
-            | "Sprite"
-            | "Animation" -> unsupported()
-            | _ -> parse_failure "Unrecognised event type" line
-        
-        if line.StartsWith(' ') || line.StartsWith('_') then
-            parse_failure "Nested events not supported" line
-        elif values.Length = 0 then
-            parse_failure "Empty line" line
-        else parse()
-
     [<Struct>]
     type private ParserState =
         | Nothing
@@ -200,10 +142,7 @@ module OsuParser =
                 let parts = line.Split(':', 2, StringSplitOptions.TrimEntries)
                 if parts.Length = 2 then
                     section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
-            | Events ->
-                line
-                |> parse_storyboard_event
-                |> Option.iter events.Add
+            | Events -> Option.iter events.Add (StoryboardObject.TryParse(line))
             | TimingPoints -> timing.Add(TimingPoint.FromString(line))
             | Objects -> objects.Add(HitObject.FromString(line))
             | Colors ->

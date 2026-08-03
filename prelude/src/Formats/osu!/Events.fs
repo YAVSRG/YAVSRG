@@ -187,3 +187,53 @@ type StoryboardObject =
         | Background(filename, x, y) -> sprintf "0,0,%A,%i,%i" filename x y
         | Video(time, filename, x, y) -> sprintf "1,%i,%A,%i,%i" time filename x y
         | Break(start, finish) -> sprintf "2,%i,%i" start finish
+        
+    static member TryParse(line: string) : StoryboardObject option =
+        let values = line.Split(',')
+        
+        let inline unsupported() = None
+        
+        let inline parse_background() =
+            ignore(values.ValueAt(1).ParseInt().ExpectValid())
+            Background(
+                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
+                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
+                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
+            )
+            
+        let inline parse_video() =
+            Video(
+                values.ValueAt(1).ParseInt().ExpectValid(),
+                values.ValueAt(2).DefaultValue("").Trim().Trim('"').Trim(),
+                values.ValueAt(3).ReplaceInvalidWith("0").ParseInt().ExpectValid(),
+                values.ValueAt(4).ReplaceInvalidWith("0").ParseInt().ExpectValid()
+            )
+            
+        let inline parse_break() =
+            Break(
+                values.ValueAt(1).ParseInt().DefaultValue(0),
+                values.ValueAt(2).ParseInt().DefaultValue(0)
+            )
+            
+        let inline parse_sample() =
+            Sample(
+                values.ValueAt(1).ParseInt().DefaultValue(0),
+                values.ValueAt(2).ParseInt().DefaultValue(0) |> enum,
+                values.ValueAt(3).DefaultValue("").Trim('"').Trim(),
+                values.ValueAt(4).ParseInt().DefaultValue(0)
+            )
+        
+        if line.StartsWith(' ') || line.StartsWith('_') then
+            raise(ParseException([|line, "Nested events not supported"|]))
+        
+        match values.[0].Trim() with
+        | "0"
+        | "Background" -> Some(parse_background())
+        | "1"
+        | "Video" -> Some(parse_video())
+        | "2"
+        | "Break" -> Some(parse_break())
+        | "Sample" -> Some(parse_sample())
+        | "Sprite"
+        | "Animation" -> unsupported()
+        | _ -> raise(ParseException([|line, "Unrecognised event type"|]))

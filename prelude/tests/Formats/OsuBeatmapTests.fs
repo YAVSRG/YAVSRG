@@ -407,7 +407,7 @@ module OsuBeatmapTests =
     let parse_evt (expected: string, input: string) =
         let result =
             try
-                match OsuParser.parse_storyboard_event(input) with
+                match StoryboardObject.TryParse(input) with
                 | Some v -> v.ToString()
                 | None -> "## UNSUPPORTED"
             with _ ->
@@ -417,7 +417,7 @@ module OsuBeatmapTests =
 
     [<Test>]
     let Event_ValidParses_Background () =
-        
+
         parse_evt("""0,0,"bg.png",0,0""", "0,0,\"bg.png\",0,0")
         parse_evt("""0,0,"bg.png",0,0""", "0,0,bg.png,0,0")
         parse_evt("""0,0,"bg.png",0,0""", "0,0,bg.png")
