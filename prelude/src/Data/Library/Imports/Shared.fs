@@ -7,10 +7,10 @@ open System.Text.RegularExpressions
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
 open Prelude.Formats.Osu
 open Prelude.Formats.Quaver
 open Prelude.Formats.StepMania
+open Prelude.Formats.Conversions
 
 [<AutoOpen>]
 module Shared =

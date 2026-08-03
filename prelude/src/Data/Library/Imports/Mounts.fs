@@ -4,7 +4,7 @@ open System
 open System.IO
 open Percyqaz.Data
 open Percyqaz.Common
-open Prelude.Formats
+open Prelude.Formats.Conversions
 open Prelude.Data
 open Prelude.Data.Library
 

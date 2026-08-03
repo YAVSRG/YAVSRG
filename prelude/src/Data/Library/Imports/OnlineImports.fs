@@ -5,7 +5,7 @@ open System.IO
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.Conversions
 open Prelude.Data
 open Prelude.Data.Library
 

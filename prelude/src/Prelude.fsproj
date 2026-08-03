@@ -27,7 +27,6 @@
     <Compile Include="Charts\NoteRow.fs" />
     <Compile Include="Charts\Chart.fs" />
     <Compile Include="Charts\Imports.fs" />
-    <Compile Include="Formats\Conversions.fs" />
     <Compile Include="Formats\osu!\ParsedValue.fs" />
     <Compile Include="Formats\osu!\MapHelpers.fs" />
     <Compile Include="Formats\osu!\SampleSet.fs" />
@@ -37,13 +36,14 @@
     <Compile Include="Formats\osu!\StoryboardEvent.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />
     <Compile Include="Formats\osu!\Beatmap.fs" />
-    <Compile Include="Formats\osu!\Converter.fs" />
     <Compile Include="Formats\StepMania\Types.fs" />
     <Compile Include="Formats\StepMania\Parser.fs" />
-    <Compile Include="Formats\StepMania\Converter.fs" />
     <Compile Include="Formats\Quaver\Yaml.fs" />
     <Compile Include="Formats\Quaver\Quaver.fs" />
-    <Compile Include="Formats\Quaver\Converter.fs" />
+    <Compile Include="Formats\Conversions\Conversions.fs" />
+    <Compile Include="Formats\Conversions\OsuConverter.fs" />
+    <Compile Include="Formats\Conversions\StepManiaConverter.fs" />
+    <Compile Include="Formats\Conversions\QuaverConverter.fs" />
     <Compile Include="Mods\Types.fs" />
     <Compile Include="Mods\Mirror.fs" />
     <Compile Include="Mods\ColumnSwap.fs" />

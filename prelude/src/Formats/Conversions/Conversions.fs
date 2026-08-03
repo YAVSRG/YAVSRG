@@ -1,4 +1,4 @@
-namespace Prelude.Formats
+namespace Prelude.Formats.Conversions
 
 open System
 open System.IO

@@ -5,8 +5,8 @@ open NUnit.Framework
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Data.Library
 open Prelude.Tests.Helpers
 

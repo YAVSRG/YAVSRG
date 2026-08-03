@@ -3,7 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.Conversions
 open Prelude.Data.Library.Imports
 
 let main () =

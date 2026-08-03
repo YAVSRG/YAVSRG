@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.StepMania
+﻿namespace Prelude.Formats.Conversions
 
 open System
 open System.IO
@@ -6,7 +6,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.StepMania
 
 module StepMania_To_Interlude =
 

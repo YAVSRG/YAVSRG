@@ -5,8 +5,8 @@ open NUnit.Framework
 open Prelude
 open Prelude.Charts
 open Prelude.Data.Library.Imports
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Tests.Helpers
 
 module ChartRateDetectionTests =

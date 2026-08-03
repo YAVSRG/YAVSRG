@@ -2,8 +2,8 @@
 
 open NUnit.Framework
 open Percyqaz.Common
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Data.OsuClientInterop
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring

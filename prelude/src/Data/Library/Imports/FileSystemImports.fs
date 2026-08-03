@@ -4,7 +4,7 @@ open System.IO
 open System.IO.Compression
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.Conversions
 open Prelude.Data
 open Prelude.Data.Library
 

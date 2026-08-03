@@ -3,8 +3,8 @@ namespace Prelude.Tests.Database
 open NUnit.Framework
 open Percyqaz.Common
 open Prelude.Data.Library
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Tests.Helpers
 
 module ChartDatabaseTests =
