@@ -28,6 +28,8 @@ type ColumnErrorBarsPage() =
         config.ColumnErrorBarsFadeTime
         |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
 
+    let log_scale_sensitivity = config.ColumnErrorBarsLogSensitivity |> Setting.bounded(0.0f, 1.0f)
+
     let enable_moving_average = Setting.simple config.ColumnErrorBarsMovingAverage
     let moving_average_sensitivity = config.ColumnErrorBarsMovingAverageSensitivity |> Setting.bounded (0.01f, 1.0f)
     let moving_average_color = Setting.simple config.ColumnErrorBarsMovingAverageColor
@@ -44,6 +46,7 @@ type ColumnErrorBarsPage() =
                 ColumnErrorBarsReleasesYScale = release_y_scale.Value
                 ColumnErrorBarsWindowsOpacity = windows_opacity.Value
                 ColumnErrorBarsFadeTime = animation_time.Value
+                ColumnErrorBarsLogSensitivity = log_scale_sensitivity.Value
                 ColumnErrorBarsMovingAverage = enable_moving_average.Value
                 ColumnErrorBarsMovingAverageSensitivity = moving_average_sensitivity.Value
                 ColumnErrorBarsMovingAverageColor = moving_average_color.Value
@@ -82,19 +85,22 @@ type ColumnErrorBarsPage() =
                 PageSetting(%"hud.column_error_bars.timing_windows_opacity", Slider.Percent(windows_opacity))
                     .Help(Help.Info("hud.column_error_bars.timing_windows_opacity"))
                     .Pos(16),
+                PageSetting(%"hud.column_error_bars.logsensitivity", Slider.Percent(log_scale_sensitivity, Step = 0.01f))
+                    .Help(Help.Info("hud.column_error_bars.logsensitivity"))
+                    .Pos(18),
                 PageSetting(%"hud.column_error_bars.moving_average", Checkbox(enable_moving_average))
                     .Help(Help.Info("hud.error_bar.moving_average_type"))
-                    .Pos(18)
+                    .Pos(20)
             )
             .WithConditional(
                 (fun () -> enable_moving_average.Value),
 
                 PageSetting(%"hud.column_error_bars.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
                     .Help(Help.Info("hud.column_error_bars.moving_average_sensitivity"))
-                    .Pos(20),
+                    .Pos(22),
                 PageSetting(%"hud.column_error_bars.moving_average_color", ColorPicker(%"hud.column_error_bars.moving_average_color", moving_average_color, true))
                     .Help(Help.Info("hud.column_error_bars.moving_average_color"))
-                    .Pos(22)
+                    .Pos(24)
             )
 
     override this.Title = %"hud.column_error_bars"
