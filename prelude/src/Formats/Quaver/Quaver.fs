@@ -130,7 +130,7 @@ type QuaverChart with
     static member FromFile(path: string) : Result<QuaverChart, string> = QuaverChart.from_file path
 
     /// The internal hash osu! uses for a .osu file
-    static member Hash(stream: Stream) =
+    static member Hash(stream: Stream) : string =
         let md5 = Security.Cryptography.MD5.Create()
         md5.ComputeHash(stream) |> Convert.ToHexString |> _.ToLower()
 
