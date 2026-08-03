@@ -24,4 +24,4 @@ type Setup() =
     member _.Teardown() = conn.Dispose()
 
 type InMemoryDatabase =
-    static member Create() = Database.in_memory "interlude"
+    static member Create() : Database * _ = Database.in_memory "interlude"

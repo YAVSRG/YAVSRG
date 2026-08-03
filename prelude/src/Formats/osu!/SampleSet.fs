@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Osu
+namespace Prelude.Formats.Osu
 
 type SampleSet =
     | None = 0

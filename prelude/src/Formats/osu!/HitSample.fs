@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Osu
+namespace Prelude.Formats.Osu
 
 type HitSample =
     {
@@ -8,7 +8,7 @@ type HitSample =
         Volume: int
         Filename: string
     }
-    
+
     static member Default: HitSample =
         {
             NormalSet = SampleSet.None
@@ -17,12 +17,13 @@ type HitSample =
             Volume = 0
             Filename = ""
         }
-        
+
     override this.ToString() : string =
         sprintf "%i:%i:%i:%i:%s" (int this.NormalSet) (int this.AdditionSet) this.Index this.Volume this.Filename
-        
+
     static member FromString(sample: string) : HitSample =
         let values = sample.Split(':')
+
         {
             NormalSet = values.ValueAt(0).ParseInt().ExpectValid(sample, 0) |> enum
             AdditionSet = values.ValueAt(1).ParseInt().ExpectValid(sample, 1) |> enum

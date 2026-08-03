@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Osu
+namespace Prelude.Formats.Osu
 
 open System
 open System.IO
@@ -30,7 +30,7 @@ type Beatmap =
     member this.Filename() : string =
         let clean (s: string) =
             s
-            |> String.filter(fun c -> c = ' ' || Char.IsAsciiLetterOrDigit c)
+            |> String.filter(fun c -> c = ' ' || Char.IsAsciiLetterOrDigit(c))
             |> fun s -> s.Substring(0, min s.Length 200)
 
         sprintf
@@ -45,36 +45,50 @@ type Beatmap =
             yield "osu file format v14"
             yield ""
             yield "[General]"
+
             for key, value in this.General.ToMap do
                 yield sprintf "%s: %s" key value
+
             yield ""
             yield "[Editor]"
+
             for key, value in this.Editor.ToMap do
                 yield sprintf "%s: %s" key value
+
             yield ""
             yield "[Metadata]"
+
             for key, value in this.Metadata.ToMap do
                 yield sprintf "%s: %s" key value
+
             yield ""
             yield "[Difficulty]"
+
             for key, value in this.Difficulty.ToMap do
                 yield sprintf "%s: %s" key value
+
             yield ""
             yield "[Events]"
+
             for object in this.Events do
                 yield object.ToString()
+
             yield ""
             yield "[TimingPoints]"
+
             for object in this.Timing do
                 yield object.ToString()
+
             yield ""
             // todo: [Colours]
             yield "[HitObjects]"
+
             for object in this.Objects do
                 yield object.ToString()
+
             yield ""
         }
-        
+
     static member FromStream(stream: Stream) : Beatmap =
         use reader = new StreamReader(stream)
 
@@ -91,6 +105,7 @@ type Beatmap =
 
         while reader.Peek() >= 0 do
             let line = reader.ReadLine().TrimEnd()
+
             match line with
             | "" -> ()
             | _ when line.StartsWith("//") -> ()
@@ -106,33 +121,29 @@ type Beatmap =
             | "[Difficulty]" ->
                 state <- Header
                 section_ref <- difficulty
-            | "[Events]" ->
-                state <- Events
-            | "[TimingPoints]" ->
-                state <- TimingPoints
-            | "[HitObjects]" ->
-                state <- Objects
-            | "[Colours]" ->
-                state <- Colors
+            | "[Events]" -> state <- Events
+            | "[TimingPoints]" -> state <- TimingPoints
+            | "[HitObjects]" -> state <- Objects
+            | "[Colours]" -> state <- Colors
             | _ ->
 
             match state with
             | Nothing -> ()
             | Header ->
                 let parts = line.Split(':', 2, StringSplitOptions.TrimEntries)
+
                 if parts.Length = 2 then
                     section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
             | Events -> Option.iter events.Add (StoryboardObject.TryParse(line))
             | TimingPoints -> timing.Add(TimingPoint.FromString(line))
             | Objects -> objects.Add(HitObject.FromString(line))
-            | Colors ->
-                () // todo: support colors header
+            | Colors -> () // todo: support colors header
 
         {
-            General = General.FromMap general.Value
-            Editor = Editor.FromMap editor.Value
-            Metadata = Metadata.FromMap metadata.Value
-            Difficulty = Difficulty.FromMap difficulty.Value
+            General = General.FromMap(general.Value)
+            Editor = Editor.FromMap(editor.Value)
+            Metadata = Metadata.FromMap(metadata.Value)
+            Difficulty = Difficulty.FromMap(difficulty.Value)
             Events = List.ofSeq events
             // The osu! client sorts all hitobjects and timing points by timestamp for when users have put them in the wrong order via notepad
             // IMPORTANT: If multiple timing points are stacked on the same timestamp,
@@ -143,17 +154,17 @@ type Beatmap =
             Objects = objects |> Seq.sortBy _.Time |> List.ofSeq
             Timing = timing |> Seq.sortBy _.Time |> List.ofSeq
         }
-        
+
     static member TryReadFromFile(path: string) : Result<Beatmap, string> =
         try
             use stream = File.OpenRead(path)
-            Ok (Beatmap.FromStream(stream))
+            Ok(Beatmap.FromStream(stream))
         with err ->
             Error(err.Message)
-            
+
     member this.WriteToFile(path: string) : unit =
         this.ToLines() |> fun contents -> File.WriteAllLines(path, contents, Encoding.UTF8)
-        
+
     member this.WriteToStream(stream: Stream, leave_stream_open: bool) : unit =
         use writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen = leave_stream_open)
         this.ToLines() |> Seq.iter writer.WriteLine
@@ -172,6 +183,6 @@ type Beatmap =
     static member HashFromFile(path: string) : Result<string, string> =
         try
             use fs = File.OpenRead(path)
-            Ok(Beatmap.Hash fs)
+            Ok(Beatmap.Hash(fs))
         with err ->
             Error err.Message
