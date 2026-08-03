@@ -16,7 +16,7 @@ module ChartDatabaseTests =
     let TEST_IMPORT =
         (Osu_To_Interlude.convert
             TEST_OSU_FILE
-            { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = TEST_OSU_FILE_PATH }
+            { Config = ConversionOptions.Pack("osu!", None, Link); Source = TEST_OSU_FILE_PATH }
          |> expect)
 
     [<Test>]

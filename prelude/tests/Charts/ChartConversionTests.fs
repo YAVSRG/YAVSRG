@@ -256,7 +256,7 @@ module ChartConversionTests =
             Osu_To_Interlude.convert
                 beatmap
                 {
-                    Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                    Config = ConversionOptions.Pack("osu!", None, Link)
                     Source = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect
@@ -277,7 +277,7 @@ module ChartConversionTests =
             Osu_To_Interlude.convert
                 exported_beatmap
                 {
-                    Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                    Config = ConversionOptions.Pack("osu!", None, Link)
                     Source = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect

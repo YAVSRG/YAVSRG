@@ -353,18 +353,18 @@ module StepMania_To_Interlude =
                             | Some file ->
                                 let absolute_audio_path = Path.Combine(path, file)
 
-                                match action.Config.AssetBehaviour with
-                                | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
-                                | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
+                                match action.Config.AssetMode with
+                                | Copy -> ImportAsset.Copy absolute_audio_path
+                                | Link -> ImportAsset.Link absolute_audio_path
                             | None -> ImportAsset.Missing
                         BackgroundFile =
                             match find_background () with
                             | Some file ->
                                 let absolute_background_path = Path.Combine(path, file)
 
-                                match action.Config.AssetBehaviour with
-                                | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
-                                | LinkAssetFiles -> ImportAsset.Link absolute_background_path
+                                match action.Config.AssetMode with
+                                | Copy -> ImportAsset.Copy absolute_background_path
+                                | Link -> ImportAsset.Link absolute_background_path
                             | None -> ImportAsset.Missing
 
                         Origins =

@@ -40,7 +40,7 @@ module Mount =
                 match source.Type with
                 | Pack packname ->
                     Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
-                    let config = ConversionOptions.Pack(packname, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles)
+                    let config = ConversionOptions.Pack(packname, since, if source.CopyAssetFiles then Copy else Link)
                     let! result = FileSystemImports.convert_pack_folder(source.SourceFolder, config, library, progress)
 
                     log_conversion result
@@ -59,7 +59,7 @@ module Mount =
                         let! result =
                             FileSystemImports.convert_pack_folder(
                                 pack_folder,
-                                ConversionOptions.Pack(pack_name, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles),
+                                ConversionOptions.Pack(pack_name, since, if source.CopyAssetFiles then Copy else Link),
                                 library,
                                 (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
                             )

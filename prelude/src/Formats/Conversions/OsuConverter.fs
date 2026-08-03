@@ -238,18 +238,18 @@ module Osu_To_Interlude =
 
                         let absolute_background_path = Path.Combine(path, background_file)
 
-                        match action.Config.AssetBehaviour with
-                        | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
-                        | LinkAssetFiles -> ImportAsset.Link absolute_background_path
+                        match action.Config.AssetMode with
+                        | Copy -> ImportAsset.Copy absolute_background_path
+                        | Link -> ImportAsset.Link absolute_background_path
                     AudioFile =
                         let audio_file = b.General.AudioFilename
                         if audio_file = "" then ImportAsset.Missing else
 
                         let absolute_audio_path = Path.Combine(path, audio_file)
 
-                        match action.Config.AssetBehaviour with
-                        | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
-                        | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
+                        match action.Config.AssetMode with
+                        | Copy -> ImportAsset.Copy absolute_audio_path
+                        | Link -> ImportAsset.Link absolute_audio_path
 
                     Origins =
                         {

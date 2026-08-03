@@ -4,29 +4,30 @@ open System
 open System.IO
 open Prelude
 
-type ConversionAssetBehaviour =
-    | CopyAssetFiles
-    | LinkAssetFiles
+[<Struct>]
+type AssetMode =
+    | Copy
+    | Link
 
 type ConversionOptions =
     {
-        AssetBehaviour: ConversionAssetBehaviour
+        AssetMode: AssetMode
         EtternaPackName: string option
         ChangedAfter: DateTime option
         PackName: string
     }
 
-    static member EtternaPack(pack_name: string, changed_after: DateTime option, asset_behaviour: ConversionAssetBehaviour) =
+    static member EtternaPack(pack_name: string, changed_after: DateTime option, asset_mode: AssetMode) : ConversionOptions =
         {
-            AssetBehaviour = asset_behaviour
+            AssetMode = asset_mode
             EtternaPackName = Some pack_name
             ChangedAfter = changed_after
             PackName = pack_name
         }
 
-    static member Pack(pack_name: string, changed_after: DateTime option, asset_behaviour: ConversionAssetBehaviour) =
+    static member Pack(pack_name: string, changed_after: DateTime option, asset_mode: AssetMode) : ConversionOptions =
         {
-            AssetBehaviour = asset_behaviour
+            AssetMode = asset_mode
             EtternaPackName = None
             ChangedAfter = changed_after
             PackName = pack_name

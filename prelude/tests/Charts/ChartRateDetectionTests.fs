@@ -155,7 +155,7 @@ module ChartRateDetectionTests =
                 Osu_To_Interlude.convert
                     beatmap
                     {
-                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                        Config = ConversionOptions.Pack("osu!", None, Link)
                         Source = "./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
                     }
             )
@@ -181,7 +181,7 @@ module ChartRateDetectionTests =
                 Osu_To_Interlude.convert
                     beatmap
                     {
-                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                        Config = ConversionOptions.Pack("osu!", None, Link)
                         Source = "./Data/Osz/989392 DJ Sharpnel - World Sound.osz"
                     }
             )

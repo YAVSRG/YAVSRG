@@ -118,7 +118,7 @@ let read_scores () =
                 Osu_To_Interlude.convert
                     beatmap
                     {
-                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                        Config = ConversionOptions.Pack("osu!", None, Link)
                         Source = osu_file
                     }
                 |> expect

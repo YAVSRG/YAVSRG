@@ -123,7 +123,7 @@ module FileSystemImports =
 
     let internal convert_folder_of_oszs (folder_of_oszs: string, library: Library, progress: ProgressCallback) : Async<ConversionResult> =
         async {
-            let config = ConversionOptions.Pack(Path.GetFileName folder_of_oszs, None, CopyAssetFiles)
+            let config = ConversionOptions.Pack(Path.GetFileName folder_of_oszs, None, Copy)
             let mutable results = ConversionResult.Empty
 
             let files =
@@ -171,7 +171,7 @@ module FileSystemImports =
                         let! result =
                             convert_pack_folder(
                                 pack_folder,
-                                ConversionOptions.EtternaPack(pack_name, None, CopyAssetFiles),
+                                ConversionOptions.EtternaPack(pack_name, None, Copy),
                                 library,
                                 progress
                             )
@@ -199,7 +199,7 @@ module FileSystemImports =
                         let! result =
                             convert_song_folder(
                                 Path.GetDirectoryName path,
-                                ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
+                                ConversionOptions.Pack(folder_name, None, Copy),
                                 library
                             )
                         log_conversion result
@@ -233,7 +233,7 @@ module FileSystemImports =
                         let! result =
                             convert_song_folder(
                                 path,
-                                ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
+                                ConversionOptions.Pack(folder_name, None, Copy),
                                 library
                             )
                         log_conversion result
@@ -264,7 +264,7 @@ module FileSystemImports =
                         let! result =
                             convert_pack_folder(
                                 path,
-                                ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
+                                ConversionOptions.Pack(folder_name, None, Copy),
                                 library,
                                 progress
                             )
@@ -281,7 +281,7 @@ module FileSystemImports =
                             let! result =
                                 convert_pack_folder(
                                     pack_folder,
-                                    ConversionOptions.Pack(pack_name, None, CopyAssetFiles),
+                                    ConversionOptions.Pack(pack_name, None, Copy),
                                     library,
                                     (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
                                 )

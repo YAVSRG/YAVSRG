@@ -456,7 +456,7 @@ module ScoreProcessorTests =
         (Osu_To_Interlude.convert
             beatmap
             {
-                Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                Config = ConversionOptions.Pack("osu!", None, Link)
                 Source = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
             }
          |> expect)
