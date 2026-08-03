@@ -149,7 +149,7 @@ module ChartRateDetectionTests =
             data.Entries
             |> Seq.map(fun (entry: ZipArchiveEntry) ->
                 use stream = entry.Open()
-                OsuParser.beatmap_from_stream stream
+                Beatmap.FromStream(stream)
             )
             |> Seq.map(fun beatmap ->
                 Osu_To_Interlude.convert
@@ -175,7 +175,7 @@ module ChartRateDetectionTests =
             data.Entries
             |> Seq.map(fun (entry: ZipArchiveEntry) ->
                 use stream = entry.Open()
-                OsuParser.beatmap_from_stream stream
+                Beatmap.FromStream(stream)
             )
             |> Seq.map(fun beatmap ->
                 Osu_To_Interlude.convert

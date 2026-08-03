@@ -113,7 +113,7 @@ let read_scores () =
 
         let chart, od =
             try
-                let beatmap = Beatmap.FromFile osu_file |> expect
+                let beatmap = Beatmap.TryReadFromFile(osu_file) |> expect
 
                 Osu_To_Interlude.convert
                     beatmap

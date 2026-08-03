@@ -451,7 +451,7 @@ module ScoreProcessorTests =
 
     let DONUT_HOLE_CHART =
         let beatmap =
-            Beatmap.FromFile("./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu") |> expect
+            Beatmap.TryReadFromFile("./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu") |> expect
 
         (Osu_To_Interlude.convert
             beatmap

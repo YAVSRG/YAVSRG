@@ -250,7 +250,7 @@ module ChartConversionTests =
     [<Test>]
     let BackbeatManiac_RoundTrip () =
         let beatmap =
-            Beatmap.FromFile("./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu") |> expect
+            Beatmap.TryReadFromFile("./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu") |> expect
 
         let converted =
             Osu_To_Interlude.convert

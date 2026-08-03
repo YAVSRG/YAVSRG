@@ -4,14 +4,17 @@ open System
 open System.IO
 open System.Text
 
+[<Struct>]
+type private BeatmapParserState =
+    | Nothing
+    | Header
+    | Events
+    | TimingPoints
+    | Objects
+    | Colors
+
 //https://osu.ppy.sh/wiki/en/Client/File_formats/osu_(file_format)
 //https://osu.ppy.sh/community/forums/topics/1869?start=12468#p12468
-
-(*
-  Not currently supported:
-    Parsing storyboard objects (only writing a newly created storyboard is available)
-    Loops and triggers in storyboards (both reading and writing)
-*)
 
 type Beatmap =
     {
@@ -24,7 +27,7 @@ type Beatmap =
         Timing: TimingPoint list
     }
 
-    member this.Filename : string =
+    member this.Filename() : string =
         let clean (s: string) =
             s
             |> String.filter(fun c -> c = ' ' || Char.IsAsciiLetterOrDigit c)
@@ -37,7 +40,7 @@ type Beatmap =
             (clean this.Metadata.Creator)
             (clean this.Metadata.Version)
 
-    member this.ToLines : string seq =
+    member this.ToLines() : string seq =
         seq {
             yield "osu file format v14"
             yield ""
@@ -71,31 +74,8 @@ type Beatmap =
                 yield object.ToString()
             yield ""
         }
-
-type Storyboard =
-    {
-        // todo: Variables
-        Events: StoryboardObject list
-    }
-    member this.ToLines =
-        seq {
-            yield "[Events]"
-            for object in this.Events do
-                yield object.ToString()
-        }
-
-module OsuParser =
-
-    [<Struct>]
-    type private ParserState =
-        | Nothing
-        | Header
-        | Events
-        | TimingPoints
-        | Objects
-        | Colors
-
-    let beatmap_from_stream (stream: Stream) : Beatmap =
+        
+    static member FromStream(stream: Stream) : Beatmap =
         use reader = new StreamReader(stream)
 
         let mutable state = Nothing
@@ -163,30 +143,31 @@ module OsuParser =
             Objects = objects |> Seq.sortBy _.Time |> List.ofSeq
             Timing = timing |> Seq.sortBy _.Time |> List.ofSeq
         }
-
-type Beatmap with
-    static member FromFile(path: string) =
+        
+    static member TryReadFromFile(path: string) : Result<Beatmap, string> =
         try
             use stream = File.OpenRead(path)
-            Ok (OsuParser.beatmap_from_stream stream)
+            Ok (Beatmap.FromStream(stream))
         with err ->
-            Error err.Message
-    member this.ToFile(path: string) =
-        this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents, Encoding.UTF8)
-    member this.ToStream(stream: Stream, leave_stream_open: bool) =
+            Error(err.Message)
+            
+    member this.WriteToFile(path: string) : unit =
+        this.ToLines() |> fun contents -> File.WriteAllLines(path, contents, Encoding.UTF8)
+        
+    member this.WriteToStream(stream: Stream, leave_stream_open: bool) : unit =
         use writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen = leave_stream_open)
-        this.ToLines |> Seq.iter writer.WriteLine
+        this.ToLines() |> Seq.iter writer.WriteLine
 
     /// The internal hash osu! uses for a .osu file
-    static member Hash(stream: Stream) =
+    static member Hash(stream: Stream) : string =
         let md5 = Security.Cryptography.MD5.Create()
         md5.ComputeHash(stream) |> Convert.ToHexString |> _.ToLower()
 
-    static member Hash(beatmap: Beatmap) =
+    member this.GenerateExportHash() : string =
         use ms = new MemoryStream()
-        beatmap.ToStream(ms, true)
+        this.WriteToStream(ms, true)
         ms.Position <- 0
-        Beatmap.Hash ms
+        Beatmap.Hash(ms)
 
     static member HashFromFile(path: string) : Result<string, string> =
         try
@@ -194,8 +175,3 @@ type Beatmap with
             Ok(Beatmap.Hash fs)
         with err ->
             Error err.Message
-
-type Storyboard with
-    // todo: there is currently no support for reading a storyboard file, only generating one
-    member this.ToFile(path: string) =
-        this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents)

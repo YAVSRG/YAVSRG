@@ -36,7 +36,7 @@
     <Compile Include="Formats\osu!\HitObject.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />
     <Compile Include="Formats\osu!\Events.fs" />
-    <Compile Include="Formats\osu!\Parser.fs" />
+    <Compile Include="Formats\osu!\Beatmap.fs" />
     <Compile Include="Formats\osu!\Converter.fs" />
     <Compile Include="Formats\StepMania\Types.fs" />
     <Compile Include="Formats\StepMania\Parser.fs" />

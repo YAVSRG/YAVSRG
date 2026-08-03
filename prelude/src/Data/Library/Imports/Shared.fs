@@ -118,7 +118,7 @@ module Shared =
                 [ Error (action.Source, "Failed to parse this file") ]
 
         | ".osu" ->
-            match Beatmap.FromFile action.Source with
+            match Beatmap.TryReadFromFile action.Source with
             | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
             | Ok beatmap ->
 
