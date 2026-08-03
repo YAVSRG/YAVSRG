@@ -36,7 +36,7 @@ type UninheritedTimingPoint =
     static member inline Create(time: ^X, ms_per_beat: ^Y, meter: ^Z) : UninheritedTimingPoint =
         {
             Time = float time
-            MsPerBeat = float ms_per_beat |> max 0.0
+            MsPerBeat = float ms_per_beat |> abs
             Meter = int meter
             SampleSet = SampleSet.Soft
             SampleIndex = 0
@@ -135,7 +135,6 @@ type TimingPoint =
                         values
                             .ValueAt(1)
                             .ParseDouble()
-                            .RejectOutOfRange(0.0, infinity)
                             .RejectNan()
                             .ReplaceZeroWith(infinity)
                             .RejectInfinity()

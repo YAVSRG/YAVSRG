@@ -69,10 +69,9 @@ module OsuBeatmapTests =
         parse_tp("## PARSE ERROR", "100.1,NaN")
         parse_tp("100.1,1E+100,4,2,0,100,1,0", "100.1,1e100")
         parse_tp("100.1,2147483648,4,2,0,100,1,0", "100.1,2147483648")
-        // Accepted by osu! but not us
-        parse_tp("## PARSE ERROR", "100.1,-1e100")
-        // Accepted by osu! but not us
-        parse_tp("## PARSE ERROR", "100.1,-1")
+        // Negative BeatLength values are treated the same as positive for scroll speed purposes
+        parse_tp("100.1,-1E+100,4,2,0,100,1,0", "100.1,-1e100")
+        parse_tp("100.1,-1,4,2,0,100,1,0", "100.1,-1")
         parse_tp("100.1,250.1,4,2,0,100,1,0", "100.1, \t250.1 ")
 
     [<Test>]
