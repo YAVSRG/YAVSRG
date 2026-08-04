@@ -257,12 +257,12 @@ module Chart =
 
     let find_most_common_bpm (chart: Chart) : float32<ms / beat> =
         (find_bpm_durations chart.BPM chart.LastNote)
-            .OrderByDescending(fun p -> p.Value)
+            .OrderByDescending(_.Value)
             .First()
             .Key
 
     let find_min_max_bpm (chart: Chart) : float32<ms / beat> * float32<ms / beat> =
-        let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(fun p -> p.Key)
+        let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(_.Key)
         (d.First().Key, d.Last().Key)
 
     let pretty_print (notes: TimeArray<NoteRow>) : unit =

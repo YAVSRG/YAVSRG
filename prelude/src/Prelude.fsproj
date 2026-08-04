@@ -26,7 +26,8 @@
     <Compile Include="Shared\TimeArray.fs" />
     <Compile Include="Charts\NoteRow.fs" />
     <Compile Include="Charts\Chart.fs" />
-    <Compile Include="Charts\Imports.fs" />
+    <Compile Include="Charts\ChartOrigin.fs" />
+    <Compile Include="Charts\ImportChart.fs" />
     <Compile Include="Formats\osu!\ParsedValue.fs" />
     <Compile Include="Formats\osu!\MapExtensions.fs" />
     <Compile Include="Formats\osu!\SampleSet.fs" />
