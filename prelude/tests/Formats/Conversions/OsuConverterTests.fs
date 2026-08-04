@@ -242,7 +242,7 @@ module ChartConversionTests =
             sv |> cleaned_sv
         )
 
-    // todo: test to cover negative bpms clamped to 0pm
+    // todo: test to cover negative bpms clamped to 0bpm
     // todo: test to cover svs clamped to 0.1x - 10x (that will currently fail)
     // todo: test to cover SV pruning logic
 
