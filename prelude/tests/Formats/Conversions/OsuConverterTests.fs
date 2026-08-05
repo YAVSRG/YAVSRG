@@ -61,14 +61,11 @@ module OsuConverterTests =
 
         let result_bpm, result_sv = OsuConverter.convert_timing_points points 2000.0f<ms>
 
-        Assert.AreEqual(2, result_sv.Length)
-        
-        Assert.AreEqual(0.0f<ms>, result_sv.[0].Time)
-        Assert.AreEqual(0.5f, result_sv.[0].Data)
-        
-        Assert.AreEqual(100.0f<ms>, result_sv.[1].Time)
-        Assert.AreEqual(1.0f, result_sv.[1].Data)
-        
+        Assert.AreEqual(1, result_sv.Length)
+
+        Assert.AreEqual(100.0f<ms>, result_sv.[0].Time)
+        Assert.AreEqual(2.0f, result_sv.[0].Data)
+
         Assert.AreEqual(2, result_bpm.Length)
 
     [<Test>]

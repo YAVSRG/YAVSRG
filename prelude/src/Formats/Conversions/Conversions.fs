@@ -69,16 +69,31 @@ exception ConversionSkipException of Reason: string
 module Utilities =
 
     let inline skip_conversion (msg: string) = raise (ConversionSkipException msg)
+    
+    let remove_stacked_points (points: TimeArray<'T>) : TimeArray<'T> =
+        if points.Length = 0 then
+            [||]
+        else
+        
+        let mutable current = points.[0]
+        
+        seq {
+            for i = 1 to points.Length - 1 do
+                let next = points.[i]
+                
+                if next.Time > current.Time then
+                    yield current
+                    
+                current <- next
+                
+            yield current
+        }
+        |> Array.ofSeq
 
     let cleaned_sv (sv: TimeArray<float32>) : TimeArray<float32> =
         seq {
-            let deduped =
-                sv
-                |> Array.rev
-                |> Array.distinctBy _.Time
-                |> Array.rev
             let mutable previous_value = 1.0f
-            for s in deduped do
+            for s in remove_stacked_points(sv) do
                 if abs (s.Data - previous_value) > 0.005f then
                     yield s
                     previous_value <- s.Data

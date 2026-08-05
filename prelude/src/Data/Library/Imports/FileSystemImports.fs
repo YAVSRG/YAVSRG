@@ -80,19 +80,6 @@ module FileSystemImports =
             let charts =
                 filtered
                 |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
-                |> List.map (fun c ->
-                    let with_pruned_svs = { c.Chart with SV = cleaned_sv c.Chart.SV }
-                    if with_pruned_svs.SV.Length < c.Chart.SV.Length then
-                        let before_hash = c.Chart.Hash()
-                        let after_hash = with_pruned_svs.Hash()
-                        if before_hash <> after_hash then
-                            match library.Charts.GetChartMeta(before_hash) with
-                            | Some chart_meta -> library.Charts.Delete(chart_meta)
-                            | None -> ()
-                            if library.UserData.GetChartData(before_hash).Scores.Length > 0 then
-                                library.UserData.TransferScores(before_hash, after_hash)
-                    { c with Chart = with_pruned_svs }
-                )
             library.Charts.Import(charts)
             return {
                 ConvertedCharts = success_count

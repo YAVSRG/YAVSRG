@@ -113,7 +113,7 @@ module Shared =
         | ".osu" ->
             match Beatmap.TryReadFromFile(ctx.OriginalPath) with
             | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
-            | Ok beatmap -> [ OsuConverter.convert_internal beatmap ctx ]
+            | Ok beatmap -> [ OsuConverter.convert beatmap ctx ]
             | Error msg -> parse_error(msg)
 
         | _ -> []

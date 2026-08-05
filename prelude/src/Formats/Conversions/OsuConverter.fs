@@ -175,9 +175,9 @@ module OsuConverter =
             | Inherited s ->
                 sv.Add { Time = Time.of_number s.Time; Data = current_bpm_mult * float32 s.Multiplier }
 
-        bpm.ToArray(), sv.ToArray()
+        remove_stacked_points(bpm.ToArray()), cleaned_sv(sv.ToArray())
 
-    let internal convert_internal (b: Beatmap) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> =
+    let convert (b: Beatmap) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> =
         try
             let keys = b.Difficulty.CircleSize |> int
 
@@ -281,8 +281,3 @@ module OsuConverter =
         | other_error ->
             Logging.Debug "Unexpected error converting %s: %O" ctx.OriginalPath other_error
             Error { OriginalPath = ctx.OriginalPath; Reason = other_error.Message }
-
-    let convert (b: Beatmap) (action: ConversionContext) : Result<ImportChart, SkippedConversion> =
-        match convert_internal b action with
-        | Ok x -> Ok { x with ImportChart.Chart.SV = cleaned_sv x.Chart.SV }
-        | error -> error
