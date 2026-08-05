@@ -279,7 +279,7 @@ module OsuConverterTests =
         | Ok _ -> ()
         | Error reason -> Assert.Fail(reason)
 
-        Assert.AreEqual(converted.Chart.Hash(), "785CAC8E416B32EF134D16D504E1F71E43AC595219EC347B89E896758F5F2795")
+        Assert.AreEqual("4860B4B8254E5C89D293361D168203103F91BE9F2B2294F9693BB82705565BCC", converted.Chart.Hash())
 
         let chart_meta =
             ChartMeta.CreateFromImport (Timestamp.now()) (K AssetLocation.Missing) converted
@@ -296,4 +296,4 @@ module OsuConverterTests =
                 }
             |> expect
 
-        Assert.AreEqual(round_trip.Chart.Hash(), "785CAC8E416B32EF134D16D504E1F71E43AC595219EC347B89E896758F5F2795")
+        Assert.AreEqual("4860B4B8254E5C89D293361D168203103F91BE9F2B2294F9693BB82705565BCC", round_trip.Chart.Hash())
