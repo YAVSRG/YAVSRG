@@ -186,7 +186,7 @@ module QuaverConverter =
                     }
                 ) |> Array.ofSeq
 
-            let sv : TimeArray<SV> =
+            let sv : TimeArray<float32> =
                 seq {
                     if b.InitialScrollVelocity <> 1.0f then
                         yield { Time = -10000.0f<ms>; Data = b.InitialScrollVelocity }
