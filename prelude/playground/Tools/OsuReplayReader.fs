@@ -118,7 +118,7 @@ let read_scores () =
                 OsuConverter.convert
                     beatmap
                     {
-                        Config = ConversionOptions.Pack("osu!", None, Link)
+                        Options = ConversionOptions.Pack("osu!", None, Link)
                         OriginalPath = osu_file
                     }
                 |> expect

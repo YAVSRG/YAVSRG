@@ -107,7 +107,7 @@ module QuaverConverter =
         finish_holds Time.infinity
         output.ToArray()
 
-    let convert (b: QuaverChart) (action: ConversionContext) : Result<ImportChart, SkippedConversion> =
+    let convert (b: QuaverChart) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> =
         try
             let keys = int b.Mode
 
@@ -117,10 +117,10 @@ module QuaverConverter =
             if b.HitObjects.Length < 20 then
                 skip_conversion "Chart has less than 20 notes"
 
-            let path = Path.GetDirectoryName action.OriginalPath
+            let path = Path.GetDirectoryName ctx.OriginalPath
 
             let md5 =
-                match QuaverChart.HashFromFile action.OriginalPath with
+                match QuaverChart.HashFromFile ctx.OriginalPath with
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .qua file: %s" reason)
 
@@ -144,7 +144,7 @@ module QuaverConverter =
 
                         let absolute_background_path = Path.Combine(path, b.BackgroundFile)
 
-                        match action.Config.AssetMode with
+                        match ctx.Options.AssetMode with
                         | Copy -> ImportAsset.Copy absolute_background_path
                         | Link -> ImportAsset.Link absolute_background_path
                     AudioFile =
@@ -152,7 +152,7 @@ module QuaverConverter =
 
                         let absolute_audio_path = Path.Combine(path, b.AudioFile)
 
-                        match action.Config.AssetMode with
+                        match ctx.Options.AssetMode with
                         | Copy -> ImportAsset.Copy absolute_audio_path
                         | Link -> ImportAsset.Link absolute_audio_path
 
@@ -203,8 +203,8 @@ module QuaverConverter =
 
             Ok {
                 Header = header
-                LoadedFromPath = action.OriginalPath
-                PackName = action.Config.PackName
+                LoadedFromPath = ctx.OriginalPath
+                PackName = ctx.Options.PackName
                 Chart = {
                     Keys = keys
                     Notes = snaps
@@ -214,7 +214,7 @@ module QuaverConverter =
             }
         with
         | :? ConversionSkipException as skip_reason ->
-            Error { OriginalPath = action.OriginalPath; Reason = skip_reason.Reason }
+            Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }
         | other_error ->
-            Logging.Debug "Unexpected error converting %s: %O" action.OriginalPath other_error
-            Error { OriginalPath = action.OriginalPath; Reason = other_error.Message }
+            Logging.Debug "Unexpected error converting %s: %O" ctx.OriginalPath other_error
+            Error { OriginalPath = ctx.OriginalPath; Reason = other_error.Message }

@@ -21,7 +21,7 @@ module RulesetOsuParityTests =
     let TEST_OSU_FILE =
         Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_CHART =
-        (OsuConverter.convert TEST_OSU_FILE { Config = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH } |> expect).Chart
+        (OsuConverter.convert TEST_OSU_FILE { Options = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH } |> expect).Chart
 
     let TEST_REPLAY_FILE_2 =
         OsuReplay.TryReadFile "./Data/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr" |> Option.get
@@ -31,7 +31,7 @@ module RulesetOsuParityTests =
     let TEST_OSU_FILE_2 =
         Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_CHART_2 =
-        (OsuConverter.convert TEST_OSU_FILE_2 { Config = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH_2 } |> expect).Chart
+        (OsuConverter.convert TEST_OSU_FILE_2 { Options = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH_2 } |> expect).Chart
 
     [<Test>]
     let Replay_MatchesTestFile_1 () =

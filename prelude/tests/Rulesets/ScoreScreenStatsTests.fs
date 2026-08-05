@@ -19,7 +19,7 @@ module ScoreScreenStatsTests =
         let chart =
             (OsuConverter.convert
                 beatmap
-                { Config = ConversionOptions.Pack("osu!", None, Link); OriginalPath = beatmap_path }
+                { Options = ConversionOptions.Pack("osu!", None, Link); OriginalPath = beatmap_path }
              |> expect)
                 .Chart
 

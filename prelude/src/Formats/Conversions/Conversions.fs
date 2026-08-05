@@ -35,7 +35,7 @@ type ConversionOptions =
 
 type ConversionContext =
     {
-        Config: ConversionOptions
+        Options: ConversionOptions
         OriginalPath: string
     }
 

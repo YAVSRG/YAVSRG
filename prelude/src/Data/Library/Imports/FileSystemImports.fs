@@ -59,7 +59,7 @@ module FileSystemImports =
                 |> Seq.collect (
                     function
                     | ChartFile _ as file ->
-                        let ctx = { Config = config; OriginalPath = file }
+                        let ctx = { Options = config; OriginalPath = file }
                         convert_chart_file(ctx)
                     | _ -> []
                 )

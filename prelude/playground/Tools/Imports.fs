@@ -17,7 +17,7 @@ let main () =
                     convert_chart_file
                         {
                             OriginalPath = file
-                            Config = ConversionOptions.Pack("osu!", None, Link)
+                            Options = ConversionOptions.Pack("osu!", None, Link)
                         } do
                     match converted with
                     | Ok { Chart = chart } ->

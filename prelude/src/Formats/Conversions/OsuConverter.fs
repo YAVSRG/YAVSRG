@@ -177,7 +177,7 @@ module OsuConverter =
 
         bpm.ToArray(), sv.ToArray()
 
-    let internal convert_internal (b: Beatmap) (action: ConversionContext) : Result<ImportChart, SkippedConversion> =
+    let internal convert_internal (b: Beatmap) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> =
         try
             let keys = b.Difficulty.CircleSize |> int
 
@@ -190,7 +190,7 @@ module OsuConverter =
             if b.Objects.Length < 20 then
                 skip_conversion "Beatmap has less than 20 notes"
 
-            let path = Path.GetDirectoryName action.OriginalPath
+            let path = Path.GetDirectoryName ctx.OriginalPath
 
             let rec find_background_file e =
                 match e with
@@ -199,7 +199,7 @@ module OsuConverter =
                 | [] -> ""
 
             let md5 =
-                match Beatmap.HashFromFile action.OriginalPath with
+                match Beatmap.HashFromFile ctx.OriginalPath with
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .osu file: %s" reason)
 
@@ -238,7 +238,7 @@ module OsuConverter =
 
                         let absolute_background_path = Path.Combine(path, background_file)
 
-                        match action.Config.AssetMode with
+                        match ctx.Options.AssetMode with
                         | Copy -> ImportAsset.Copy absolute_background_path
                         | Link -> ImportAsset.Link absolute_background_path
                     AudioFile =
@@ -247,7 +247,7 @@ module OsuConverter =
 
                         let absolute_audio_path = Path.Combine(path, audio_file)
 
-                        match action.Config.AssetMode with
+                        match ctx.Options.AssetMode with
                         | Copy -> ImportAsset.Copy absolute_audio_path
                         | Link -> ImportAsset.Link absolute_audio_path
 
@@ -266,8 +266,8 @@ module OsuConverter =
 
             Ok {
                 Header = header
-                LoadedFromPath = action.OriginalPath
-                PackName = action.Config.PackName
+                LoadedFromPath = ctx.OriginalPath
+                PackName = ctx.Options.PackName
                 Chart = {
                     Keys = keys
                     Notes = snaps
@@ -277,10 +277,10 @@ module OsuConverter =
             }
         with
         | :? ConversionSkipException as skip_reason ->
-            Error { OriginalPath = action.OriginalPath; Reason = skip_reason.Reason }
+            Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }
         | other_error ->
-            Logging.Debug "Unexpected error converting %s: %O" action.OriginalPath other_error
-            Error { OriginalPath = action.OriginalPath; Reason = other_error.Message }
+            Logging.Debug "Unexpected error converting %s: %O" ctx.OriginalPath other_error
+            Error { OriginalPath = ctx.OriginalPath; Reason = other_error.Message }
 
     let convert (b: Beatmap) (action: ConversionContext) : Result<ImportChart, SkippedConversion> =
         match convert_internal b action with

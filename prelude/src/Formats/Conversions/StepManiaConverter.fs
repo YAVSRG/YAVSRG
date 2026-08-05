@@ -156,9 +156,9 @@ module StepManiaConverter =
 
         keys, states |> Array.ofSeq, points |> Array.ofSeq
 
-    let convert (sm: StepManiaFile) (action: ConversionContext) : Result<ImportChart, SkippedConversion> list =
+    let convert (sm: StepManiaFile) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> list =
 
-        let path = Path.GetDirectoryName action.OriginalPath
+        let path = Path.GetDirectoryName ctx.OriginalPath
 
         let rec metadata_fallback (choices: string list) : string =
             match choices with
@@ -285,7 +285,7 @@ module StepManiaConverter =
                             | Some file ->
                                 let absolute_audio_path = Path.Combine(path, file)
 
-                                match action.Config.AssetMode with
+                                match ctx.Options.AssetMode with
                                 | Copy -> ImportAsset.Copy absolute_audio_path
                                 | Link -> ImportAsset.Link absolute_audio_path
                             | None -> ImportAsset.Missing
@@ -294,22 +294,22 @@ module StepManiaConverter =
                             | Some file ->
                                 let absolute_background_path = Path.Combine(path, file)
 
-                                match action.Config.AssetMode with
+                                match ctx.Options.AssetMode with
                                 | Copy -> ImportAsset.Copy absolute_background_path
                                 | Link -> ImportAsset.Link absolute_background_path
                             | None -> ImportAsset.Missing
 
                         Origins =
-                            action.Config.EtternaPackName
-                            |> Option.defaultValue action.Config.PackName
+                            ctx.Options.EtternaPackName
+                            |> Option.defaultValue ctx.Options.PackName
                             |> ChartOrigin.Etterna
                             |> Set.singleton
                     }
 
                 Ok {
                     Header = header
-                    LoadedFromPath = action.OriginalPath
-                    PackName = action.Config.PackName
+                    LoadedFromPath = ctx.OriginalPath
+                    PackName = ctx.Options.PackName
                     Chart = {
                         Keys = keys
                         Notes = notes
@@ -319,9 +319,9 @@ module StepManiaConverter =
                 }
             with
             | :? ConversionSkipException as skip_reason ->
-                Error { OriginalPath = action.OriginalPath; Reason = skip_reason.Reason }
+                Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }
             | other_error ->
-                Logging.Debug "Unexpected error converting %s: %O" action.OriginalPath other_error
-                Error { OriginalPath = action.OriginalPath; Reason = other_error.Message }
+                Logging.Debug "Unexpected error converting %s: %O" ctx.OriginalPath other_error
+                Error { OriginalPath = ctx.OriginalPath; Reason = other_error.Message }
 
         sm.Charts |> List.map convert_difficulty

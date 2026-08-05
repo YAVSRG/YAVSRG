@@ -255,7 +255,7 @@ module ChartConversionTests =
             OsuConverter.convert
                 beatmap
                 {
-                    Config = ConversionOptions.Pack("osu!", None, Link)
+                    Options = ConversionOptions.Pack("osu!", None, Link)
                     OriginalPath = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect
@@ -276,7 +276,7 @@ module ChartConversionTests =
             OsuConverter.convert
                 exported_beatmap
                 {
-                    Config = ConversionOptions.Pack("osu!", None, Link)
+                    Options = ConversionOptions.Pack("osu!", None, Link)
                     OriginalPath = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect
