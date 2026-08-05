@@ -12,26 +12,6 @@ open Prelude.Tests.Helpers
 module OsuConverterTests =
 
     [<Test>]
-    let OsuConverter_StackedTimingPoints () =
-        let points =
-            [
-                TimingPoint.CreateBPM(0.0f<ms>, 500.0f<ms / beat>, 4)
-                TimingPoint.CreateSV(0.0f<ms>, 0.5f)
-                TimingPoint.CreateBPM(100.0f<ms>, 250.0f<ms / beat>, 4)
-                TimingPoint.CreateBPM(100.0f<ms>, 1000.0f<ms / beat>, 4)
-                TimingPoint.CreateSV(100f<ms>, 2.0f)
-            ]
-
-        let result_bpm, result_sv = OsuConverter.convert_timing_points points 2000.0f<ms>
-
-        Assert.AreEqual(1, result_sv.Length)
-
-        Assert.AreEqual(100.0f<ms>, result_sv.[0].Time)
-        Assert.AreEqual(2.0f, result_sv.[0].Data)
-
-        Assert.AreEqual(2, result_bpm.Length)
-
-    [<Test>]
     let OsuConverter_ForgiveStackedNotes_CaseA () =
         let osu_notes =
             [
@@ -136,6 +116,27 @@ module OsuConverterTests =
             Assert.Pass(reason)
 
     [<Test>]
+    let OsuConverter_StackedTimingPoints () =
+        let points =
+            [
+                TimingPoint.CreateBPM(0.0f<ms>, 500.0f<ms / beat>, 4)
+                TimingPoint.CreateSV(0.0f<ms>, 0.5f)
+                TimingPoint.CreateBPM(100.0f<ms>, 250.0f<ms / beat>, 4)
+                TimingPoint.CreateBPM(100.0f<ms>, 1000.0f<ms / beat>, 4)
+                TimingPoint.CreateSV(100f<ms>, 2.0f)
+            ]
+
+        let result_bpm, result_sv = OsuConverter.convert_timing_points points 2000.0f<ms>
+
+        Assert.AreEqual(1, result_sv.Length)
+
+        Assert.AreEqual(100.0f<ms>, result_sv.[0].Time)
+        Assert.AreEqual(2.0f, result_sv.[0].Data)
+
+        Assert.AreEqual(2, result_bpm.Length)
+        Assert.AreEqual(1000.0f<ms / beat>, result_bpm.[1].Data.MsPerBeat)
+
+    [<Test>]
     let OsuConverter_TimingPointsCanHaveNonIntegerTimes () =
         let points =
             [
@@ -176,8 +177,30 @@ module OsuConverterTests =
         Assert.AreEqual(15000.0f<ms>, bpm.[1].Time)
         Assert.AreEqual(500.0f<ms / beat>, bpm.[1].Data.MsPerBeat)
 
-    // todo: test to cover svs clamped to 0.1x - 10x (that will currently fail)
-    // todo: test to cover SV pruning logic
+    [<Test>]
+    let OsuConverter_InheritedPoints_MinAndMaxMult () =
+        let points =
+            [
+                "0,250,4,1,0,10,1,0"
+                "1000,-5000,4,1,0,10,0,0"
+                "2000,-10000,4,1,0,10,0,0"
+                "3000,-20000,4,1,0,10,0,0"
+                "4000,-50,4,1,0,10,0,0"
+                "5000,-10,4,1,0,10,0,0"
+                "6000,-1,4,1,0,10,0,0"
+            ]
+            |> List.map TimingPoint.FromString
+
+        let bpm, sv = OsuConverter.convert_timing_points points 20000.0f<ms>
+
+        Assert.AreEqual(1, bpm.Length)
+        Assert.AreEqual({ Time = 1000.0f<ms>; Data = 0.02f }, sv.[0])
+        Assert.AreEqual({ Time = 2000.0f<ms>; Data = 0.01f }, sv.[1])
+        // at 3000: SV would be 0.005x but 0.01x is the minimum, overall no effect so pruned out
+        Assert.AreEqual({ Time = 4000.0f<ms>; Data = 2.0f }, sv.[2])
+        Assert.AreEqual({ Time = 5000.0f<ms>; Data = 10.0f }, sv.[3])
+        // at 6000: SV would be 100x but 10x is the maximum, overall no effect so pruned out
+        Assert.AreEqual(4, sv.Length)
 
     [<Test>]
     let RoundTrip_Fuzzed_Notes () =
