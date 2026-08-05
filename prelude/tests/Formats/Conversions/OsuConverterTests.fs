@@ -10,15 +10,12 @@ open Prelude.Formats.Conversions
 open Prelude.Data.Library
 open Prelude.Tests.Helpers
 
-module ChartConversionTests =
+module OsuConverterTests =
 
     [<Test>]
     let OsuMania_Notes_RoundTrip () =
-
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
-
             let chart = ChartFuzzer.Generate(keys, seed)
-
             let osu_notes = OsuExport.notes_to_hitobjects chart.Notes chart.Keys
             let interlude_notes = OsuConverter.convert_hit_objects osu_notes chart.Keys
 
@@ -42,7 +39,6 @@ module ChartConversionTests =
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
 
             let chart = ChartFuzzer.Generate(keys, seed)
-
             let most_common_mspb = Chart.find_most_common_bpm chart
             let osu_points = OsuExport.convert_timing_points chart.BPM chart.SV most_common_mspb
 
@@ -65,8 +61,15 @@ module ChartConversionTests =
 
         let result_bpm, result_sv = OsuConverter.convert_timing_points points 2000.0f<ms>
 
-        printfn "%A" result_bpm
-        printfn "%A" result_sv
+        Assert.AreEqual(2, result_sv.Length)
+        
+        Assert.AreEqual(0.0f<ms>, result_sv.[0].Time)
+        Assert.AreEqual(0.5f, result_sv.[0].Data)
+        
+        Assert.AreEqual(100.0f<ms>, result_sv.[1].Time)
+        Assert.AreEqual(1.0f, result_sv.[1].Data)
+        
+        Assert.AreEqual(2, result_bpm.Length)
 
     [<Test>]
     let OsuMania_TimingPoints_SingleBPM () =
@@ -80,8 +83,6 @@ module ChartConversionTests =
 
         let interlude_bpm, interlude_sv =
             OsuConverter.convert_timing_points osu_points 1000.0f<ms>
-
-        printfn "%A" osu_points
 
         Assert.AreEqual(one_bpm, interlude_bpm)
         Assert.AreEqual([||], interlude_sv |> cleaned_sv)
@@ -102,8 +103,6 @@ module ChartConversionTests =
 
         let interlude_bpm, interlude_sv =
             OsuConverter.convert_timing_points osu_points 1000.0f<ms>
-
-        printfn "%A" osu_points
 
         Assert.AreEqual(many_bpms, interlude_bpm)
         Assert.AreEqual([||], interlude_sv |> cleaned_sv)
