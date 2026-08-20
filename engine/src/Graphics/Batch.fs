@@ -59,7 +59,7 @@ type internal Batch =
 
         this.vcount <- this.vcount + 1
 
-    member inline this.Texture(t: Texture) : unit =
+    member this.Texture(t: Texture) : unit =
         if this.last_texture_handle <> t.Handle then
             this.Draw()
 
