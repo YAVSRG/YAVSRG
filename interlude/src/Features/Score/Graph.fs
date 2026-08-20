@@ -180,7 +180,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "%.4f%%, %ix" (info.Accuracy * 100.0) info.Combo,
+            sprintf "%.4f%%  •  %ix" (info.Accuracy * 100.0) info.Combo,
             text_b,
             text_color,
             Alignment.LEFT
@@ -263,7 +263,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "%.4f%% %ix" (accuracy * 100.0) combo,
+            sprintf "%.4f%%  •  %ix" (accuracy * 100.0) combo,
             text_b,
             text_color,
             Alignment.LEFT
