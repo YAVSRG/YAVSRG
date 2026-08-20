@@ -52,7 +52,7 @@ module Scores =
         ) =
         async {
 
-            if rate < 0.5f<rate> || rate > 3.0f<rate> then
+            if rate < LOWEST_SUPPORTED_RATE || rate > HIGHEST_SUPPORTED_RATE then
                 return ScoreUploadOutcome.Failed
             else
 
