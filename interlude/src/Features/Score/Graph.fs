@@ -175,8 +175,8 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
         let judgement_count = Array.sum info.Judgements
 
-        let ma = sprintf "  •  MA: %s" (JudgementRatio.Format(info.Judgements, 0))
-        let pa = sprintf "  •  PA: %s" (JudgementRatio.Format(info.Judgements, 1))
+        let ma = JudgementRatio.Format(info.Judgements, 0)
+        let pa = JudgementRatio.Format(info.Judgements, 1)
 
         Text.fill_b (
             Style.font,
@@ -196,7 +196,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "G: %i%s%s" info.GhostTaps ma pa,
+            sprintf "G: %i  •  MA: %s  •  PA: %s" info.GhostTaps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
@@ -258,8 +258,8 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             |> sqrt
         let ghost_taps = post.GhostTaps - pre.GhostTaps
 
-        let ma = sprintf "  •  MA: %s" (JudgementRatio.Format(judgement_diff, 0))
-        let pa = sprintf "  •  PA: %s" (JudgementRatio.Format(judgement_diff, 1))
+        let ma = JudgementRatio.Format(judgement_diff, 0)
+        let pa = JudgementRatio.Format(judgement_diff, 1)
 
         Text.fill_b (
             Style.font,
@@ -279,7 +279,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "G: %i%s%s" ghost_taps ma pa,
+            sprintf "G: %i  •  MA: %s  •  PA: %s" ghost_taps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
