@@ -69,7 +69,7 @@ module SelectedChart =
             if pc < 0.5f then
                 sprintf "%i %s" lnotes %"levelselect.holds"
             else
-                sprintf "%.0f%% %s" pc %"levelselect.holds"
+                sprintf "%i %s (%.0f%%)" lnotes %"levelselect.holds" pc
 
         sprintf "%iK | %i %s | %s" chart.Keys notes %"levelselect.notes" hold_count
 
