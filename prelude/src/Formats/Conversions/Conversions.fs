@@ -90,7 +90,7 @@ module Utilities =
         }
         |> Array.ofSeq
 
-    let cleaned_sv (sv: TimeArray<float32>) : TimeArray<float32> =
+    let cleanup_sv (sv: TimeArray<float32>) : TimeArray<float32> =
         seq {
             let mutable previous_value = 1.0f
             for s in remove_stacked_points(sv) do

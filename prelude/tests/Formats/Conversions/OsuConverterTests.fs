@@ -214,7 +214,7 @@ module OsuConverterTests =
     [<Test>]
     let RoundTrip_Fuzzed_TimingPoints () =
         let inline round_sv (sv: TimeArray<float32>) =
-            cleaned_sv(sv) |> TimeArray.map(fun x -> System.MathF.Round(x, 3))
+            cleanup_sv(sv) |> TimeArray.map(fun x -> System.MathF.Round(x, 3))
 
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
             let chart = ChartFuzzer.Generate(keys, seed)
