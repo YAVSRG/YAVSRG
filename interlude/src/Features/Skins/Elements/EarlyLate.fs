@@ -59,7 +59,7 @@ type EarlyLate(ctx: HudContext) =
                              ctx.Config.EarlyLateMeterLateText),
                         this.Bounds,
                         (if early then
-                             Color.FromArgb(opacity, ctx.Config.EarlyLateMeterEarlyColor)
+                             (ctx.Config.EarlyLateMeterEarlyColor.O4a(opacity))
                          else
                              Color.FromArgb(opacity, ctx.Config.EarlyLateMeterLateColor)),
                         Alignment.CENTER
