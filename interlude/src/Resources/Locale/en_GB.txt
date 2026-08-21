@@ -578,6 +578,7 @@ levelselect.groupby.reverse_hint=Reverse group ordering
 levelselect.groupby.title=Title
 levelselect.groupby.tooltip=Choose how charts are grouped.
 levelselect.holds=Holds
+levelselect.hold=Hold
 levelselect.info.details=Chart details
 levelselect.info.leaderboard=Leaderboard
 levelselect.info.leaderboard.empty=No leaderboard scores yet!
