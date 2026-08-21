@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.LevelSelect
 
+open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -14,10 +15,12 @@ type Patterns(display: Setting<InfoPanelMode>) =
 
     let mutable patterns: Cluster array = [||]
     let mutable category: string = ""
+    let mutable duration: Time = 0.0f<ms>
 
     let on_chart_update(info: LoadedChartInfo) =
         patterns <- info.Patterns.Clusters |> Array.truncate 6
         category <- info.Patterns.Category
+        duration <- info.Patterns.Duration
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -83,7 +86,7 @@ type Patterns(display: Setting<InfoPanelMode>) =
             let density_color (nps: float32</rate>) =
                 nps * 2.0f * SelectedChart.rate.Value |> Difficulty.color
 
-            let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / SelectedChart.rate.Value / 100.0f)
+            let bar_scale = Math.Clamp((entry.Amount / duration), 0.02f, 1.0f)
 
             let bar (lo_pc, lo_val, hi_pc, hi_val) =
                 Render.rect_edges_c
