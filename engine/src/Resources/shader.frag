@@ -1,4 +1,4 @@
-﻿#version 330 core
+﻿#version 130
 in vec2 fUv;
 in vec4 fColor;
 in float fTexLayer;
