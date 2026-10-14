@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Stats
+namespace Prelude.Tests.Data.Stats
 
 open System
 open NUnit.Framework

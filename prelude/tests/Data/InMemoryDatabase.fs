@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Database
+namespace Prelude.Tests.Data
 
 open System
 open System.Runtime.CompilerServices

@@ -1,10 +1,11 @@
-namespace Prelude.Tests.Database
+namespace Prelude.Tests.Data.UserDatabase
 
 open NUnit.Framework
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Data.UserDatabase
+open Prelude.Tests.Data
 
 module DbSingletonsTests =
 

@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Charts
+namespace Prelude.Tests.Formats.Conversions
 
 open NUnit.Framework
 open Percyqaz.Common

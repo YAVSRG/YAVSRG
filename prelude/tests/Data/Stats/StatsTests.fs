@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Stats
+namespace Prelude.Tests.Data.Stats
 
 open System
 open System.Linq
@@ -6,14 +6,14 @@ open NUnit.Framework
 open Percyqaz.Common
 open Prelude.Data.UserDatabase
 open Prelude.Data.Stats
-open Prelude.Tests.Database
 open Prelude.Tests.Helpers
+open Prelude.Tests.Data
 
 module StatsTests =
 
     [<Test>]
     let BasicUsage () : unit =
-        let db, conn = InMemoryDatabase.Create()
+        let db, conn = InMemoryDatabase.CreateIsolated()
         let user_db = UserDatabase.CreateLazyLoaded(db)
         let clock = VirtualClock(Timestamp.now())
         let stats = Stats.FromUserDatabase(user_db, clock)

@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Replays
+namespace Prelude.Tests.Gameplay.Replays
 
 open NUnit.Framework
 open System.IO

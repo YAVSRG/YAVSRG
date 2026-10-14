@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Rulesets
+namespace Prelude.Tests.Gameplay.Scoring
 
 open System
 open NUnit.Framework

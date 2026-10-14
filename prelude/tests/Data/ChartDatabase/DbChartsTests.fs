@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Database
+namespace Prelude.Tests.Data.ChartDatabase
 
 open NUnit.Framework
 open Percyqaz.Common
@@ -6,6 +6,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Calculator.Patterns
 open Prelude.Data.ChartDatabase
+open Prelude.Tests.Data
 
 module DbChartsTests =
 
