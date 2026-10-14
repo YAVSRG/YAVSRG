@@ -15,12 +15,12 @@ module RulesetOsuParityTests =
 
     let TEST_REPLAY_FILE =
         OsuReplay.TryReadFile(
-            "./test_data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr"
+            "./test_data/osu_parity/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr"
         )
         |> Option.get
 
     let TEST_OSU_FILE_PATH =
-        "./test_data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
+        "./test_data/osu_parity/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
 
     let TEST_OSU_FILE_HASH = Beatmap.HashFromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_OSU_FILE = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
@@ -33,10 +33,10 @@ module RulesetOsuParityTests =
             .Chart
 
     let TEST_REPLAY_FILE_2 =
-        OsuReplay.TryReadFile("./test_data/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr")
+        OsuReplay.TryReadFile("./test_data/osu_parity/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr")
         |> Option.get
 
-    let TEST_OSU_FILE_PATH_2 = "./test_data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+    let TEST_OSU_FILE_PATH_2 = "./test_data/osu_parity/Hachi - DONUT HOLE (Raveille) [Filling].osu"
     let TEST_OSU_FILE_HASH_2 = Beatmap.HashFromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_OSU_FILE_2 = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH_2) |> expect
 

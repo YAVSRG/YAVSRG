@@ -14,7 +14,7 @@ module ScoreScreenStatsTests =
 
     let TEST_SCORE =
         let beatmap_path =
-            "./test_data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
+            "./test_data/osu_parity/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
 
         let beatmap = Beatmap.TryReadFromFile(beatmap_path) |> expect
 
@@ -27,7 +27,7 @@ module ScoreScreenStatsTests =
 
         let osu_replay =
             OsuReplay.TryReadFile(
-                "./test_data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr"
+                "./test_data/osu_parity/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr"
             )
             |> Option.get
 

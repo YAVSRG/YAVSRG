@@ -10,7 +10,7 @@ open Prelude.Tests.Data
 
 module ChartDatabaseTests =
 
-    let TEST_OSU_FILE_PATH = "./test_data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+    let TEST_OSU_FILE_PATH = "./test_data/osu_parity/Hachi - DONUT HOLE (Raveille) [Filling].osu"
     let TEST_OSU_FILE_HASH = Beatmap.HashFromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_OSU_FILE = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
 
