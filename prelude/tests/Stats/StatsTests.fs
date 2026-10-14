@@ -89,3 +89,111 @@ module StatsTests =
         database_roundtrip()
 
         conn.Dispose()
+
+    [<Test>]
+    let TryGetLatestSession_FromPreviousDay () : unit =
+        let db, conn = InMemoryDatabase.CreateIsolated()
+        let user_db = UserDatabase.CreateLazyLoaded(db)
+
+        let clock = VirtualClock(Timestamp.from_datetime(DateTime.Today.AddHours(-12)))
+        let stats = Stats.FromUserDatabase(user_db, clock)
+
+        stats.CompletePlay(4, 60_000.0, 2500)
+        Assert.AreEqual(2500, stats.GetCurrentSession().NotesHit)
+
+        clock.AddHours(24)
+        stats.StartOrContinueSession()
+
+        Assert.AreEqual(0, stats.GetCurrentSession().NotesHit)
+
+        match stats.TryGetLatestSession() with
+        | None -> Assert.Fail("Expected a previous session")
+        | Some(dt, latest_session) ->
+            Assert.AreEqual(clock.Today().AddDays(-1), dt)
+            Assert.AreEqual(2500, latest_session.NotesHit)
+
+        conn.Dispose()
+
+    [<Test>]
+    let TryGetLatestSession_FromEarlierToday () : unit =
+        let db, conn = InMemoryDatabase.CreateIsolated()
+        let user_db = UserDatabase.CreateLazyLoaded(db)
+
+        let clock = VirtualClock(Timestamp.from_datetime(DateTime.Today.AddHours(12)))
+        let stats = Stats.FromUserDatabase(user_db, clock)
+
+        stats.CompletePlay(4, 60_000.0, 2500)
+        Assert.AreEqual(2500, stats.GetCurrentSession().NotesHit)
+
+        clock.Add(SESSION_TIMEOUT * 2L)
+        stats.StartOrContinueSession()
+
+        Assert.AreEqual(0, stats.GetCurrentSession().NotesHit)
+
+        match stats.TryGetLatestSession() with
+        | None -> Assert.Fail("Expected a previous session")
+        | Some(dt, latest_session) ->
+            Assert.AreEqual(clock.Today(), dt)
+            Assert.AreEqual(2500, latest_session.NotesHit)
+
+        conn.Dispose()
+
+    [<Test>]
+    let TryGetNextSession_CurrentSessionLaterToday () : unit =
+        let db, conn = InMemoryDatabase.CreateIsolated()
+        let user_db = UserDatabase.CreateLazyLoaded(db)
+
+        let clock = VirtualClock(Timestamp.from_datetime(DateTime.Today.AddHours(12)))
+        let stats = Stats.FromUserDatabase(user_db, clock)
+
+        stats.CompletePlay(4, 60_000.0, 2500)
+        Assert.AreEqual(2500, stats.GetCurrentSession().NotesHit)
+
+        clock.Add(SESSION_TIMEOUT * 2L)
+        stats.StartOrContinueSession()
+        Assert.AreEqual(0, stats.GetCurrentSession().NotesHit)
+
+        match stats.TryGetLatestSession() with
+        | None -> Assert.Fail("Above lines should have created a previous session")
+        | Some(dt, latest_session) ->
+
+            Assert.AreEqual(dt, clock.Today())
+            Assert.AreEqual(None, stats.TryGetNextSession(dt, latest_session))
+
+        conn.Dispose()
+
+    [<Test>]
+    let TryGetNextSession_TwoSessionsToday () : unit =
+        let db, conn = InMemoryDatabase.CreateIsolated()
+        let user_db = UserDatabase.CreateLazyLoaded(db)
+
+        let clock = VirtualClock(Timestamp.from_datetime(DateTime.Today.AddHours(6)))
+        let stats = Stats.FromUserDatabase(user_db, clock)
+
+        stats.CompletePlay(4, 60_000.0, 2500)
+        Assert.AreEqual(2500, stats.GetCurrentSession().NotesHit)
+
+        clock.Add(SESSION_TIMEOUT * 2L)
+        stats.StartOrContinueSession()
+        stats.CompletePlay(4, 60_000.0, 2500)
+        Assert.AreEqual(2500, stats.GetCurrentSession().NotesHit)
+
+        clock.Add(SESSION_TIMEOUT * 2L)
+        stats.StartOrContinueSession()
+        Assert.AreEqual(0, stats.GetCurrentSession().NotesHit)
+
+        let today = clock.Today()
+        let previous_sessions_today = stats.GetPreviousSessionsForDate(today)
+
+        match previous_sessions_today with
+        | one :: [ two ] ->
+            match stats.TryGetNextSession(today, one) with
+            | Some(dt, next_session) ->
+                Assert.AreEqual(today, dt)
+                Assert.AreEqual(two, next_session)
+            | None -> Assert.Fail("Should have found the second session of today")
+        | otherwise ->
+            printfn "%A" otherwise
+            Assert.Fail("Test setup should have ensured two previous sessions today")
+
+        conn.Dispose()
