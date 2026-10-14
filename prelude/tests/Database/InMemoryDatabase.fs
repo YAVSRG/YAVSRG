@@ -27,10 +27,9 @@ type Setup() =
 
 type InMemoryDatabase =
     static member Create() : Database * _ = Database.in_memory "interlude"
-    
+
     static member CreateIsolated([<CallerMemberName; Optional; DefaultParameterValue("")>] id: string) : Database * _ =
-        let db, conn = Database.in_memory ("interlude_" + id)
+        let db, conn = Database.in_memory("interlude_" + id)
         UserDatabase.CreateLazyLoaded(db) |> ignore
         ChartDatabase.CreateLazyLoaded(db) |> ignore
         db, conn
-        
