@@ -218,14 +218,3 @@ module HitObjectTests =
         parse_hobj("## PARSE ERROR", "0,0,1,2,0,B,0,70,0|0,0:0|0:0|AAA")
         parse_hobj("0,0,1,2,0,B,1,70,0|0,2147483647:0|0:0,0:0:0:0:", "0,0,1,2,0,B,0,70,0|0,2147483647:0")
         parse_hobj("## PARSE ERROR", "0,0,1,2,0,B,0,70,0|0,2147483648:0")
-
-    let parse_evt (expected: string, input: string) =
-        let result =
-            try
-                match StoryboardEvent.TryParse(input) with
-                | Some v -> v.ToString()
-                | None -> "## UNSUPPORTED"
-            with _ ->
-                "## PARSE ERROR"
-
-        Assert.AreEqual(expected, result)

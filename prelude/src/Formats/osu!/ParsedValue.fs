@@ -23,13 +23,13 @@ type ParsedValueExtensions =
         if index < split_values.Length then Valid(split_values.[index]) else Invalid
 
     [<Extension>]
-    static member inline DefaultValue<'T>(pvalue: ParsedValue<'T>, default_value: 'T) : 'T =
+    static member inline DefaultValue(pvalue: ParsedValue<'T>, default_value: 'T) : 'T =
         match pvalue with
         | Valid v -> v
         | Invalid -> default_value
 
     [<Extension>]
-    static member inline ReplaceInvalidWith<'T>(pvalue: ParsedValue<'T>, default_value: 'T) : ParsedValue<'T> =
+    static member inline ReplaceInvalidWith(pvalue: ParsedValue<'T>, default_value: 'T) : ParsedValue<'T> =
         match pvalue with
         | Valid v -> Valid v
         | Invalid -> Valid default_value
