@@ -33,6 +33,12 @@
     <None Include="test_data\Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="test_data\osu_parity\hehehe_events.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="test_data\osu_parity\donut_hole_events.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="Helpers\ChartFuzzer.fs" />
     <Compile Include="Helpers\NotesBuilder.fs" />
     <Compile Include="Helpers\ReplayBuilder.fs" />
