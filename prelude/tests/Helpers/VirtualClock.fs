@@ -12,3 +12,4 @@ type VirtualClock(start_time: int64) =
     member inline this.AddSeconds(seconds: int64) : unit = this.Add(seconds * 1000L)
 
     member inline this.AddMinutes(minutes: int64) : unit = this.AddSeconds(minutes * 60L)
+    member inline this.AddHours(hours: int64) : unit = this.AddMinutes(hours * 60L)
