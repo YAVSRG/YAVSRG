@@ -1,17 +1,18 @@
-﻿namespace Percyqaz.Flux.Audio
+namespace Percyqaz.Flux.Audio
 
 open System
 open ManagedBass
 open Percyqaz.Common
 
 type SoundEffect =
-    private {
-        ID: int
-        mutable ChannelID: int
-    }
+    private
+        {
+            ID: int
+            mutable ChannelID: int
+        }
 
     static member Default = { ID = 0; ChannelID = 0 }
-    
+
     static member FromStream(source: string, stream: IO.Stream) : SoundEffect =
         use ms = new IO.MemoryStream()
         stream.CopyTo(ms)
@@ -38,5 +39,5 @@ type SoundEffect =
         if this.ID <> 0 then
             Bass.ChannelSetAttribute(this.ChannelID, ChannelAttribute.Volume, volume * 2.0) |> display_bass_error
             Bass.ChannelPlay(this.ChannelID, true) |> display_bass_error
-        
+
     member this.Play() : unit = this.Play(1.0)

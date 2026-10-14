@@ -2,6 +2,7 @@
 **/obj
 interlude
 engine
+!engine/src/Audio
 libraries
 prelude/src
 prelude/playground

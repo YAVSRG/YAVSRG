@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Audio
+namespace Percyqaz.Flux.Audio
 
 open System
 open ManagedBass
