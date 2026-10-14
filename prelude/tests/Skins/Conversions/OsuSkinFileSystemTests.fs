@@ -13,14 +13,16 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let Empty () =
-        let fs = VirtualOsuSkinFileSystem()
+        use fs = new VirtualOsuSkinFileSystem()
         Assert.True(fs.SearchForTexture("note-1H").ToOption().IsNone)
         Assert.True(fs.SearchForAnimation("note-1H").ToOption().IsNone)
 
     [<Test>]
     let Texture_Prefer2xOver1x () =
-        let fs =
-            VirtualOsuSkinFileSystem().AddImage("note-1H@2x.png", ONEPIXELIMAGE).AddImage("note-1H.png", ONEPIXELIMAGE)
+        use fs =
+            (new VirtualOsuSkinFileSystem())
+                .AddImage("note-1H@2x.png", ONEPIXELIMAGE)
+                .AddImage("note-1H.png", ONEPIXELIMAGE)
 
         let texture = fs.SearchForTexture("note-1H")
         ignore(texture.Load(fs))
@@ -29,8 +31,10 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let Animation_Prefer2xOver1x () =
-        let fs =
-            VirtualOsuSkinFileSystem().AddImage("note-1H@2x.png", ONEPIXELIMAGE).AddImage("note-1H.png", ONEPIXELIMAGE)
+        use fs =
+            (new VirtualOsuSkinFileSystem())
+                .AddImage("note-1H@2x.png", ONEPIXELIMAGE)
+                .AddImage("note-1H.png", ONEPIXELIMAGE)
 
         let animation = fs.SearchForAnimation("note-1H")
         ignore(animation.Load(fs))
@@ -39,8 +43,8 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let Texture_IgnoresFrames () =
-        let fs =
-            VirtualOsuSkinFileSystem()
+        use fs =
+            (new VirtualOsuSkinFileSystem())
                 .AddImage("note-1H-0.png", ONEPIXELIMAGE)
                 .AddImage("note-1H@2x.png", ONEPIXELIMAGE)
                 .AddImage("note-1H.png", ONEPIXELIMAGE)
@@ -52,8 +56,8 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let Animation_UsesFrames () =
-        let fs =
-            VirtualOsuSkinFileSystem()
+        use fs =
+            (new VirtualOsuSkinFileSystem())
                 .AddImage("note-1H-0.png", ONEPIXELIMAGE)
                 .AddImage("note-1H@2x.png", ONEPIXELIMAGE)
                 .AddImage("note-1H.png", ONEPIXELIMAGE)
@@ -65,8 +69,8 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let Animation_UsesManyFramesPreferring2xOver1x () =
-        let fs =
-            VirtualOsuSkinFileSystem()
+        use fs =
+            (new VirtualOsuSkinFileSystem())
                 .AddImage("note-1H-0@2x.png", ONEPIXELIMAGE)
                 .AddImage("note-1H-0.png", ONEPIXELIMAGE)
                 .AddImage("note-1H-1.png", ONEPIXELIMAGE)
@@ -86,8 +90,8 @@ module OsuSkinFileSystemTests =
     let Animation_FallbackForUnloadableFrame () =
         let INVALID_IMAGE = new MemoryStream()
 
-        let fs =
-            VirtualOsuSkinFileSystem()
+        use fs =
+            (new VirtualOsuSkinFileSystem())
                 .AddImage("note-1H-0@2x.png", ONEPIXELIMAGE)
                 .AddImage("note-1H-0.png", ONEPIXELIMAGE)
                 .Add("note-1H-1.png", INVALID_IMAGE)
@@ -105,8 +109,8 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let Animation_EndsAtMissingFrame () =
-        let fs =
-            VirtualOsuSkinFileSystem()
+        use fs =
+            (new VirtualOsuSkinFileSystem())
                 .AddImage("note-1H-0.png", ONEPIXELIMAGE)
                 .AddImage("note-1H-1.png", ONEPIXELIMAGE)
                 .AddImage("note-1H-3.png", ONEPIXELIMAGE)
@@ -122,8 +126,8 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let Animation_FirstFrame () =
-        let fs =
-            VirtualOsuSkinFileSystem()
+        use fs =
+            (new VirtualOsuSkinFileSystem())
                 .AddImage("note-1H-0.png", ONEPIXELIMAGE)
                 .AddImage("note-1H-1.png", ONEPIXELIMAGE)
                 .AddImage("note-1H-3.png", ONEPIXELIMAGE)
@@ -141,7 +145,7 @@ module OsuSkinFileSystemTests =
     [<Test>]
     let Texture_UseFallback () =
         let INVALID_IMAGE = new MemoryStream()
-        let fs = VirtualOsuSkinFileSystem().Add("note-1H.png", INVALID_IMAGE)
+        use fs = (new VirtualOsuSkinFileSystem()).Add("note-1H.png", INVALID_IMAGE)
 
         let texture = fs.SearchForTexture("note-1H")
         let loaded = texture.Load(fs)
@@ -152,7 +156,7 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let FromFolder_CorrectBehaviour () =
-        let fs = OsuSkinFolderFileSystem("./Data")
+        use fs = new OsuSkinFolderFileSystem("./Data")
 
         Assert.True(fs.Exists("skin.ini"))
         Assert.True(fs.Exists("replay.bin"))
@@ -163,7 +167,7 @@ module OsuSkinFileSystemTests =
         let ms = new MemoryStream()
         ZipFile.CreateFromDirectory("./Data", ms)
         let zip = new ZipArchive(ms, ZipArchiveMode.Read)
-        let fs = OsuSkinZipFileSystem(zip)
+        use fs = new OsuSkinZipFileSystem(zip)
 
         Assert.True(fs.Exists("skin.ini"))
         Assert.True(fs.Exists("replay.bin"))
@@ -179,7 +183,7 @@ module OsuSkinFileSystemTests =
         zip.Dispose()
 
         use zip = new ZipArchive(ms, ZipArchiveMode.Read)
-        let fs = OsuSkinZipFileSystem(zip)
+        use fs = new OsuSkinZipFileSystem(zip)
 
         Assert.True(fs.Exists("skin.ini"))
         Assert.True(fs.Exists("a.png"))
@@ -195,7 +199,7 @@ module OsuSkinFileSystemTests =
         zip.Dispose()
 
         use zip = new ZipArchive(ms, ZipArchiveMode.Read)
-        let fs = OsuSkinZipFileSystem(zip)
+        use fs = new OsuSkinZipFileSystem(zip)
 
         Assert.True(fs.Exists("skin.ini"))
         Assert.True(fs.Exists("a.png"))
@@ -211,7 +215,7 @@ module OsuSkinFileSystemTests =
         zip.Dispose()
 
         use zip = new ZipArchive(ms, ZipArchiveMode.Read)
-        let fs = OsuSkinZipFileSystem(zip)
+        use fs = new OsuSkinZipFileSystem(zip)
 
         Assert.True(fs.Exists("two/skin.ini"))
         Assert.True(fs.Exists("two/a.png"))
