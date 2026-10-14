@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.User
+﻿namespace Prelude.Data.UserDatabase
 
 open Prelude
 open Prelude.Mods

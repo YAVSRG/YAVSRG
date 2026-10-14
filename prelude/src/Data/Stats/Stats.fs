@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Data.Sqlite
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 
 type SessionXPGain =

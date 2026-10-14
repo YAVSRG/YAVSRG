@@ -10,7 +10,7 @@ open Prelude.Mods
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
 open Prelude.Skins.Noteskins
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Options

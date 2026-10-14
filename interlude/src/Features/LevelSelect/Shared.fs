@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Content

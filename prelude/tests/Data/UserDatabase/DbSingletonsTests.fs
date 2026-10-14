@@ -4,7 +4,7 @@ open NUnit.Framework
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 
 module DbSingletonsTests =
 

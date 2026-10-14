@@ -7,7 +7,7 @@ open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Gameplay.Rulesets
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Features.Gameplay

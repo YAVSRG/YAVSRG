@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop

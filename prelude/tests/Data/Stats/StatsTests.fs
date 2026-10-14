@@ -4,7 +4,7 @@ open System
 open System.Linq
 open NUnit.Framework
 open Percyqaz.Common
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Stats
 open Prelude.Tests.Database
 open Prelude.Tests.Helpers

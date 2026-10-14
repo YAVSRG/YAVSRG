@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Collections
 
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
