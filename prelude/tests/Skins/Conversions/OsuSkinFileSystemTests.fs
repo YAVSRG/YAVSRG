@@ -168,3 +168,51 @@ module OsuSkinFileSystemTests =
         Assert.True(fs.Exists("skin.ini"))
         Assert.True(fs.Exists("replay.bin"))
         Assert.True(fs.Exists("osz/2089086 the living tombstone - my ordinary life (speed up ver.).osz"))
+
+    [<Test>]
+    let FromZipArchive_NestedFix_NoNesting () =
+        use ms = new MemoryStream()
+        let zip = new ZipArchive(ms, ZipArchiveMode.Create, true)
+        zip.CreateEntry("skin.ini") |> ignore
+        zip.CreateEntry("a.png") |> ignore
+        zip.CreateEntry("b.png") |> ignore
+        zip.Dispose()
+
+        use zip = new ZipArchive(ms, ZipArchiveMode.Read)
+        let fs = OsuSkinZipFileSystem(zip)
+
+        Assert.True(fs.Exists("skin.ini"))
+        Assert.True(fs.Exists("a.png"))
+        Assert.True(fs.Exists("b.png"))
+
+    [<Test>]
+    let FromZipArchive_NestedFix_OneLayerNesting () =
+        use ms = new MemoryStream()
+        let zip = new ZipArchive(ms, ZipArchiveMode.Create, true)
+        zip.CreateEntry("common/skin.ini") |> ignore
+        zip.CreateEntry("common/a.png") |> ignore
+        zip.CreateEntry("common/b.png") |> ignore
+        zip.Dispose()
+
+        use zip = new ZipArchive(ms, ZipArchiveMode.Read)
+        let fs = OsuSkinZipFileSystem(zip)
+
+        Assert.True(fs.Exists("skin.ini"))
+        Assert.True(fs.Exists("a.png"))
+        Assert.True(fs.Exists("b.png"))
+
+    [<Test>]
+    let FromZipArchive_NestedFix_ThreeLayerNesting () =
+        use ms = new MemoryStream()
+        let zip = new ZipArchive(ms, ZipArchiveMode.Create, true)
+        zip.CreateEntry("max/depth/two/skin.ini") |> ignore
+        zip.CreateEntry("max/depth/two/a.png") |> ignore
+        zip.CreateEntry("max/depth/two/b.png") |> ignore
+        zip.Dispose()
+
+        use zip = new ZipArchive(ms, ZipArchiveMode.Read)
+        let fs = OsuSkinZipFileSystem(zip)
+
+        Assert.True(fs.Exists("two/skin.ini"))
+        Assert.True(fs.Exists("two/a.png"))
+        Assert.True(fs.Exists("two/b.png"))
