@@ -4,7 +4,7 @@ open System.IO.Compression
 open NUnit.Framework
 open Prelude
 open Prelude.Charts
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Formats.Osu
 open Prelude.Formats.Conversions
 open Prelude.Tests.Helpers

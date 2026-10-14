@@ -131,6 +131,7 @@
     <Compile Include="Data\TaskProgress.fs" />
     <Compile Include="Data\WebServices.fs" />
     <Compile Include="Data\ImageServices.fs" />
+    <Compile Include="Data\FileSystemServices.fs" />
     <Compile Include="Data\ChartDatabase\AssetStorage.fs" />
     <Compile Include="Data\ChartDatabase\ChartMeta.fs" />
     <Compile Include="Data\ChartDatabase\DbCharts.fs" />
@@ -170,6 +171,7 @@
     <Compile Include="Data\Imports\FileSystemImports.fs" />
     <Compile Include="Data\Imports\Mounts.fs" />
     <Compile Include="Data\Imports\OnlineImports.fs" />
+    <Compile Include="Data\Exports\OsuExport.fs" />
     <Compile Include="Data\Exports\Exports.fs" />
   </ItemGroup>
   <ItemGroup>

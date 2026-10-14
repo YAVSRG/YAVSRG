@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Interlude.Web.Shared.Requests
 
 module Backbeat =

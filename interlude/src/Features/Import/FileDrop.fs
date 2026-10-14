@@ -5,7 +5,7 @@ open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
 open Prelude.Skins.Conversions
 open Prelude.Skins.Conversions.Osu

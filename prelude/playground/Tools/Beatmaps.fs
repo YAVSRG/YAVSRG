@@ -1,7 +1,7 @@
 ﻿module Beatmaps
 
 open System.IO
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Formats.Osu
 
 let main() =

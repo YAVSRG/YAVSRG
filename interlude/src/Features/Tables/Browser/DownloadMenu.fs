@@ -7,7 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Interlude.Web.Shared.Requests
 open Interlude.Content
 open Interlude.UI

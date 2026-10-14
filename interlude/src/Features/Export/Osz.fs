@@ -6,6 +6,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Mods
 open Prelude.Data.Library
+open Prelude.Data.Exports
 open Interlude.UI
 
 module OsuExport =

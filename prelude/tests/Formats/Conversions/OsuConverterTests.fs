@@ -7,6 +7,7 @@ open Prelude.Charts
 open Prelude.Formats.Osu
 open Prelude.Formats.Conversions
 open Prelude.Data.Library
+open Prelude.Data.Exports
 open Prelude.Tests.Helpers
 
 module OsuConverterTests =

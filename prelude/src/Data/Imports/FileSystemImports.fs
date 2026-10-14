@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library.Imports
+﻿namespace Prelude.Data.Imports
 
 open System.IO
 open System.IO.Compression
@@ -9,48 +9,6 @@ open Prelude.Data
 open Prelude.Data.Library
 
 module FileSystemImports =
-
-    // todo: these are not imports, they should go somewhere else
-    let delete_folder =
-        { new Async.Queue<string, bool>() with
-            override this.Handle(path: string) =
-                async {
-                    if Directory.Exists(path) then
-                        Logging.Debug "Deleting folder '%s'" path
-                        let mutable remaining_retries = 3
-                        while remaining_retries > 0 do
-                            try
-                                Directory.Delete(path, true)
-                                remaining_retries <- -1
-                            with err ->
-                                remaining_retries <- remaining_retries - 1
-                                Logging.Debug "Deleting folder '%s' failed, retrying in 1s: %s" path err.Message
-                                System.Threading.Thread.Sleep(1000)
-                        if remaining_retries = 0 then Logging.Error "Deleting folder '%s' failed, out of retries" path
-                        return remaining_retries < 0
-                    else
-                        return true
-                }
-        }
-
-    let delete_file =
-        { new Async.Queue<string, bool>() with
-            override this.Handle(path) =
-                async {
-                    Logging.Debug "Deleting file '%s'" path
-                    let mutable remaining_retries = 3
-                    while remaining_retries > 0 do
-                        try
-                            File.Delete path
-                            remaining_retries <- -1
-                        with err ->
-                            remaining_retries <- remaining_retries - 1
-                            Logging.Debug "Deleting file '%s' failed, retrying in 1s: %s" path err.Message
-                            System.Threading.Thread.Sleep(1000)
-                    if remaining_retries = 0 then Logging.Error "Deleting file '%s' failed, out of retries" path
-                    return remaining_retries < 0
-                }
-        }
 
     let internal convert_song_folder (path: string, config: ConversionOptions, library: Library) : Async<ConversionResult> =
         async {
@@ -125,7 +83,7 @@ module FileSystemImports =
                     try
                         ZipFile.ExtractToDirectory(osz, extracted_folder)
                         let! result = convert_song_folder(extracted_folder, config, library)
-                        delete_folder.Request(extracted_folder, ignore)
+                        FileSystemServices.delete_folder.Request(extracted_folder, ignore)
                         results <- ConversionResult.Combine result results
                     with err ->
                         Logging.Error "Unexpected error in '%s': %O" extracted_folder err
@@ -159,10 +117,10 @@ module FileSystemImports =
                             )
                         results <- ConversionResult.Combine result results
 
-                    delete_folder.Request(dir, ignore)
+                    FileSystemServices.delete_folder.Request(dir, ignore)
                     return Ok results
                 | _ ->
-                    delete_folder.Request(dir, ignore)
+                    FileSystemServices.delete_folder.Request(dir, ignore)
                     return Error "Extracted zip does not match the usual structure for a StepMania pack"
         }
 
@@ -198,7 +156,7 @@ module FileSystemImports =
                         else
                             ZipFile.ExtractToDirectory(path, dir)
                             let! result = auto_detect_import (dir, library, progress)
-                            delete_folder.Request(dir, ignore)
+                            FileSystemServices.delete_folder.Request(dir, ignore)
                             return result
                     | _ ->
                         progress Faulted

@@ -3,8 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Interlude.UI
 open Interlude.Options
 
@@ -14,7 +13,7 @@ type MountDisplay =
     static member ALL_HEIGHT = MountDisplay.HEIGHT * 4.0f + Style.PADDING * 12.0f + 70.0f
     static member WIDTH = 580.0f
 
-    static member Create(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) : Container =
+    static member Create(game: MountedGameType, setting: Setting<MountedChartSource option>) : Container =
 
         let create_or_edit_button =
             Button(

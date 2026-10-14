@@ -6,7 +6,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
 open Interlude.Content
 open Interlude.UI

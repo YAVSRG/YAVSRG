@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library.Endless
+﻿namespace Prelude.Data.Library
 
 open System
 open Percyqaz.Common

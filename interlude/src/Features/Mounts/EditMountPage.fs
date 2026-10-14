@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Interlude.Content

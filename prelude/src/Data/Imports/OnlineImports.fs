@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library.Imports
+﻿namespace Prelude.Data.Imports
 
 open System
 open System.IO
@@ -34,11 +34,11 @@ module OnlineImports =
                 | true ->
                     match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, progress) with
                     | Ok result ->
-                        FileSystemImports.delete_file.Request(target, ignore)
+                        FileSystemServices.delete_file.Request(target, ignore)
                         progress Complete
                         return Ok result
                     | Error reason ->
-                        FileSystemImports.delete_file.Request(target, ignore)
+                        FileSystemServices.delete_file.Request(target, ignore)
                         progress Faulted
                         return Error reason
             with err ->
@@ -58,11 +58,11 @@ module OnlineImports =
                 | true ->
                     match! FileSystemImports.auto_detect_import(target, library, progress) with
                     | Ok result ->
-                        FileSystemImports.delete_file.Request(target, ignore)
+                        FileSystemServices.delete_file.Request(target, ignore)
                         progress Complete
                         return Ok result
                     | Error reason ->
-                        FileSystemImports.delete_file.Request(target, ignore)
+                        FileSystemServices.delete_file.Request(target, ignore)
                         progress Faulted
                         return Error reason
             with err ->

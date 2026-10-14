@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude.Data.User
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.Content
 
 #nowarn "40"

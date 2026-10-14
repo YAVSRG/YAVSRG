@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Web.Server.Domain.Services
 
 open Percyqaz.Common
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.Web.Server.Domain.Core
 
 module Stats =

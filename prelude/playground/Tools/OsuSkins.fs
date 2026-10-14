@@ -2,7 +2,7 @@
 
 open System.IO
 open Percyqaz.Common
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Skins.Conversions.Osu
 
 let osu_skin_path = Path.Combine(OSU_SONG_FOLDER, "..", "Skins")

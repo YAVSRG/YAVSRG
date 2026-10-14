@@ -3,7 +3,7 @@ namespace Prelude.Tests.Stats
 open System
 open NUnit.Framework
 open Percyqaz.Common
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 
 module StatsHelpersTests =
 
