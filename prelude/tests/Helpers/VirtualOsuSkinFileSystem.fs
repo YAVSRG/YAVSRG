@@ -41,3 +41,5 @@ type VirtualOsuSkinFileSystem() =
         let stream = new MemoryStream()
         image.SaveAsPng(stream)
         this.Add(path, stream)
+
+    override this.Dispose() = ()
