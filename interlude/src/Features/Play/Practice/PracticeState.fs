@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play

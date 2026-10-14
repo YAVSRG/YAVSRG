@@ -544,7 +544,7 @@ module Friends =
 
 module Stats =
 
-    open Prelude.Data.User.Stats
+    open Prelude.Data.Stats
 
     /// requires login token as Authorization header
     module Fetch =

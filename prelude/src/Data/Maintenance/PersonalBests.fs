@@ -4,7 +4,8 @@ open Percyqaz.Common
 open Prelude.Mods
 open Prelude.Gameplay.Rulesets
 open Prelude.Data
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
+open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
 
 module PersonalBests =

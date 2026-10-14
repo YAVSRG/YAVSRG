@@ -1,7 +1,7 @@
-﻿namespace Prelude.Data.User.Stats
+﻿namespace Prelude.Data.Stats
 
 open Percyqaz.Data
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 
 [<Json.AutoCodec(false)>]
 type CurrentSession =

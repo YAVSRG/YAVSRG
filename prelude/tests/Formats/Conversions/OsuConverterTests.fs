@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Charts
+namespace Prelude.Tests.Formats.Conversions
 
 open NUnit.Framework
 open Percyqaz.Common
@@ -6,7 +6,8 @@ open Prelude
 open Prelude.Charts
 open Prelude.Formats.Osu
 open Prelude.Formats.Conversions
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
+open Prelude.Data.Exports
 open Prelude.Tests.Helpers
 
 module OsuConverterTests =
@@ -264,14 +265,14 @@ module OsuConverterTests =
     [<Test>]
     let RoundTrip_BackbeatManiac () =
         let beatmap =
-            Beatmap.TryReadFromFile("./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu") |> expect
+            Beatmap.TryReadFromFile("./test_data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu") |> expect
 
         let converted =
             OsuConverter.convert
                 beatmap
                 {
                     Options = ConversionOptions.Pack("osu!", None, Link)
-                    OriginalPath = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
+                    OriginalPath = "./test_data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect
 
@@ -292,7 +293,7 @@ module OsuConverterTests =
                 exported_beatmap
                 {
                     Options = ConversionOptions.Pack("osu!", None, Link)
-                    OriginalPath = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
+                    OriginalPath = "./test_data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect
 

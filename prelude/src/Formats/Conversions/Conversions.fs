@@ -66,7 +66,7 @@ exception ConversionSkipException of Reason: string
 *)
 
 [<AutoOpen>]
-module Utilities =
+module Conversions =
 
     let inline skip_conversion (msg: string) = raise (ConversionSkipException msg)
     

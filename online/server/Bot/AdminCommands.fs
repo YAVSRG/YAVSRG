@@ -4,7 +4,7 @@ open System
 open Discord
 open Discord.WebSocket
 open Percyqaz.Common
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.Web.Server.Domain.Backbeat
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services

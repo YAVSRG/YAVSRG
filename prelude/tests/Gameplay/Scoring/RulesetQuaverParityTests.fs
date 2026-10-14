@@ -1,0 +1,192 @@
+namespace Prelude.Tests.Gameplay.Scoring
+
+open NUnit.Framework
+open Percyqaz.Common
+open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.Scoring
+open Prelude.Tests.Helpers
+
+module RulesetQuaverParityTests =
+
+    let RULESET = Quaver.create Quaver.Standard
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_DropHold () =
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+
+        let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 30.0f<ms>).Build()
+
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        event_processing.ProcessEntireReplay()
+
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
+
+        Assert.AreEqual(
+            [
+                Hold {| Delta = 0.0f<ms / rate>; Judgement = Some(0, 1.0); Missed = false |}
+                DropHold
+                Release
+                    {|
+                        Delta = CONVENTIONAL_LATE_WINDOW
+                        Judgement = Some(5, -0.5)
+                        Missed = true
+                        Overhold = false
+                        Dropped = true
+                    |}
+            ],
+            event_processing.Events |> Seq.map _.Inner
+        )
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_DropHold_Regrab () =
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+
+        let replay =
+            ReplayBuilder().KeyDownUntil(0.0f<ms>, 30.0f<ms>).KeyDownUntil(60.0f<ms>, 1000.0f<ms>).Build()
+
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        event_processing.ProcessEntireReplay()
+
+        Assert.AreEqual(
+            [
+                Hold {| Delta = 0.0f<ms / rate>; Judgement = Some(0, 1.0); Missed = false |}
+                DropHold
+                RegrabHold
+                Release
+                    {|
+                        Delta = 0.0f<ms / rate>
+                        Judgement = Some(5, -0.5)
+                        Missed = false
+                        Overhold = false
+                        Dropped = true
+                    |}
+            ],
+            event_processing.Events |> Seq.map _.Inner
+        )
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_DropHold_Regrab_Overhold () =
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+
+        let replay =
+            ReplayBuilder().KeyDownUntil(0.0f<ms>, 30.0f<ms>).KeyDownUntil(60.0f<ms>, 2000.0f<ms>).Build()
+
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        event_processing.ProcessEntireReplay()
+
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
+
+        Assert.AreEqual(
+            [
+                Hold {| Delta = 0.0f<ms / rate>; Judgement = Some(0, 1.0); Missed = false |}
+                DropHold
+                RegrabHold
+                Release
+                    {|
+                        Delta = CONVENTIONAL_LATE_WINDOW
+                        Judgement = Some(5, -0.5)
+                        Missed = true
+                        Overhold = true
+                        Dropped = true
+                    |}
+            ],
+            event_processing.Events |> Seq.map _.Inner
+        )
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_Overhold () =
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+
+        let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 2000.0f<ms>).Build()
+
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        event_processing.ProcessEntireReplay()
+
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
+
+        Assert.AreEqual(
+            [
+                Hold {| Delta = 0.0f<ms / rate>; Judgement = Some(0, 1.0); Missed = false |}
+                Release
+                    {|
+                        Delta = CONVENTIONAL_LATE_WINDOW
+                        Judgement = Some(4, -1.0)
+                        Missed = true
+                        Overhold = true
+                        Dropped = false
+                    |}
+            ],
+            event_processing.Events |> Seq.map _.Inner
+        )
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_OkayWindowGivesGood () =
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+
+        let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 1190.0f<ms>).Build()
+
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        event_processing.ProcessEntireReplay()
+
+        Assert.AreEqual(
+            [
+                Hold {| Delta = 0.0f<ms / rate>; Judgement = Some(0, 1.0); Missed = false |}
+                Release
+                    {|
+                        Delta = 190.0f<ms / rate>
+                        Judgement = Some(3, 0.25)
+                        Missed = false
+                        Overhold = false
+                        Dropped = false
+                    |}
+            ],
+            event_processing.Events |> Seq.map _.Inner
+        )
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_GoodWindowGivesGood () =
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+
+        let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 1158.0f<ms>).Build()
+
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        event_processing.ProcessEntireReplay()
+
+        Assert.AreEqual(
+            [
+                Hold {| Delta = 0.0f<ms / rate>; Judgement = Some(0, 1.0); Missed = false |}
+                Release
+                    {|
+                        Delta = 158.0f<ms / rate>
+                        Judgement = Some(3, 0.25)
+                        Missed = false
+                        Overhold = false
+                        Dropped = false
+                    |}
+            ],
+            event_processing.Events |> Seq.map _.Inner
+        )
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_GreatWindowGivesGreat () =
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+
+        let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 1113.0f<ms>).Build()
+
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        event_processing.ProcessEntireReplay()
+
+        Assert.AreEqual(
+            [
+                Hold {| Delta = 0.0f<ms / rate>; Judgement = Some(0, 1.0); Missed = false |}
+                Release
+                    {|
+                        Delta = 113.0f<ms / rate>
+                        Judgement = Some(2, 0.65)
+                        Missed = false
+                        Overhold = false
+                        Dropped = false
+                    |}
+            ],
+            event_processing.Events |> Seq.map _.Inner
+        )

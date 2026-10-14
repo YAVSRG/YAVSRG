@@ -9,7 +9,7 @@ open Percyqaz.Flux.Input.Bind
 open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Mods
-open Prelude.Data.Library
+open Prelude.Data.Imports
 open Interlude.Content
 open Interlude.Resources
 
@@ -176,10 +176,10 @@ type GameOptions =
         OnlySaveNewRecords: Setting<bool>
         SelectedMods: Setting<ModState>
 
-        OsuMount: Setting<Imports.MountedChartSource option>
-        QuaverMount: Setting<Imports.MountedChartSource option>
-        StepmaniaMount: Setting<Imports.MountedChartSource option>
-        EtternaMount: Setting<Imports.MountedChartSource option>
+        OsuMount: Setting<MountedChartSource option>
+        QuaverMount: Setting<MountedChartSource option>
+        StepmaniaMount: Setting<MountedChartSource option>
+        EtternaMount: Setting<MountedChartSource option>
 
         ChartSortMode: Setting<string>
         ChartSortReverse: Setting<bool>

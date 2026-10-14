@@ -8,7 +8,7 @@ open Prelude.Mods
 open Prelude.Data.Library
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Interlude.Web.Shared
 
 type LobbyInvite =

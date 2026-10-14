@@ -28,7 +28,7 @@ module SkinIniParserTests =
 
     [<Test>]
     let SampleIni () =
-        let result = SkinIni.FromFile("./Data/skin.ini")
+        let result = SkinIni.FromFile("./test_data/skin.ini")
 
         printfn "%A" result
 

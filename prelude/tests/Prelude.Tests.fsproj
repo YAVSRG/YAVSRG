@@ -6,31 +6,37 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="Data\Osz\2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz">
+    <None Include="test_data\Osz\2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Osz\989392 DJ Sharpnel - World Sound.osz">
+    <None Include="test_data\Osz\989392 DJ Sharpnel - World Sound.osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu">
+    <None Include="test_data\Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\skin.ini">
+    <None Include="test_data\skin.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\replay.bin">
+    <None Include="test_data\replay.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Hachi - DONUT HOLE (Raveille) [Filling].osu">
+    <None Include="test_data\osu_parity\hehehe_events.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr">
+    <None Include="test_data\osu_parity\donut_hole_events.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu">
+    <None Include="test_data\osu_parity\Hachi - DONUT HOLE (Raveille) [Filling].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr">
+    <None Include="test_data\osu_parity\Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="test_data\osu_parity\Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="test_data\osu_parity\Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="Helpers\ChartFuzzer.fs" />
@@ -54,36 +60,36 @@
     <Compile Include="Formats\osu!\StoryboardEventTests.fs" />
     <Compile Include="Formats\osu!\BeatmapTests.fs" />
     <Compile Include="Formats\Conversions\OsuConverterTests.fs" />
-    <Compile Include="Calculator\HoldCoverageTests.fs" />
-    <Compile Include="Calculator\DiffCalcColorTests.fs" />
     <Compile Include="Mods\MirrorTests.fs" />
     <Compile Include="Mods\ColumnSwapTests.fs" />
     <Compile Include="Mods\InverseTests.fs" />
     <Compile Include="Mods\ModStateTests.fs" />
-    <Compile Include="Replays\ReplayTests.fs" />
-    <Compile Include="Rulesets\RulesetEditingTests.fs" />
-    <Compile Include="Rulesets\RulesetValidationTests.fs" />
-    <Compile Include="Rulesets\LampTests.fs" />
-    <Compile Include="Rulesets\GradeTests.fs" />
-    <Compile Include="Rulesets\GameplayEventProcessorTests.fs" />
-    <Compile Include="Rulesets\ScoreProcessorTests.fs" />
-    <Compile Include="Rulesets\ScoreScreenStatsTests.fs" />
-    <Compile Include="Rulesets\RulesetOsuParityTests.fs" />
-    <Compile Include="Rulesets\RulesetQuaverParityTests.fs" />
+    <Compile Include="Calculator\HoldCoverageTests.fs" />
+    <Compile Include="Calculator\DiffCalcColorTests.fs" />
+    <Compile Include="Gameplay\Replays\ReplayTests.fs" />
+    <Compile Include="Gameplay\Rulesets\RulesetEditingTests.fs" />
+    <Compile Include="Gameplay\Rulesets\RulesetValidationTests.fs" />
+    <Compile Include="Gameplay\Scoring\LampTests.fs" />
+    <Compile Include="Gameplay\Scoring\GradeTests.fs" />
+    <Compile Include="Gameplay\Scoring\GameplayEventProcessorTests.fs" />
+    <Compile Include="Gameplay\Scoring\ScoreProcessorTests.fs" />
+    <Compile Include="Gameplay\Scoring\ScoreScreenStatsTests.fs" />
+    <Compile Include="Gameplay\Scoring\RulesetOsuParityTests.fs" />
+    <Compile Include="Gameplay\Scoring\RulesetQuaverParityTests.fs" />
     <Compile Include="Skins\Conversions\SkinIniParserTests.fs" />
     <Compile Include="Skins\Conversions\OsuSkinFileSystemTests.fs" />
     <Compile Include="Skins\Conversions\LoadedTextureTests.fs" />
     <Compile Include="Skins\Noteskins\NoteskinValidationTests.fs" />
-    <Compile Include="Database\InMemoryDatabase.fs" />
-    <Compile Include="Database\UserDatabaseTests.fs" />
-    <Compile Include="Database\DbScoresTests.fs" />
-    <Compile Include="Database\DbChartDataTests.fs" />
-    <Compile Include="Database\DbSingletonsTests.fs" />
-    <Compile Include="Database\DbSessionsTests.fs" />
-    <Compile Include="Database\DbChartsTests.fs" />
-    <Compile Include="Database\ChartDatabaseTests.fs" />
-    <Compile Include="Stats\StatsHelpersTests.fs" />
-    <Compile Include="Stats\StatsTests.fs" />
+    <Compile Include="Data\InMemoryDatabase.fs" />
+    <Compile Include="Data\ChartDatabase\ChartDatabaseTests.fs" />
+    <Compile Include="Data\ChartDatabase\DbChartsTests.fs" />
+    <Compile Include="Data\UserDatabase\UserDatabaseTests.fs" />
+    <Compile Include="Data\UserDatabase\DbScoresTests.fs" />
+    <Compile Include="Data\UserDatabase\DbChartDataTests.fs" />
+    <Compile Include="Data\UserDatabase\DbSingletonsTests.fs" />
+    <Compile Include="Data\UserDatabase\DbSessionsTests.fs" />
+    <Compile Include="Data\Stats\StatsHelpersTests.fs" />
+    <Compile Include="Data\Stats\StatsTests.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>
   <ItemGroup>

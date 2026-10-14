@@ -7,7 +7,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay

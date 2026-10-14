@@ -3,7 +3,7 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.Features.Online
 open Interlude.Content
 

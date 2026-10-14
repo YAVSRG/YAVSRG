@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Content
 
 open Prelude.Data.Library
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 
 module private Data =
     let mutable library: Library = Unchecked.defaultof<_>

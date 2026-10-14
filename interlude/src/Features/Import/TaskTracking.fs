@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 

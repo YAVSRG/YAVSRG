@@ -7,7 +7,7 @@ open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Flux.Windowing
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Prelude.Data.Library
 open Prelude.Calculator
 open Interlude

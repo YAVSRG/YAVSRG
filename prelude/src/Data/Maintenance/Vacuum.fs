@@ -4,7 +4,7 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude.Data
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 
 module Vacuum =
 

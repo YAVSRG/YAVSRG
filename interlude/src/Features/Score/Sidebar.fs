@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Mods
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Calculator
 open Interlude.UI
 

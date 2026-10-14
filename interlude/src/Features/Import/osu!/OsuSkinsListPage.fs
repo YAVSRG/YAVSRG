@@ -3,7 +3,7 @@
 open System.IO
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Interlude.UI
 open Interlude.Options
 
