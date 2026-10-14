@@ -67,30 +67,45 @@ type Song =
     member this.Free() : unit =
         Bass.StreamFree(this.ID) |> display_bass_error
 
-    member this.SetLowPass(amount: float32) : unit =
+    member this.TimeToBytes(time: Time) : int64 =
+        Bass.ChannelSeconds2Bytes(this.ID, time / 1000.0f<ms> |> float)
+
+    member this.SetLowPassFilter(amount: float32) : unit =
+        let apply_effect (handle: int) =
+            let center = lerp amount 22049f 800f
+            let parameters = BQFParameters(lFilter = BQFType.LowPass, fQ = 0.7f)
+            parameters.fCenter <- center
+            parameters.fBandwidth <- 0f
+            Bass.FXSetParameters(handle, parameters) |> display_bass_error
+
         match this.LowPassFilterEffect with
         | 0 when amount > 0.0f ->
             let effect = Bass.ChannelSetFX(this.ID, EffectType.BQF, 1)
-            let center = lerp amount 22049f 800f
-
-            Bass.FXSetParameters(
-                effect,
-                BQFParameters(lFilter = BQFType.LowPass, fCenter = center, fBandwidth = 0f, fQ = 0.7f)
-            )
-            |> display_bass_error
-
+            apply_effect(effect)
             this.LowPassFilterEffect <- effect
-        | existing when amount = 0.0f ->
-            Bass.ChannelRemoveFX(this.ID, existing) |> display_bass_error
-            this.LowPassFilterEffect <- 0
-        | existing ->
-            let center = lerp amount 22049f 800f
 
-            Bass.FXSetParameters(
-                existing,
-                BQFParameters(lFilter = BQFType.LowPass, fCenter = center, fBandwidth = 0f, fQ = 0.7f)
-            )
+        | existing_handle when amount = 0.0f ->
+            Bass.ChannelRemoveFX(this.ID, existing_handle) |> display_bass_error
+            this.LowPassFilterEffect <- 0
+
+        | existing_handle -> apply_effect(existing_handle)
+
+    member this.ChangeRate(rate: float32<rate>, change_pitch: bool) : unit =
+
+        let set_frequency_multiplier (rate: float32<rate>) =
+            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Frequency, float32 this.Frequency * float32 rate)
             |> display_bass_error
+
+        let set_tempo (rate: float32<rate>) =
+            let tempo_adjustment = (rate - 1.0f<rate>) * 100.0f< / rate>
+            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Tempo, tempo_adjustment) |> display_bass_error
+
+        if change_pitch then
+            set_tempo(1.0f<rate>)
+            set_frequency_multiplier(rate)
+        else
+            set_tempo(rate)
+            set_frequency_multiplier(1.0f<rate>)
 
 [<RequireQualifiedAccess>]
 type SongFinishAction =
@@ -166,7 +181,7 @@ module Song =
 
         if time >= 0.0f<ms> && time < duration() then
 
-            let pos = Bass.ChannelSeconds2Bytes(now_playing.ID, float(time / 1000.0f<ms>))
+            let pos = now_playing.TimeToBytes(time)
             Bass.ChannelSetPosition(now_playing.ID, pos) |> display_bass_error
 
             Bass.ChannelSetSync(
@@ -197,11 +212,7 @@ module Song =
             play_from time
         else
             if time >= 0.0f<ms> && time < duration() then
-                Bass.ChannelSetPosition(
-                    now_playing.ID,
-                    Bass.ChannelSeconds2Bytes(now_playing.ID, float(time / 1000.0f<ms>))
-                )
-                |> display_bass_error
+                Bass.ChannelSetPosition(now_playing.ID, now_playing.TimeToBytes(time)) |> display_bass_error
             else if channel_playing then
                 Bass.ChannelStop(now_playing.ID) |> display_bass_error
                 channel_playing <- false
@@ -224,7 +235,7 @@ module Song =
 
         if time >= 0.0f<ms> && time < duration() then
 
-            let pos = Bass.ChannelSeconds2Bytes(now_playing.ID, float(time / 1000.0f<ms>))
+            let pos = now_playing.TimeToBytes(time)
             Bass.ChannelSetPosition(now_playing.ID, pos) |> display_bass_error
             let before = timer.Elapsed.TotalMilliseconds
 
@@ -251,26 +262,10 @@ module Song =
             elif rate > 1.0f<rate> then enable_pitch_rate_up
             else enable_pitch_rate_down
 
-        if pitch_enabled_for_direction then
-            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Tempo, 0.0f) |> display_bass_error
-
-            Bass.ChannelSetAttribute(
-                now_playing.ID,
-                ChannelAttribute.Frequency,
-                float32 now_playing.Frequency * float32 rate
-            )
-            |> display_bass_error
-        else
-            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Tempo, (rate - 1.0f<rate>) * 100.0f< / rate>)
-            |> display_bass_error
-
-            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency)
-            |> display_bass_error
+        now_playing.ChangeRate(rate, pitch_enabled_for_direction)
 
         if rate_changed then
             seek time
-
-    let playback_rate () : float32<rate> = rate
 
     let set_pitch_rate_down_enabled (enabled: bool) : unit =
         enable_pitch_rate_down <- enabled
@@ -280,9 +275,11 @@ module Song =
         enable_pitch_rate_up <- enabled
         change_rate rate
 
+    let playback_rate () : float32<rate> = rate
+
     let set_low_pass (amount: float32) : unit =
         low_pass_target <- amount
-        now_playing.SetLowPass(low_pass_amount)
+        now_playing.SetLowPassFilter(low_pass_amount)
 
     let set_local_offset (offset: Time) : unit = _local_offset <- offset
     let set_global_offset (offset: float32<ms / rate>) : unit = _global_offset <- offset
@@ -302,7 +299,7 @@ module Song =
                 now_playing <- song
                 change_rate rate
 
-                song.SetLowPass(low_pass_amount)
+                song.SetLowPassFilter(low_pass_amount)
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
@@ -366,7 +363,7 @@ module Song =
             if abs(low_pass_amount - low_pass_target) < 0.01f then
                 low_pass_amount <- low_pass_target
 
-            now_playing.SetLowPass(low_pass_amount)
+            now_playing.SetLowPassFilter(low_pass_amount)
 
         song_loader.Join()
 
@@ -374,7 +371,7 @@ module Song =
 
             channel_playing <- true
 
-            let pos = Bass.ChannelSeconds2Bytes(now_playing.ID, float(_time / 1000.0f<ms>))
+            let pos = now_playing.TimeToBytes(_time)
             Bass.ChannelSetPosition(now_playing.ID, pos) |> display_bass_error
 
             Bass.ChannelSetSync(
