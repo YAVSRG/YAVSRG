@@ -3,8 +3,8 @@ namespace Prelude.Tests.Rulesets
 open NUnit.Framework
 open Percyqaz.Common
 open Prelude
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Data.OsuClientInterop
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
@@ -17,9 +17,9 @@ module ScoreScreenStatsTests =
         let beatmap = Beatmap.TryReadFromFile(beatmap_path) |> expect
 
         let chart =
-            (Osu_To_Interlude.convert
+            (OsuConverter.convert
                 beatmap
-                { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = beatmap_path }
+                { Options = ConversionOptions.Pack("osu!", None, Link); OriginalPath = beatmap_path }
              |> expect)
                 .Chart
 

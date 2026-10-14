@@ -1,13 +1,13 @@
-﻿namespace Prelude.Formats.Quaver
+﻿namespace Prelude.Formats.Conversions
 
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.Quaver
 
-module Quaver_To_Interlude =
+module QuaverConverter =
 
     let private convert_hit_objects (objects: QuaverHitObject list) (keys: int) : TimeArray<NoteRow> =
         let output = List<TimeItem<NoteRow>>()
@@ -107,7 +107,7 @@ module Quaver_To_Interlude =
         finish_holds Time.infinity
         output.ToArray()
 
-    let convert (b: QuaverChart) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
+    let convert (b: QuaverChart) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> =
         try
             let keys = int b.Mode
 
@@ -117,10 +117,10 @@ module Quaver_To_Interlude =
             if b.HitObjects.Length < 20 then
                 skip_conversion "Chart has less than 20 notes"
 
-            let path = Path.GetDirectoryName action.Source
+            let path = Path.GetDirectoryName ctx.OriginalPath
 
             let md5 =
-                match QuaverChart.HashFromFile action.Source with
+                match QuaverChart.HashFromFile ctx.OriginalPath with
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .qua file: %s" reason)
 
@@ -144,17 +144,17 @@ module Quaver_To_Interlude =
 
                         let absolute_background_path = Path.Combine(path, b.BackgroundFile)
 
-                        match action.Config.AssetBehaviour with
-                        | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
-                        | LinkAssetFiles -> ImportAsset.Link absolute_background_path
+                        match ctx.Options.AssetMode with
+                        | Copy -> ImportAsset.Copy absolute_background_path
+                        | Link -> ImportAsset.Link absolute_background_path
                     AudioFile =
                         if b.AudioFile = "" then ImportAsset.Missing else
 
                         let absolute_audio_path = Path.Combine(path, b.AudioFile)
 
-                        match action.Config.AssetBehaviour with
-                        | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
-                        | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
+                        match ctx.Options.AssetMode with
+                        | Copy -> ImportAsset.Copy absolute_audio_path
+                        | Link -> ImportAsset.Link absolute_audio_path
 
                     Origins =
                         {
@@ -186,7 +186,7 @@ module Quaver_To_Interlude =
                     }
                 ) |> Array.ofSeq
 
-            let sv : TimeArray<SV> =
+            let sv : TimeArray<float32> =
                 seq {
                     if b.InitialScrollVelocity <> 1.0f then
                         yield { Time = -10000.0f<ms>; Data = b.InitialScrollVelocity }
@@ -203,8 +203,8 @@ module Quaver_To_Interlude =
 
             Ok {
                 Header = header
-                LoadedFromPath = action.Source
-                PackName = action.Config.PackName
+                LoadedFromPath = ctx.OriginalPath
+                PackName = ctx.Options.PackName
                 Chart = {
                     Keys = keys
                     Notes = snaps
@@ -214,7 +214,7 @@ module Quaver_To_Interlude =
             }
         with
         | :? ConversionSkipException as skip_reason ->
-            Error (action.Source, skip_reason.msg)
+            Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }
         | other_error ->
-            Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
-            Error (action.Source, other_error.Message)
+            Logging.Debug "Unexpected error converting %s: %O" ctx.OriginalPath other_error
+            Error { OriginalPath = ctx.OriginalPath; Reason = other_error.Message }

@@ -5,8 +5,8 @@ open NUnit.Framework
 open Prelude
 open Prelude.Charts
 open Prelude.Data.Library.Imports
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Tests.Helpers
 
 module ChartRateDetectionTests =
@@ -152,11 +152,11 @@ module ChartRateDetectionTests =
                 Beatmap.FromStream(stream)
             )
             |> Seq.map(fun beatmap ->
-                Osu_To_Interlude.convert
+                OsuConverter.convert
                     beatmap
                     {
-                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
-                        Source = "./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
+                        Options = ConversionOptions.Pack("osu!", None, Link)
+                        OriginalPath = "./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
                     }
             )
             |> List.ofSeq
@@ -178,11 +178,11 @@ module ChartRateDetectionTests =
                 Beatmap.FromStream(stream)
             )
             |> Seq.map(fun beatmap ->
-                Osu_To_Interlude.convert
+                OsuConverter.convert
                     beatmap
                     {
-                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
-                        Source = "./Data/Osz/989392 DJ Sharpnel - World Sound.osz"
+                        Options = ConversionOptions.Pack("osu!", None, Link)
+                        OriginalPath = "./Data/Osz/989392 DJ Sharpnel - World Sound.osz"
                     }
             )
             |> List.ofSeq

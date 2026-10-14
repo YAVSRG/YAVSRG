@@ -3,7 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.Conversions
 open Prelude.Data.Library.Imports
 
 let main () =
@@ -16,8 +16,8 @@ let main () =
                 for converted in
                     convert_chart_file
                         {
-                            Source = file
-                            Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                            OriginalPath = file
+                            Options = ConversionOptions.Pack("osu!", None, Link)
                         } do
                     match converted with
                     | Ok { Chart = chart } ->

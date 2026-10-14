@@ -7,10 +7,10 @@ open System.Text.RegularExpressions
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
 open Prelude.Formats.Osu
 open Prelude.Formats.Quaver
 open Prelude.Formats.StepMania
+open Prelude.Formats.Conversions
 
 [<AutoOpen>]
 module Shared =
@@ -32,7 +32,7 @@ module Shared =
         if skipped > 0 then
             let dump =
                 result.SkippedCharts
-                |> Seq.map (fun (path, reason) -> sprintf "%s -> %s" path reason)
+                |> Seq.map _.ToString()
                 |> String.concat "\n "
             Logging.Info "Successful import of %i chart(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump
         else
@@ -56,7 +56,7 @@ module Shared =
         else
             None
 
-    let filter_rates (results: Result<ImportChart, string * string> list) : Result<ImportChart, string * string> list =
+    let filter_rates (results: Result<ImportChart, SkippedConversion> list) : Result<ImportChart, SkippedConversion> list =
         
         let find_matching_1x (import: ImportChart, rate: Rate) =
             results
@@ -87,7 +87,7 @@ module Shared =
                     match find_matching_1x(import, rate) with
                     | Some (h, alt_rate_origin) ->
                         h.Origins <- h.Origins.Add alt_rate_origin
-                        Error (import.LoadedFromPath, sprintf "Skipping %.2fx rate of another map" rate)
+                        Error { OriginalPath = import.LoadedFromPath; Reason = sprintf "Skipping %.2fx rate of another map" rate }
                     | None ->
                         Logging.Debug "%s: Looks like %.2fx rate, but didn't find a 1.0x version in the same folder, so keeping it" import.LoadedFromPath rate
                         Ok import
@@ -95,38 +95,26 @@ module Shared =
             | Error skipped_conversion -> Error skipped_conversion
         )
 
-    let convert_chart_file (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
-        match Path.GetExtension(action.Source).ToLower() with
+    let convert_chart_file (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> list =
+        let inline parse_error(message: string) =
+            [ Error { OriginalPath = ctx.OriginalPath; Reason = sprintf "Failed to parse this file: %s" message } ]
+        
+        match Path.GetExtension(ctx.OriginalPath).ToLower() with
         | ".sm" ->
-            match StepMania.FromFile action.Source with
-            | Ok data ->
-
-                StepMania_To_Interlude.convert data action
-
-            | Error msg ->
-                Logging.Debug "Parse error in SM file %s: %O" action.Source msg
-                [ Error (action.Source, "Failed to parse this file") ]
+            match StepMania.FromFile(ctx.OriginalPath) with
+            | Ok data -> StepManiaConverter.convert data ctx
+            | Error msg -> parse_error(msg)
 
         | ".qua" ->
-            match QuaverChart.FromFile action.Source with
-            | Ok quaver_chart ->
-
-                [ Quaver_To_Interlude.convert quaver_chart action ]
-
-            | Error msg ->
-                Logging.Debug "Parse error in osu! file %s: %O" action.Source msg
-                [ Error (action.Source, "Failed to parse this file") ]
+            match QuaverChart.FromFile(ctx.OriginalPath) with
+            | Ok quaver_chart -> [ QuaverConverter.convert quaver_chart ctx ]
+            | Error msg -> parse_error(msg)
 
         | ".osu" ->
-            match Beatmap.TryReadFromFile action.Source with
+            match Beatmap.TryReadFromFile(ctx.OriginalPath) with
             | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
-            | Ok beatmap ->
-
-                [ Osu_To_Interlude.convert_internal beatmap action ]
-
-            | Error msg ->
-                Logging.Debug "Parse error in osu! file %s: %O" action.Source msg
-                [ Error (action.Source, "Failed to parse this file") ]
+            | Ok beatmap -> [ OsuConverter.convert beatmap ctx ]
+            | Error msg -> parse_error(msg)
 
         | _ -> []
 
