@@ -151,11 +151,6 @@
     <Compile Include="Data\Library\Views\Shared.fs" />
     <Compile Include="Data\Library\Views\Filtering.fs" />
     <Compile Include="Data\Library\Views\Sorting.fs" />
-    <Compile Include="Data\Library\Imports\Shared.fs" />
-    <Compile Include="Data\Library\Imports\FileSystemImports.fs" />
-    <Compile Include="Data\Library\Imports\Mounts.fs" />
-    <Compile Include="Data\Library\Imports\OnlineImports.fs" />
-    <Compile Include="Data\Library\Exports.fs" />
     <Compile Include="Data\Library\Views\Grouping.fs" />
     <Compile Include="Data\Library\Views\Views.fs" />
     <Compile Include="Data\Library\Endless.fs" />
@@ -171,6 +166,11 @@
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
     <Compile Include="Data\OsuClientInterop\Scores.fs" />
+    <Compile Include="Data\Imports\Shared.fs" />
+    <Compile Include="Data\Imports\FileSystemImports.fs" />
+    <Compile Include="Data\Imports\Mounts.fs" />
+    <Compile Include="Data\Imports\OnlineImports.fs" />
+    <Compile Include="Data\Exports\Exports.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FParsec" Version="1.1.1" />
