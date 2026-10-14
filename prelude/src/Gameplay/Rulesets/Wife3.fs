@@ -77,17 +77,17 @@ module Wife3 =
                     {
                         Name = "A"
                         Accuracy = 0.8
-                        Color = Color.Lime
+                        Color = Color.IndianRed
                     }
                     {
                         Name = "A."
                         Accuracy = 0.85
-                        Color = Color.Lime
+                        Color = Color.IndianRed
                     }
                     {
                         Name = "A:"
                         Accuracy = 0.9
-                        Color = Color.Lime
+                        Color = Color.IndianRed
                     }
                     {
                         Name = "AA"
