@@ -451,13 +451,13 @@ module ScoreProcessorTests =
 
     let DONUT_HOLE_CHART =
         let beatmap =
-            Beatmap.TryReadFromFile("./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu") |> expect
+            Beatmap.TryReadFromFile("./test_data/Hachi - DONUT HOLE (Raveille) [Filling].osu") |> expect
 
         (OsuConverter.convert
             beatmap
             {
                 Options = ConversionOptions.Pack("osu!", None, Link)
-                OriginalPath = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+                OriginalPath = "./test_data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
             }
          |> expect)
             .Chart

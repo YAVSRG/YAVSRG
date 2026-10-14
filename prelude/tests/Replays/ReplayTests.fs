@@ -7,7 +7,7 @@ open Prelude.Gameplay.Replays
 
 module ReplayTests =
 
-    let SAMPLE_REPLAY_BYTES = File.ReadAllBytes("./Data/replay.bin")
+    let SAMPLE_REPLAY_BYTES = File.ReadAllBytes("./test_data/replay.bin")
     let SAMPLE_REPLAY_DATA = Replay.FromByteArray(SAMPLE_REPLAY_BYTES)
 
     [<Test>]

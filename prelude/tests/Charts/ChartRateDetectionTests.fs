@@ -143,7 +143,7 @@ module ChartRateDetectionTests =
     let RateFiltering_RealCase () =
 
         let data =
-            ZipFile.OpenRead("./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz")
+            ZipFile.OpenRead("./test_data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz")
 
         let song_rates =
             data.Entries
@@ -156,7 +156,8 @@ module ChartRateDetectionTests =
                     beatmap
                     {
                         Options = ConversionOptions.Pack("osu!", None, Link)
-                        OriginalPath = "./Data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
+                        OriginalPath =
+                            "./test_data/Osz/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
                     }
             )
             |> List.ofSeq
@@ -169,7 +170,7 @@ module ChartRateDetectionTests =
     [<Test>]
     let RateFiltering_RealCase2 () =
 
-        let data = ZipFile.OpenRead("./Data/Osz/989392 DJ Sharpnel - World Sound.osz")
+        let data = ZipFile.OpenRead("./test_data/Osz/989392 DJ Sharpnel - World Sound.osz")
 
         let song_rates =
             data.Entries
@@ -182,7 +183,7 @@ module ChartRateDetectionTests =
                     beatmap
                     {
                         Options = ConversionOptions.Pack("osu!", None, Link)
-                        OriginalPath = "./Data/Osz/989392 DJ Sharpnel - World Sound.osz"
+                        OriginalPath = "./test_data/Osz/989392 DJ Sharpnel - World Sound.osz"
                     }
             )
             |> List.ofSeq

@@ -264,14 +264,14 @@ module OsuConverterTests =
     [<Test>]
     let RoundTrip_BackbeatManiac () =
         let beatmap =
-            Beatmap.TryReadFromFile("./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu") |> expect
+            Beatmap.TryReadFromFile("./test_data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu") |> expect
 
         let converted =
             OsuConverter.convert
                 beatmap
                 {
                     Options = ConversionOptions.Pack("osu!", None, Link)
-                    OriginalPath = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
+                    OriginalPath = "./test_data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect
 
@@ -292,7 +292,7 @@ module OsuConverterTests =
                 exported_beatmap
                 {
                     Options = ConversionOptions.Pack("osu!", None, Link)
-                    OriginalPath = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
+                    OriginalPath = "./test_data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect
 

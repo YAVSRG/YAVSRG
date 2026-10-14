@@ -14,8 +14,8 @@ module RulesetOsuParityTests =
     let RULESET = OsuMania.create 8.0f OsuMania.NoMod
 
     let TEST_REPLAY_FILE =
-        OsuReplay.TryReadFile "./Data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr" |> Option.get
-    let TEST_OSU_FILE_PATH = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
+        OsuReplay.TryReadFile "./test_data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr" |> Option.get
+    let TEST_OSU_FILE_PATH = "./test_data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
     let TEST_OSU_FILE_HASH =
         Beatmap.HashFromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_OSU_FILE =
@@ -24,8 +24,8 @@ module RulesetOsuParityTests =
         (OsuConverter.convert TEST_OSU_FILE { Options = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH } |> expect).Chart
 
     let TEST_REPLAY_FILE_2 =
-        OsuReplay.TryReadFile "./Data/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr" |> Option.get
-    let TEST_OSU_FILE_PATH_2 = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+        OsuReplay.TryReadFile "./test_data/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr" |> Option.get
+    let TEST_OSU_FILE_PATH_2 = "./test_data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
     let TEST_OSU_FILE_HASH_2 =
         Beatmap.HashFromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_OSU_FILE_2 =

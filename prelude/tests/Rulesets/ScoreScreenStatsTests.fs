@@ -13,7 +13,9 @@ open Prelude.Tests.Helpers
 module ScoreScreenStatsTests =
 
     let TEST_SCORE =
-        let beatmap_path = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
+        let beatmap_path =
+            "./test_data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
+
         let beatmap = Beatmap.TryReadFromFile(beatmap_path) |> expect
 
         let chart =
@@ -24,7 +26,9 @@ module ScoreScreenStatsTests =
                 .Chart
 
         let osu_replay =
-            OsuReplay.TryReadFile("./Data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr")
+            OsuReplay.TryReadFile(
+                "./test_data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr"
+            )
             |> Option.get
 
         let replay = OsuReplay.decode(osu_replay, chart.FirstNote, 1.0f<rate>)

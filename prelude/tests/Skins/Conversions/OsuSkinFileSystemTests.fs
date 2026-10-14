@@ -156,7 +156,7 @@ module OsuSkinFileSystemTests =
 
     [<Test>]
     let FromFolder_CorrectBehaviour () =
-        use fs = new OsuSkinFolderFileSystem("./Data")
+        use fs = new OsuSkinFolderFileSystem("./test_data")
 
         Assert.True(fs.Exists("skin.ini"))
         Assert.True(fs.Exists("replay.bin"))
@@ -165,7 +165,7 @@ module OsuSkinFileSystemTests =
     [<Test(Description = "May be a little slow to do all this file system stuff on the entire test data, consider making smaller later?")>]
     let FromZipArchive_CorrectBehaviour () =
         let ms = new MemoryStream()
-        ZipFile.CreateFromDirectory("./Data", ms)
+        ZipFile.CreateFromDirectory("./test_data", ms)
         let zip = new ZipArchive(ms, ZipArchiveMode.Read)
         use fs = new OsuSkinZipFileSystem(zip)
 

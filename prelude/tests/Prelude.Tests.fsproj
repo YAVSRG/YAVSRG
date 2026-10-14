@@ -6,31 +6,31 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="Data\Osz\2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz">
+    <None Include="test_data\Osz\2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Osz\989392 DJ Sharpnel - World Sound.osz">
+    <None Include="test_data\Osz\989392 DJ Sharpnel - World Sound.osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu">
+    <None Include="test_data\Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\skin.ini">
+    <None Include="test_data\skin.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\replay.bin">
+    <None Include="test_data\replay.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Hachi - DONUT HOLE (Raveille) [Filling].osu">
+    <None Include="test_data\Hachi - DONUT HOLE (Raveille) [Filling].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr">
+    <None Include="test_data\Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu">
+    <None Include="test_data\Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr">
+    <None Include="test_data\Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="Helpers\ChartFuzzer.fs" />
