@@ -33,10 +33,14 @@ module RulesetOsuParityTests =
             .Chart
 
     let TEST_REPLAY_FILE_2 =
-        OsuReplay.TryReadFile("./test_data/osu_parity/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr")
+        OsuReplay.TryReadFile(
+            "./test_data/osu_parity/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr"
+        )
         |> Option.get
 
-    let TEST_OSU_FILE_PATH_2 = "./test_data/osu_parity/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+    let TEST_OSU_FILE_PATH_2 =
+        "./test_data/osu_parity/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+
     let TEST_OSU_FILE_HASH_2 = Beatmap.HashFromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_OSU_FILE_2 = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH_2) |> expect
 
@@ -134,8 +138,7 @@ module RulesetOsuParityTests =
 
         // Obtained with GosuMemory
         let EXPECTED_DATA =
-            System.IO.File.ReadAllLines("./test_data/osu_parity/hehehe_events.txt")
-            |> Array.map int
+            System.IO.File.ReadAllLines("./test_data/osu_parity/hehehe_events.txt") |> Array.map int
 
         Assert.AreEqual(EXPECTED_DATA, event_deltas)
 
@@ -308,8 +311,7 @@ module RulesetOsuParityTests =
 
         // Obtained with GosuMemory
         let EXPECTED_DATA =
-            System.IO.File.ReadAllLines("./test_data/osu_parity/donut_hole_events.txt")
-            |> Array.map int
+            System.IO.File.ReadAllLines("./test_data/osu_parity/donut_hole_events.txt") |> Array.map int
 
         printfn "%.2f%%" (score.Accuracy * 100.0)
 
