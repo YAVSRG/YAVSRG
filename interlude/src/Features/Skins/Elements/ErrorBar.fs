@@ -186,6 +186,11 @@ type ErrorBar(ctx: HudContext) =
             let center = this.Bounds.CenterX
             Rect.FromEdges(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
 
+        if ctx.Config.TimingDisplayShowGuide then
+            Render.rect
+                (bar (-ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness) (ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness))
+                Color.White
+
         let now = ctx.State.CurrentChartTime()
 
         match ctx.Config.TimingDisplayMovingAverageType with
