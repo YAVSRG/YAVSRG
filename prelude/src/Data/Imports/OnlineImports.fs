@@ -7,6 +7,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Formats.Conversions
 open Prelude.Data
+open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
 
 module OnlineImports =

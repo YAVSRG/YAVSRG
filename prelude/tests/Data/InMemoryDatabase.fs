@@ -6,7 +6,7 @@ open System.Runtime.InteropServices
 open NUnit.Framework
 open Percyqaz.Data.Sqlite
 open Prelude.Data.User
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 
 [<SetUpFixture>]
 type Setup() =

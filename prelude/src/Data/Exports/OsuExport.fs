@@ -4,7 +4,7 @@ open System.IO
 open Prelude
 open Prelude.Charts
 open Prelude.Formats.Osu
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 
 type OsuExportOptions =
     {

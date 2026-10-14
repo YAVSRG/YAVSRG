@@ -5,8 +5,9 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Data.Library
 open Prelude.Data.User
+open Prelude.Data.ChartDatabase
+open Prelude.Data.Library
 open Interlude.Web.Shared
 open YAVSRG.CLI
 

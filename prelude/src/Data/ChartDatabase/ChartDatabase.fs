@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library
+﻿namespace Prelude.Data.ChartDatabase
 
 open System.IO
 open System.Collections.Generic

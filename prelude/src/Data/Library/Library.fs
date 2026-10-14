@@ -6,7 +6,9 @@ open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
+
+type ChartMeta = Prelude.Data.ChartDatabase.ChartMeta
 
 type Library =
     {

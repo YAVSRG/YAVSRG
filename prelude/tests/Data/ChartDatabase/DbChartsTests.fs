@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Calculator.Patterns
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 
 module DbChartsTests =
 

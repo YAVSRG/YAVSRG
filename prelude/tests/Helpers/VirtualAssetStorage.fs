@@ -1,6 +1,6 @@
 ﻿namespace Prelude.Tests.Helpers
 
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 
 type VirtualAssetStorage(path: string) =
     inherit AssetStorage()

@@ -6,7 +6,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Formats.Osu
 open Prelude.Formats.Conversions
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 open Prelude.Data.Exports
 open Prelude.Tests.Helpers
 

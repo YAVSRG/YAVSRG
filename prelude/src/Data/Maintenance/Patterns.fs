@@ -5,7 +5,7 @@ open Prelude
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
 open Prelude.Data
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 
 module Patterns =
 

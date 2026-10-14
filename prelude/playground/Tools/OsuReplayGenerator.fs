@@ -8,9 +8,9 @@ open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
-open Prelude.Data.OsuClientInterop
 open Prelude.Data
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
+open Prelude.Data.OsuClientInterop
 open Prelude.Data.Exports
 open Prelude.Tests.Helpers
 

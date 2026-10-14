@@ -1,12 +1,11 @@
-﻿namespace Prelude.Data.Library
+﻿namespace Prelude.Data.User
 
 open System.Collections.Generic
 open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
 open Prelude.Mods
-
-// todo: this is user data and should be moved to Prelude.Data.User
+open Prelude.Data.ChartDatabase
 
 [<Json.AutoCodec>]
 type CollectionEntry =
