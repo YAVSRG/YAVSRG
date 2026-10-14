@@ -142,7 +142,7 @@ module Updates =
         let path = get_interlude_location ()
         let folder_path = Path.Combine(path, "update")
 
-        Imports.delete_folder.Request(folder_path, ignore)
+        FileSystemImports.delete_folder.Request(folder_path, ignore)
 
     let apply_update (progress: float32 -> unit, callback: unit -> unit) : unit =
         if not update_available then
@@ -175,7 +175,7 @@ module Updates =
                 fun success ->
                     if success then
                         ZipFile.ExtractToDirectory(zip_path, folder_path)
-                        Imports.delete_file.Request(zip_path, ignore)
+                        FileSystemImports.delete_file.Request(zip_path, ignore)
                         swap_update_files folder_path path
                         callback ()
                         update_complete <- true

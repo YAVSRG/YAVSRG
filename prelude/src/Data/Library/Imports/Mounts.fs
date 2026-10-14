@@ -4,7 +4,7 @@ open System
 open System.IO
 open Percyqaz.Data
 open Percyqaz.Common
-open Prelude.Formats
+open Prelude.Formats.Conversions
 open Prelude.Data
 open Prelude.Data.Library
 
@@ -40,8 +40,8 @@ module Mount =
                 match source.Type with
                 | Pack packname ->
                     Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
-                    let config = ConversionOptions.Pack(packname, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles)
-                    let! result = Imports.convert_pack_folder(source.SourceFolder, config, library, progress)
+                    let config = ConversionOptions.Pack(packname, since, if source.CopyAssetFiles then Copy else Link)
+                    let! result = FileSystemImports.convert_pack_folder(source.SourceFolder, config, library, progress)
 
                     log_conversion result
                     source.LastImported <- Some DateTime.UtcNow
@@ -57,9 +57,9 @@ module Mount =
                         let pack_name = Path.GetFileName pack_folder
 
                         let! result =
-                            Imports.convert_pack_folder(
+                            FileSystemImports.convert_pack_folder(
                                 pack_folder,
-                                ConversionOptions.Pack(pack_name, since, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles),
+                                ConversionOptions.Pack(pack_name, since, if source.CopyAssetFiles then Copy else Link),
                                 library,
                                 (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
                             )

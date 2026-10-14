@@ -1,44 +1,52 @@
-namespace Prelude.Formats
+namespace Prelude.Formats.Conversions
 
 open System
 open System.IO
 open Prelude
 
-type ConversionAssetBehaviour =
-    | CopyAssetFiles
-    | LinkAssetFiles
+[<Struct>]
+type AssetMode =
+    | Copy
+    | Link
 
 type ConversionOptions =
     {
-        AssetBehaviour: ConversionAssetBehaviour
+        AssetMode: AssetMode
         EtternaPackName: string option
         ChangedAfter: DateTime option
         PackName: string
     }
 
-    static member EtternaPack(pack_name: string, changed_after: DateTime option, asset_behaviour: ConversionAssetBehaviour) =
+    static member EtternaPack(pack_name: string, changed_after: DateTime option, asset_mode: AssetMode) : ConversionOptions =
         {
-            AssetBehaviour = asset_behaviour
+            AssetMode = asset_mode
             EtternaPackName = Some pack_name
             ChangedAfter = changed_after
             PackName = pack_name
         }
 
-    static member Pack(pack_name: string, changed_after: DateTime option, asset_behaviour: ConversionAssetBehaviour) =
+    static member Pack(pack_name: string, changed_after: DateTime option, asset_mode: AssetMode) : ConversionOptions =
         {
-            AssetBehaviour = asset_behaviour
+            AssetMode = asset_mode
             EtternaPackName = None
             ChangedAfter = changed_after
             PackName = pack_name
         }
 
-type ConversionAction =
+type ConversionContext =
     {
-        Config: ConversionOptions
-        Source: string
+        Options: ConversionOptions
+        OriginalPath: string
     }
 
-type SkippedConversion = string * string
+[<Struct>]
+type SkippedConversion =
+    {
+        OriginalPath: string
+        Reason: string
+    }
+    override this.ToString() = sprintf "%s -> %s" this.OriginalPath this.Reason
+    
 type ConversionResult =
     {
         ConvertedCharts: int
@@ -51,7 +59,7 @@ type ConversionResult =
             SkippedCharts = res1.SkippedCharts @ res2.SkippedCharts
         }
 
-exception ConversionSkipException of msg: string
+exception ConversionSkipException of Reason: string
 
 (*
     Overall utilities to dynamically load different chart files and convert to Interlude format
@@ -61,16 +69,31 @@ exception ConversionSkipException of msg: string
 module Utilities =
 
     let inline skip_conversion (msg: string) = raise (ConversionSkipException msg)
-
-    let cleaned_sv (sv: TimeArray<float32>) : TimeArray<float32> =
+    
+    let remove_stacked_points (points: TimeArray<'T>) : TimeArray<'T> =
+        if points.Length = 0 then
+            [||]
+        else
+        
+        let mutable current = points.[0]
+        
         seq {
-            let deduped =
-                sv
-                |> Array.rev
-                |> Array.distinctBy _.Time
-                |> Array.rev
+            for i = 1 to points.Length - 1 do
+                let next = points.[i]
+                
+                if next.Time > current.Time then
+                    yield current
+                    
+                current <- next
+                
+            yield current
+        }
+        |> Array.ofSeq
+
+    let cleanup_sv (sv: TimeArray<float32>) : TimeArray<float32> =
+        seq {
             let mutable previous_value = 1.0f
-            for s in deduped do
+            for s in remove_stacked_points(sv) do
                 if abs (s.Data - previous_value) > 0.005f then
                     yield s
                     previous_value <- s.Data

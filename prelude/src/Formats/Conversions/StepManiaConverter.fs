@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.StepMania
+﻿namespace Prelude.Formats.Conversions
 
 open System
 open System.IO
@@ -6,77 +6,9 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.StepMania
 
-module StepMania_To_Interlude =
-
-    // this does not work and was an experiment
-    open System.Security.Cryptography
-    let private get_chart_key_wip
-        (measures: string list list)
-        (bpms: (float32<beat> * float32<beat / minute>) list)
-        (start: Time)
-        =
-
-        let h = SHA1.Create()
-        use ms = new MemoryStream()
-        use bw = new StreamWriter(ms)
-
-        let mutable bpms = bpms
-
-        let meter = 4<beat>
-        let fmeter = float32 meter * 1.0f<beat>
-
-        let mutable bpm_now = snd (List.head bpms)
-        if bpm_now < 0.0f<beat / minute> then failwithf "SM file has negative BPMs"
-        bpms <- List.tail bpms
-
-        let mutable total_beats = 0.0f<beat>
-        let mutable lo = 0.0f<beat>
-        let mutable hi = 0.0f<beat>
-
-        let write_measure (m: string list) (lo: float32<beat>) (hi: float32<beat>) =
-            let l = List.length m |> float32
-            let start = Math.Ceiling(lo * l / fmeter |> float) |> int
-            let finish = Math.Ceiling(hi * l / fmeter |> float) |> int
-
-            for i in start .. (finish - 1) do
-                let beat = total_beats + float32 i * fmeter / l
-
-                Seq.iter
-                    (fun c ->
-                        match c with
-                        | '0' -> bw.Write('0')
-                        | '1' -> bw.Write('1')
-                        | '2' -> bw.Write('2')
-                        | '4' -> bw.Write('2')
-                        | '3' -> bw.Write('0')
-                        | 'M' -> bw.Write('4')
-                        | 'L' -> bw.Write('5')
-                        | 'F' -> bw.Write('7')
-                        | _ -> failwithf "Unknown note type '%c'" c
-                    )
-                    m.[i]
-                bw.Write(int (bpm_now + 0.374643F<beat / minute>))
-
-        List.iter
-            (fun m ->
-                lo <- 0.0f<beat>
-
-                while ((not (List.isEmpty bpms)) && fst (List.head bpms) < total_beats + fmeter) do
-                    hi <- fst (List.head bpms) - total_beats
-                    write_measure m lo hi
-                    lo <- hi
-                    bpm_now <- snd (List.head bpms)
-                    if bpm_now < 0.0f<beat / minute> then failwithf "SM file has negative BPMs"
-                    bpms <- List.tail bpms
-
-                write_measure m lo fmeter
-                total_beats <- total_beats + fmeter
-            )
-            measures
-
-        "X" + BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "").ToLower()
+module StepManiaConverter =
 
     let private convert_measures
         (steps_type: StepManiaChartType)
@@ -224,9 +156,9 @@ module StepMania_To_Interlude =
 
         keys, states |> Array.ofSeq, points |> Array.ofSeq
 
-    let convert (sm: StepManiaFile) (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
+    let convert (sm: StepManiaFile) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> list =
 
-        let path = Path.GetDirectoryName action.Source
+        let path = Path.GetDirectoryName ctx.OriginalPath
 
         let rec metadata_fallback (choices: string list) : string =
             match choices with
@@ -353,31 +285,31 @@ module StepMania_To_Interlude =
                             | Some file ->
                                 let absolute_audio_path = Path.Combine(path, file)
 
-                                match action.Config.AssetBehaviour with
-                                | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
-                                | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
+                                match ctx.Options.AssetMode with
+                                | Copy -> ImportAsset.Copy absolute_audio_path
+                                | Link -> ImportAsset.Link absolute_audio_path
                             | None -> ImportAsset.Missing
                         BackgroundFile =
                             match find_background () with
                             | Some file ->
                                 let absolute_background_path = Path.Combine(path, file)
 
-                                match action.Config.AssetBehaviour with
-                                | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
-                                | LinkAssetFiles -> ImportAsset.Link absolute_background_path
+                                match ctx.Options.AssetMode with
+                                | Copy -> ImportAsset.Copy absolute_background_path
+                                | Link -> ImportAsset.Link absolute_background_path
                             | None -> ImportAsset.Missing
 
                         Origins =
-                            action.Config.EtternaPackName
-                            |> Option.defaultValue action.Config.PackName
+                            ctx.Options.EtternaPackName
+                            |> Option.defaultValue ctx.Options.PackName
                             |> ChartOrigin.Etterna
                             |> Set.singleton
                     }
 
                 Ok {
                     Header = header
-                    LoadedFromPath = action.Source
-                    PackName = action.Config.PackName
+                    LoadedFromPath = ctx.OriginalPath
+                    PackName = ctx.Options.PackName
                     Chart = {
                         Keys = keys
                         Notes = notes
@@ -387,9 +319,9 @@ module StepMania_To_Interlude =
                 }
             with
             | :? ConversionSkipException as skip_reason ->
-                Error (action.Source, skip_reason.msg)
+                Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }
             | other_error ->
-                Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
-                Error (action.Source, other_error.Message)
+                Logging.Debug "Unexpected error converting %s: %O" ctx.OriginalPath other_error
+                Error { OriginalPath = ctx.OriginalPath; Reason = other_error.Message }
 
         sm.Charts |> List.map convert_difficulty

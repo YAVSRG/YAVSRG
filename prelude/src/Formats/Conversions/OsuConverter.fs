@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Osu
+﻿namespace Prelude.Formats.Conversions
 
 open System
 open System.IO
@@ -7,30 +7,31 @@ open System.Linq
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
+open Prelude.Formats.Osu
 
-module Osu_To_Interlude =
+module OsuConverter =
 
     let convert_hit_objects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
-        let output = List<TimeItem<NoteRow>>()
+
+        let inline x_to_column (x: float) : int =
+            x / 512.0 * float keys |> int |> min (keys - 1) |> max 0
+        
         let holding_until: Time option array = Array.zeroCreate keys
+        let output = List<TimeItem<NoteRow>>()
         let mutable last_row: TimeItem<NoteRow> = { Time = -Time.infinity; Data = [||] }
 
-        let x_to_column (x: float) : int =
-            x / 512.0 * float keys |> int |> min (keys - 1) |> max 0
-
-        let finish_holds (time: Time) =
+        let inline find_earliest_upcoming_release () : Time =
             let mutable earliest_upcoming_release = Time.infinity
 
-            let find_earliest_upcoming_release () =
-                earliest_upcoming_release <- Time.infinity
+            for h in holding_until do
+                match h with
+                | Some v -> earliest_upcoming_release <- min earliest_upcoming_release v
+                | None -> ()
+                
+            earliest_upcoming_release
 
-                for h in holding_until do
-                    match h with
-                    | Some v -> earliest_upcoming_release <- min earliest_upcoming_release v
-                    | None -> ()
-
-            find_earliest_upcoming_release ()
+        let finish_holds (time: Time) =
+            let mutable earliest_upcoming_release = find_earliest_upcoming_release()
 
             while earliest_upcoming_release < time do
                 for k = 0 to keys - 1 do
@@ -57,10 +58,10 @@ module Osu_To_Interlude =
                             holding_until.[k] <- None
                         | _ -> failwithf "impossible"
 
-                find_earliest_upcoming_release ()
+                earliest_upcoming_release <- find_earliest_upcoming_release()
 
         let add_note (column: int) (time: Time) =
-            finish_holds time
+            finish_holds(time)
             assert (time >= last_row.Time)
 
             if time > last_row.Time then
@@ -83,7 +84,7 @@ module Osu_To_Interlude =
             | other -> skip_conversion (sprintf "Stacked note at %f, column %i, coincides with %A" time (column + 1) other)
 
         let start_hold (column: int) (time: Time) (end_time: Time) =
-            finish_holds time
+            finish_holds(time)
             assert (time >= last_row.Time)
             assert (end_time > time)
 
@@ -110,17 +111,18 @@ module Osu_To_Interlude =
                 holding_until.[column] <- Some end_time
             | other -> skip_conversion (sprintf "Stacked LN at %f, column %i, head coincides with %A" time (column + 1) other)
 
-        for object in objects do
+        // The osu! client sorts all hitobjects and timing points by timestamp for when users have put them in the wrong order via notepad
+        for object in objects |> List.sortBy _.Time do
             match object with
             | HitCircle x -> add_note (x_to_column x.X) (Time.of_number x.Time)
             | Hold x when x.EndTime > x.Time -> start_hold (x_to_column x.X) (Time.of_number x.Time) (Time.of_number x.EndTime)
             | Hold x -> add_note (x_to_column x.X) (Time.of_number x.Time)
             | _ -> ()
 
-        finish_holds Time.infinity
+        finish_holds(Time.infinity)
         output.ToArray()
 
-    let private find_bpm_durations (points: TimingPoint list) (end_time: Time) : Dictionary<float32<ms / beat>, Time> =
+    let private find_most_common_beat_length (points: TimingPoint list) (end_time: Time) : float32<ms / beat> =
 
         let data = Dictionary<float32<ms / beat>, Time>()
 
@@ -130,7 +132,7 @@ module Osu_To_Interlude =
             |> List.ofSeq
 
         match uninherited with
-        | [] -> skip_conversion "Beatmap has no BPM points set"
+        | [] -> failwith "unreachable due to the check before this function is called"
         | x :: xs ->
             let mutable current: float32<ms / beat> = abs(float32 x.MsPerBeat) * 1.0f<ms / beat>
             let mutable time = Time.of_number x.Time
@@ -149,37 +151,46 @@ module Osu_To_Interlude =
             data.[current] <- data.[current] + max (end_time - time) 0.0f<ms>
 
         data
+            .OrderByDescending(_.Value)
+            .First()
+            .Key
 
     let convert_timing_points (points: TimingPoint list) (end_time: Time) : TimeArray<BPM> * TimeArray<float32> =
 
-        let most_common_mspb =
-            (find_bpm_durations points end_time)
-                .OrderByDescending(_.Value)
-                .First()
-                .Key
-
+        // The osu! client sorts all hitobjects and timing points by timestamp for when users have put them in the wrong order via notepad
+        // IMPORTANT: If multiple timing points are stacked on the same timestamp,
+        //   osu! will act UNPREDICTABLY and put them in an arbitrary order since it does not use a stable sort
+        // I have ruled to use a stable sort (`List.sortBy`)
+        //   This means stacked timing points will stay in the order they are in the .osu file after being sorted
+        // This gives a defined behaviour to my parse and conversion but anyone writing their own should be aware that it's UB
+        let points = points |> List.sortBy _.Time
+        
+        match List.tryHead points with
+        | Some (Inherited _) -> skip_conversion "First timing point must be uninherited"
+        | None -> skip_conversion "This beatmap has no timing points"
+        | _ -> ()
+        
+        let most_common_mspb = find_most_common_beat_length points end_time
         let sv = ResizeArray<TimeItem<float32>>()
         let bpm = ResizeArray<TimeItem<BPM>>()
-
-        // in osu!, an inherited point before an uninherited point stops the file from being playable, or playtestable in the editor
-        // This algorithm creates defined behaviour for it, but keep that in mind
         let mutable current_bpm_mult = 1.0f
 
-        for p in points do
-            match p with
-            | Uninherited b ->
-                let mspb = abs(float32 b.MsPerBeat) * 1.0f<ms / beat>
-                bpm.Add { Time = Time.of_number b.Time; Data = { Meter = b.Meter * 1<beat>; MsPerBeat = mspb } }
-                current_bpm_mult <- most_common_mspb / mspb
-                sv.Add { Time = Time.of_number b.Time; Data = current_bpm_mult }
-            | Inherited s ->
-                sv.Add { Time = Time.of_number s.Time; Data = current_bpm_mult * float32 s.Multiplier }
+        for point in points do
+            match point with
+            | Uninherited uninherited ->
+                let beat_length = abs(float32 uninherited.MsPerBeat) * 1.0f<ms / beat>
+                bpm.Add { Time = Time.of_number uninherited.Time; Data = { Meter = uninherited.Meter * 1<beat>; MsPerBeat = beat_length } }
+                current_bpm_mult <- most_common_mspb / beat_length
+                sv.Add { Time = Time.of_number uninherited.Time; Data = current_bpm_mult }
+                
+            | Inherited inherited ->
+                sv.Add { Time = Time.of_number inherited.Time; Data = current_bpm_mult * float32 inherited.Multiplier }
 
-        bpm.ToArray(), sv.ToArray()
+        remove_stacked_points(bpm.ToArray()), cleanup_sv(sv.ToArray())
 
-    let internal convert_internal (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
+    let convert (b: Beatmap) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> =
         try
-            let keys = b.Difficulty.CircleSize |> int
+            let keys = int b.Difficulty.CircleSize
 
             if b.General.Mode <> Gamemode.OSU_MANIA then
                 skip_conversion "Beatmap is not osu!mania gamemode"
@@ -190,22 +201,21 @@ module Osu_To_Interlude =
             if b.Objects.Length < 20 then
                 skip_conversion "Beatmap has less than 20 notes"
 
-            let path = Path.GetDirectoryName action.Source
+            let path = Path.GetDirectoryName ctx.OriginalPath
 
-            let rec find_background_file e =
-                match e with
+            let rec find_background_file(events: StoryboardEvent list) =
+                match events with
                 | Background(bg, _, _) :: _ -> bg
                 | _ :: es -> find_background_file es
                 | [] -> ""
 
             let md5 =
-                match Beatmap.HashFromFile action.Source with
+                match Beatmap.HashFromFile ctx.OriginalPath with
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .osu file: %s" reason)
 
-            let snaps = convert_hit_objects b.Objects keys
-
-            let bpm, sv = convert_timing_points b.Timing (TimeArray.last snaps).Value.Time
+            let notes = convert_hit_objects b.Objects keys
+            let bpm, sv = convert_timing_points b.Timing (TimeArray.last notes).Value.Time
 
             let header =
                 {
@@ -238,18 +248,18 @@ module Osu_To_Interlude =
 
                         let absolute_background_path = Path.Combine(path, background_file)
 
-                        match action.Config.AssetBehaviour with
-                        | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
-                        | LinkAssetFiles -> ImportAsset.Link absolute_background_path
+                        match ctx.Options.AssetMode with
+                        | Copy -> ImportAsset.Copy absolute_background_path
+                        | Link -> ImportAsset.Link absolute_background_path
                     AudioFile =
                         let audio_file = b.General.AudioFilename
                         if audio_file = "" then ImportAsset.Missing else
 
                         let absolute_audio_path = Path.Combine(path, audio_file)
 
-                        match action.Config.AssetBehaviour with
-                        | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
-                        | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
+                        match ctx.Options.AssetMode with
+                        | Copy -> ImportAsset.Copy absolute_audio_path
+                        | Link -> ImportAsset.Link absolute_audio_path
 
                     Origins =
                         {
@@ -257,7 +267,7 @@ module Osu_To_Interlude =
                             BeatmapSetId = b.Metadata.BeatmapSetID
                             BeatmapId = b.Metadata.BeatmapID
                             SourceRate = 1.0f<rate>
-                            FirstNoteOffset = snaps.[0].Time
+                            FirstNoteOffset = notes.[0].Time
                             SourceOD = Math.Clamp(MathF.Round(float32 b.Difficulty.OverallDifficulty, 1), 0.0f, 10.0f)
                         }
                         |> ChartOrigin.Osu
@@ -266,23 +276,18 @@ module Osu_To_Interlude =
 
             Ok {
                 Header = header
-                LoadedFromPath = action.Source
-                PackName = action.Config.PackName
+                LoadedFromPath = ctx.OriginalPath
+                PackName = ctx.Options.PackName
                 Chart = {
                     Keys = keys
-                    Notes = snaps
+                    Notes = notes
                     BPM = bpm
                     SV = sv
                 }
             }
         with
         | :? ConversionSkipException as skip_reason ->
-            Error (action.Source, skip_reason.msg)
+            Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }
         | other_error ->
-            Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
-            Error (action.Source, other_error.Message)
-
-    let convert (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
-        match convert_internal b action with
-        | Ok x -> Ok { x with ImportChart.Chart.SV = cleaned_sv x.Chart.SV }
-        | error -> error
+            Logging.Debug "Unexpected error converting %s: %O" ctx.OriginalPath other_error
+            Error { OriginalPath = ctx.OriginalPath; Reason = other_error.Message }

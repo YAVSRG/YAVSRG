@@ -4,8 +4,8 @@ open System
 open NUnit.Framework
 open Percyqaz.Common
 open Prelude
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
@@ -453,11 +453,11 @@ module ScoreProcessorTests =
         let beatmap =
             Beatmap.TryReadFromFile("./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu") |> expect
 
-        (Osu_To_Interlude.convert
+        (OsuConverter.convert
             beatmap
             {
-                Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
-                Source = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
+                Options = ConversionOptions.Pack("osu!", None, Link)
+                OriginalPath = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
             }
          |> expect)
             .Chart
