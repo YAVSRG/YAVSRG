@@ -57,7 +57,7 @@ type PerformanceMonitor() =
             update_times.[i] <- GameThread.update_time * 10.0
             latencies.[i] <- GameThread.visual_latency_hi
 
-            let (frames, ticks) = GameThread.framecount_tickcount
+            let frames, ticks = GameThread.framecount_tickcount
             fps <- float frames / (float ticks / float Stopwatch.Frequency)
 
     override this.Draw() =
@@ -93,7 +93,7 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
-                sprintf "%.1fms audio compensation" Song.seek_inaccuracy_compensation,
+                sprintf "%.1fms audio compensation" Song.compensation_at_start_of_frame,
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 140.0f,

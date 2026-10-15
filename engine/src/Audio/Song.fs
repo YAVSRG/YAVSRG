@@ -8,7 +8,7 @@ open Percyqaz.Common
 
 type Song =
     {
-        ID: int
+        mutable ID: int
         Frequency: int // in hz
         Duration: Time
         PreviewPoint: Time
@@ -121,11 +121,13 @@ type Song =
     member this.Pause() : Time =
         if this.ID <> 0 && this.Playing then
             this.Playing <- false
-            if Bass.ChannelIsActive(this.ID) = PlaybackState.Playing then Bass.ChannelPause(this.ID).LogBassError()
+
+            if Bass.ChannelIsActive(this.ID) = PlaybackState.Playing then
+                Bass.ChannelPause(this.ID).LogBassError()
 
         this.CurrentPosition()
 
-    member this.Play(delay_callback: Time -> unit) : unit =
+    member this.Play(delay_callback: float32<ms / rate> -> unit) : unit =
         if this.ID <> 0 && not this.Playing then
             this.Playing <- true
             let before = Stopwatch.GetTimestamp()
@@ -133,7 +135,7 @@ type Song =
 
             let callback =
                 SyncProcedure(fun _ _ _ _ ->
-                    delay_callback(float32(Stopwatch.GetElapsedTime(before).TotalMilliseconds) * 1.0f<ms>)
+                    delay_callback(float32(Stopwatch.GetElapsedTime(before).TotalMilliseconds) * 1.0f<ms / rate>)
                 )
 
             Bass.ChannelSetSync(this.ID, sync_flags, Bass.ChannelGetPosition(this.ID) + 1L, callback).LogBassError()
@@ -149,6 +151,7 @@ type Song =
     member this.Free() : unit =
         if this.ID <> 0 then
             Bass.StreamFree(this.ID).LogBassError()
+            this.ID <- 0
 
     member this.FadeIn(duration_ms: int) : unit =
         if this.ID <> 0 then
@@ -175,7 +178,7 @@ type SongLoadAction =
     | PlayFromPreview
     | PlayFromBeginning
     | Wait
-    
+
 [<RequireQualifiedAccess>]
 type private SongPlaybackState =
     | Paused
@@ -197,12 +200,13 @@ module Song =
     let mutable internal now_playing: Song =
         Song.CreatePlaceholder(0.0f<ms>, 1000.0f<ms>, 0.0f<ms>)
 
-    let mutable private _time = 0.0f<ms>
-    let private timer = Stopwatch()
-    let mutable private timer_start = 0.0f<ms>
-    let mutable private channel_playing = false
-    let mutable private paused = false
-    let mutable internal seek_inaccuracy_compensation = 37.0f<ms>
+    let mutable private timer_start: int64 = Stopwatch.GetTimestamp()
+    let mutable private timer_position: Time = 0.0f<ms>
+    let mutable private state: SongPlaybackState = SongPlaybackState.PlayingWithoutAudio
+    let ASSUMED_BASS_DELAY = 37.0f<ms / rate>
+    let mutable internal actual_bass_delay = 37.0f<ms / rate>
+    let mutable time_at_start_of_frame = 0.0f<ms>
+    let mutable compensation_at_start_of_frame = ASSUMED_BASS_DELAY
 
     module AudioSettings =
 
@@ -214,86 +218,103 @@ module Song =
         let mutable low_pass_amount = 0.0f
         let mutable low_pass_target = 0.0f
 
-    let duration () : Time = now_playing.Duration
-
     /// The exact audio position the engine thinks we are at; Can be called mid-frame for sub-frame precision
     let private exact_time () : Time =
-        timer_start + AudioSettings.rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>)
+        if state = SongPlaybackState.Paused then
+            timer_position
+        else
+            timer_position
+            + float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate> * AudioSettings.rate
 
     /// Used by the input engine at the instant an input is polled for precise mapping of inputs to audio positions
     let exact_time_with_offset () : Time =
-        exact_time() - seek_inaccuracy_compensation
+        exact_time() - compensation_at_start_of_frame * AudioSettings.rate
         + now_playing.LocalOffset
         + AudioSettings._global_offset * AudioSettings.rate
 
-    /// For the rest of gameplay rendering, the current 'exact time' is set at the start of the frame
-    /// This value is then reused without being updated until next frame
-    let private update_time () : unit = _time <- exact_time()
+    let start_of_frame () : unit =
+        if state = SongPlaybackState.PlayingWithAudio then
+            let target_compensation = actual_bass_delay - ASSUMED_BASS_DELAY
 
-    let frame_compensation () : Time = exact_time() - _time
+            let run_time =
+                float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate>
 
-    let time () : Time = _time
+            let multiplier =
+                min 1.0f ((run_time - actual_bass_delay) / (1000.0f * abs target_compensation))
 
-    let time_compensated () : Time = time() - seek_inaccuracy_compensation
+            compensation_at_start_of_frame <- ASSUMED_BASS_DELAY + multiplier * target_compensation
+        else
+            compensation_at_start_of_frame <- 0.0f<ms / rate>
+
+        time_at_start_of_frame <- exact_time()
+
+    let frame_compensation () : Time = exact_time() - time_at_start_of_frame
+
+    let time () : Time = time_at_start_of_frame
+
+    let time_compensated () : Time =
+        time() - compensation_at_start_of_frame * AudioSettings.rate
 
     let time_with_offset () : Time =
         time_compensated() + now_playing.LocalOffset + AudioSettings._global_offset * AudioSettings.rate
 
-    let playing () : bool = timer.IsRunning
+    let playing () : bool = state <> SongPlaybackState.Paused
 
     let play_from (time: Time) : unit =
 
-        if time >= 0.0f<ms> && time < duration() && now_playing.ID <> 0 then
+        if time >= 0.0f<ms> && time < now_playing.Duration && now_playing.ID <> 0 then
             now_playing.Pause() |> ignore
             now_playing.Seek(time)
             now_playing.Play(printfn "%.4fms play_from")
-            channel_playing <- true
 
-        else if channel_playing then
+        else if now_playing.Playing then
             now_playing.Pause() |> ignore
-            channel_playing <- false
 
-        timer_start <- time
-        timer.Restart()
-        paused <- false
-        update_time()
+        timer_position <- time
+        timer_start <- Stopwatch.GetTimestamp()
+        start_of_frame()
+        state <- SongPlaybackState.PlayingWithoutAudio
 
     let play_leadin (first_note: Time) : unit =
         play_from(min 0.0f<ms> (first_note - LEADIN_TIME * AudioSettings.rate))
 
     let seek (time: Time) : unit =
         if playing() then
-            play_from time
+            play_from(time)
         else
-            if time >= 0.0f<ms> && time < duration() && now_playing.ID <> 0 then
-                Bass.ChannelSetPosition(now_playing.ID, now_playing.TimeToBytes(time)).LogBassError()
-            else if channel_playing then
-                Bass.ChannelStop(now_playing.ID).LogBassError()
-                channel_playing <- false
+            if time >= 0.0f<ms> && time < now_playing.Duration && now_playing.ID <> 0 then
+                now_playing.Seek(time)
 
-            timer_start <- time
-            timer.Reset()
-            update_time()
+            timer_position <- time
+            start_of_frame()
 
     let pause () : unit =
-        let time = time()
+        let time = exact_time()
 
-        if time >= 0.0f<ms> && time < duration() then
-            now_playing.Pause() |> ignore
+        timer_position <- time
 
-        timer.Stop()
-        paused <- true
+        if time >= 0.0f<ms> && time < now_playing.Duration then
+            timer_position <- now_playing.Pause()
+
+        state <- SongPlaybackState.Paused
+        start_of_frame()
 
     let resume () : unit =
-        let time = time()
+        let time = exact_time()
 
-        if time >= 0.0f<ms> && time < duration() then
+        if time >= 0.0f<ms> && time < now_playing.Duration then
             now_playing.Pause() |> ignore
             now_playing.Seek(time)
-            now_playing.Play(printfn "%.4fms resume")
 
-        timer.Start()
-        paused <- false
+            now_playing.Play(fun delay ->
+                actual_bass_delay <- delay
+                state <- SongPlaybackState.PlayingWithAudio
+            )
+
+        timer_position <- time
+        timer_start <- Stopwatch.GetTimestamp()
+        start_of_frame()
+        state <- SongPlaybackState.PlayingWithoutAudio
 
     type AudioSettings =
         static member LocalOffset
@@ -353,7 +374,7 @@ module Song =
 
     let private song_loader =
         { new Async.CancelQueue<SongLoadRequest, Song * SongLoadAction>() with
-            override this.Process(request) =
+            override this.Process(request: SongLoadRequest) : Async<_> =
                 async {
                     return
                         match request.Path with
@@ -365,20 +386,22 @@ module Song =
                             request.AfterLoad
                 }
 
-            override this.Handle((song, after_load: SongLoadAction)) =
+            override this.Handle((song: Song, after_load: SongLoadAction)) : unit =
                 loading <- false
                 song.ChangeRate(AudioSettings.rate, AudioSettings.RateChangesPitch())
                 song.SetLowPassFilter(AudioSettings.low_pass_amount)
+                let was_paused = state = SongPlaybackState.Paused
+                state <- SongPlaybackState.Paused
                 now_playing <- song
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
-                    (if paused then seek else play_from) song.PreviewPoint
+                    if was_paused then seek(song.PreviewPoint) else play_from(song.PreviewPoint)
                     song.FadeIn(CROSSFADE_DURATION_MS)
-                | SongLoadAction.PlayFromBeginning -> (if paused then seek else play_from) 0.0f<ms>
-                | SongLoadAction.Wait ->
-                    play_from(LEADIN_TIME * AudioSettings.rate)
-                    pause()
+
+                | SongLoadAction.PlayFromBeginning -> if was_paused then seek(0.0f<ms>) else play_from(0.0f<ms>)
+
+                | SongLoadAction.Wait -> seek(0.0f<ms>)
 
                 on_loaded_ev.Trigger()
         }
@@ -390,15 +413,13 @@ module Song =
         if path_changed then
             load_path <- request.Path
             now_playing.FadeOutThenFree(CROSSFADE_DURATION_MS)
-            channel_playing <- false
             loading <- true
             song_loader.Request(request)
         else
             now_playing.LocalOffset <- request.LocalOffset
 
     let update (elapsed_ms: float) : unit =
-        let time_last_update = _time
-        update_time()
+        start_of_frame()
 
         if AudioSettings.low_pass_target <> AudioSettings.low_pass_amount then
             AudioSettings.low_pass_amount <-
@@ -411,41 +432,28 @@ module Song =
 
         song_loader.Join()
 
-        // if playback is running and the audio should have started, then start it adjusted for where we are rn
+        // if playback is running and the audio should have started, then start it
         if
-            playing() && _time >= 0.0f<ms> && _time < now_playing.Duration && not channel_playing && now_playing.ID <> 0
+            state.IsPlayingWithoutAudio
+            && time_at_start_of_frame >= 0.0f<ms>
+            && time_at_start_of_frame < now_playing.Duration
+            && not now_playing.Playing
+            && now_playing.ID <> 0
         then
-            channel_playing <- true
             now_playing.Pause() |> ignore
-            now_playing.Seek(_time)
+            now_playing.Seek(time_at_start_of_frame)
             now_playing.Play(printfn "%.4fms")
 
-        elif _time > now_playing.Duration then
+        elif time_at_start_of_frame > now_playing.Duration then
 
             match on_finish with
             | SongFinishAction.LoopFromPreview ->
-                if _time >= now_playing.LastNote then
+                if time_at_start_of_frame >= now_playing.LastNote then
                     play_from now_playing.PreviewPoint
             | SongFinishAction.LoopFromBeginning ->
-                if _time >= now_playing.LastNote then
+                if time_at_start_of_frame >= now_playing.LastNote then
                     play_from 0.0f<ms>
-            | SongFinishAction.Wait -> ()
+            | SongFinishAction.Wait -> now_playing.Pause() |> ignore
             | SongFinishAction.Custom action ->
-                if channel_playing then
+                if now_playing.Playing then
                     action()
-
-            channel_playing <- false
-
-        elif channel_playing && playing() && timer.ElapsedMilliseconds > 80L && timer.ElapsedMilliseconds < 2000L then
-            let audio_position =
-                Bass.ChannelBytes2Seconds(now_playing.ID, Bass.ChannelGetPosition(now_playing.ID, PositionFlags.Bytes))
-                |> float32
-
-            let clock_elapsed = _time - time_last_update
-
-            let off_by = time_compensated() - audio_position * 1000.0f<ms>
-            let adjustment = abs off_by |> min(clock_elapsed * 0.8f)
-
-            if abs off_by < 200.0f<ms> then
-                seek_inaccuracy_compensation <-
-                    seek_inaccuracy_compensation + if off_by > 0.0f<ms> then adjustment else -adjustment

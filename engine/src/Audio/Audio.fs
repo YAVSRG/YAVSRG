@@ -25,7 +25,7 @@ module Audio =
     let private update_waveform (elapsed_ms: float) : unit =
         let lerp_amount = MathF.Pow(0.988f, float32 elapsed_ms)
 
-        if Song.playing() then
+        if Song.now_playing.Playing then
             Bass.ChannelGetData(Song.now_playing.ID, fft, int DataFlags.FFT2048) |> ignore
             //algorithm adapted from here
             //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
