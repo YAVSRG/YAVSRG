@@ -172,7 +172,7 @@ module Screen =
     type ScreenRoot(toolbar: Widget) =
         inherit Root()
 
-        let perf = PerformanceMonitor()
+        let perf = DebugOverlay()
 
         override this.Update(elapsed_ms, moved) =
             let elapsed_ms = elapsed_ms * timescale

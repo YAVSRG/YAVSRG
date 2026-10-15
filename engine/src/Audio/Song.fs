@@ -208,6 +208,11 @@ module Song =
     let mutable time_at_start_of_frame = 0.0f<ms>
     let mutable compensation_at_start_of_frame = ASSUMED_BASS_DELAY
 
+    let delay_callback =
+        fun delay ->
+            actual_bass_delay <- delay
+            state <- SongPlaybackState.PlayingWithAudio
+
     module AudioSettings =
 
         let mutable rate = 1.0f<rate>
@@ -233,7 +238,8 @@ module Song =
         + AudioSettings._global_offset * AudioSettings.rate
 
     let start_of_frame () : unit =
-        if state = SongPlaybackState.PlayingWithAudio then
+        match state with
+        | SongPlaybackState.PlayingWithAudio ->
             let target_compensation = actual_bass_delay - ASSUMED_BASS_DELAY
 
             let run_time =
@@ -243,8 +249,12 @@ module Song =
                 min 1.0f ((run_time - actual_bass_delay) / (1000.0f * abs target_compensation))
 
             compensation_at_start_of_frame <- ASSUMED_BASS_DELAY + multiplier * target_compensation
-        else
-            compensation_at_start_of_frame <- 0.0f<ms / rate>
+        | SongPlaybackState.PlayingWithoutAudio ->
+            let run_time =
+                float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate>
+            // attempt to cancel unpause-delay
+            compensation_at_start_of_frame <- min run_time ASSUMED_BASS_DELAY
+        | SongPlaybackState.Paused -> compensation_at_start_of_frame <- -ASSUMED_BASS_DELAY
 
         time_at_start_of_frame <- exact_time()
 
@@ -265,7 +275,7 @@ module Song =
         if time >= 0.0f<ms> && time < now_playing.Duration && now_playing.ID <> 0 then
             now_playing.Pause() |> ignore
             now_playing.Seek(time)
-            now_playing.Play(printfn "%.4fms play_from")
+            now_playing.Play(delay_callback)
 
         else if now_playing.Playing then
             now_playing.Pause() |> ignore
@@ -305,11 +315,7 @@ module Song =
         if time >= 0.0f<ms> && time < now_playing.Duration then
             now_playing.Pause() |> ignore
             now_playing.Seek(time)
-
-            now_playing.Play(fun delay ->
-                actual_bass_delay <- delay
-                state <- SongPlaybackState.PlayingWithAudio
-            )
+            now_playing.Play(delay_callback)
 
         timer_position <- time
         timer_start <- Stopwatch.GetTimestamp()
@@ -442,7 +448,7 @@ module Song =
         then
             now_playing.Pause() |> ignore
             now_playing.Seek(time_at_start_of_frame)
-            now_playing.Play(printfn "%.4fms")
+            now_playing.Play(delay_callback)
 
         elif time_at_start_of_frame > now_playing.Duration then
 
@@ -457,3 +463,11 @@ module Song =
             | SongFinishAction.Custom action ->
                 if now_playing.Playing then
                     action()
+
+    let debug_timeline_drift () : Time =
+        let bass_reported_time = now_playing.CurrentPosition()
+
+        let timeline_time =
+            exact_time() - compensation_at_start_of_frame * AudioSettings.rate
+
+        timeline_time - bass_reported_time
