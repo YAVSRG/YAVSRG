@@ -18,7 +18,7 @@
 	  <Compile Include="Graphics\Batch.fs" />
 	  <Compile Include="Graphics\Render.fs" />
 	  <Compile Include="Graphics\Text.fs" />
-	  <Compile Include="Audio\Shared.fs" />
+	  <Compile Include="Audio\BassErrorExtensions.fs" />
 	  <Compile Include="Audio\Song.fs" />
 	  <Compile Include="Audio\SoundEffect.fs" />
 	  <Compile Include="Audio\Audio.fs" />

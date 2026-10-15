@@ -29,15 +29,15 @@ type SoundEffect =
 
     member this.Free() : unit =
         if this.ID <> 0 then
-            Bass.SampleFree(this.ID) |> display_bass_error
+            Bass.SampleFree(this.ID).LogBassError()
 
     member this.ChangeDevice() : unit =
-        Bass.ChannelSetDevice(this.ID, Bass.CurrentDevice) |> display_bass_error
+        Bass.ChannelSetDevice(this.ID, Bass.CurrentDevice).LogBassError()
         this.ChannelID <- Bass.SampleGetChannel(this.ID)
 
     member this.Play(volume: float) : unit =
         if this.ID <> 0 then
-            Bass.ChannelSetAttribute(this.ChannelID, ChannelAttribute.Volume, volume * 2.0) |> display_bass_error
-            Bass.ChannelPlay(this.ChannelID, true) |> display_bass_error
+            Bass.ChannelSetAttribute(this.ChannelID, ChannelAttribute.Volume, volume * 2.0).LogBassError()
+            Bass.ChannelPlay(this.ChannelID, true).LogBassError()
 
     member this.Play() : unit = this.Play(1.0)

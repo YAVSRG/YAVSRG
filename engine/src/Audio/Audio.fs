@@ -137,7 +137,7 @@ module Audio =
                     Logging.Critical "Initialising with no sound also failed: %O" Bass.LastError
 
             if Song.now_playing.ID <> 0 then
-                Bass.ChannelSetDevice(Song.now_playing.ID, device_index) |> display_bass_error
+                Bass.ChannelSetDevice(Song.now_playing.ID, device_index).LogBassError()
 
             current_device_changed_ev.Trigger()
 
@@ -176,11 +176,11 @@ Detected and enabled devices:
         detect_devices()
 
         // https://github.com/ppy/osu/issues/3800
-        Bass.Configure(Configuration.DevNonStop, true) |> display_bass_error
-        Bass.Configure(Configuration.DevicePeriod, device_period) |> display_bass_error
-        Bass.Configure(Configuration.DeviceBufferLength, device_buffer_length) |> display_bass_error
-        Bass.Configure(Configuration.PlaybackBufferLength, 200) |> display_bass_error
-        Bass.Configure(Configuration.UpdatePeriod, 5) |> display_bass_error
+        Bass.Configure(Configuration.DevNonStop, true).LogBassError()
+        Bass.Configure(Configuration.DevicePeriod, device_period).LogBassError()
+        Bass.Configure(Configuration.DeviceBufferLength, device_buffer_length).LogBassError()
+        Bass.Configure(Configuration.PlaybackBufferLength, 200).LogBassError()
+        Bass.Configure(Configuration.UpdatePeriod, 5).LogBassError()
 
         change_device device
         Bass.GlobalStreamVolume <- 0

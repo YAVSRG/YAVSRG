@@ -48,11 +48,11 @@ type Song =
             let frequency = channel_info.Frequency
 
             let fx_handle = BassFx.TempoCreate(handle, BassFlags.FxFreeSource)
-            Bass.ChannelSetDevice(fx_handle, Bass.CurrentDevice) |> display_bass_error
-            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.NoBuffer, 1f) |> display_bass_error
-            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoUseQuickAlgorithm, 1) |> display_bass_error
-            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoOverlapMilliseconds, 4) |> display_bass_error
-            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoSequenceMilliseconds, 30) |> display_bass_error
+            Bass.ChannelSetDevice(fx_handle, Bass.CurrentDevice).LogBassError()
+            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.NoBuffer, 1f).LogBassError()
+            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoUseQuickAlgorithm, 1).LogBassError()
+            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoOverlapMilliseconds, 4).LogBassError()
+            Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoSequenceMilliseconds, 30).LogBassError()
 
             {
                 ID = fx_handle
@@ -77,16 +77,18 @@ type Song =
             let parameters = BQFParameters(lFilter = BQFType.LowPass, fQ = 0.7f)
             parameters.fCenter <- center
             parameters.fBandwidth <- 0f
-            Bass.FXSetParameters(handle, parameters) |> display_bass_error
+            Bass.FXSetParameters(handle, parameters).LogBassError()
 
         match this.LowPassFilterEffect with
-        | 0 when amount > 0.0f ->
-            let effect = Bass.ChannelSetFX(this.ID, EffectType.BQF, 1)
-            apply_effect(effect)
-            this.LowPassFilterEffect <- effect
+        | _ when this.ID = 0 -> ()
+        | 0 ->
+            if amount > 0.0f then
+                let effect = Bass.ChannelSetFX(this.ID, EffectType.BQF, 1)
+                apply_effect(effect)
+                this.LowPassFilterEffect <- effect
 
         | existing_handle when amount = 0.0f ->
-            Bass.ChannelRemoveFX(this.ID, existing_handle) |> display_bass_error
+            Bass.ChannelRemoveFX(this.ID, existing_handle).LogBassError()
             this.LowPassFilterEffect <- 0
 
         | existing_handle -> apply_effect(existing_handle)
@@ -95,34 +97,36 @@ type Song =
 
         let set_frequency_multiplier (rate: float32<rate>) =
             let scaled_frequency = float32 this.Frequency * float32 rate
-            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Frequency, scaled_frequency) |> display_bass_error
+            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Frequency, scaled_frequency).LogBassError()
 
         let set_tempo (rate: float32<rate>) =
             let tempo_adjustment = (rate - 1.0f<rate>) * 100.0f< / rate>
-            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Tempo, tempo_adjustment) |> display_bass_error
-
-        if change_pitch then
-            set_tempo(1.0f<rate>)
-            set_frequency_multiplier(rate)
-        else
-            set_tempo(rate)
-            set_frequency_multiplier(1.0f<rate>)
-
-    member this.Free() : unit =
-        Bass.StreamFree(this.ID) |> display_bass_error
-
-    member this.FadeOutThenFree(duration_ms: int) : unit =
-        // if not playing then free immediately ?
-        let slide_completed _ _ _ _ = this.Free()
+            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Tempo, tempo_adjustment).LogBassError()
 
         if this.ID <> 0 then
-            Bass.ChannelSetSync(this.ID, SyncFlags.Slided ||| SyncFlags.Onetime, 0, SyncProcedure(slide_completed))
-            |> display_bass_error
+            if change_pitch then
+                set_tempo(1.0f<rate>)
+                set_frequency_multiplier(rate)
+            else
+                set_tempo(rate)
+                set_frequency_multiplier(1.0f<rate>)
 
-            Bass.ChannelSetSync(this.ID, SyncFlags.End ||| SyncFlags.Onetime, 0, SyncProcedure(slide_completed))
-            |> display_bass_error
+    member this.Free() : unit =
+        if this.ID <> 0 then
+            Bass.StreamFree(this.ID).LogBassError()
 
-            Bass.ChannelSlideAttribute(this.ID, ChannelAttribute.Volume, 0.0f, duration_ms) |> display_bass_error
+    member this.FadeIn(duration_ms: int) : unit =
+        if this.ID <> 0 then
+            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Volume, 0.0f).LogBassError()
+            Bass.ChannelSlideAttribute(this.ID, ChannelAttribute.Volume, 1.0f, duration_ms).LogBassError()
+
+    member this.FadeOutThenFree(duration_ms: int) : unit =
+        if this.ID <> 0 then
+            let slide_completed _ _ _ _ = this.Free()
+            let callback = SyncProcedure(slide_completed)
+            Bass.ChannelSetSync(this.ID, SyncFlags.Slided ||| SyncFlags.Onetime, 0, callback).LogBassError()
+            Bass.ChannelSetSync(this.ID, SyncFlags.End ||| SyncFlags.Onetime, 0, callback).LogBassError()
+            Bass.ChannelSlideAttribute(this.ID, ChannelAttribute.Volume, 0.0f, duration_ms).LogBassError()
 
 [<RequireQualifiedAccess>]
 type SongFinishAction =
@@ -198,24 +202,25 @@ module Song =
 
     let play_from (time: Time) : unit =
 
-        if time >= 0.0f<ms> && time < duration() then
+        if time >= 0.0f<ms> && time < duration() && now_playing.ID <> 0 then
 
             let pos = now_playing.TimeToBytes(time)
-            Bass.ChannelSetPosition(now_playing.ID, pos) |> display_bass_error
+            Bass.ChannelSetPosition(now_playing.ID, pos).LogBassError()
 
-            Bass.ChannelSetSync(
-                now_playing.ID,
-                SyncFlags.Position ||| SyncFlags.Onetime,
-                pos,
-                SyncProcedure(fun _ _ _ _ -> printfn "%.4fms to play" timer.Elapsed.TotalMilliseconds)
-            )
-            |> display_bass_error
+            Bass
+                .ChannelSetSync(
+                    now_playing.ID,
+                    SyncFlags.Position ||| SyncFlags.Onetime,
+                    pos,
+                    SyncProcedure(fun _ _ _ _ -> printfn "%.4fms to play" timer.Elapsed.TotalMilliseconds)
+                )
+                .LogBassError()
 
-            Bass.ChannelPlay(now_playing.ID) |> display_bass_error
+            Bass.ChannelPlay(now_playing.ID).LogBassError()
             channel_playing <- true
 
         else if channel_playing then
-            Bass.ChannelStop(now_playing.ID) |> display_bass_error
+            Bass.ChannelStop(now_playing.ID).LogBassError()
             channel_playing <- false
 
         timer_start <- time
@@ -230,10 +235,10 @@ module Song =
         if playing() then
             play_from time
         else
-            if time >= 0.0f<ms> && time < duration() then
-                Bass.ChannelSetPosition(now_playing.ID, now_playing.TimeToBytes(time)) |> display_bass_error
+            if time >= 0.0f<ms> && time < duration() && now_playing.ID <> 0 then
+                Bass.ChannelSetPosition(now_playing.ID, now_playing.TimeToBytes(time)).LogBassError()
             else if channel_playing then
-                Bass.ChannelStop(now_playing.ID) |> display_bass_error
+                Bass.ChannelStop(now_playing.ID).LogBassError()
                 channel_playing <- false
 
             timer_start <- time
@@ -243,8 +248,8 @@ module Song =
     let pause () : unit =
         let time = time()
 
-        if time >= 0.0f<ms> && time < duration() then
-            Bass.ChannelPause(now_playing.ID) |> display_bass_error
+        if time >= 0.0f<ms> && time < duration() && now_playing.ID <> 0 then
+            Bass.ChannelPause(now_playing.ID).LogBassError()
 
         timer.Stop()
         paused <- true
@@ -252,21 +257,22 @@ module Song =
     let resume () : unit =
         let time = time()
 
-        if time >= 0.0f<ms> && time < duration() then
+        if time >= 0.0f<ms> && time < duration() && now_playing.ID <> 0 then
 
             let pos = now_playing.TimeToBytes(time)
-            Bass.ChannelSetPosition(now_playing.ID, pos) |> display_bass_error
+            Bass.ChannelSetPosition(now_playing.ID, pos).LogBassError()
             let before = timer.Elapsed.TotalMilliseconds
 
-            Bass.ChannelSetSync(
-                now_playing.ID,
-                SyncFlags.Position ||| SyncFlags.Onetime,
-                pos,
-                SyncProcedure(fun _ _ _ _ -> printfn "%.4fms to resume" (timer.Elapsed.TotalMilliseconds - before))
-            )
-            |> display_bass_error
+            Bass
+                .ChannelSetSync(
+                    now_playing.ID,
+                    SyncFlags.Position ||| SyncFlags.Onetime,
+                    pos,
+                    SyncProcedure(fun _ _ _ _ -> printfn "%.4fms to resume" (timer.Elapsed.TotalMilliseconds - before))
+                )
+                .LogBassError()
 
-            Bass.ChannelPlay(now_playing.ID) |> display_bass_error
+            Bass.ChannelPlay(now_playing.ID).LogBassError()
 
         timer.Start()
         paused <- false
@@ -350,10 +356,7 @@ module Song =
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
                     (if paused then seek else play_from) song.PreviewPoint
-                    Bass.ChannelSetAttribute(song.ID, ChannelAttribute.Volume, 0.0f) |> display_bass_error
-
-                    Bass.ChannelSlideAttribute(song.ID, ChannelAttribute.Volume, 1.0f, CROSSFADE_DURATION_MS)
-                    |> display_bass_error
+                    song.FadeIn(CROSSFADE_DURATION_MS)
                 | SongLoadAction.PlayFromBeginning -> (if paused then seek else play_from) 0.0f<ms>
                 | SongLoadAction.Wait ->
                     play_from(LEADIN_TIME * AudioSettings.rate)
@@ -364,10 +367,10 @@ module Song =
 
     let change (request: SongLoadRequest, new_rate: float32<rate>) : unit =
         let path_changed = request.Path <> load_path
-        load_path <- request.Path
         AudioSettings.Rate <- new_rate
 
         if path_changed then
+            load_path <- request.Path
             now_playing.FadeOutThenFree(CROSSFADE_DURATION_MS)
             channel_playing <- false
             loading <- true
@@ -390,22 +393,25 @@ module Song =
 
         song_loader.Join()
 
-        if playing() && _time >= 0.0f<ms> && _time < now_playing.Duration && not channel_playing then
+        if
+            playing() && _time >= 0.0f<ms> && _time < now_playing.Duration && not channel_playing && now_playing.ID <> 0
+        then
 
             channel_playing <- true
 
             let pos = now_playing.TimeToBytes(_time)
-            Bass.ChannelSetPosition(now_playing.ID, pos) |> display_bass_error
+            Bass.ChannelSetPosition(now_playing.ID, pos).LogBassError()
 
-            Bass.ChannelSetSync(
-                now_playing.ID,
-                SyncFlags.Position ||| SyncFlags.Onetime,
-                pos,
-                SyncProcedure(fun _ _ _ _ -> printfn "%.4fms to play after leadin" timer.Elapsed.TotalMilliseconds)
-            )
-            |> display_bass_error
+            Bass
+                .ChannelSetSync(
+                    now_playing.ID,
+                    SyncFlags.Position ||| SyncFlags.Onetime,
+                    pos,
+                    SyncProcedure(fun _ _ _ _ -> printfn "%.4fms to play after leadin" timer.Elapsed.TotalMilliseconds)
+                )
+                .LogBassError()
 
-            Bass.ChannelPlay(now_playing.ID) |> display_bass_error
+            Bass.ChannelPlay(now_playing.ID).LogBassError()
 
         elif _time > now_playing.Duration then
 
