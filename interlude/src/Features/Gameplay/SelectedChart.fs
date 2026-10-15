@@ -157,20 +157,24 @@ module SelectedChart =
                         yield
                             fun () ->
                                 CHART <- Some chart
-
+                                
+                                let after_load =
+                                    if play_audio then
+                                        if Screen.current_type = ScreenType.MainMenu then
+                                            SongLoadAction.PlayFromBeginning
+                                        else
+                                            SongLoadAction.PlayFromPreview
+                                    else SongLoadAction.Wait
+                                    
                                 Song.change (
-                                    chart_meta.Audio.Path,
-                                    save_data.Offset,
-                                    rate,
-                                    (chart_meta.PreviewTime, chart.LastNote),
-                                    (
-                                        if play_audio then
-                                            if Screen.current_type = ScreenType.MainMenu then
-                                                SongLoadAction.PlayFromBeginning
-                                            else
-                                                SongLoadAction.PlayFromPreview
-                                        else SongLoadAction.Wait
-                                    )
+                                    {
+                                        Path = chart_meta.Audio.Path
+                                        AfterLoad = after_load
+                                        PreviewPoint = chart_meta.PreviewTime
+                                        LastNote = chart.LastNote
+                                        LocalOffset = save_data.Offset
+                                    },
+                                    rate
                                 )
 
                                 SAVE_DATA <- Some save_data

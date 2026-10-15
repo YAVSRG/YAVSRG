@@ -13,20 +13,22 @@ type Song =
         Duration: Time
         PreviewPoint: Time
         LastNote: Time
+        mutable LocalOffset: Time
         mutable LowPassFilterEffect: int
     }
 
-    static member CreatePlaceholder(preview_point: Time, last_note: Time) : Song =
+    static member CreatePlaceholder(preview_point: Time, last_note: Time, local_offset: Time) : Song =
         {
             ID = 0
             Frequency = 1
             Duration = 1000.0f<ms>
             PreviewPoint = preview_point
             LastNote = last_note
+            LocalOffset = local_offset
             LowPassFilterEffect = 0
         }
 
-    static member FromFile(preview_point: Time, last_note: Time, file: string) : Song =
+    static member CreateFromFile(file: string, preview_point: Time, last_note: Time, local_offset: Time) : Song =
         let handle = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan ||| BassFlags.Decode)
 
         if handle = 0 then
@@ -36,7 +38,7 @@ type Song =
                 | other -> other.ToString()
 
             Logging.Error "Couldn't load audio track from '%s': %s" file error
-            Song.CreatePlaceholder(preview_point, last_note)
+            Song.CreatePlaceholder(preview_point, last_note, local_offset)
         else
             let duration_seconds =
                 Bass.ChannelBytes2Seconds(handle, Bass.ChannelGetLength(handle))
@@ -62,6 +64,7 @@ type Song =
                     else
                         preview_point
                 LastNote = last_note
+                LocalOffset = local_offset
                 LowPassFilterEffect = 0
             }
 
@@ -109,6 +112,7 @@ type Song =
         Bass.StreamFree(this.ID) |> display_bass_error
 
     member this.FadeOutThenFree(duration_ms: int) : unit =
+        // if not playing then free immediately ?
         let slide_completed _ _ _ _ = this.Free()
 
         if this.ID <> 0 then
@@ -145,7 +149,7 @@ module Song =
     let mutable loading = false
 
     let mutable internal now_playing: Song =
-        Song.CreatePlaceholder(0.0f<ms>, 1000.0f<ms>)
+        Song.CreatePlaceholder(0.0f<ms>, 1000.0f<ms>, 0.0f<ms>)
 
     let mutable private _time = 0.0f<ms>
     let private timer = Stopwatch()
@@ -160,8 +164,6 @@ module Song =
         let mutable rate = 1.0f<rate>
         let mutable enable_pitch_rate_down = true
         let mutable enable_pitch_rate_up = true
-
-        let mutable _local_offset = 0.0f<ms>
         let mutable _global_offset = 0.0f<ms / rate>
 
         let mutable low_pass_amount = 0.0f
@@ -176,7 +178,7 @@ module Song =
     /// Used by the input engine at the instant an input is polled for precise mapping of inputs to audio positions
     let exact_time_with_offset () : Time =
         exact_time() - seek_inaccuracy_compensation
-        + AudioSettings._local_offset
+        + now_playing.LocalOffset
         + AudioSettings._global_offset * AudioSettings.rate
 
     /// For the rest of gameplay rendering, the current 'exact time' is set at the start of the frame
@@ -190,7 +192,7 @@ module Song =
     let time_compensated () : Time = time() - seek_inaccuracy_compensation
 
     let time_with_offset () : Time =
-        time_compensated() + AudioSettings._local_offset + AudioSettings._global_offset * AudioSettings.rate
+        time_compensated() + now_playing.LocalOffset + AudioSettings._global_offset * AudioSettings.rate
 
     let playing () : bool = timer.IsRunning
 
@@ -271,8 +273,8 @@ module Song =
 
     type AudioSettings =
         static member LocalOffset
-            with get (): Time = AudioSettings._local_offset
-            and set (offset: Time) = AudioSettings._local_offset <- offset
+            with get (): Time = now_playing.LocalOffset
+            and set (offset: Time) = now_playing.LocalOffset <- offset
 
         static member GlobalOffset
             with get (): float32<ms / rate> = AudioSettings._global_offset
@@ -315,14 +317,28 @@ module Song =
                 AudioSettings.low_pass_target <- amount
                 now_playing.SetLowPassFilter(AudioSettings.low_pass_amount)
 
+    [<Struct>]
+    type SongLoadRequest =
+        {
+            Path: string option
+            AfterLoad: SongLoadAction
+            PreviewPoint: Time
+            LastNote: Time
+            LocalOffset: Time
+        }
+
     let private song_loader =
-        { new Async.CancelQueue<Time * Time * string option * SongLoadAction, Song * SongLoadAction>() with
-            override this.Process((preview_point, last_note, path, after_load)) =
+        { new Async.CancelQueue<SongLoadRequest, Song * SongLoadAction>() with
+            override this.Process(request) =
                 async {
                     return
-                        match path with
-                        | Some p -> Song.FromFile(preview_point, last_note, p), after_load
-                        | None -> Song.CreatePlaceholder(preview_point, last_note), after_load
+                        match request.Path with
+                        | Some file_path ->
+                            Song.CreateFromFile(file_path, request.PreviewPoint, request.LastNote, request.LocalOffset),
+                            request.AfterLoad
+                        | None ->
+                            Song.CreatePlaceholder(request.PreviewPoint, request.LastNote, request.LocalOffset),
+                            request.AfterLoad
                 }
 
             override this.Handle((song, after_load: SongLoadAction)) =
@@ -346,24 +362,18 @@ module Song =
                 on_loaded_ev.Trigger()
         }
 
-    let change
-        (
-            path: string option,
-            offset: Time,
-            new_rate: float32<rate>,
-            (preview: Time, chart_last_note: Time),
-            after_load: SongLoadAction
-        ) : unit =
-        let path_changed = path <> load_path
-        load_path <- path
-        AudioSettings.LocalOffset <- offset
+    let change (request: SongLoadRequest, new_rate: float32<rate>) : unit =
+        let path_changed = request.Path <> load_path
+        load_path <- request.Path
         AudioSettings.Rate <- new_rate
 
         if path_changed then
             now_playing.FadeOutThenFree(CROSSFADE_DURATION_MS)
             channel_playing <- false
             loading <- true
-            song_loader.Request(preview, chart_last_note, path, after_load)
+            song_loader.Request(request)
+        else
+            now_playing.LocalOffset <- request.LocalOffset
 
     let update (elapsed_ms: float) : unit =
         let time_last_update = _time
