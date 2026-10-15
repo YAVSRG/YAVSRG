@@ -69,7 +69,7 @@ type MainMenuScreen() =
             fun () ->
                 confirmed_quit <- true
                 Screen.back Transitions.UnderLogo |> ignore
-                GameThread.defer (fun () -> Song.set_low_pass 1.0f)
+                GameThread.defer (fun () -> Song.AudioSettings.LowPassFilter <- 1.0f)
         )
             .Show()
 

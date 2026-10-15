@@ -31,7 +31,7 @@ type AudioPage() =
             %"system.audio_pitch_rates_down",
             Checkbox(
                 options.AudioPitchRatesDown
-                |> Setting.trigger (fun v -> Song.set_pitch_rate_down_enabled v)
+                |> Setting.trigger (fun v -> Song.AudioSettings.DownRatesChangePitch <- v)
             )
         )
             .Help(Help.Info("system.audio_pitch_rates_down"))
@@ -41,7 +41,7 @@ type AudioPage() =
             %"system.audio_pitch_rates_up",
             Checkbox(
                 options.AudioPitchRatesUp
-                |> Setting.trigger (fun v -> Song.set_pitch_rate_up_enabled v)
+                |> Setting.trigger (fun v ->  Song.AudioSettings.UpRatesChangePitch <- v)
             )
         )
             .Help(Help.Info("system.audio_pitch_rates_up"))
@@ -50,7 +50,7 @@ type AudioPage() =
         PageSetting(%"system.menus_muffle_song",
             Checkbox (
                 options.MenusMuffleSong
-                |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)
+                |> Setting.trigger (fun b -> if b then Song.AudioSettings.LowPassFilter <- 1.0f else Song.AudioSettings.LowPassFilter <- 0.0f)
             )
         )
             .Help(Help.Info("system.menus_muffle_song"))
@@ -61,7 +61,7 @@ type AudioPage() =
             { new Slider(Setting.uom options.AudioOffset, Step = 1f) with
                 override this.OnDeselected(by_mouse: bool) =
                     base.OnDeselected by_mouse
-                    Song.set_global_offset options.AudioOffset.Value
+                    Song.AudioSettings.GlobalOffset <- options.AudioOffset.Value
             }
         )
             .Help(Help.Info("system.audiooffset"))

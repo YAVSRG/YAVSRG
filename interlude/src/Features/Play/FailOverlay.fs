@@ -67,7 +67,7 @@ type FailOverlay(pacemaker_state: PacemakerState, retry: unit -> unit, score_scr
 
     do
         Background.set_parallax_amount 0.0f
-        Song.set_low_pass 1.0f
+        Song.AudioSettings.LowPassFilter <- 1.0f
         Toolbar.show_cursor()
 
     override this.Init(parent: Widget) =

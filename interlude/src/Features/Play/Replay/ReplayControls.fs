@@ -30,7 +30,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
                     setting.Set SelectedChart.rate.Value
                 else
                     SelectedChart.rate.Set rate
-                    Song.change_rate v
+                    Song.AudioSettings.Rate <- v
                     setting.Set v
 
                 fade.Target <- 1.0f

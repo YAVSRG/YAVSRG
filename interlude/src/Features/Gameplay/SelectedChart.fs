@@ -368,7 +368,7 @@ module SelectedChart =
             if_loading_or_loaded
             <| fun info ->
                 collections_on_rate_changed info.LibraryContext v
-                Song.change_rate v
+                Song.AudioSettings.Rate <- v
                 update ()
         )
 
@@ -389,7 +389,7 @@ module SelectedChart =
             <| fun info ->
                 collections_on_mods_changed info.LibraryContext mods
                 collections_on_rate_changed info.LibraryContext rate
-                Song.change_rate rate
+                Song.AudioSettings.Rate <- rate
                 Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
                 update ()
 

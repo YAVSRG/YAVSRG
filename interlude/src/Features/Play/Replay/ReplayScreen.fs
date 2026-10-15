@@ -94,13 +94,13 @@ type ReplayScreen =
                 base.Init(parent)
 
             override this.OnEnter p =
-                Song.change_rate rate
+                Song.AudioSettings.Rate <- rate
                 DiscordRPC.playing (%"discord_status.replay", SelectedChart.CACHE_DATA.Value.Title)
                 base.OnEnter p
 
             override this.OnExit p =
                 base.OnExit p
-                Song.change_rate SelectedChart.rate.Value
+                Song.AudioSettings.Rate <- SelectedChart.rate.Value
                 Toolbar.show_cursor ()
                 Song.resume()
 

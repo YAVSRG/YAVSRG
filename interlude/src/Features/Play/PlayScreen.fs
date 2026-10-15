@@ -222,7 +222,7 @@ type PlayScreen =
                     LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
                 Toolbar.show_cursor ()
                 Background.set_parallax_amount 40.0f
-                Song.set_low_pass 0.0f
+                Song.AudioSettings.LowPassFilter <- 0.0f
 
                 base.OnExit(next)
 

@@ -38,12 +38,13 @@ type Song =
             Logging.Error "Couldn't load audio track from '%s': %s" file error
             Song.CreatePlaceholder(preview_point, last_note)
         else
+            let duration_seconds =
+                Bass.ChannelBytes2Seconds(handle, Bass.ChannelGetLength(handle))
+
+            let duration = float32 duration_seconds * 1000.0f<ms>
             let channel_info = Bass.ChannelGetInfo(handle)
-
-            let duration =
-                Bass.ChannelBytes2Seconds(handle, Bass.ChannelGetLength(handle)) |> float32 |> (*) 1000.0f<ms>
-
             let frequency = channel_info.Frequency
+
             let fx_handle = BassFx.TempoCreate(handle, BassFlags.FxFreeSource)
             Bass.ChannelSetDevice(fx_handle, Bass.CurrentDevice) |> display_bass_error
             Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.NoBuffer, 1f) |> display_bass_error
@@ -63,9 +64,6 @@ type Song =
                 LastNote = last_note
                 LowPassFilterEffect = 0
             }
-
-    member this.Free() : unit =
-        Bass.StreamFree(this.ID) |> display_bass_error
 
     member this.TimeToBytes(time: Time) : int64 =
         Bass.ChannelSeconds2Bytes(this.ID, time / 1000.0f<ms> |> float)
@@ -93,8 +91,8 @@ type Song =
     member this.ChangeRate(rate: float32<rate>, change_pitch: bool) : unit =
 
         let set_frequency_multiplier (rate: float32<rate>) =
-            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Frequency, float32 this.Frequency * float32 rate)
-            |> display_bass_error
+            let scaled_frequency = float32 this.Frequency * float32 rate
+            Bass.ChannelSetAttribute(this.ID, ChannelAttribute.Frequency, scaled_frequency) |> display_bass_error
 
         let set_tempo (rate: float32<rate>) =
             let tempo_adjustment = (rate - 1.0f<rate>) * 100.0f< / rate>
@@ -106,6 +104,21 @@ type Song =
         else
             set_tempo(rate)
             set_frequency_multiplier(1.0f<rate>)
+
+    member this.Free() : unit =
+        Bass.StreamFree(this.ID) |> display_bass_error
+
+    member this.FadeOutThenFree(duration_ms: int) : unit =
+        let slide_completed _ _ _ _ = this.Free()
+
+        if this.ID <> 0 then
+            Bass.ChannelSetSync(this.ID, SyncFlags.Slided ||| SyncFlags.Onetime, 0, SyncProcedure(slide_completed))
+            |> display_bass_error
+
+            Bass.ChannelSetSync(this.ID, SyncFlags.End ||| SyncFlags.Onetime, 0, SyncProcedure(slide_completed))
+            |> display_bass_error
+
+            Bass.ChannelSlideAttribute(this.ID, ChannelAttribute.Volume, 0.0f, duration_ms) |> display_bass_error
 
 [<RequireQualifiedAccess>]
 type SongFinishAction =
@@ -142,25 +155,29 @@ module Song =
     let mutable on_finish = SongFinishAction.Wait
     let mutable internal seek_inaccuracy_compensation = 37.0f<ms>
 
-    let mutable private rate = 1.0f<rate>
-    let mutable private enable_pitch_rate_down = true
-    let mutable private enable_pitch_rate_up = true
+    module AudioSettings =
 
-    let mutable private _local_offset = 0.0f<ms>
-    let mutable private _global_offset = 0.0f<ms / rate>
+        let mutable rate = 1.0f<rate>
+        let mutable enable_pitch_rate_down = true
+        let mutable enable_pitch_rate_up = true
 
-    let mutable private low_pass_amount = 0.0f
-    let mutable private low_pass_target = 0.0f
+        let mutable _local_offset = 0.0f<ms>
+        let mutable _global_offset = 0.0f<ms / rate>
+
+        let mutable low_pass_amount = 0.0f
+        let mutable low_pass_target = 0.0f
 
     let duration () : Time = now_playing.Duration
 
     /// The exact audio position the engine thinks we are at; Can be called mid-frame for sub-frame precision
     let private exact_time () : Time =
-        timer_start + rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>)
+        timer_start + AudioSettings.rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>)
 
     /// Used by the input engine at the instant an input is polled for precise mapping of inputs to audio positions
     let exact_time_with_offset () : Time =
-        exact_time() - seek_inaccuracy_compensation + _local_offset + _global_offset * rate
+        exact_time() - seek_inaccuracy_compensation
+        + AudioSettings._local_offset
+        + AudioSettings._global_offset * AudioSettings.rate
 
     /// For the rest of gameplay rendering, the current 'exact time' is set at the start of the frame
     /// This value is then reused without being updated until next frame
@@ -173,7 +190,7 @@ module Song =
     let time_compensated () : Time = time() - seek_inaccuracy_compensation
 
     let time_with_offset () : Time =
-        time_compensated() + _local_offset + _global_offset * rate
+        time_compensated() + AudioSettings._local_offset + AudioSettings._global_offset * AudioSettings.rate
 
     let playing () : bool = timer.IsRunning
 
@@ -205,7 +222,7 @@ module Song =
         update_time()
 
     let play_leadin (first_note: Time) : unit =
-        play_from(min 0.0f<ms> (first_note - LEADIN_TIME * rate))
+        play_from(min 0.0f<ms> (first_note - LEADIN_TIME * AudioSettings.rate))
 
     let seek (time: Time) : unit =
         if playing() then
@@ -252,37 +269,51 @@ module Song =
         timer.Start()
         paused <- false
 
-    let change_rate (new_rate: float32<rate>) : unit =
-        let rate_changed = rate <> new_rate
-        let time = time()
-        rate <- new_rate
+    type AudioSettings =
+        static member LocalOffset
+            with get (): Time = AudioSettings._local_offset
+            and set (offset: Time) = AudioSettings._local_offset <- offset
 
-        let pitch_enabled_for_direction =
-            if rate = 1.0f<rate> then true
-            elif rate > 1.0f<rate> then enable_pitch_rate_up
-            else enable_pitch_rate_down
+        static member GlobalOffset
+            with get (): float32<ms / rate> = AudioSettings._global_offset
+            and set (offset: float32<ms / rate>) = AudioSettings._global_offset <- offset
 
-        now_playing.ChangeRate(rate, pitch_enabled_for_direction)
+        static let handle_rate_change () =
+            now_playing.ChangeRate(AudioSettings.rate, AudioSettings.RateChangesPitch())
+            seek(time())
 
-        if rate_changed then
-            seek time
+        static member RateChangesPitch() : bool =
+            if AudioSettings.rate = 1.0f<rate> then true
+            elif AudioSettings.rate > 1.0f<rate> then AudioSettings.enable_pitch_rate_up
+            else AudioSettings.enable_pitch_rate_down
 
-    let set_pitch_rate_down_enabled (enabled: bool) : unit =
-        enable_pitch_rate_down <- enabled
-        change_rate rate
+        static member Rate
+            with get (): float32<rate> = AudioSettings.rate
+            and set (new_rate: float32<rate>) =
+                if AudioSettings.rate <> new_rate then
+                    AudioSettings.rate <- new_rate
+                    handle_rate_change()
 
-    let set_pitch_rate_up_enabled (enabled: bool) : unit =
-        enable_pitch_rate_up <- enabled
-        change_rate rate
+        static member DownRatesChangePitch
+            with get () = AudioSettings.enable_pitch_rate_down
+            and set (enabled: bool) =
+                AudioSettings.enable_pitch_rate_down <- enabled
 
-    let playback_rate () : float32<rate> = rate
+                if AudioSettings.rate < 1.0f<rate> then
+                    handle_rate_change()
 
-    let set_low_pass (amount: float32) : unit =
-        low_pass_target <- amount
-        now_playing.SetLowPassFilter(low_pass_amount)
+        static member UpRatesChangePitch
+            with get () = AudioSettings.enable_pitch_rate_up
+            and set (enabled: bool) =
+                AudioSettings.enable_pitch_rate_up <- enabled
 
-    let set_local_offset (offset: Time) : unit = _local_offset <- offset
-    let set_global_offset (offset: float32<ms / rate>) : unit = _global_offset <- offset
+                if AudioSettings.rate > 1.0f<rate> then
+                    handle_rate_change()
+
+        static member LowPassFilter
+            with set (amount: float32) =
+                AudioSettings.low_pass_target <- amount
+                now_playing.SetLowPassFilter(AudioSettings.low_pass_amount)
 
     let private song_loader =
         { new Async.CancelQueue<Time * Time * string option * SongLoadAction, Song * SongLoadAction>() with
@@ -296,10 +327,9 @@ module Song =
 
             override this.Handle((song, after_load: SongLoadAction)) =
                 loading <- false
+                song.ChangeRate(AudioSettings.rate, AudioSettings.RateChangesPitch())
+                song.SetLowPassFilter(AudioSettings.low_pass_amount)
                 now_playing <- song
-                change_rate rate
-
-                song.SetLowPassFilter(low_pass_amount)
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
@@ -310,7 +340,7 @@ module Song =
                     |> display_bass_error
                 | SongLoadAction.PlayFromBeginning -> (if paused then seek else play_from) 0.0f<ms>
                 | SongLoadAction.Wait ->
-                    play_from(LEADIN_TIME * rate)
+                    play_from(LEADIN_TIME * AudioSettings.rate)
                     pause()
 
                 on_loaded_ev.Trigger()
@@ -326,29 +356,11 @@ module Song =
         ) : unit =
         let path_changed = path <> load_path
         load_path <- path
-        set_local_offset offset
-        change_rate new_rate
+        AudioSettings.LocalOffset <- offset
+        AudioSettings.Rate <- new_rate
 
         if path_changed then
-
-            let current = now_playing
-            let slide_completed _ _ _ _ = current.Free()
-
-            if current.ID <> 0 then
-                Bass.ChannelSetSync(
-                    current.ID,
-                    SyncFlags.Slided ||| SyncFlags.Onetime,
-                    0,
-                    SyncProcedure(slide_completed)
-                )
-                |> display_bass_error
-
-                Bass.ChannelSetSync(current.ID, SyncFlags.End ||| SyncFlags.Onetime, 0, SyncProcedure(slide_completed))
-                |> display_bass_error
-
-                Bass.ChannelSlideAttribute(current.ID, ChannelAttribute.Volume, 0.0f, CROSSFADE_DURATION_MS)
-                |> display_bass_error
-
+            now_playing.FadeOutThenFree(CROSSFADE_DURATION_MS)
             channel_playing <- false
             loading <- true
             song_loader.Request(preview, chart_last_note, path, after_load)
@@ -357,13 +369,14 @@ module Song =
         let time_last_update = _time
         update_time()
 
-        if low_pass_target <> low_pass_amount then
-            low_pass_amount <- lerp (float32(Math.Pow(0.994, elapsed_ms))) low_pass_target low_pass_amount
+        if AudioSettings.low_pass_target <> AudioSettings.low_pass_amount then
+            AudioSettings.low_pass_amount <-
+                lerp (float32(Math.Pow(0.994, elapsed_ms))) AudioSettings.low_pass_target AudioSettings.low_pass_amount
 
-            if abs(low_pass_amount - low_pass_target) < 0.01f then
-                low_pass_amount <- low_pass_target
+            if abs(AudioSettings.low_pass_amount - AudioSettings.low_pass_target) < 0.01f then
+                AudioSettings.low_pass_amount <- AudioSettings.low_pass_target
 
-            now_playing.SetLowPassFilter(low_pass_amount)
+            now_playing.SetLowPassFilter(AudioSettings.low_pass_amount)
 
         song_loader.Join()
 

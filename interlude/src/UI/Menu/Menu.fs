@@ -231,7 +231,7 @@ and Menu(top_level: Page) as this =
         volume.Init this
         exit_key.Init this
         this.ShowPage top_level
-        if options.MenusMuffleSong.Value then Song.set_low_pass 1.0f
+        if options.MenusMuffleSong.Value then Song.AudioSettings.LowPassFilter <- 1.0f
 
     override this.Draw() =
         let mutable i = 0
@@ -283,7 +283,7 @@ and Menu(top_level: Page) as this =
         base.Close()
         Selection.unclamp ()
         _instance <- None
-        Song.set_low_pass 0.0f
+        Song.AudioSettings.LowPassFilter <- 0.0f
 
     member private this.PageTitles() = namestack
     static member PageTitles() =

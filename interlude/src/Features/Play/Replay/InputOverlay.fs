@@ -59,7 +59,7 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
 
             let now =
                 state.CurrentChartTime() +
-                (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
+                (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.AudioSettings.Rate
 
             while replay_frames.Length - 1 > seek && replay_frames.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1
