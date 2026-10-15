@@ -1,6 +1,5 @@
 namespace Percyqaz.Flux.Audio
 
-open System
 open System.Diagnostics
 open System.Runtime.CompilerServices
 open ManagedBass
