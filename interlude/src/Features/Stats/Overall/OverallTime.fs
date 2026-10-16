@@ -4,7 +4,7 @@ open System
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.UI
 
 type OverallTime(total_time: unit -> float, play_time: unit -> float, practice_time: unit -> float) =

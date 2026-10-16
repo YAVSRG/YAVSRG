@@ -2,7 +2,7 @@
 
 open NetCoreServer
 open Percyqaz.Common
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API

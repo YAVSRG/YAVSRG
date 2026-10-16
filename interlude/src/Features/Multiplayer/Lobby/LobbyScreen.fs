@@ -8,7 +8,7 @@ open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Calculator
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Interlude.Content
 open Interlude.Web.Shared
 open Interlude.UI

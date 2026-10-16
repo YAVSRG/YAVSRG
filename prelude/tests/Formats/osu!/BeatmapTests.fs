@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Formats
+namespace Prelude.Tests.Formats.Osu
 
 open NUnit.Framework
 open Prelude.Formats.Osu

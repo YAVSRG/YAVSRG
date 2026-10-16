@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Data
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 
 module Scores =

@@ -1,6 +1,6 @@
 namespace Prelude.Tests.Helpers
 
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 
 type VirtualClock(start_time: int64) =
     inherit Clock()

@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Data.Library
 
 open System.Collections.Generic
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 
 type internal SortingTag = string * float32 * float32
 type SortMethod = ChartMeta * LibraryViewContext -> SortingTag

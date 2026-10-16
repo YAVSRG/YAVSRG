@@ -5,7 +5,7 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online

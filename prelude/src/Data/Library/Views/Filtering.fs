@@ -98,7 +98,7 @@ type Filter =
     member internal this.Compile : ChartMeta -> bool =
         seq {
             match this.Keymode with
-            | Some k -> yield fun chart_meta -> chart_meta.Keys = k
+            | Some k -> yield fun (chart_meta: ChartMeta) -> chart_meta.Keys = k
             | None -> ()
 
             match this.LengthMin with

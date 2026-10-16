@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Mods
 open Prelude.Gameplay.Rulesets
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Features.Gameplay

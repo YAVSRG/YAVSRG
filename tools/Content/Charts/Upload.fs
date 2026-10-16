@@ -6,8 +6,8 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Data
-open Prelude.Data.Library
-open Prelude.Data.Library.Imports
+open Prelude.Data.ChartDatabase
+open Prelude.Data.Imports
 open Interlude.Web.Shared
 open Bytewizer.Backblaze.Client
 

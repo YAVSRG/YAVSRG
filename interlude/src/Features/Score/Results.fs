@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Interlude.UI
 
 #nowarn "3370"

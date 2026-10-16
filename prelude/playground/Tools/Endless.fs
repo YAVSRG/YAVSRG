@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Calculator
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.Library
-open Prelude.Data.Library.Endless
 
 let test() =
 
