@@ -145,7 +145,7 @@ type MultiplayerScreen =
             |> ignore
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer(lobby.Replays)) with
-            override this.Init(parent: Widget) =
+            override this.Init(parent: Widget) : unit =
                 this.Add(
                     HotkeyHoldAction(
                         "exit",
@@ -156,7 +156,7 @@ type MultiplayerScreen =
 
                 base.Init(parent)
 
-            override this.OnEnter(previous) =
+            override this.OnEnter(previous: ScreenType) : unit =
                 Content.Stats.StartOrContinueSession()
                 info.SaveData.LastPlayed <- Timestamp.now()
                 Toolbar.hide_cursor()
@@ -169,7 +169,7 @@ type MultiplayerScreen =
                     info.ChartMeta.Length / SelectedChart.rate.Value
                 )
 
-            override this.OnExit(next) =
+            override this.OnExit(next: ScreenType) : unit =
                 if quit_out_early then
                     Content.Stats.QuitOutOfPlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
                 else
@@ -180,7 +180,7 @@ type MultiplayerScreen =
                 Toolbar.show_cursor()
                 base.OnExit(next)
 
-            override this.Update(elapsed_ms, moved) =
+            override this.Update(elapsed_ms: float, moved: bool) : unit =
                 stats_play_time <- stats_play_time + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.TimeWithOffset

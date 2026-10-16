@@ -24,7 +24,7 @@ type private MenuButton(label: string, on_click: unit -> unit, position: Positio
             )
         )
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
             .With(
                 MouseListener().Button(this),
@@ -38,20 +38,20 @@ type private MenuButton(label: string, on_click: unit -> unit, position: Positio
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.quad (Quad.parallelogram 0.5f (this.Bounds.Expand(5.0f))) (!*Palette.HIGHLIGHT_100)
 
         Render.quad (Quad.parallelogram 0.5f this.Bounds) (!*Palette.MAIN_100)
         base.Draw()
 
-    member this.Hide() =
+    member this.Hide() : unit =
         this.Position(position.SliceL(-100.0f)).SnapPosition()
 
-    member this.Show() =
+    member this.Show() : unit =
         this.Hide()
         this.Position <- position
 
@@ -124,7 +124,7 @@ type MainMenuScreen() =
 
         base.Init(parent)
 
-    override this.OnEnter(prev: ScreenType) =
+    override this.OnEnter(prev: ScreenType) : unit =
         if Updates.update_available then
             Notifications.system_feedback(
                 Icons.ALERT_OCTAGON,
@@ -153,21 +153,22 @@ type MainMenuScreen() =
             )
         )
 
-        button_sequence.Add
-        <| Animation.seq
-            [
-                Animation.Action(play_button.Show)
-                Animation.Delay(50.0)
-                Animation.Action(options_button.Show)
-                Animation.Delay(50.0)
-                Animation.Action(quit_button.Show)
-                Animation.Delay(200.0)
-                Animation.Action(fun () -> splash_fade.Target <- 1.0f)
-            ]
+        button_sequence.Add(
+            Animation.seq
+                [
+                    Animation.Action(play_button.Show)
+                    Animation.Delay(50.0)
+                    Animation.Action(options_button.Show)
+                    Animation.Delay(50.0)
+                    Animation.Action(quit_button.Show)
+                    Animation.Delay(200.0)
+                    Animation.Action(fun () -> splash_fade.Target <- 1.0f)
+                ]
+        )
 
         DiscordRPC.in_menus(%"discord_status.main_menu")
 
-    override this.OnExit(next: ScreenType) =
+    override this.OnExit(next: ScreenType) : unit =
         if next <> ScreenType.SplashScreen then
             Screen.logo.MoveOffscreen()
 
@@ -185,7 +186,7 @@ type MainMenuScreen() =
             confirm_quit()
             None
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let c = this.Bounds.CenterX
         let splash, subsplash = splash_text
         let a1 = splash_subtitle_fade.Value * splash_fade.Value * 255.0f |> int
@@ -222,7 +223,7 @@ type MainMenuScreen() =
 
         base.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         splash_fade.Update(elapsed_ms)
         splash_subtitle_fade.Update(elapsed_ms)

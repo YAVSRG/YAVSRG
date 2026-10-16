@@ -94,12 +94,12 @@ type PracticeScreen =
             )
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Play) with
-            override this.Init(parent: Widget) =
+            override this.Init(parent: Widget) : unit =
                 this.Add(paused_overlay this)
                 base.Init(parent)
 
-            override this.OnEnter(p) =
-                base.OnEnter(p)
+            override this.OnEnter(previous: ScreenType) : unit =
+                base.OnEnter(previous)
                 Song.Seek(state.PracticePoint.Value)
                 Song.Pause()
                 DiscordRPC.playing(%"discord_status.practice", info.ChartMeta.Title)
@@ -108,11 +108,11 @@ type PracticeScreen =
                 base.OnExit(next)
                 Content.Stats.AddPracticeTime(stats_practice_time, stats_notes_hit)
 
-            override this.OnBack() =
+            override this.OnBack() : ScreenType option =
                 Song.Resume()
                 base.OnBack()
 
-            override this.Update(elapsed_ms, moved) =
+            override this.Update(elapsed_ms: float, moved: bool) : unit =
                 let now = Song.TimeWithOffset
                 let chart_time = now - FIRST_NOTE
 

@@ -62,7 +62,7 @@ type Toolbar() =
             .Hotkey("import")
             .With(TaskProgressMiniBar().Position(Position.BorderB(Style.PADDING)))
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         container
             // Bottom right info
             .With(
@@ -157,7 +157,7 @@ type Toolbar() =
         volume_when_hidden.Init(this)
         container.Init(this)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if Toolbar.hidden then
             volume_when_hidden.Draw()
         else
@@ -177,7 +177,7 @@ type Toolbar() =
 
             Terminal.draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         if Screen.current_type <> ScreenType.SplashScreen then
             Content.Stats.AddGameTime(elapsed_ms)
 

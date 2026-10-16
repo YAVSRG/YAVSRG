@@ -104,7 +104,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
     static member HEIGHT = 80.0f
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Frame(
             Fill = (fun () -> if this.Focused then fill.O3 else fill.O2),
@@ -118,11 +118,11 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         match status with
@@ -259,7 +259,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
                 y <- y + 45.0f
 
-    member private this.Download() = download()
+    member private this.Download() : unit = download()
 
 type SortingDropdown =
 

@@ -21,7 +21,7 @@ type PlayerInfo(rank: int, data: Stats.Leaderboard.KeymodeLeaderboardEntry) =
 
     static member HEIGHT = 50.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let bounds = if is_you then this.Bounds else this.Bounds.ShrinkX(20.0f)
         Render.rect (if is_you then this.Bounds else bounds) Colors.shadow_2.O2
 
@@ -105,7 +105,7 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
             .Align(Alignment.LEFT)
             .Position(Position.SlicePercentL(0.25f).ShrinkL(PlayerInfo.HEIGHT * 1.5f).Shrink(10.0f, 5.0f))
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             player_column_label,
 
@@ -127,7 +127,7 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
@@ -144,11 +144,11 @@ type private KeymodesLeaderboard() =
                 keymode.Value,
                 sort_by.Value,
                 fun response ->
-                    GameThread.defer
-                    <| fun () ->
+                    GameThread.defer(fun () ->
                         match response with
                         | Some result -> container.SetData(result)
                         | None -> container.ServerError()
+                    )
             )
         else
             container.Offline()
@@ -216,6 +216,6 @@ type private KeymodesLeaderboard() =
     member this.MonthlyLeaderboard = monthly
     member this.Keymode = keymode
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |* container
         base.Init(parent)

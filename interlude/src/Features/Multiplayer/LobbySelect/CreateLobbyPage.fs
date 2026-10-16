@@ -16,7 +16,7 @@ type CreateLobbyPage() =
     let submit () =
         Network.client.Send(Upstream.CREATE_LOBBY(name.Value))
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
         |+ PageTextEntry(%"create_lobby.name", name).Pos(0)
         |+ PageButton(

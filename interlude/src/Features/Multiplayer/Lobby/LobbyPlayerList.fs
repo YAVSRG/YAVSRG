@@ -12,7 +12,7 @@ open Interlude.Features.Online.Players
 type Player(lobby: Lobby, name: string, player: LobbyPlayer) =
     inherit StaticWidget(NodeType.None)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let icon, fill, border =
             match player.Status with
             | LobbyPlayerStatus.Ready -> Icons.CHECK, Colors.green, Colors.green_accent
@@ -36,7 +36,7 @@ type Player(lobby: Lobby, name: string, player: LobbyPlayer) =
         Text.fill_b(Style.font, name, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
         Text.fill_b(Style.font, icon, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if lobby.YouAreHost && Mouse.hover this.Bounds && Mouse.left_clicked() then
@@ -62,7 +62,7 @@ type LobbyPlayerList(lobby: Lobby) =
             Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> PlayerListPage().Show()))
         )
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |* other_players_scroll
         refresh()
 
@@ -70,7 +70,7 @@ type LobbyPlayerList(lobby: Lobby) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         let fill, border = Colors.cyan, Colors.cyan_accent
 

@@ -15,7 +15,7 @@ type OverallHeader() =
     let xp_to_next_level = xp_for_level(level + 1) - xp_for_level level
     let current_xp = xp - xp_for_level level
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         Render.rect (this.Bounds.SliceB(120.0f)) Colors.shadow_2.O2
         let bar = this.Bounds.SliceB(40.0f).ShrinkX(20.0f).TranslateY(-20.0f)
@@ -25,7 +25,7 @@ type OverallHeader() =
 
         base.Draw()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(if Network.credentials.Username <> "" then Network.credentials.Username else %"stats.name_placeholder")
                 .Position(Position.SliceT(100.0f).ShrinkX(10.0f))

@@ -9,7 +9,7 @@ open Interlude.Features.Skins
 type LanecoverPage() =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f))
         this.DisposeOnDestroy(preview)
 

@@ -52,7 +52,7 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
                 Checkbox(column_filter_setting k).Position(Position.SliceL(50.0f).Translate(float32 k * 80.0f, 0.0f))
             )
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(fun () ->
             if column_filter_changed then
                 apply_column_filter()
@@ -162,16 +162,16 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     do fbo.Unbind()
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Position <- NORMAL_POSITION
         base.Init(parent)
 
-    member this.Refresh() = refresh <- true
+    member this.Refresh() : unit = refresh <- true
 
-    member this.ApplyColumnFilter() =
+    member this.ApplyColumnFilter() : unit =
         stats.Value <- ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
 
-    member private this.DrawCumulativeInfo(bounds: Rect, info: GraphPoint) =
+    member private this.DrawCumulativeInfo(bounds: Rect, info: GraphPoint) : unit =
 
         let black_cutoff_area =
             this.Bounds.SlicePercentR(
@@ -251,7 +251,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-    member private this.DrawSliceInfo(bounds: Rect, index: int, width: int) =
+    member private this.DrawSliceInfo(bounds: Rect, index: int, width: int) : unit =
 
         let pre = stats.Value.GraphPoints.[index - width |> max 0]
 
@@ -351,7 +351,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-    member private this.PlotLine(y_func: GraphPoint -> float32, color_func: GraphPoint -> Color) =
+    member private this.PlotLine(y_func: GraphPoint -> float32, color_func: GraphPoint -> Color) : unit =
 
         let mutable filler: ((float32 * float32) * (float32 * float32) * Color) voption =
             ValueNone
@@ -387,7 +387,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             draw_line (x1, y1) (x2, y2) (color_func snapshots.[i]).O3
 
-    member private this.DrawWindows() =
+    member private this.DrawWindows() : unit =
         let h = 0.5f * this.Bounds.Height
         let c = this.Bounds.CenterY
 
@@ -419,7 +419,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 previous_late <- late
             | None -> ()
 
-    member private this.DrawLabels(translucent: bool) =
+    member private this.DrawLabels(translucent: bool) : unit =
         let color = if translucent then Colors.white.O1, Color.Transparent else Colors.text
 
         if expanded && options.ScoreGraphWindowBackground.Value then
@@ -512,7 +512,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 Alignment.CENTER
             )
 
-    member private this.DrawLineGraph() =
+    member private this.DrawLineGraph() : unit =
         let line_color =
             match options.ScoreGraphLineColor.Value with
             | ScoreGraphLineColor.Lamp -> fun (snapshot: GraphPoint) -> score_info.Ruleset.LampColor(snapshot.Lamp)
@@ -585,7 +585,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         | _ -> ()
 
-    member private this.DrawHits() =
+    member private this.DrawHits() : unit =
         let events = score_info.Scoring.Events
         assert (events.Count > 0)
 
@@ -661,7 +661,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             | DropHold
             | RegrabHold -> ()
 
-    member private this.Redraw() =
+    member private this.Redraw() : unit =
         refresh <- false
         MAX_WINDOW <- score_info.Ruleset.LargestWindow
         let h = 0.5f * this.Bounds.Height
@@ -685,7 +685,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         fbo.Unbind()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if moved then
@@ -731,7 +731,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             this.Position <- NORMAL_POSITION
             refresh <- true
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if refresh then
             this.Redraw()
 
@@ -778,7 +778,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             this.DrawLabels(false)
 
     interface System.IDisposable with
-        override this.Dispose() =
+        override this.Dispose() : unit =
             for i = 0 to 9 do
                 GraphSettings.column_filter.[i] <- true
 

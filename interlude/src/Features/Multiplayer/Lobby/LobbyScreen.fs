@@ -29,12 +29,12 @@ type LobbySettingsPage(lobby: Lobby) =
     let host_rotation = Setting.simple settings.HostRotation
     let auto_countdown = Setting.simple settings.AutomaticRoundCountdown
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         lobby.ChangeSettings(
             { Name = name.Value; HostRotation = host_rotation.Value; AutomaticRoundCountdown = auto_countdown.Value }
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -53,7 +53,7 @@ type LobbySettingsPage(lobby: Lobby) =
 type LobbyUI(lobby: Lobby) =
     inherit Container(NodeType.None)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Button(Icons.SETTINGS, fun () -> LobbySettingsPage(lobby).Show())
             .Position(Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f))
@@ -64,7 +64,7 @@ type LobbyUI(lobby: Lobby) =
         |+ LobbyPlayerList(lobby).Position(Position.SlicePercentL(0.4f).Shrink(50.0f, 100.0f))
         |+ AngledButton(
             sprintf "%s %s" Icons.EYE (%"levelselect.preview"),
-            (fun () -> SelectedChart.if_loaded <| fun info -> ChartPreview(info, ignore).Show()),
+            (fun () -> SelectedChart.if_loaded(fun info -> ChartPreview(info, ignore).Show())),
             Palette.MAIN_100
         )
             .LeanLeft(false)
@@ -87,8 +87,7 @@ type LobbyUI(lobby: Lobby) =
 
         lobby.OnGameStart.Add(fun () ->
             if Screen.current_type = ScreenType.Lobby && lobby.ReadyStatus = ReadyFlag.Play then
-                SelectedChart.if_loaded
-                <| fun info ->
+                SelectedChart.if_loaded(fun info ->
                     if
                         Screen.change_new
                             (fun () -> MultiplayerScreen.Create(info, lobby))
@@ -97,17 +96,22 @@ type LobbyUI(lobby: Lobby) =
                         |> not
                     then
                         Logging.Warn("Missed the start of the lobby song because you were changing screen")
+                )
         )
 
         lobby.OnPlayerStatusChanged.Add(fun (username, status) ->
             if status = LobbyPlayerStatus.Playing then
-                SelectedChart.if_loaded
-                <| fun info ->
+                SelectedChart.if_loaded(fun info ->
 
                     let replay_source: NetworkReplaySource = NetworkReplaySource()
 
                     let scoring =
-                        ScoreProcessor.Create(Rulesets.current, replay_source, info.WithMods, SelectedChart.rate.Value)
+                        ScoreProcessor.Create(
+                            Rulesets.current,
+                            replay_source,
+                            info.WithMods,
+                            SelectedChart.rate.Value
+                        )
 
                     let replay_info =
                         {
@@ -162,6 +166,7 @@ type LobbyUI(lobby: Lobby) =
                             |> not
                         then
                             Logging.Warn("Missed the start of spectating because you were changing screen")
+                )
         )
 
 // Screen
@@ -178,7 +183,7 @@ type LobbyScreen() =
             current_lobby_ui.Current <- lobby_ui
         )
 
-    override this.OnEnter(_: ScreenType) =
+    override this.OnEnter(_: ScreenType) : unit =
         match Network.lobby with
         | Some lobby -> LobbySelectedChart.on_screen_enter lobby
         | None -> ()
@@ -186,23 +191,23 @@ type LobbyScreen() =
         Song.OnFinish(SongFinishAction.LoopFromPreview)
         DiscordRPC.in_menus(%"discord_status.multiplayer_lobby")
 
-    override this.OnExit(_: ScreenType) =
+    override this.OnExit(_: ScreenType) : unit =
         Selection.clear()
         Input.remove_listener()
 
-    override this.OnBack() =
+    override this.OnBack() : ScreenType option =
         match Network.lobby with
         | Some lobby ->
             ConfirmPage(%"lobby.confirm_leave", lobby.Leave).Show()
             None
         | None -> Some ScreenType.LevelSelect
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |* current_lobby_ui
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         match Network.lobby with
         | None ->
             if not(Transitions.in_progress()) then

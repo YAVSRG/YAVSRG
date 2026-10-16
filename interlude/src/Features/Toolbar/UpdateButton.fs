@@ -14,7 +14,7 @@ type UpdateButton() as this =
 
     let mutable download_progress = 0.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let area = this.Bounds.Shrink(0.0f, 7.5f)
         Render.rect area Colors.shadow_1.O2
 
@@ -48,7 +48,7 @@ type UpdateButton() as this =
                 Alignment.CENTER
             )
 
-    member this.Click() =
+    member this.Click() : unit =
 
         if Updates.update_complete then
             Updates.restart_on_exit <- true

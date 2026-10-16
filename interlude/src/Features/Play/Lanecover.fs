@@ -42,6 +42,6 @@ module Lanecover =
 type LanecoverOverReceptors() =
     inherit StaticWidget(NodeType.None)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if options.LaneCover.Enabled.Value && not options.LaneCover.DrawUnderReceptors.Value then
             Lanecover.draw this.Bounds

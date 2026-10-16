@@ -9,7 +9,7 @@ open Interlude.Features.Import
 type ConfirmQuitPage(on_confirm: unit -> unit) =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         if TaskTracking.in_progress() then
             page_container()
                 .With(

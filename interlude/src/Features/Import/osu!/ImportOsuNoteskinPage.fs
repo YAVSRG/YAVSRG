@@ -17,7 +17,7 @@ type ImportOsuNoteskinPage(osu_skin_conversion: OsuSkinConversion, folder_name: 
     let is_arrows: Setting<bool> = Setting.simple false
     let delete_existing: Setting<bool> = Setting.simple false
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
         |+ PageSetting(%"osu_skin_import.keymode", SelectDropdown.FromEnum(keymode)).Pos(0)
         |+ PageSetting(%"osu_skin_import.isarrows", Checkbox is_arrows)

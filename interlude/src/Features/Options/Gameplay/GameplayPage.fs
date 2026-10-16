@@ -72,7 +72,7 @@ type GameplayPage() =
     static member Keybinds() : PageButton =
         PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show()).Help(Help.Info("gameplay.keybinds"))
 
-    override this.Content() =
+    override this.Content() : Widget =
         let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(200.0f))
         this.DisposeOnDestroy(preview)
 

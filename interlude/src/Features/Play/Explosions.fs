@@ -167,7 +167,7 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
 
     do state.Subscribe(handle_event) |> ignore
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let now = state.CurrentChartTime()
 
         if now < last_time then

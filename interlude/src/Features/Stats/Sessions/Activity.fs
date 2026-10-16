@@ -32,7 +32,7 @@ type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>)
     let mutable hovered_day = None
     let PADDING = 20.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_2.O2
 
         let box_size = (this.Bounds.Height - PADDING * 2.0f) / 7.0f
@@ -82,7 +82,7 @@ type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>)
 
         Text.draw_b(Style.font, year.ToString(), 30.0f, this.Bounds.Left + 15.0f, this.Bounds.Top - 50.0f, Colors.text)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         hovered_day <- None
 
@@ -119,7 +119,7 @@ type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>)
 type AllYearsActivityPage(selected: Setting<(DateOnly * Session) option>) =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         let flow = FlowContainer.Vertical<YearActivityGrid>(200.0f, Spacing = 65.0f)
 
         for year in Content.Stats.GetPreviousSessions() |> Seq.map _.Key.Year |> Seq.distinct |> Seq.sortDescending do
@@ -153,7 +153,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
     let mutable hovered_day = None
     let PADDING = 20.0f
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Button(
                 sprintf "%s %s" Icons.ARROW_LEFT (%"stats.activity.view_older"),
@@ -165,7 +165,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_2.O2
 
         let box_size = (this.Bounds.Height - PADDING * 2.0f) / 7.0f
@@ -224,7 +224,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
 
         base.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         hovered_day <- None
 

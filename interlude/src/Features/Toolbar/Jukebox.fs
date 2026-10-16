@@ -51,7 +51,7 @@ type Jukebox() =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_1.O2
 
         let carousel_bounds = this.Bounds.ShrinkL(145.0f).Shrink(Style.PADDING)
@@ -102,6 +102,6 @@ type Jukebox() =
 
         Render.stencil_finish()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         song_title_carousel.Update(elapsed_ms)

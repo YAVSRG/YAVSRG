@@ -10,7 +10,7 @@ open Interlude.Features.Gameplay
 type private SpectateControls(who: unit -> string, cycle: unit -> unit) =
     inherit Container(NodeType.None)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(%"spectate.title")
                 .Color(Colors.text_subheading)
@@ -22,7 +22,7 @@ type private SpectateControls(who: unit -> string, cycle: unit -> unit) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
@@ -32,13 +32,13 @@ type private SpectateOverlay(info: LoadedChartInfo, on_seek: Time -> unit, who: 
     let mutable show = true
     let mutable show_timeout = 3000.0
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |+ Timeline(info.WithMods, on_seek, SelectedChart.rate)
         |* SpectateControls(who, cycle).Position(Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if Mouse.moved_recently() then

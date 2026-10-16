@@ -41,21 +41,21 @@ type OptionsMenuButton(label: string, on_click: unit -> unit) =
     member val IsHighlighted = K false with get, set
     member val Keybind = Bind.Dummy with get, set
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |* MouseListener().Button(this)
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Keybind.Pressed() then
             on_click()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let is_highlighted = this.IsHighlighted()
 
         let trim_color =

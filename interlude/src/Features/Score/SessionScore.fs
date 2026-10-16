@@ -15,7 +15,7 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
 
     let xp_display = Animation.Fade(float32 xp_before)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         printfn "%A" xp_gain
         printfn "%i -> %i" xp_before xp_now
 
@@ -51,7 +51,7 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let level = int64 xp_display.Value |> current_level
         let xp_start = xp_for_level level |> float32
         let xp_end = xp_for_level(level + 1) |> float32
@@ -87,6 +87,6 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
             Alignment.CENTER
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         xp_display.Update(elapsed_ms)

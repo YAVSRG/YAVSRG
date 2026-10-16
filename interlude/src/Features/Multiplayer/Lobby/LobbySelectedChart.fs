@@ -20,7 +20,7 @@ open Interlude.Features.Play.Spectate
 type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         FlowContainer.Vertical(PAGE_ITEM_HEIGHT).Position(Position.Shrink(100.0f, 200.0f))
 
         |+ PageButton(%"chart.add_to_collection", fun () -> AddToCollectionPage(chart_meta).Show())
@@ -78,14 +78,16 @@ module LobbySelectedChart =
                         let newly_installed = Content.Charts.GetChartMeta(chart.Hash).Value
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
 
-                        GameThread.defer
-                        <| fun () ->
+                        GameThread.defer(fun () ->
                             SelectedChart.change(newly_installed, LibraryContext.None, true)
                             SelectedChart.rate.Set(chart.Rate)
 
                             SelectedChart.selected_mods.Set(
-                                chart.Mods |> Map.ofArray |> Map.filter(fun id _ -> Mods.AVAILABLE_MODS.ContainsKey(id))
+                                chart.Mods
+                                |> Map.ofArray
+                                |> Map.filter(fun id _ -> Mods.AVAILABLE_MODS.ContainsKey(id))
                             )
+                        )
                 )
             | Some chart_meta ->
                 SelectedChart.change(chart_meta, LibraryContext.None, true)
@@ -120,7 +122,7 @@ module LobbySelectedChart =
 type LobbySelectedChart(lobby: Lobby) =
     inherit Container(NodeType.None)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
 
         this
         |+ Text(fun () ->
@@ -278,7 +280,7 @@ type LobbySelectedChart(lobby: Lobby) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let is_loaded = LobbySelectedChart.is_loaded_or_loading()
 
         Render.rect

@@ -23,7 +23,7 @@ type StatsPage() =
             leaderboards, %"stats.leaderboard", fun () -> Network.status <> Network.LoggedIn
         |]
 
-    override this.Header() =
+    override this.Header() : Widget =
         if selected_tab.Value = 2 && Network.status <> Network.LoggedIn then
             selected_tab.Value <- 0
 
@@ -31,6 +31,6 @@ type StatsPage() =
             .CreatePersistent(tab_options, tab_container, selected_tab)
             .Position(Position.SlicePercentL(0.4f).ShrinkT(50.0f).SliceT(TabButtons.HEIGHT).ShrinkX(40.0f))
 
-    override this.Content() = tab_container
+    override this.Content() : Widget = tab_container
 
     override this.Title = %"menu.stats"

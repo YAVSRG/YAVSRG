@@ -19,11 +19,11 @@ type NetworkStatus() as this =
             Position.SliceT(d.Height + this.Bounds.Height).ShrinkT(this.Bounds.Height).Shrink(Style.PADDING, 0.0f)
         )
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Add(dropdown_wrapper)
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let area = this.Bounds.ShrinkX(30.0f).SliceT(InlaidButton.HEIGHT)
 
         let text, color =
@@ -54,7 +54,7 @@ type NetworkStatus() as this =
 
         base.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if Network.status = Network.NotConnected && not Network.kicked_no_reconnect then
@@ -99,5 +99,5 @@ type NetworkStatus() as this =
                 Network.logout, Icons.LOG_OUT + " " + %"network.logout"
             ]
 
-    member this.ToggleDropdown() =
+    member this.ToggleDropdown() : unit =
         dropdown_wrapper.Toggle(fun () -> DropdownMenu { Items = this.MenuItems })

@@ -17,7 +17,7 @@ type InviteCard(invite: LobbyInvite) =
 
     let BUTTON_SIZE = 50.0f
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(Icons.MAIL + " " + invite.InvitedBy).Align(Alignment.LEFT).Position(Position.Shrink(5.0f)),
             Button(Icons.CHECK, fun () -> accept_invite this).Position(Position.SliceR(BUTTON_SIZE, BUTTON_SIZE)),
@@ -32,7 +32,7 @@ type InviteList() =
     let container =
         FlowContainer.Vertical<InviteCard>(50.0f).Spacing(Style.PADDING * 3.0f).Position(Position.ShrinkY(80.0f))
 
-    member this.UpdateList() =
+    member this.UpdateList() : unit =
         container.Clear()
 
         for l in Network.lobby_invites do
@@ -47,7 +47,7 @@ type InviteList() =
     //then
     //    Notifications.add([name] %> "notification.invited_to_lobby.title", NotificationType.Info)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |* container
         this.UpdateList()
         base.Init(parent)

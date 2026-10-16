@@ -39,7 +39,7 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
                 %"notification.no_native_ruleset.body"
             )
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             InlaidButton((fun () -> score_info.Ruleset.Name), (fun () -> this.ToggleDropdown()))
                 .Hotkey("ruleset_switch")
@@ -52,7 +52,7 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         if dropdown_wrapper.Active && not score_info.ChartMeta.Origins.IsEmpty then
@@ -66,13 +66,13 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
                 Alignment.RIGHT
             )
 
-    member this.ToggleDropdown() =
+    member this.ToggleDropdown() : unit =
         RulesetSwitcher.make_dropdown setting dropdown_wrapper
 
 type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGraph, refresh: unit -> unit) =
     inherit Container(NodeType.None)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
 
         if Network.lobby.IsNone && played_just_now then
             this

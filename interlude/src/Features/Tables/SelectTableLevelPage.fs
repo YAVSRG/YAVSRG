@@ -19,9 +19,9 @@ type SelectTableLevelPage(table: Table, action: int -> unit) =
         if container.Focused then
             container.Focus(false)
 
-    override this.Content() =
+    override this.Content() : Widget =
         refresh()
         ScrollContainer(container).Position(Position.Shrink(100.0f, 200.0f))
 
     override this.Title = %"table"
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()

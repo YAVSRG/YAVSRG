@@ -39,7 +39,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
     and like_button_swap: SwapContainer =
         SwapContainer(if CollectionActions.is_liked score_info.ChartMeta then unlike_button else like_button)
 
-    override this.Content() =
+    override this.Content() : Widget =
         let content =
             FlowContainer
                 .Vertical<Widget>(PAGE_ITEM_HEIGHT)

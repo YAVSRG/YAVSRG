@@ -72,7 +72,7 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>) =
 
     let reset_offset () = setting.Set(0.0f<ms>)
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(fun () -> Selection.up false)
 
         GameThread.defer(fun () -> offset_slider.Select(false))
@@ -90,7 +90,7 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>) =
                 PageButton(%"play.localoffset.reset", reset_offset).Hotkey("reset_offset").Pos(5)
             )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         if offset_slider.Selected && (%%"select").Pressed() then
             Menu.Back()
 

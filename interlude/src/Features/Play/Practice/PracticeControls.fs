@@ -14,7 +14,7 @@ open Interlude.Features.Play
 type private PracticeToolsPage(state: PracticeState) =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
         |+ PageButton(
             %"play.localoffset",
@@ -58,7 +58,7 @@ type SyncSuggestionControls(state: PracticeState) =
     let scroll_speed = options.ScrollSpeed |> Setting.roundf_uom 2
     let hit_position = options.HitPosition |> Setting.roundf 0
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
 
         let suggestion_hint = %"practice.suggestions.hint"
 
@@ -143,7 +143,7 @@ type PracticeControls(state: PracticeState, with_mods: ModdedChart, on_seek: Tim
 
     let fade = Animation.Fade(1.0f)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Text(Icons.TARGET + " " + (%"practice.title"))
             .Align(Alignment.LEFT)
@@ -173,13 +173,13 @@ type PracticeControls(state: PracticeState, with_mods: ModdedChart, on_seek: Tim
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if fade.Alpha > 0 then
             let old_m = Render.alpha_multiplier_begin fade.Value
             base.Draw()
             Render.alpha_multiplier_restore old_m
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if state.Paused.Value && fade.Target <> 1.0f then

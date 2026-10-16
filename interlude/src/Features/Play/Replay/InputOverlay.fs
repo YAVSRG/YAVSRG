@@ -32,11 +32,11 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
                         Bottom = bottom - r.Top
                     }
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         state.OnScoringChanged(fun _ -> seek <- 0) |> ignore
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         if show_input_overlay.Value then
             let draw_press (k, now: ChartTime, start: ChartTime, finish: ChartTime) =
@@ -83,7 +83,7 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
                         if not keys_down.[k] then
                             keys_down.[k] <- true
                             keys_times.[k] <- replay_frame.Time
-                    else if keys_down.[k] then
+                    elif keys_down.[k] then
                         keys_down.[k] <- false
                         draw_press(k, now, keys_times.[k], replay_frame.Time)
 
@@ -93,7 +93,7 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
                 if keys_down.[k] then
                     draw_press(k, now, keys_times.[k], until_time)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()

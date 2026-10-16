@@ -47,9 +47,9 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
         if container.Focused then
             container.Focus(false)
 
-    override this.Content() =
+    override this.Content() : Widget =
         refresh()
         ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"table")
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()

@@ -30,11 +30,11 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
 
     member private this.Content = content
 
-    member this.Offline() =
+    member this.Offline() : unit =
         assert GameThread.is_game_thread()
         status <- WebRequestState.Offline
 
-    member this.ServerError() =
+    member this.ServerError() : unit =
         assert GameThread.is_game_thread()
         status <- WebRequestState.ServerError
 
@@ -43,12 +43,12 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
         status <- WebRequestState.Loaded
         data.Value <- result
 
-    member this.Reload() =
+    member this.Reload() : unit =
         assert GameThread.is_game_thread()
         status <- WebRequestState.Loading
         load this
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
 
         load this
 
@@ -60,13 +60,13 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
         base.Init(parent)
         content.Init(this)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if status = WebRequestState.Loaded || status = WebRequestState.Loading then
             content.Update(elapsed_ms, moved)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         if status = WebRequestState.Loaded || status = WebRequestState.Loading then

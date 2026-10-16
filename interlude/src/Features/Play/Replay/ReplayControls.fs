@@ -43,7 +43,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
     let refresh_playback_speed () =
         playback_speed.Set(playback_speed.Value)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(Icons.FILM + " " + (if is_auto then %"replay.title.autoplay" else %"replay.title"))
                 .Align(Alignment.LEFT)
@@ -80,13 +80,13 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if fade.Alpha > 0 then
             let old_m = Render.alpha_multiplier_begin fade.Value
             base.Draw()
             Render.alpha_multiplier_restore old_m
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         fade.Update(elapsed_ms)

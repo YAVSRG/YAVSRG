@@ -47,7 +47,7 @@ type SessionsTab() =
 
     and activity: RecentActivityGrid = RecentActivityGrid(selected_session)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             activity.Position(Position.SlicePercentL(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f)),
 
@@ -99,7 +99,7 @@ type SessionsTab() =
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Focused then

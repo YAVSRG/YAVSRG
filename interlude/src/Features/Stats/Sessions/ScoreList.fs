@@ -21,7 +21,7 @@ type MissingScore() =
 
     let fade = Animation.Fade(0.0f, Target = 1.0f)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let alpha = fade.Alpha
 
         let fill_color =
@@ -41,7 +41,7 @@ type MissingScore() =
             Alignment.CENTER
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         fade.Update(elapsed_ms)
 
@@ -72,7 +72,7 @@ type Score(score_info: ScoreInfo) =
 
     member this.ScoreInfo = score_info
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let alpha = fade.Alpha
 
         let fill_color =
@@ -159,16 +159,16 @@ type Score(score_info: ScoreInfo) =
             Alignment.CENTER
         )
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         Style.hover.Play()
         base.OnFocus(by_mouse)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this |* MouseListener().Button(this)
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         fade.Update(elapsed_ms)
 
@@ -191,7 +191,7 @@ module private ScoreList =
                     yield callback_when_done
                 }
 
-            member this.Handle(action) = action()
+            member this.Handle(action: unit -> unit) : unit = action()
         }
 
 type ScoreList(start_time: int64, end_time: int64) =
@@ -216,7 +216,7 @@ type ScoreList(start_time: int64, end_time: int64) =
         )
             .Show()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         let mutable finished_loading = false
         let mutable has_scores = false
 
@@ -247,10 +247,10 @@ type ScoreList(start_time: int64, end_time: int64) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_2.O2
         base.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         ScoreList.loader.Join()

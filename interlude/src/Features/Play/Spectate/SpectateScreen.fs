@@ -48,7 +48,7 @@ type SpectateScreen =
         lobby.StartSpectating()
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Spectate(lobby.Replays)) with
-            override this.Init(parent: Widget) =
+            override this.Init(parent: Widget) : unit =
 
                 this.Add(
                     SpectateOverlay(info, ignore, (fun () -> currently_spectating), fun () -> cycle_spectator this)
@@ -56,17 +56,17 @@ type SpectateScreen =
 
                 base.Init(parent)
 
-            override this.OnEnter(prev) =
+            override this.OnEnter(prev: ScreenType) : unit =
                 base.OnEnter(prev)
                 DiscordRPC.playing(%"discord_status.spectate", info.ChartMeta.Title)
                 Song.Pause()
 
-            override this.OnExit(next) =
+            override this.OnExit(next: ScreenType) : unit =
                 base.OnExit(next)
                 Song.Resume()
                 Toolbar.show_cursor()
 
-            override this.Update(elapsed_ms, moved) =
+            override this.Update(elapsed_ms: float, moved: bool) : unit =
                 base.Update(elapsed_ms, moved)
 
                 if wait_for_load > 0.0 then

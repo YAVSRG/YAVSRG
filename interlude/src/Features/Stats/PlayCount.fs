@@ -15,7 +15,7 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
 
     let CONTENT_HEIGHT = 165.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_2.O2
 
         let graph_radius = min (this.Bounds.Height * 0.4f) (this.Bounds.Width * 0.15f)
@@ -110,7 +110,7 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
             Alignment.LEFT
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let completed = completed()

@@ -22,7 +22,7 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         setting.Value <- fst items.[index]
         Style.click.Play()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(fun () -> snd items.[index]).Align(Alignment.LEFT),
 
@@ -31,11 +31,11 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
@@ -48,7 +48,7 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
             elif (%%"down").Pressed() then
                 bk()
 
-    static member FromEnum(setting: Setting<'T>) =
+    static member FromEnum(setting: Setting<'T>) : Selector<'T> =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         Selector(Array.zip values names, setting)
@@ -73,13 +73,13 @@ type SelectDropdown<'T when 'T: equality>(items: ('T * string) array, setting: S
         |> Setting.simple
         |> Setting.trigger(fun (v, _) -> setting.Set(v))
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |+ Text(fun () -> snd wrapped_setting.Value).Align(Alignment.LEFT) |+ MouseListener().Button(this)
         |* dropdown_wrapper
 
         base.Init(parent)
 
-    member this.ToggleDropdown() =
+    member this.ToggleDropdown() : unit =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
@@ -89,11 +89,11 @@ type SelectDropdown<'T when 'T: equality>(items: ('T * string) array, setting: S
                 }
         )
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    static member FromEnum(setting: Setting<'T>) =
+    static member FromEnum(setting: Setting<'T>) : SelectDropdown<'T> =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         SelectDropdown(Array.zip values names, setting)

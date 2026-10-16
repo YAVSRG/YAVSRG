@@ -16,7 +16,7 @@ type OverallTime(total_time: unit -> float, play_time: unit -> float, practice_t
 
     let CONTENT_HEIGHT = 165.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_2.O2
 
         let graph_radius = min (this.Bounds.Height * 0.4f) (this.Bounds.Width * 0.15f)
@@ -102,7 +102,7 @@ type OverallTime(total_time: unit -> float, play_time: unit -> float, practice_t
             Alignment.LEFT
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let total = total_time() + 0.1

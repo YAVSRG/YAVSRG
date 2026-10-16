@@ -24,7 +24,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker_state: PacemakerState, on_rea
 
     let pacemaker_desc = pacemaker_state.Description(Rulesets.current)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let alpha = fade.Alpha
 
         if info.WithMods.Status <> ModStatus.Ranked then
@@ -107,7 +107,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker_state: PacemakerState, on_rea
             Alignment.CENTER
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         timer.Update(elapsed_ms)
 

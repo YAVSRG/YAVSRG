@@ -19,17 +19,17 @@ module private Dropdown =
                 )
             )
 
-        override this.Init(parent) =
+        override this.Init(parent: Widget) : unit =
             this |+ MouseListener().Button(this).Floating()
             |* Text(label).Align(Alignment.LEFT).Color(color).Position(Position.Shrink(10.0f, 5.0f))
 
             base.Init(parent)
 
-        override this.OnFocus(by_mouse: bool) =
+        override this.OnFocus(by_mouse: bool) : unit =
             base.OnFocus(by_mouse)
             Style.hover.Play()
 
-        override this.Draw() =
+        override this.Draw() : unit =
             if is_odd then
                 Render.rect this.Bounds (Colors.shadow_1.O1a(100))
 
@@ -50,14 +50,14 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
     member val FocusTrap = false with get, set
     member val OnClose: unit -> unit = ignore with get, set
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
         current |> Option.iter(fun dropdown -> dropdown.Init(this))
 
-    override this.Draw() =
+    override this.Draw() : unit =
         current |> Option.iter(fun dropdown -> dropdown.Draw())
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let moved =
@@ -116,7 +116,7 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         let mutable what_to_focus: Widget = this
 
         flow
@@ -157,7 +157,7 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         flow
         |+ seq {
             for i, (action, label) in Seq.indexed options.Items do

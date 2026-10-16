@@ -9,7 +9,7 @@ open Interlude.Features.Online
 type LobbyInfoCard(info: LobbyInfo) =
     inherit FrameContainer(NodeType.None)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(info.Name).Align(Alignment.LEFT).Position(Position.SliceT(50.0f).Shrink(5.0f)),
 
@@ -48,14 +48,14 @@ type LobbyList() =
 
     let create_lobby () = CreateLobbyPage().Show()
 
-    member this.UpdateList(lobbies: LobbyInfo array) =
+    member this.UpdateList(lobbies: LobbyInfo array) : unit =
         no_lobbies <- lobbies.Length = 0
         lobby_list_container.Clear()
 
         for lobby in lobbies do
             lobby_list_container.Add(LobbyInfoCard lobby)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             ScrollContainer(lobby_list_container).Margin(Style.PADDING).Position(Position.Shrink(0.0f, 80.0f)),
 

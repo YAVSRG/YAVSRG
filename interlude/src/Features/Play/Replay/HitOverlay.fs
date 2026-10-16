@@ -192,11 +192,11 @@ type private HitOverlay(rate: Rate, chart: ModdedChart, replay: Replay, state: P
             draw_delta ev.Column action_y action_y color
             label_after ev.Column action_y (sprintf "%s  %s" Icons.CHEVRONS_DOWN REGRAB_HOLD_ANNOTATION) color
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         state.OnScoringChanged(fun _ -> seek <- 0) |> ignore
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if show_hit_overlay.Value then
             let now =
                 state.CurrentChartTime() + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.Rate
@@ -215,7 +215,7 @@ type private HitOverlay(rate: Rate, chart: ModdedChart, replay: Replay, state: P
                 draw_event now hit_events.[peek]
                 peek <- peek + 1
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()

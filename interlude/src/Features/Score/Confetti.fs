@@ -40,7 +40,7 @@ type Confetti() =
 
     let random = System.Random()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         taken_screenshot_cooldown <- taken_screenshot_cooldown - elapsed_ms
 
@@ -72,7 +72,7 @@ type Confetti() =
                 confetti.[i].Y <- confetti.[i].Y + confetti.[i].YVel * dt
                 confetti.[i].YVel <- confetti.[i].YVel + 0.0075f * dt
 
-    override this.Draw() =
+    override this.Draw() : unit =
         for i = 0 to confetti.Length - 1 do
             if confetti.[i].X > 0.0f && confetti.[i].Y > 0.0f && confetti.[i].Y < Render.height() then
                 Render.rect (Rect.FromSize(confetti.[i].X, confetti.[i].Y, 12.0f, 12.0f)) colors.[confetti.[i].Color]

@@ -178,7 +178,7 @@ type PlayScreen =
             LocalOffsetPage(LocalOffset.get_automatic state info.SaveData, offset_setting).WithOnClose(retry).Show()
 
         { new IPlayScreen(info, pacemaker_state, scoring, HudContextInner.Play) with
-            override this.Init(parent: Widget) =
+            override this.Init(parent: Widget) : unit =
 
                 this.Add(
                     HotkeyHoldAction(
@@ -207,7 +207,7 @@ type PlayScreen =
                 base.Init(parent)
                 start_overlay.Init(this)
 
-            override this.OnEnter(previous) =
+            override this.OnEnter(previous: ScreenType) : unit =
                 Content.Stats.StartOrContinueSession()
                 info.SaveData.LastPlayed <- Timestamp.now()
                 Toolbar.hide_cursor()
@@ -224,7 +224,7 @@ type PlayScreen =
                     info.ChartMeta.Length / SelectedChart.rate.Value
                 )
 
-            override this.OnExit(next) =
+            override this.OnExit(next: ScreenType) : unit =
                 match stats_exit_reason with
                 | ExitReason.Complete ->
                     Content.Stats.CompletePlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
@@ -240,7 +240,7 @@ type PlayScreen =
 
                 base.OnExit(next)
 
-            override this.Update(elapsed_ms, moved) =
+            override this.Update(elapsed_ms: float, moved: bool) : unit =
                 stats_play_time <- stats_play_time + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.TimeWithOffset
@@ -274,7 +274,7 @@ type PlayScreen =
                     start_overlay.Update(elapsed_ms, moved)
                     fade_in.Update(elapsed_ms)
 
-            override this.Draw() =
+            override this.Draw() : unit =
 
                 if fade_in.Value < 1.0f then
                     let old_m = Render.alpha_multiplier_begin fade_in.Value

@@ -20,7 +20,7 @@ type OsuSkinsListPage(on_select: string -> unit) =
     let osu_skin_paths =
         if Directory.Exists(osu_skin_folder) then Directory.EnumerateDirectories(osu_skin_folder) |> List.ofSeq else []
 
-    override this.Content() =
+    override this.Content() : Widget =
         if List.isEmpty osu_skin_paths then
             Container(NodeType.Leaf).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
             |+ EmptyState(Icons.IMAGE, %"osu_skin_import.no_skins_found")

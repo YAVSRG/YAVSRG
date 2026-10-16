@@ -18,7 +18,7 @@ type LobbySelectPage() =
             Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Left = 0.7f %+ (PAGE_MARGIN_X * 0.5f) }
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
 
         this.DisposeOnClose(
             NetworkEvents.receive_lobby_list.Subscribe(fun lobbies -> lobby_list.UpdateList(lobbies)),

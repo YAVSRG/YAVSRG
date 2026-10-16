@@ -30,7 +30,7 @@ type TableCard(online_table: Tables.List.Table) as this =
     let mutable existing = None
     let mutable status = TableStatus.NotInstalled
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Text(online_table.Info.Name)
             .Align(Alignment.CENTER)
@@ -60,11 +60,11 @@ type TableCard(online_table: Tables.List.Table) as this =
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    member this.Install() =
+    member this.Install() : unit =
         match status with
         | TableStatus.NotInstalled
         | TableStatus.OutOfDate as current_status ->
@@ -110,7 +110,7 @@ type TableBrowserPage() =
     let scroll =
         ScrollContainer(flow, Margin = Style.PADDING).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
-    override this.Content() =
+    override this.Content() : Widget =
         Tables.List.get(
             function
             | Some tables ->

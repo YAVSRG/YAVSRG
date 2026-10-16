@@ -37,7 +37,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         | Ok score -> show_replay score
         | Error reason -> Notifications.error(%"osu_replay_import.failed", reason)
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
         |+ PageSetting(%"osu_replay_import.rate", Slider(Setting.uom rate)).Pos(0)
         |+ PageButton(%"osu_replay_import.import", import).Pos(3)
@@ -56,15 +56,17 @@ module Replay =
 
         SelectedChart.change(chart_meta, LibraryContext.None, true)
 
-        SelectedChart.when_loaded true
-        <| fun _ ->
-            if
-                Screen.change_new
-                    (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false))
-                    ScreenType.Score
-                    Transitions.EnterGameplayNoFadeAudio
-            then
-                Menu.Exit()
+        SelectedChart.when_loaded
+            true
+            (fun _ ->
+                if
+                    Screen.change_new
+                        (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false))
+                        ScreenType.Score
+                        Transitions.EnterGameplayNoFadeAudio
+                then
+                    Menu.Exit()
+            )
 
     let figure_out_replay (replay: OsuReplay) : unit =
 

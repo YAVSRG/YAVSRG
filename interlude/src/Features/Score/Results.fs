@@ -13,7 +13,7 @@ open Interlude.UI
 type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |* Text(fun () -> score_info.Ruleset.GradeName((!grade).Grade))
             .Color(fun () -> (score_info.Ruleset.GradeColor((!grade).Grade), Colors.black))
@@ -21,7 +21,7 @@ type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw(this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
         let grade_color = score_info.Ruleset.GradeColor((!grade).Grade)
@@ -44,17 +44,17 @@ type Accuracy
 
     let glint_animation = Animation.Delay(375.0)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         if (!improvements).Accuracy <> Improvement.None then
             ScoreScreenHelpers.animation_queue.Add(glint_animation)
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         hover <- Mouse.hover this.Bounds
         base.Update(elapsed_ms, moved)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw(this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
         let grade_color = score_info.Ruleset.GradeColor((!grade).Grade)
@@ -153,7 +153,7 @@ type Lamp
 
     let glint_animation = Animation.Delay(375.0)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |* Text(fun () -> score_info.Ruleset.LampName((!lamp).Lamp))
             .Color(fun () -> (score_info.Ruleset.LampColor((!lamp).Lamp), Colors.black))
@@ -164,11 +164,11 @@ type Lamp
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         hover <- Mouse.hover this.Bounds
         base.Update(elapsed_ms, moved)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw(this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
         Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.LampColor((!lamp).Lamp)).O1
@@ -235,7 +235,7 @@ type Results
     ) =
     inherit Container(NodeType.None)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Grade(grade, score_info).Position(Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
         |+ Accuracy(grade, improvements, previous_personal_bests, stats, score_info)

@@ -33,7 +33,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         else
             sprintf "%iK" score_info.WithMods.Keys
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Text(sprintf "%s  %s" Icons.ZAP mod_string)
             .Align(Alignment.CENTER)
@@ -138,7 +138,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect (this.Bounds.Translate(Style.PADDING * 2.0f, Style.PADDING * 2.0f)) Colors.black
         Background.draw(this.Bounds, Colors.white, 2.0f)
         Render.rect_c this.Bounds (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)

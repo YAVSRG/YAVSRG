@@ -27,8 +27,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
                 Error error
             |> function
                 | Ok() ->
-                    GameThread.defer
-                    <| fun () ->
+                    GameThread.defer(fun () ->
                         animation.Add(Animation.Delay(50.0))
                         animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
                         animation.Add(Animation.Delay(500.0))
@@ -38,15 +37,16 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
                                 Screen.change ScreenType.MainMenu Transitions.UnderLogo |> ignore
                             )
                         )
+                    )
                 | Error error -> GameThread.defer(fun () -> raise error)
         }
         |> Async.Start
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this |* LoadingIndicator.Strip(fun () -> not closing).Position(Position.SliceT(165.0f, 10.0f).SliceX(400.0f))
         base.Init(parent)
 
-    override this.OnEnter(prev: ScreenType) =
+    override this.OnEnter(prev: ScreenType) : unit =
         Toolbar.hide()
 
         background_fade.Reset()
@@ -72,7 +72,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         if not closing then
             Audio.change_volume(options.AudioVolume.Value, options.AudioVolume.Value)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         audio_fade.Update(elapsed_ms)
         animation.Update(elapsed_ms)
@@ -80,7 +80,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
 
         Audio.change_volume(options.AudioVolume.Value, options.AudioVolume.Value * float audio_fade.Value)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let alpha =
             if closing then 255.0 * (1.0 - background_fade.Progress) |> int else 255.0 * background_fade.Progress |> int
 
@@ -101,6 +101,6 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
 
             base.Draw()
 
-    override this.OnBack() =
+    override this.OnBack() : ScreenType option =
         WindowThread.exit()
         None

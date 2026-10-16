@@ -93,7 +93,7 @@ type RejectSuggestionPage(table: Table, suggestion: Suggestion) =
             | _ -> Notifications.error(%"notification.suggestion.server_error.title", "")
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
         |+ PageTextEntry(%"table.suggestions.reject_reason", reason).Pos(0)
         |+ PageButton.Once(%"table.suggestions.reject", reject).Pos(3)
@@ -141,7 +141,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             | false -> Notifications.error(%"notification.install_song_failed", "")
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(fun () -> still_open <- false)
 
         page_container()
@@ -223,11 +223,11 @@ type SuggestionsList(table: Table) =
                     Tables.Suggestions.List.get(
                         table.Id,
                         fun response ->
-                            GameThread.defer
-                            <| fun () ->
+                            GameThread.defer(fun () ->
                                 match response with
                                 | Some result -> this.SetData(result)
                                 | None -> this.ServerError()
+                            )
                     )
                 else
                     this.Offline()
@@ -257,8 +257,8 @@ type SuggestionsPage(table: Table) =
 
     let suggestions_list = SuggestionsList(table)
 
-    override this.Content() =
+    override this.Content() : Widget =
         NavigationContainer.Column().With(Dummy(NodeType.Leaf), suggestions_list)
 
     override this.Title = %"table.suggestions"
-    override this.OnReturnFromNestedPage() = suggestions_list.Reload()
+    override this.OnReturnFromNestedPage() : unit = suggestions_list.Reload()

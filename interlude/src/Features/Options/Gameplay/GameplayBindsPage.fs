@@ -57,7 +57,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
             Input.listen_to_next_key input_callback
             Input.finish_frame_events()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(fun () -> text)
                 .Color(fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1)
@@ -67,11 +67,11 @@ type GameplayKeybinder(keymode: Keymode) as this =
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.OnSelected(by_mouse: bool) =
+    override this.OnSelected(by_mouse: bool) : unit =
         base.OnSelected(by_mouse)
         progress <- 0
         duplicates <- Set.empty
@@ -79,18 +79,18 @@ type GameplayKeybinder(keymode: Keymode) as this =
         Style.click.Play()
         Input.listen_to_next_key input_callback
 
-    override this.OnDeselected(by_mouse: bool) =
+    override this.OnDeselected(by_mouse: bool) : unit =
         base.OnDeselected(by_mouse)
         Input.remove_listener()
 
         text <- options.GameplayBinds.[int keymode - 3] |> Seq.map(sprintf "%O") |> String.concat ",  "
 
-    member this.OnKeymodeChanged() = refresh_text()
+    member this.OnKeymodeChanged() : unit = refresh_text()
 
 type GameplayBindsPage() =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 seq {

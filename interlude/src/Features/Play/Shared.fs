@@ -89,7 +89,7 @@ type HudContextExtensions =
 
     /// Adds the element in its configured position, if enabled
     [<Extension>]
-    static member TryAdd(ctx: HudContext, element: HudElement) =
+    static member TryAdd(ctx: HudContext, element: HudElement) : unit =
         if ctx.IsEnabled(element) then
             let position = ctx.Position(element)
 
@@ -106,7 +106,7 @@ type HudContextExtensions =
             if position.RelativeToPlayfield then ctx.Playfield.Add(w) else ctx.Screen.Add(w)
 
     [<Extension>]
-    static member Init(ctx: HudContext) =
+    static member Init(ctx: HudContext) : unit =
         match ctx.Inner with
         | HudContextInner.Play -> HudElement.DRAW_ORDER
         | HudContextInner.Practice -> HudElement.DRAW_ORDER_WITHOUT_SKIP
@@ -151,7 +151,7 @@ type IPlayScreen
     member this.State = state
     member this.HudContext = hud_ctx
 
-    override this.OnEnter(_: ScreenType) =
+    override this.OnEnter(_: ScreenType) : unit =
         Dialog.close()
         Background.dim(float32 options.BackgroundDim.Value)
         Toolbar.hide()
@@ -163,7 +163,7 @@ type IPlayScreen
         Input.finish_frame_events()
         WindowThread.defer WindowThread.disable_windows_key
 
-    override this.OnExit(next: ScreenType) =
+    override this.OnExit(next: ScreenType) : unit =
         Background.dim 0.7f
 
         if next <> ScreenType.Score then
@@ -172,5 +172,5 @@ type IPlayScreen
         if next <> ScreenType.Play then
             WindowThread.defer WindowThread.enable_windows_key
 
-    override this.OnBack() =
+    override this.OnBack() : ScreenType option =
         if Network.lobby.IsSome then Some ScreenType.Lobby else Some ScreenType.LevelSelect

@@ -9,7 +9,7 @@ open Interlude.Features.Online
 type Username() =
     inherit StaticWidget(NodeType.None)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let area = this.Bounds.Shrink(30.0f, 0.0f).ShrinkB(15.0f)
 
         let username =

@@ -90,7 +90,7 @@ type LobbyChat(lobby: Lobby) =
 
                     let container =
                         { new Container(NodeType.Leaf) with
-                            override this.Draw() =
+                            override this.Draw() : unit =
                                 if this.Focused then
                                     Render.rect this.Bounds Colors.grey_2.O1
 
@@ -139,7 +139,7 @@ type LobbyChat(lobby: Lobby) =
             .Align(Alignment.CENTER)
         |> add_msg
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ chatline
         |+ Text([ (%%"select").ToString().ToUpperInvariant() ] %> "lobby.chat_hint")
@@ -177,12 +177,12 @@ type LobbyChat(lobby: Lobby) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect (this.Bounds.ShrinkB(60.0f)) Colors.shadow_2.O3
         Render.rect (this.Bounds.SliceB(50.0f)) Colors.shadow_2.O3
         base.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         if (%%"select").Pressed() then
             if chatline.Selected && current_message.Value <> "" then
                 lobby.SendMessage(current_message.Value)

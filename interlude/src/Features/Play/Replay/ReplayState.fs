@@ -27,7 +27,7 @@ module private ReplayModeSettings =
 type private ReplayModeSettingsPage() =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageSetting(%"replay.fixed_scroll_speed", Checkbox fixed_scroll_speed).Pos(0),

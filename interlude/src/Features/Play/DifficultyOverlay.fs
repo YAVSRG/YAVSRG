@@ -233,7 +233,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                 peek <- peek - 1
         }
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let now =
             state.CurrentTime() + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.Rate
 
@@ -329,7 +329,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             Colors.white
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()

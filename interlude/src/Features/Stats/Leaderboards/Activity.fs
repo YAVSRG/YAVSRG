@@ -28,7 +28,7 @@ type PlayerXP(rank: int, username: string, color: Color, xp: int64, playtime: fl
 
     static member HEIGHT = 50.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let bounds = if is_you then this.Bounds else this.Bounds.ShrinkX(20.0f)
         Render.rect (if is_you then this.Bounds else bounds) Colors.shadow_2.O2
 
@@ -113,7 +113,7 @@ type ActivityHeader(by_playtime: bool, change_sort: bool -> unit) =
     let player_column_label =
         Text(%"stats.leaderboards.activity.player").Color(Colors.text_subheading).Align(Alignment.LEFT)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             player_column_label.Position(
                 Position.SlicePercentL(0.33f).ShrinkL(PlayerXP.HEIGHT * 1.5f).Shrink(10.0f, 5.0f)
@@ -126,7 +126,7 @@ type ActivityHeader(by_playtime: bool, change_sort: bool -> unit) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
@@ -141,11 +141,11 @@ type private ActivityLeaderboard() =
             (if monthly.Value then Stats.Leaderboard.MonthlyXP.get else Stats.Leaderboard.XP.get) (
                 by_playtime.Value,
                 fun response ->
-                    GameThread.defer
-                    <| fun () ->
+                    GameThread.defer(fun () ->
                         match response with
                         | Some result -> container.SetData(result)
                         | None -> container.ServerError()
+                    )
             )
         else
             container.Offline()
@@ -208,6 +208,6 @@ type private ActivityLeaderboard() =
     member this.SortByPlaytime = by_playtime
     member this.MonthlyLeaderboard = monthly
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this |* container
         base.Init(parent)

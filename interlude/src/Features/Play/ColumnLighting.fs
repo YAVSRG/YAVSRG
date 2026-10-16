@@ -42,7 +42,7 @@ type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
                 v
             )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         timers |> Array.iter(fun s -> s.Update(elapsed_ms))
 
@@ -53,7 +53,7 @@ type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
             )
             timers
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         let draw_column k (s: Animation.Delay) =
             if not s.Complete then

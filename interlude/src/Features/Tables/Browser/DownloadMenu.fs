@@ -122,13 +122,13 @@ module TableDownloader =
 
         member this.Charts = charts
 
-        member this.SectionStatus(section: string) = section_status.[section]
+        member this.SectionStatus(section: string) : GroupStatus = section_status.[section]
 
-        member this.LevelStatus(level: int) = level_status.[level]
+        member this.LevelStatus(level: int) : GroupStatus = level_status.[level]
 
-        member this.Status(chart: string) = statuses.[chart]
+        member this.Status(chart: string) : ChartStatus = statuses.[chart]
 
-        member this.SetStatus(chart: string, status: ChartStatus) =
+        member this.SetStatus(chart: string, status: ChartStatus) : unit =
             statuses.[chart] <- status
 
             let level = levels_by_chart.[chart]
@@ -207,7 +207,7 @@ module TableDownloader =
                 open_section <- v
                 this.OnSelectedChanged()
 
-        member this.QueueSection(section: string) =
+        member this.QueueSection(section: string) : unit =
             for chart in sections |> List.find(fun (info, _) -> info.Name = section) |> snd |> Map.values |> Seq.concat do
                 match this.Status(chart.Hash) with
                 | ChartStatus.DownloadFailed
@@ -216,7 +216,7 @@ module TableDownloader =
                     download_service.Request((this, table.Info.Name, chart), ignore)
                 | _ -> ()
 
-        member this.QueueLevel(level: int) =
+        member this.QueueLevel(level: int) : unit =
             for chart in charts_by_level.[level] do
                 match this.Status(chart.Hash) with
                 | ChartStatus.DownloadFailed
@@ -266,7 +266,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
 
     override this.Visible = state.OpenLevel = chart.Level
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
         |+ Text(chart.Song.FormattedTitle).Align(Alignment.LEFT).Position(Position.Shrink(5.0f, 0.0f))
@@ -303,7 +303,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
 
     override this.Visible = state.OpenSection = section.Name
 
-    member this.OnClick() =
+    member this.OnClick() : unit =
         if state.OpenLevel = level then state.OpenLevel <- -1 else state.OpenLevel <- level
 
     member this.Button =
@@ -319,13 +319,13 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
         )
             .Position(Position.ShrinkR(160.0f).SliceR(200.0f).Shrink(20.0f, 5.0f))
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
-        |+ Frame(Fill = (K <| Color.FromArgb(section.Color).O1), Border = (K <| Color.FromArgb(section.Color).O1))
+        |+ Frame(Fill = K(Color.FromArgb(section.Color).O1), Border = K(Color.FromArgb(section.Color).O1))
         |+ Text(level_name)
             .Align(Alignment.LEFT)
             .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
@@ -367,7 +367,7 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
 
     override this.Visible = true
 
-    member this.OnClick() =
+    member this.OnClick() : unit =
         if state.OpenSection = info.Name then state.OpenSection <- "" else state.OpenSection <- info.Name
 
     member this.Button =
@@ -382,13 +382,13 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
         )
             .Position(Position.ShrinkR(100.0f).SliceR(200.0f).Shrink(20.0f, 20.0f))
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
-        |+ Frame(Fill = (K <| Color.FromArgb(info.Color).O2), Border = (K <| Color.FromArgb(info.Color).O3))
+        |+ Frame(Fill = K(Color.FromArgb(info.Color).O2), Border = K(Color.FromArgb(info.Color).O3))
         |+ Text(info.Name)
             .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
             .Align(Alignment.LEFT)
@@ -423,7 +423,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
             |> Array.sortBy fst
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         container.Filter <- _.Visible
         state.OnSelectedChanged <- fun () -> container.Filter <- _.Visible
 
@@ -440,7 +440,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
 
     override this.Title = table.Info.Name
 
-    static member LoadOrOpen(table: Table) =
+    static member LoadOrOpen(table: Table) : unit =
         match existing_states.TryFind(table.Id) with
         | Some state -> TableDownloadMenu(table, state).Show()
         | None ->
@@ -461,7 +461,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
             // error toast
             )
 
-    static member OpenAfterInstall(table: Table, charts: Tables.Charts.Response) =
+    static member OpenAfterInstall(table: Table, charts: Tables.Charts.Response) : unit =
         let state = DownloaderState(table, charts.Charts, download_service)
         existing_states <- Map.add table.Id state existing_states
         TableDownloadMenu(table, state).Show()

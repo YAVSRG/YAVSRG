@@ -1,4 +1,4 @@
-namespace Interlude.Features.Score
+﻿namespace Interlude.Features.Score
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
@@ -22,17 +22,18 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
     let personal_bests = ref pbs
 
     let grade =
-        ref <| Grade.calculate_with_target score_info.Ruleset.Grades score_info.Accuracy
+        ref(Grade.calculate_with_target score_info.Ruleset.Grades score_info.Accuracy)
 
     let lamp =
-        ref
-        <| Lamp.calculate_with_target
-            score_info.Ruleset.Lamps
-            score_info.Scoring.JudgementCounts
-            score_info.Scoring.ComboBreaks
+        ref(
+            Lamp.calculate_with_target
+                score_info.Ruleset.Lamps
+                score_info.Scoring.JudgementCounts
+                score_info.Scoring.ComboBreaks
+        )
 
     let stats =
-        ref <| ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
+        ref(ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter)
 
     let previous_personal_bests =
         match SelectedChart.SAVE_DATA with
@@ -62,7 +63,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
     let bottom_info =
         BottomBanner(score_info, played_just_now, graph, refresh).Position(Position.SlicePercentB(0.35f))
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Results(grade, lamp, personal_bests, previous_personal_bests, stats, score_info)
             .Position({ Position.DEFAULT with Left = 0.35f %+ 0.0f; Top = 0.0f %+ 175.0f; Bottom = 0.65f %+ 0.0f })
@@ -90,25 +91,25 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         ScoreScreenHelpers.animation_queue.Update(elapsed_ms)
         base.Update(elapsed_ms, moved)
 
-    override this.OnEnter(_: ScreenType) =
+    override this.OnEnter(_: ScreenType) : unit =
         Toolbar.hide()
         Song.OnFinish(SongFinishAction.Wait)
         DiscordRPC.in_menus(%"discord_status.score_screen")
 
-    override this.OnExit(_: ScreenType) =
+    override this.OnExit(_: ScreenType) : unit =
         score_info.Ruleset <- Rulesets.current
         (graph :> System.IDisposable).Dispose()
         on_ruleset_changed.Dispose()
         Toolbar.show()
 
-    override this.OnBack() =
+    override this.OnBack() : ScreenType option =
         if Network.lobby.IsSome then Some ScreenType.Lobby else Some ScreenType.LevelSelect
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         Render.rect (this.Bounds.ShrinkT(175.0f).SliceT(160.0f).ShrinkT(5.0f)) Colors.shadow_2.O2
         Render.rect (this.Bounds.ShrinkT(175.0f).ShrinkT(160.0f).SliceT(5.0f)) Colors.white

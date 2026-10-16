@@ -30,7 +30,7 @@ type FailButton(kind: FailButtonType, label: string, hotkey: Bind, action: unit 
             )
         )
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let bounds = this.Bounds.TranslateY((1.0f - fade.Value) * 30.0f)
         let alpha = fade.Alpha
         Render.rect bounds (if this.Focused then Colors.yellow_accent.O1a(alpha) else Colors.shadow_2.O2a(alpha))
@@ -53,7 +53,7 @@ type FailButton(kind: FailButtonType, label: string, hotkey: Bind, action: unit 
             Alignment.CENTER
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         if Mouse.hover this.Bounds then
             if not this.Focused && Mouse.moved_recently() then
                 this.Focus(true)
@@ -98,7 +98,7 @@ type FailOverlay
         Song.ApplyLowPassFilter()
         Toolbar.show_cursor()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         let b_retry =
             FailButton(FailButtonType.RETRY, %"failed.retry", %%"retry", retry, b1_fade)
 
@@ -132,7 +132,7 @@ type FailOverlay
 
         GameThread.defer(fun () -> initial_focus.Focus(false))
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let old_m = Render.alpha_multiplier_begin 1.0f
 
         let alpha = main_fade.Alpha
@@ -162,7 +162,7 @@ type FailOverlay
 
         Render.alpha_multiplier_restore old_m
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         animation.Update(elapsed_ms)
         main_fade.Update(elapsed_ms)

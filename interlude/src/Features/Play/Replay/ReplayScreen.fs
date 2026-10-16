@@ -47,7 +47,7 @@ type ReplayScreen =
             screen.State.ChangeScoring(scoring)
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Replay(is_auto, overlay_shown)) with
-            override this.Init(parent: Widget) =
+            override this.Init(parent: Widget) : unit =
 
                 this.Add(
                     { new StaticWidget(NodeType.None) with
@@ -83,7 +83,7 @@ type ReplayScreen =
                 Toolbar.show_cursor()
                 Song.Resume()
 
-            override this.Update(elapsed_ms, moved) =
+            override this.Update(elapsed_ms: float, moved: bool) : unit =
                 base.Update(elapsed_ms, moved)
                 replay_ended_fade.Target <- if is_failed && replay_data.Finished then 1.0f else 0.0f
                 replay_ended_fade.Update(elapsed_ms)

@@ -53,7 +53,7 @@ type TopBanner(score_info: ScoreInfo) as this =
         | ScorePlayedBy.You -> this.Add(Username().Position(Position.SliceT(Toolbar.HEIGHT).SliceR(300.0f)))
         | _ -> ()
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         Render.rect (this.Bounds.ShrinkB(5.0f)) (Palette.color(127, 0.5f, 0.0f))
         Render.rect (this.Bounds.SliceB(5.0f)) Colors.white.O2

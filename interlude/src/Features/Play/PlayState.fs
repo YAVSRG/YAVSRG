@@ -21,15 +21,15 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     member this.Scoring = scoring
     /// 0.0f<ms> = You are at the start of the audio file
     /// Negative numbers are possible, if needed to give enough time before the first note
-    member this.CurrentTime() = current_time()
+    member this.CurrentTime() : Time = current_time()
     /// 0.0f<ms> = You are at the very first note of the chart
-    member this.CurrentChartTime() = current_time() - first_note
+    member this.CurrentChartTime() : Time = current_time() - first_note
     member this.Pacemaker = pacemaker
 
     member this.Rate = this.Scoring.Rate
     member this.Ruleset = this.Scoring.Ruleset
 
-    member this.ChangeScoring(new_scoring: ScoreProcessor) =
+    member this.ChangeScoring(new_scoring: ScoreProcessor) : unit =
         scoring <- new_scoring
         scoring_changed_ev.Trigger()
 
@@ -45,7 +45,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
             )
 
         { new IDisposable with
-            override this.Dispose() =
+            override this.Dispose() : unit =
                 resubscribe_on_change.Dispose()
                 obj.Dispose()
         }

@@ -9,7 +9,7 @@ open Prelude.Data
 open Interlude.UI
 
 type BeatmapStatusToggle =
-    static member Create(label: string, status: int, color: Color, statuses: Setting<Set<int>>) =
+    static member Create(label: string, status: int, color: Color, statuses: Setting<Set<int>>) : AngledButton =
         AngledButton(
             (fun () -> if statuses.Value.Contains(status) then Icons.CHECK + " " + label else Icons.X + " " + label),
             (fun () ->
@@ -171,18 +171,18 @@ type BeatmapBrowserPage() =
             )
 
     // page parts are rotated around to give correct draw order for the dropdowns in the header
-    override this.Content() = header
+    override this.Content() : Widget = header
 
-    override this.Footer() =
+    override this.Footer() : Widget =
         begin_search search_text.Value
         search_results
 
-    override this.Header() =
+    override this.Header() : Widget =
         Text(%"beatmap_browser.disclaimer")
             .Align(Alignment.CENTER)
             .Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         json_downloader.Join()
         base.Update(elapsed_ms, moved)
 

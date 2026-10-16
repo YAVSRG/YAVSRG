@@ -68,7 +68,7 @@ type OptionsPage() =
 
     let header = OptionsPageHeader(content_setting)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.OnClose(fun () ->
             on_destroy_current_tab()
             header.Hide()
@@ -77,9 +77,9 @@ type OptionsPage() =
         base.Init(parent)
         header.Focus(false)
 
-    override this.Header() = header |> OverlayContainer :> Widget
+    override this.Header() : Widget = header |> OverlayContainer :> Widget
 
-    override this.Footer() =
+    override this.Footer() : Widget =
         OptionsPageFooter()
         |+ HotkeyListener(
             "reload_content",
@@ -95,13 +95,13 @@ type OptionsPage() =
         |> OverlayContainer
         :> Widget
 
-    override this.Content() =
+    override this.Content() : Widget =
         content_setting.Set(State.recent_tab)
         page_body
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")
-    override this.OnEnterNestedPage() = header.Hide()
+    override this.OnEnterNestedPage() : unit = header.Hide()
 
-    override this.OnReturnFromNestedPage() =
+    override this.OnReturnFromNestedPage() : unit =
         on_return_current_tab()
         header.Show()
