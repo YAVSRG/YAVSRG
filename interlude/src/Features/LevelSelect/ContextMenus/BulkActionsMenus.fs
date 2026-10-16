@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -19,14 +19,28 @@ module BulkActions =
             fun () ->
                 // delete charts selected from packs, just from their packs
                 charts
-                |> Seq.choose (function chart_meta, LibraryContext.Pack pack_name -> Some (chart_meta, pack_name) | _ -> None)
+                |> Seq.choose(
+                    function
+                    | chart_meta, LibraryContext.Pack pack_name -> Some(chart_meta, pack_name)
+                    | _ -> None
+                )
                 |> Seq.groupBy snd
-                |> Seq.iter (fun (pack_name, charts_in_pack) -> Content.Charts.RemoveFromPack(charts_in_pack |> Seq.map fst, pack_name))
+                |> Seq.iter(fun (pack_name, charts_in_pack) ->
+                    Content.Charts.RemoveFromPack(charts_in_pack |> Seq.map fst, pack_name)
+                )
 
                 // delete charts picked by custom grouping, from all packs
-                Content.Charts.Delete(charts |> Seq.filter (function _, LibraryContext.Pack _ -> false | _ -> true ) |> Seq.map fst)
+                Content.Charts.Delete(
+                    charts
+                    |> Seq.filter(
+                        function
+                        | _, LibraryContext.Pack _ -> false
+                        | _ -> true
+                    )
+                    |> Seq.map fst
+                )
 
-                LevelSelect.refresh_all ()
+                LevelSelect.refresh_all()
                 Menu.Back()
         )
             .Show()
@@ -41,6 +55,7 @@ module BulkActions =
                         for chart_meta, _ in charts do
                             yield Content.Library.Charts.GetChart(chart_meta.Hash), chart_meta
                     }
+
                 OsuExport.bulk_export loaded_charts options
         )
             .Show()
@@ -53,7 +68,7 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
                 Content.Charts.Delete(charts |> Seq.map fst)
-                LevelSelect.refresh_all ()
+                LevelSelect.refresh_all()
 
                 Menu.Back()
         )
@@ -63,8 +78,8 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_unlike",
             fun () ->
-                charts |> Seq.map (fst >> _.Hash) |> Seq.iter Content.Library.Collections.Unlike
-                LevelSelect.refresh_all ()
+                charts |> Seq.map(fst >> _.Hash) |> Seq.iter Content.Library.Collections.Unlike
+                LevelSelect.refresh_all()
 
                 Menu.Back()
         )
@@ -77,13 +92,14 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
                 | Playlist p ->
                     for chart_meta, ctx in charts do
                         match ctx with
-                        | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | LibraryContext.Playlist(_, _, data) -> p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
                         | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
-                LevelSelect.refresh_all ()
+                    for chart_meta, _ in charts do
+                        f.Add(chart_meta) |> ignore
+
+                LevelSelect.refresh_all()
                 Menu.Exit()
             ),
             K false,
@@ -91,16 +107,11 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         )
             .Show()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
-                PageButton(%"bulk_actions.unlike", confirm_bulk_unlike)
-                    .Icon(Icons.FOLDER_MINUS)
-                    .Hotkey("like")
-                    .Pos(0),
-                PageButton(%"bulk_actions.add_to_collection", add_to_collection)
-                    .Icon(Icons.FOLDER_PLUS)
-                    .Pos(2),
+                PageButton(%"bulk_actions.unlike", confirm_bulk_unlike).Icon(Icons.FOLDER_MINUS).Hotkey("like").Pos(0),
+                PageButton(%"bulk_actions.add_to_collection", add_to_collection).Icon(Icons.FOLDER_PLUS).Pos(2),
                 PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
                     .Icon(Icons.UPLOAD)
                     .Pos(4),
@@ -120,10 +131,13 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
         ConfirmPage(
             [ (Seq.length charts).ToString(); folder ] %> "bulk_actions.confirm_bulk_remove",
             fun () ->
-                match Content.Library.Collections.GetFolder folder with
-                | Some f -> for chart_meta, _ in charts do f.Remove chart_meta |> ignore
+                match Content.Library.Collections.GetFolder(folder) with
+                | Some f ->
+                    for chart_meta, _ in charts do
+                        f.Remove(chart_meta) |> ignore
                 | _ -> ()
-                LevelSelect.refresh_all ()
+
+                LevelSelect.refresh_all()
                 Menu.Back()
         )
             .Show()
@@ -132,8 +146,8 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_like",
             fun () ->
-                charts |> Seq.map (fst >> _.Hash) |> Seq.iter Content.Library.Collections.Like
-                LevelSelect.refresh_all ()
+                charts |> Seq.map(fst >> _.Hash) |> Seq.iter Content.Library.Collections.Like
+                LevelSelect.refresh_all()
 
                 Menu.Back()
         )
@@ -146,31 +160,29 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
                 | Playlist p ->
                     for chart_meta, ctx in charts do
                         match ctx with
-                        | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | LibraryContext.Playlist(_, _, data) -> p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
                         | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
-                LevelSelect.refresh_all ()
+                    for chart_meta, _ in charts do
+                        f.Add(chart_meta) |> ignore
+
+                LevelSelect.refresh_all()
                 Menu.Exit()
             ),
-            (function f, Folder _ when f = folder -> false | _ -> true),
+            (function
+            | f, Folder _ when f = folder -> false
+            | _ -> true),
             true
         )
             .Show()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
-                PageButton(%"bulk_actions.like", confirm_bulk_like)
-                    .Icon(Icons.HEART)
-                    .Hotkey("like")
-                    .Pos(0),
-                PageButton(%"bulk_actions.add_to_collection", add_to_collection)
-                    .Icon(Icons.FOLDER_PLUS)
-                    .Pos(2),
-                PageButton([folder] %> "bulk_actions.remove_from_collection", confirm_bulk_remove)
+                PageButton(%"bulk_actions.like", confirm_bulk_like).Icon(Icons.HEART).Hotkey("like").Pos(0),
+                PageButton(%"bulk_actions.add_to_collection", add_to_collection).Icon(Icons.FOLDER_PLUS).Pos(2),
+                PageButton([ folder ] %> "bulk_actions.remove_from_collection", confirm_bulk_remove)
                     .Icon(Icons.FOLDER_MINUS)
                     .Pos(4),
                 PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
@@ -187,15 +199,20 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
         ConfirmPage(
             [ (Seq.length charts).ToString(); playlist ] %> "bulk_actions.confirm_bulk_remove",
             fun () ->
-                match Content.Library.Collections.GetPlaylist playlist with
+                match Content.Library.Collections.GetPlaylist(playlist) with
                 | Some p ->
                     charts
-                    |> Seq.map (function _, LibraryContext.Playlist(index, _, _) -> index | _ -> -1)
+                    |> Seq.map(
+                        function
+                        | _, LibraryContext.Playlist(index, _, _) -> index
+                        | _ -> -1
+                    )
                     |> Seq.sortDescending
-                    |> Seq.iter (p.RemoveAt >> ignore)
+                    |> Seq.iter(p.RemoveAt >> ignore)
 
                 | _ -> ()
-                LevelSelect.refresh_all ()
+
+                LevelSelect.refresh_all()
 
                 Menu.Back()
         )
@@ -205,8 +222,8 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_like",
             fun () ->
-                charts |> Seq.map (fst >> _.Hash) |> Seq.iter Content.Library.Collections.Like
-                LevelSelect.refresh_all ()
+                charts |> Seq.map(fst >> _.Hash) |> Seq.iter Content.Library.Collections.Like
+                LevelSelect.refresh_all()
 
                 Menu.Back()
         )
@@ -219,31 +236,29 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
                 | Playlist p ->
                     for chart_meta, ctx in charts do
                         match ctx with
-                        | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | LibraryContext.Playlist(_, _, data) -> p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
                         | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
-                LevelSelect.refresh_all ()
+                    for chart_meta, _ in charts do
+                        f.Add(chart_meta) |> ignore
+
+                LevelSelect.refresh_all()
                 Menu.Exit()
             ),
-            (function f, Folder _ when f = playlist -> false | _ -> true),
+            (function
+            | f, Folder _ when f = playlist -> false
+            | _ -> true),
             true
         )
             .Show()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
-                PageButton(%"bulk_actions.like", confirm_bulk_like)
-                    .Icon(Icons.HEART)
-                    .Hotkey("like")
-                    .Pos(0),
-                PageButton(%"bulk_actions.add_to_collection", add_to_collection)
-                    .Icon(Icons.FOLDER_PLUS)
-                    .Pos(2),
-                PageButton([playlist] %> "bulk_actions.remove_from_collection", confirm_bulk_remove)
+                PageButton(%"bulk_actions.like", confirm_bulk_like).Icon(Icons.HEART).Hotkey("like").Pos(0),
+                PageButton(%"bulk_actions.add_to_collection", add_to_collection).Icon(Icons.FOLDER_PLUS).Pos(2),
+                PageButton([ playlist ] %> "bulk_actions.remove_from_collection", confirm_bulk_remove)
                     .Icon(Icons.FOLDER_MINUS)
                     .Pos(4),
                 PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
@@ -260,8 +275,8 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_like",
             fun () ->
-                charts |> Seq.map (fst >> _.Hash) |> Seq.iter Content.Library.Collections.Like
-                LevelSelect.refresh_all ()
+                charts |> Seq.map(fst >> _.Hash) |> Seq.iter Content.Library.Collections.Like
+                LevelSelect.refresh_all()
 
                 Menu.Back()
         )
@@ -274,13 +289,14 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
                 | Playlist p ->
                     for chart_meta, ctx in charts do
                         match ctx with
-                        | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | LibraryContext.Playlist(_, _, data) -> p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
                         | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
-                LevelSelect.refresh_all ()
+                    for chart_meta, _ in charts do
+                        f.Add(chart_meta) |> ignore
+
+                LevelSelect.refresh_all()
                 Menu.Exit()
             ),
             K false,
@@ -288,16 +304,11 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         )
             .Show()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
-                PageButton(%"bulk_actions.like", confirm_bulk_like)
-                    .Icon(Icons.HEART)
-                    .Hotkey("like")
-                    .Pos(0),
-                PageButton(%"bulk_actions.add_to_collection", add_to_collection)
-                    .Icon(Icons.FOLDER_PLUS)
-                    .Pos(2),
+                PageButton(%"bulk_actions.like", confirm_bulk_like).Icon(Icons.HEART).Hotkey("like").Pos(0),
+                PageButton(%"bulk_actions.add_to_collection", add_to_collection).Icon(Icons.FOLDER_PLUS).Pos(2),
                 PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
                     .Icon(Icons.UPLOAD)
                     .Pos(4),

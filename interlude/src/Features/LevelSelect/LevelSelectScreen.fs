@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -25,30 +25,33 @@ type LevelSelectScreen() =
 
     let search_text = Setting.simple ""
 
-    override this.Init(parent: Widget) =
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
 
-        LevelSelect.on_refresh_all.Add Tree.refresh
-        Rulesets.on_changed.Add (fun _ ->
+        LevelSelect.on_refresh_all.Add(Tree.refresh)
+
+        Rulesets.on_changed.Add(fun _ ->
             match options.ChartGroupMode.Value with
             | "grade"
             | "lamp" -> LevelSelect.refresh_all()
             | _ -> LevelSelect.refresh_details()
         )
 
-        if not (Sorting.modes.ContainsKey options.ChartSortMode.Value) then
+        if not(Sorting.modes.ContainsKey(options.ChartSortMode.Value)) then
             options.ChartSortMode.Value <- "title"
-        if not (Grouping.modes.ContainsKey options.ChartGroupMode.Value) then
+
+        if not(Grouping.modes.ContainsKey(options.ChartGroupMode.Value)) then
             options.ChartGroupMode.Value <- "pack"
 
         this
             .With(
-                CurrentChart()
-                    .Position(Position.SliceT(TOP_BAR_HEIGHT).SlicePercentL(INFO_SCREEN_SPLIT)),
+                CurrentChart().Position(Position.SliceT(TOP_BAR_HEIGHT).SlicePercentL(INFO_SCREEN_SPLIT)),
 
-                SearchBox(search_text, fun f ->
-                    LevelSelect.filter <- f
-                    Tree.refresh ()
+                SearchBox(
+                    search_text,
+                    fun f ->
+                        LevelSelect.filter <- f
+                        Tree.refresh()
                 )
                     .Position(
                         Position
@@ -61,8 +64,7 @@ type LevelSelectScreen() =
                     )
                     .Help(Help.Info("levelselect.search", "search")),
 
-                InfoPanel()
-                    .Position(Position.ShrinkT(TOP_BAR_HEIGHT + 5.0f).SlicePercentL(INFO_SCREEN_SPLIT)),
+                InfoPanel().Position(Position.ShrinkT(TOP_BAR_HEIGHT + 5.0f).SlicePercentL(INFO_SCREEN_SPLIT)),
 
                 // Empty states explaining why there are no charts to show
                 Container(NodeType.None)
@@ -73,17 +75,12 @@ type LevelSelectScreen() =
                     )
                     .WithConditional(
                         (fun () ->
-                            search_text.Value = ""
-                            && options.ChartGroupMode.Value = "level"
-                            && Content.Table.IsNone
+                            search_text.Value = "" && options.ChartGroupMode.Value = "level" && Content.Table.IsNone
                         ),
                         EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
                     )
                     .WithConditional(
-                        (fun () ->
-                            search_text.Value = ""
-                            && options.ChartGroupMode.Value = "collection"
-                        ),
+                        (fun () -> search_text.Value = "" && options.ChartGroupMode.Value = "collection"),
                         EmptyState(Icons.FOLDER, %"levelselect.empty.no_collections")
                     )
                     .WithConditional(
@@ -112,13 +109,15 @@ type LevelSelectScreen() =
                 AngledButton(
                     Icons.TARGET,
                     (fun () ->
-                        SelectedChart.when_loaded true
-                        <| fun info ->
-                            Screen.change_new
-                                (fun () -> PracticeScreen.Create(info, 0.0f<ms>))
-                                ScreenType.Practice
-                                Transitions.Default
-                            |> ignore
+                        SelectedChart.when_loaded
+                            true
+                            (fun info ->
+                                Screen.change_new
+                                    (fun () -> PracticeScreen.Create(info, 0.0f<ms>))
+                                    ScreenType.Practice
+                                    Transitions.Default
+                                |> ignore
+                            )
                     ),
                     Palette.DARK.O2
                 )
@@ -133,7 +132,10 @@ type LevelSelectScreen() =
 
                 AngledButton(
                     Icons.REFRESH_CCW,
-                    (fun () -> LevelSelect.random_chart(); Tree.debounce()),
+                    (fun () ->
+                        LevelSelect.random_chart()
+                        Tree.debounce()
+                    ),
                     Palette.MAIN.O2
                 )
                     .Position(
@@ -146,14 +148,20 @@ type LevelSelectScreen() =
 
                 AngledButton(
                     Icons.LIST,
-                    (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.ChartMeta, info.LibraryContext).Show())),
+                    (fun () ->
+                        SelectedChart.if_loaded(fun info ->
+                            ChartContextMenu(info.ChartMeta, info.LibraryContext).Show()
+                        )
+                    ),
                     Palette.DARK.O2
                 )
                     .Position(
                         Position
                             .SliceB(AngledButton.HEIGHT)
                             .SliceR(OTHER_BUTTONS_WIDTH)
-                            .TranslateX(-PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH * 2.0f - AngledButton.LEAN_AMOUNT * 3.0f)
+                            .TranslateX(
+                                -PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH * 2.0f - AngledButton.LEAN_AMOUNT * 3.0f
+                            )
                     )
                     .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
             )
@@ -163,7 +171,10 @@ type LevelSelectScreen() =
 
                 AngledButton(
                     sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection",
-                    (fun () -> Tree.clear_multi_selection(); Tree.debounce()),
+                    (fun () ->
+                        Tree.clear_multi_selection()
+                        Tree.debounce()
+                    ),
                     Palette.DARK.O2
                 )
                     .LeanRight(false)
@@ -171,10 +182,19 @@ type LevelSelectScreen() =
 
                 AngledButton(
                     sprintf "%s %s" Icons.LIST %"bulk_actions",
-                    (fun () -> match Tree.multi_selection() with Some s -> s.ShowActions() | None -> ()),
+                    (fun () ->
+                        match Tree.multi_selection() with
+                        | Some s -> s.ShowActions()
+                        | None -> ()
+                    ),
                     Palette.MAIN.O2
                 )
-                    .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH).TranslateX(-BULK_ACTION_BUTTON_WIDTH - AngledButton.LEAN_AMOUNT))
+                    .Position(
+                        Position
+                            .SliceB(AngledButton.HEIGHT)
+                            .SliceR(BULK_ACTION_BUTTON_WIDTH)
+                            .TranslateX(-BULK_ACTION_BUTTON_WIDTH - AngledButton.LEAN_AMOUNT)
+                    )
             )
             .Add(
                 // Goes last so that its dropdowns draw over action buttons
@@ -182,39 +202,34 @@ type LevelSelectScreen() =
                     .Position(Position.SliceT(TOP_BAR_HEIGHT).SliceB(50.0f).ShrinkPercentL(INFO_SCREEN_SPLIT))
             )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if (%%"select").Pressed() then
-            LevelSelect.choose_this_chart ()
+            LevelSelect.choose_this_chart()
 
         elif (%%"next").PressedOrRepeated() then
-            Tree.next ()
+            Tree.next()
         elif (%%"previous").PressedOrRepeated() then
-            Tree.previous ()
+            Tree.previous()
         elif (%%"next_group").Pressed() then
-            Tree.next_group ()
+            Tree.next_group()
         elif (%%"previous_group").Pressed() then
-            Tree.previous_group ()
+            Tree.previous_group()
         elif (%%"start").Pressed() then
-            Tree.top_of_group ()
+            Tree.top_of_group()
         elif (%%"end").Pressed() then
-            Tree.bottom_of_group ()
+            Tree.bottom_of_group()
 
-        Tree.update (this.Bounds.Top + TOP_BAR_HEIGHT, this.Bounds.Bottom, elapsed_ms)
+        Tree.update(this.Bounds.Top + TOP_BAR_HEIGHT, this.Bounds.Bottom, elapsed_ms)
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
-        Tree.draw (this.Bounds.Top + TOP_BAR_HEIGHT, this.Bounds.Bottom)
+        Tree.draw(this.Bounds.Top + TOP_BAR_HEIGHT, this.Bounds.Bottom)
 
         let w = this.Bounds.Width * INFO_SCREEN_SPLIT
 
-        let {
-                Rect.Left = left
-                Top = top
-                Right = right
-            } =
-            this.Bounds
+        let { Rect.Left = left; Top = top; Right = right } = this.Bounds
 
         Render.quad_points_c
             (left, top)
@@ -234,17 +249,14 @@ type LevelSelectScreen() =
 
         base.Draw()
 
-    override this.OnEnter(_: ScreenType) =
+    override this.OnEnter(_: ScreenType) : unit =
         LevelSelect.exit_gameplay()
         Song.OnFinish(SongFinishAction.LoopFromPreview)
 
-        Tree.refresh ()
-        DiscordRPC.in_menus (%"discord_status.level_select")
+        Tree.refresh()
+        DiscordRPC.in_menus(%"discord_status.level_select")
 
-    override this.OnExit(_: ScreenType) = Input.remove_listener ()
+    override this.OnExit(_: ScreenType) : unit = Input.remove_listener()
 
-    override this.OnBack() =
-        if Network.lobby.IsSome then
-            Some ScreenType.Lobby
-        else
-            Some ScreenType.MainMenu
+    override this.OnBack() : ScreenType option =
+        if Network.lobby.IsSome then Some ScreenType.Lobby else Some ScreenType.MainMenu

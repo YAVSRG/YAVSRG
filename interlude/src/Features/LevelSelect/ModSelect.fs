@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -16,14 +16,14 @@ type private ColumnSwapPage() =
 
     static let columns_setting = Setting.simple "1234123"
 
-    member this.TrySaveChanges() =
+    member this.TrySaveChanges() : unit =
         match ColumnSwap.parse columns_setting.Value with
         | Ok columns ->
             SelectedChart.selected_mods.Value <-
                 ModState.cycle_column_swap "column_swap" columns SelectedChart.selected_mods.Value
-        | Error reason -> Notifications.error (reason, "")
+        | Error reason -> Notifications.error(reason, "")
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.TrySaveChanges)
 
         page_container()
@@ -31,52 +31,55 @@ type private ColumnSwapPage() =
                 PageTextEntry(%"mods.column_swap_columns", columns_setting)
                     .Help(Help.Info("mods.column_swap_columns"))
                     .Pos(0),
-                PageButton(%"confirm.yes", Menu.Back)
-                    .Pos(3)
+                PageButton(%"confirm.yes", Menu.Back).Pos(3)
             )
 
     override this.Title = %"mod.column_swap"
 
-type private ModSelector(id: string, current_state: unit -> int64 option, left_click_action: unit -> unit, right_click_action: unit -> unit) =
+type private ModSelector
+    (id: string, current_state: unit -> int64 option, left_click_action: unit -> unit, right_click_action: unit -> unit)
+    =
     inherit
         Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                left_click_action ()
+                left_click_action()
             )
         )
 
     static let TOP_HEIGHT = 60.0f
     static let DESCRIPTION_HEIGHT = 30.0f
     static member HEIGHT = DESCRIPTION_HEIGHT + TOP_HEIGHT
-        
-    new(id: string, current_state: unit -> int64 option, left_click_action: unit -> unit) = ModSelector(id, current_state, left_click_action, left_click_action)
 
-    override this.Init(parent: Widget) =
+    new(id: string, current_state: unit -> int64 option, left_click_action: unit -> unit) =
+        ModSelector(id, current_state, left_click_action, left_click_action)
+
+    override this.Init(parent: Widget) : unit =
         this.Add(
             MouseListener()
                 .Button(this)
-                .OnRightClick(fun () -> Style.click.Play(); right_click_action())
+                .OnRightClick(fun () ->
+                    Style.click.Play()
+                    right_click_action()
+                )
         )
-        base.Init parent
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+        base.Init(parent)
+
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
-        let state = current_state ()
+    override this.Draw() : unit =
+        let state = current_state()
         Render.rect (this.Bounds.SliceT(TOP_HEIGHT)) (if state.IsSome then Colors.pink.O3 else Colors.shadow_2.O2)
 
         Render.rect
             (this.Bounds.ShrinkT(TOP_HEIGHT))
-            (if state.IsSome then
-                 Colors.pink_shadow.O3
-             else
-                 Colors.shadow_1.O3)
+            (if state.IsSome then Colors.pink_shadow.O3 else Colors.shadow_1.O3)
 
         if state.IsSome then
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 Icons.CHECK,
                 this.Bounds.SliceT(TOP_HEIGHT).ShrinkX(20.0f),
@@ -84,7 +87,7 @@ type private ModSelector(id: string, current_state: unit -> int64 option, left_c
                 Alignment.RIGHT
             )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             Mods.name id state,
             this.Bounds.SliceT(TOP_HEIGHT).ShrinkX(20.0f),
@@ -92,7 +95,7 @@ type private ModSelector(id: string, current_state: unit -> int64 option, left_c
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             Mods.desc id state,
             this.Bounds.ShrinkT(TOP_HEIGHT - 2.0f).ShrinkX(20.0f),
@@ -106,13 +109,15 @@ type private ModSelectPage(change_rate: Rate -> unit) =
     inherit Page()
 
     let mutable last_seen_mod_status = ModStatus.Ranked
+
     let mod_status () =
         match SelectedChart.WITH_MODS with
         | Some m -> last_seen_mod_status <- m.Status
         | None -> ()
+
         last_seen_mod_status
 
-    override this.Content() =
+    override this.Content() : Widget =
         let mod_grid =
             GridFlowContainer<ModSelector>(ModSelector.HEIGHT, 3)
                 .Spacing(20.0f)
@@ -125,30 +130,39 @@ type private ModSelectPage(change_rate: Rate -> unit) =
                         (fun _ -> SelectedChart.autoplay <- not SelectedChart.autoplay)
                     )
                 )
-                .With(seq {
-                    for id in Mods.MENU_DISPLAY_ORDER do
-                        yield ModSelector(
-                            id,
-                            (fun _ ->
-                                if SelectedChart.selected_mods.Value.ContainsKey id then
-                                    Some SelectedChart.selected_mods.Value.[id]
-                                else
-                                    None
-                            ),
-                            (fun _ ->
-                                if id = "column_swap" && not (SelectedChart.selected_mods.Value.ContainsKey id) then
-                                    ColumnSwapPage().Show()
-                                else
-                                    Setting.app (ModState.cycle_fd id) SelectedChart.selected_mods
-                            ),
-                            (fun _ ->
-                                if id = "column_swap" && not (SelectedChart.selected_mods.Value.ContainsKey id) then
-                                    ColumnSwapPage().Show()
-                                else
-                                    Setting.app (ModState.cycle_bk id) SelectedChart.selected_mods
-                            )
-                        )
-                })
+                .With(
+                    seq {
+                        for id in Mods.MENU_DISPLAY_ORDER do
+                            yield
+                                ModSelector(
+                                    id,
+                                    (fun _ ->
+                                        if SelectedChart.selected_mods.Value.ContainsKey(id) then
+                                            Some SelectedChart.selected_mods.Value.[id]
+                                        else
+                                            None
+                                    ),
+                                    (fun _ ->
+                                        if
+                                            id = "column_swap"
+                                            && not(SelectedChart.selected_mods.Value.ContainsKey(id))
+                                        then
+                                            ColumnSwapPage().Show()
+                                        else
+                                            Setting.app (ModState.cycle_fd id) SelectedChart.selected_mods
+                                    ),
+                                    (fun _ ->
+                                        if
+                                            id = "column_swap"
+                                            && not(SelectedChart.selected_mods.Value.ContainsKey(id))
+                                        then
+                                            ColumnSwapPage().Show()
+                                        else
+                                            Setting.app (ModState.cycle_bk id) SelectedChart.selected_mods
+                                    )
+                                )
+                    }
+                )
                 .With(
                     ModSelector(
                         "pacemaker",
@@ -159,21 +173,23 @@ type private ModSelectPage(change_rate: Rate -> unit) =
 
         page_container()
             .With(
-                PageSetting(%"gameplay.rate",
+                PageSetting(
+                    %"gameplay.rate",
                     Slider(
                         SelectedChart.rate
-                        |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate>)
+                        |> Setting.map id (fun v -> round(v / 0.05f<rate>) * 0.05f<rate>)
                         |> Setting.uom,
                         Format = sprintf "%.02fx"
                     )
                 )
                     .Help(
-                        Help.Info("gameplay.rate")
+                        Help
+                            .Info("gameplay.rate")
                             .Hotkey(%"levelselect.selected_mods.uprate.hint", "uprate")
                             .Hotkey(%"levelselect.selected_mods.downrate.hint", "downrate")
                     )
                     .Pos(0),
-                Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i")
+                Text([ (%%"uprate").ToString(); (%%"downrate").ToString() ] %> "gameplay.rate.hotkey_hint_i")
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
                     .Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH)),
@@ -189,14 +205,15 @@ type private ModSelectPage(change_rate: Rate -> unit) =
                     .Help(Help.Info("gameplay.pacemaker"))
                     .Pos(19),
 
-                PageSetting(%"mods.mod_status",
+                PageSetting(
+                    %"mods.mod_status",
                     Text(fun () ->
                         match mod_status() with
                         | ModStatus.Ranked -> %"mods.mod_status.ranked"
                         | ModStatus.Unranked -> %"mods.mod_status.unranked"
                         | ModStatus.Offline -> %"mods.mod_status.offline"
                         | ModStatus.Unstored -> %"mods.mod_status.unstored"
-                     )
+                    )
                         .Color(fun () ->
                             match mod_status() with
                             | ModStatus.Ranked -> Colors.text_green_2
@@ -209,7 +226,7 @@ type private ModSelectPage(change_rate: Rate -> unit) =
                     .Pos(21)
             )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if (%%"autoplay").Pressed() then
@@ -231,11 +248,11 @@ type ModSelect(change_rate: Rate -> unit) =
         AngledButton(
             sprintf "%s %s" Icons.ZAP (%"levelselect.mods"),
             (fun () -> ModSelectPage(change_rate).Show()),
-            (fun () -> Palette.color (100, 0.5f, 0.0f)),
+            (fun () -> Palette.color(100, 0.5f, 0.0f)),
             Hotkey = "mods"
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if (%%"autoplay").Pressed() then

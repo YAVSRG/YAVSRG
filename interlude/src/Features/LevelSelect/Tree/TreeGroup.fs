@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open System.Linq
 open Percyqaz.Flux.Input
@@ -9,24 +9,27 @@ open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Content
 
-type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<TreeChart>, group_ctx: LibraryGroupContext) =
+type private TreeGroup
+    (tree_ctx: TreeContext, name: string, items: ResizeArray<TreeChart>, group_ctx: LibraryGroupContext) =
     inherit TreeItem(tree_ctx)
 
-    let display_name = if group_ctx = LibraryGroupContext.Likes then  %"library.likes" else name
+    let display_name =
+        if group_ctx = LibraryGroupContext.Likes then %"library.likes" else name
 
-    let charts_as_seq = items |> Seq.map (fun i -> i.Chart, i.Context)
+    let charts_as_seq = items |> Seq.map(fun i -> i.Chart, i.Context)
 
     let mutable last_cached_flag = -1
     let select_animation = Animation.Fade(0.0f)
     let mutable label = ""
+
     let special_color =
         match group_ctx with
         | LibraryGroupContext.None -> None
         | LibraryGroupContext.Pack _ -> None
         | LibraryGroupContext.Table _ -> None
-        | LibraryGroupContext.Likes -> Some (Colors.pink, Colors.pink_shadow)
-        | LibraryGroupContext.Folder _ -> Some (Colors.cyan, Colors.cyan_shadow)
-        | LibraryGroupContext.Playlist _ -> Some (Colors.green, Colors.green_shadow)
+        | LibraryGroupContext.Likes -> Some(Colors.pink, Colors.pink_shadow)
+        | LibraryGroupContext.Folder _ -> Some(Colors.cyan, Colors.cyan_shadow)
+        | LibraryGroupContext.Playlist _ -> Some(Colors.green, Colors.green_shadow)
 
     let update_cached_info () =
         last_cached_flag <- tree_ctx.CacheFlag
@@ -34,20 +37,15 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
         label <-
             match group_ctx with
             | LibraryGroupContext.Folder id ->
-                match Content.Collections.GetFolder id with
+                match Content.Collections.GetFolder(id) with
                 | Some folder -> sprintf "%s %i" folder.Icon.Value items.Count
                 | None -> sprintf "%s %i" Icons.FOLDER items.Count
             | LibraryGroupContext.Playlist id ->
-                match Content.Collections.GetPlaylist id with
+                match Content.Collections.GetPlaylist(id) with
                 | Some playlist ->
-                    let duration = items |> Seq.map (fun i -> i.PlaylistDuration) |> Seq.sum
+                    let duration = items |> Seq.map(fun i -> i.PlaylistDuration) |> Seq.sum
 
-                    sprintf
-                        "%s %s    %s %i"
-                        Icons.CLOCK
-                        (format_duration_ms duration)
-                        playlist.Icon.Value
-                        items.Count
+                    sprintf "%s %s    %s %i" Icons.CLOCK (format_duration_ms duration) playlist.Icon.Value items.Count
                 | None -> sprintf "%s %i" Icons.FOLDER items.Count
             | LibraryGroupContext.Table id -> // todo: calc some cool table/folder stats to go here
                 sprintf "%s %i" Icons.FOLDER items.Count
@@ -55,9 +53,9 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
             | LibraryGroupContext.Pack _ -> sprintf "%s %i" Icons.FOLDER items.Count
             | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER_PLUS items.Count
 
-    do update_cached_info ()
+    do update_cached_info()
 
-    override this.Bounds(this_top: float32) =
+    override this.Bounds(this_top: float32) : Rect =
         Rect.FromEdges(
             Render.width() * (TREE_LEFT_SPLIT + 0.1f - 0.05f * select_animation.Value),
             this_top,
@@ -65,13 +63,13 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
             this_top + GROUP_HEIGHT
         )
 
-    member this.Selected : bool = tree_ctx.IsGroupSelected(name, group_ctx)
-    override this.Spacing : float32 = GROUP_SPACING
+    member this.Selected: bool = tree_ctx.IsGroupSelected(name, group_ctx)
+    override this.Spacing: float32 = GROUP_SPACING
 
-    member this.Items : ResizeArray<TreeChart> = items
-    member this.Name : string = name
-    member this.Context : LibraryGroupContext = group_ctx
-    member this.Expanded : bool =  tree_ctx.IsGroupExpanded(name, group_ctx)
+    member this.Items: ResizeArray<TreeChart> = items
+    member this.Name: string = name
+    member this.Context: LibraryGroupContext = group_ctx
+    member this.Expanded: bool = tree_ctx.IsGroupExpanded(name, group_ctx)
 
     member this.SelectFirst() : unit = items.First().Select()
     member this.SelectLast() : unit = items.Last().Select()
@@ -84,18 +82,18 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
             | Some s when s.GroupAmountSelected(name, group_ctx, charts_as_seq) <> AmountSelected.None ->
                 Colors.grey_2.O2, Colors.shadow_2.O2
             | _ ->
+
             match special_color with
-            | Some (fg, bg) -> if this.Selected then fg.O3, bg else fg.O2, bg.O2
+            | Some(fg, bg) -> if this.Selected then fg.O3, bg else fg.O2, bg.O2
             | None ->
                 if this.Selected then
-                    Palette.color (120, 0.7f + select_animation.Value * 0.3f, select_animation.Value * 0.3f),
-                    Palette.color (255, 0.2f, 0.0f)
+                    Palette.color(120, 0.7f + select_animation.Value * 0.3f, select_animation.Value * 0.3f),
+                    Palette.color(255, 0.2f, 0.0f)
                 else
-                    Palette.color (100, 0.7f, 0.0f),
-                    Palette.color (255, 0.2f, 0.0f)
+                    Palette.color(100, 0.7f, 0.0f), Palette.color(255, 0.2f, 0.0f)
 
         Render.rect (bounds.Translate(10.0f, 10.0f)) bg_color
-        Background.draw (bounds, Color.FromArgb(40, 40, 40), 1.5f)
+        Background.draw(bounds, Color.FromArgb(40, 40, 40), 1.5f)
 
         Render.rect bounds color
 
@@ -106,12 +104,27 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
                 | AmountSelected.None -> Icons.SQUARE, Colors.text_subheading
                 | AmountSelected.Some -> Icons.PLUS_SQUARE, Colors.text_yellow_2
                 | AmountSelected.All -> Icons.CHECK_SQUARE, Colors.text_yellow_2
-            Text.fill_b (Style.font, display_name, bounds.Shrink(15.0f, 5.0f).ShrinkR(150.0f), name_color, Alignment.LEFT)
-            Text.fill_b (Style.font, filled_icon, bounds.Shrink(15.0f, 5.0f), Colors.text, Alignment.RIGHT)
-            Text.fill_b (Style.font, label, bounds.Shrink(65.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
+
+            Text.fill_b(
+                Style.font,
+                display_name,
+                bounds.Shrink(15.0f, 5.0f).ShrinkR(150.0f),
+                name_color,
+                Alignment.LEFT
+            )
+
+            Text.fill_b(Style.font, filled_icon, bounds.Shrink(15.0f, 5.0f), Colors.text, Alignment.RIGHT)
+            Text.fill_b(Style.font, label, bounds.Shrink(65.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
         | None ->
-            Text.fill_b (Style.font, display_name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
-            Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
+            Text.fill_b(
+                Style.font,
+                display_name,
+                bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f),
+                Colors.text,
+                Alignment.LEFT
+            )
+
+            Text.fill_b(Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
     member this.Draw(this_top: float32, tree_top: float32, tree_bottom: float32) : float32 =
         let next_top = this.IfVisible(this_top, tree_top, tree_bottom, this.DrawCulled)
@@ -119,7 +132,9 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
         if this.Expanded then
             let padded_chart_height = CHART_HEIGHT + CHART_SPACING
 
-            let first_visible_chart_index = (tree_top - next_top) / padded_chart_height |> floor |> int |> max 0
+            let first_visible_chart_index =
+                (tree_top - next_top) / padded_chart_height |> floor |> int |> max 0
+
             let mutable chart_index = first_visible_chart_index
 
             let mutable top_edge = next_top + float32 chart_index * padded_chart_height
@@ -131,7 +146,7 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
             let expanded_next_top = next_top + float32 items.Count * padded_chart_height
 
             if next_top < tree_top && expanded_next_top > tree_top then
-                Text.draw_aligned_b (
+                Text.draw_aligned_b(
                     Style.font,
                     name,
                     20.0f,
@@ -156,12 +171,13 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
                     tree_ctx.ExpandedGroup <- "", LibraryGroupContext.None
                 else
                     tree_ctx.ExpandedGroup <- name, group_ctx
-                    tree_ctx.ScrollTo <- ScrollTo.Group (name, group_ctx)
+                    tree_ctx.ScrollTo <- ScrollTo.Group(name, group_ctx)
 
             elif this.RightClicked(tree_top) then
                 match tree_ctx.MultiSelection with
-                | Some s when s.GroupAmountSelected(name, group_ctx, charts_as_seq) <> AmountSelected.None -> s.ShowActions()
-                | _ -> GroupContextMenu.Show(name, items |> Seq.map (fun (x: TreeChart) -> x.Chart), group_ctx)
+                | Some s when s.GroupAmountSelected(name, group_ctx, charts_as_seq) <> AmountSelected.None ->
+                    s.ShowActions()
+                | _ -> GroupContextMenu.Show(name, items |> Seq.map(fun (x: TreeChart) -> x.Chart), group_ctx)
 
             elif (%%"delete").Pressed() then
                 match group_ctx with
@@ -170,17 +186,18 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
                 | LibraryGroupContext.Likes
                 | LibraryGroupContext.Table _ -> ()
                 | LibraryGroupContext.Pack _
-                | LibraryGroupContext.None -> GroupContextMenu.ConfirmDelete(items |> Seq.map (fun (x: TreeChart) -> x.Chart), group_ctx, false)
+                | LibraryGroupContext.None ->
+                    GroupContextMenu.ConfirmDelete(items |> Seq.map(fun (x: TreeChart) -> x.Chart), group_ctx, false)
 
     member this.Update(this_top: float32, tree_top: float32, tree_bottom: float32, elapsed_ms: float) : float32 =
         if last_cached_flag < tree_ctx.CacheFlag then
-            update_cached_info ()
+            update_cached_info()
 
         select_animation.Target <- if this.Selected then 1.0f else 0.0f
-        select_animation.Update elapsed_ms
+        select_animation.Update(elapsed_ms)
 
         match tree_ctx.ScrollTo with
-        | ScrollTo.Group (a, b) when (a, b) = (name, group_ctx) ->
+        | ScrollTo.Group(a, b) when (a, b) = (name, group_ctx) ->
             if this.Expanded then
                 tree_ctx.Scroll(-this_top + tree_top + 185.0f)
             else
@@ -201,11 +218,14 @@ type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<T
 
             if tree_ctx.ScrollTo = ScrollTo.Chart && this.Selected then
                 match Seq.tryFindIndex (fun (s: TreeChart) -> s.Selected) items with
-                | Some i -> tree_ctx.Scroll (-(next_top + float32 i * padded_chart_height) + 500.0f)
+                | Some i -> tree_ctx.Scroll(-(next_top + float32 i * padded_chart_height) + 500.0f)
                 | None -> ()
+
                 tree_ctx.ScrollTo <- ScrollTo.Nothing
 
-            let first_visible_chart_index = (tree_top - next_top) / padded_chart_height |> floor |> int |> max 0
+            let first_visible_chart_index =
+                (tree_top - next_top) / padded_chart_height |> floor |> int |> max 0
+
             let mutable chart_index = first_visible_chart_index
             let mutable top_edge = next_top + float32 chart_index * padded_chart_height
 

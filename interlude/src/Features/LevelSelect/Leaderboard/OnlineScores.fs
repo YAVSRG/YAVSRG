@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Prelude.Charts
@@ -31,11 +31,12 @@ module OnlineScores =
             ChartMeta: ChartMeta
             CurrentChart: Chart
         }
-        override this.ToString() = "<leaderboard loader>"
+
+        override this.ToString() : string = "<leaderboard loader>"
 
     // Can be accessed from the UI thread at any time
     // Contains scores for the current loaded leaderboard, calculated for current ruleset
-    let leaderboard_scores : ResizeArray<ScoreInfo> = ResizeArray()
+    let leaderboard_scores: ResizeArray<ScoreInfo> = ResizeArray()
     let mutable state = State.Unloaded
 
     let private leaderboard_score_loaded_ev = Event<LeaderboardScore * ScoreInfo>()
@@ -47,27 +48,28 @@ module OnlineScores =
     let private load_score (score: LeaderboardScore, score_info: ScoreInfo) : unit =
         if score_info.Ruleset <> Rulesets.current then
             score_info.Ruleset <- Rulesets.current
-        leaderboard_scores.Add score_info
-        leaderboard_score_loaded_ev.Trigger (score, score_info)
+
+        leaderboard_scores.Add(score_info)
+        leaderboard_score_loaded_ev.Trigger(score, score_info)
 
     let private finish_loading (new_state: State) : unit =
         state <- new_state
-        leaderboard_loaded_ev.Trigger (state <> State.NoLeaderboard)
+        leaderboard_loaded_ev.Trigger(state <> State.NoLeaderboard)
 
     let score_loader =
         { new Async.CancelQueueSeq<Request, unit -> unit>() with
-            member this.Process(req: Request) =
+            member this.Process(req: Request) : seq<unit -> unit> =
                 seq {
-                    let mutable scores : LeaderboardScore array = [||]
+                    let mutable scores: LeaderboardScore array = [||]
                     let mutable new_state = State.Offline
-                    Charts.Scores.Leaderboard.get_async (
+
+                    Charts.Scores.Leaderboard.get_async(
                         req.ChartMeta.Hash,
                         function
                         | Some reply ->
                             new_state <- State.Loaded
                             scores <- reply.Scores
-                        | None ->
-                            new_state <- State.NoLeaderboard
+                        | None -> new_state <- State.NoLeaderboard
                     )
                     |> Async.RunSynchronously
 
@@ -75,7 +77,8 @@ module OnlineScores =
                         let with_mods = ModState.apply score.Mods req.CurrentChart
                         let replay = Replay.FromBase64String(score.Replay)
 
-                        let scoring = ScoreProcessor.ProcessEntireReplay(req.Ruleset, replay, with_mods, score.Rate)
+                        let scoring =
+                            ScoreProcessor.ProcessEntireReplay(req.Ruleset, replay, with_mods, score.Rate)
 
                         let rating = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
@@ -85,7 +88,7 @@ module OnlineScores =
                                 Chart = req.CurrentChart
                                 WithMods = with_mods
 
-                                PlayedBy = ScorePlayedBy.Username score.Username
+                                PlayedBy = ScorePlayedBy.Username(score.Username)
                                 TimePlayed = score.Timestamp
                                 Rate = score.Rate
 
@@ -100,42 +103,36 @@ module OnlineScores =
                                 ImportedFromOsu = false
                                 IsFailed = false
                             }
-                        yield fun () -> load_score (score, score_info)
+
+                        yield fun () -> load_score(score, score_info)
+
                     yield fun () -> finish_loading new_state
                 }
 
-            member this.Handle(action) = action ()
+            member this.Handle(action: unit -> unit) : unit = action()
         }
 
     let load (info: LoadedChartInfo) : unit =
         if Network.status <> Network.Status.LoggedIn then
             state <- State.Offline
         elif state = State.Unloaded then
-            score_loader.Request
-                {
-                    Ruleset = Rulesets.current
-                    ChartMeta = info.ChartMeta
-                    CurrentChart = info.Chart
-                }
+            score_loader.Request({ Ruleset = Rulesets.current; ChartMeta = info.ChartMeta; CurrentChart = info.Chart })
 
     do
-        SelectedChart.on_chart_change_started.Add (fun _ ->
+        SelectedChart.on_chart_change_started.Add(fun _ ->
             leaderboard_scores.Clear()
             state <- State.Unloaded
             score_loader.Cancel()
         )
 
-        Rulesets.on_changed.Add (fun ruleset ->
+        Rulesets.on_changed.Add(fun ruleset ->
             for score_info in leaderboard_scores do
                 score_info.Ruleset <- ruleset
         )
 
-        Gameplay.leaderboard_rank_changed.Add (fun info ->
+        Gameplay.leaderboard_rank_changed.Add(fun info ->
             if state = State.Loaded then
-                score_loader.Request
-                    {
-                        Ruleset = Rulesets.current
-                        ChartMeta = info.ChartMeta
-                        CurrentChart = info.Chart
-                    }
+                score_loader.Request(
+                    { Ruleset = Rulesets.current; ChartMeta = info.ChartMeta; CurrentChart = info.Chart }
+                )
         )

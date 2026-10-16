@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -20,19 +20,29 @@ module LevelSelect =
     let private refresh_all_event = Event<unit>()
     let private refresh_details_event = Event<unit>()
 
-    let refresh_all () = GameThread.defer refresh_all_event.Trigger
-    let refresh_details () = GameThread.defer refresh_details_event.Trigger
+    let refresh_all () =
+        GameThread.defer refresh_all_event.Trigger
+
+    let refresh_details () =
+        GameThread.defer refresh_details_event.Trigger
 
     let on_refresh_all = refresh_all_event.Publish
     let on_refresh_details = refresh_details_event.Publish
 
     do
-        Content.OnChartAdded.Add (fun () -> if Screen.current_type = ScreenType.LevelSelect then refresh_all())
+        Content.OnChartAdded.Add(fun () ->
+            if Screen.current_type = ScreenType.LevelSelect then
+                refresh_all()
+        )
 
         CollectionActions.collection_modified.Add(fun () ->
-            if options.ChartGroupMode.Value = "collection" || (options.ChartGroupMode.Value <> "level" && options.TreeAlwaysShowCollections.Value) then
-                refresh_all ()
+            if
+                options.ChartGroupMode.Value = "collection"
+                || (options.ChartGroupMode.Value <> "level" && options.TreeAlwaysShowCollections.Value)
+            then
+                refresh_all()
         )
+
         CollectionActions.likes_modified.Add(fun () ->
             match SelectedChart.LIBRARY_CTX with
             | LibraryContext.Likes -> refresh_all()
@@ -42,13 +52,14 @@ module LevelSelect =
     let mutable filter: FilteredSearch = FilteredSearch.Empty
 
     let private state: EndlessModeState = EndlessModeState.create()
-    let mutable private suggestion_ctx : SuggestionContext option = None
+    let mutable private suggestion_ctx: SuggestionContext option = None
 
     let private enter_gameplay (ctx: LibraryContext) : unit =
         match ctx with
         | LibraryContext.Playlist(index, playlist_id, _) ->
-            match Content.Library.Collections.GetPlaylist playlist_id with
-            | Some playlist -> EndlessModeState.queue_playlist (index + 1) playlist_id playlist Content.Library filter state
+            match Content.Library.Collections.GetPlaylist(playlist_id) with
+            | Some playlist ->
+                EndlessModeState.queue_playlist (index + 1) playlist_id playlist Content.Library filter state
             | None -> ()
         | _ -> ()
 
@@ -66,18 +77,29 @@ module LevelSelect =
                 )
                 ScreenType.Play
                 Transitions.EnterGameplayFadeAudio
-        then enter_gameplay info.LibraryContext
+        then
+            enter_gameplay info.LibraryContext
 
     let continue_endless_mode () : bool =
-        if Transitions.in_progress() then false else
+        if Transitions.in_progress() then
+            false
+        else
 
         let ctx =
             match suggestion_ctx with
             | None ->
                 {
                     BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                    MinimumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMinRate.Value else SelectedChart.rate.Value
-                    MaximumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMaxRate.Value else SelectedChart.rate.Value
+                    MinimumRate =
+                        if options.SuggestionsEnableRates.Value then
+                            options.SuggestionsMinRate.Value
+                        else
+                            SelectedChart.rate.Value
+                    MaximumRate =
+                        if options.SuggestionsEnableRates.Value then
+                            options.SuggestionsMaxRate.Value
+                        else
+                            SelectedChart.rate.Value
                     OnlyNewCharts = options.SuggestionsOnlyNew.Value
                     Filter = filter.WithoutSearchTerms
                     Mods = SelectedChart.selected_mods.Value
@@ -90,14 +112,14 @@ module LevelSelect =
         match EndlessModeState.next ctx state with
         | Some next ->
             LevelSelectHistory.append_current()
-            SelectedChart._rate.Set next.Rate
-            SelectedChart._selected_mods.Set next.Mods
-            SelectedChart.change (next.ChartMeta, next.LibraryContext, false)
+            SelectedChart._rate.Set(next.Rate)
+            SelectedChart._selected_mods.Set(next.Mods)
+            SelectedChart.change(next.ChartMeta, next.LibraryContext, false)
             SelectedChart.when_loaded true (fun info -> play info)
             suggestion_ctx <- Some next.NextContext
             true
         | None ->
-            Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+            Notifications.action_feedback(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
             false
 
     let start_playlist (playlist_id: string, playlist: Playlist) : unit =
@@ -113,7 +135,7 @@ module LevelSelect =
         EndlessModeState.clear_queue state
 
     let random_chart () : unit =
-        let true_random_chart() =
+        let true_random_chart () =
             let ctx =
                 {
                     Rate = SelectedChart.rate.Value
@@ -128,13 +150,21 @@ module LevelSelect =
                 SelectedChart.change(chart_meta, LibraryContext.None, true)
             | None -> ()
 
-        if not (Transitions.in_progress()) then
+        if not(Transitions.in_progress()) then
             if SelectedChart.DIFFICULTY.IsSome then
                 let ctx =
                     {
                         BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                        MinimumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMinRate.Value else SelectedChart.rate.Value
-                        MaximumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMaxRate.Value else SelectedChart.rate.Value
+                        MinimumRate =
+                            if options.SuggestionsEnableRates.Value then
+                                options.SuggestionsMinRate.Value
+                            else
+                                SelectedChart.rate.Value
+                        MaximumRate =
+                            if options.SuggestionsEnableRates.Value then
+                                options.SuggestionsMaxRate.Value
+                            else
+                                SelectedChart.rate.Value
                         OnlyNewCharts = false
                         Filter = filter
                         Mods = SelectedChart.selected_mods.Value
@@ -144,58 +174,65 @@ module LevelSelect =
                     }
 
                 match Suggestion.get_suggestion ctx with
-                | Some (chart_meta, rate) ->
+                | Some(chart_meta, rate) ->
                     LevelSelectHistory.append_current()
                     SelectedChart._rate.Value <- rate
                     SelectedChart.change(chart_meta, LibraryContext.None, true)
-                | None ->
-                    true_random_chart()
+                | None -> true_random_chart()
             else
                 true_random_chart()
 
     let choose_this_chart () : unit =
-        SelectedChart.when_loaded true
-        <| fun info ->
+        SelectedChart.when_loaded
+            true
+            (fun info ->
 
-            match Network.lobby with
-            | Some lobby ->
-                if Screen.change ScreenType.Lobby Transitions.Default then
-                    lobby.SelectChart (info.ChartMeta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
-            | None ->
-                if SelectedChart.autoplay then
-                    Screen.change_new
-                        (fun () -> ReplayScreen.Create(info, ReplayMode.Auto))
-                        ScreenType.Replay
-                        Transitions.EnterGameplayFadeAudio
-                    |> ignore
-                else
-                    play info
+                match Network.lobby with
+                | Some lobby ->
+                    if Screen.change ScreenType.Lobby Transitions.Default then
+                        lobby.SelectChart(info.ChartMeta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+                | None ->
+                    if SelectedChart.autoplay then
+                        Screen.change_new
+                            (fun () -> ReplayScreen.Create(info, ReplayMode.Auto))
+                            ScreenType.Replay
+                            Transitions.EnterGameplayFadeAudio
+                        |> ignore
+                    else
+                        play info
+            )
 
     let challenge_score (score_info: ScoreInfo) : unit =
         SelectedChart.set_rate_and_mods(score_info.Rate, score_info.Mods)
-        SelectedChart.when_loaded true
-        <| fun info ->
 
-        if
-            score_info.ChartMeta.Hash = info.ChartMeta.Hash &&
-            Screen.change_new
-                (fun () -> PlayScreen.Create(info, PacemakerCreationContext.FromScore score_info))
-                ScreenType.Play
-                Transitions.EnterGameplayFadeAudio
-        then
-            enter_gameplay info.LibraryContext
+        SelectedChart.when_loaded
+            true
+            (fun info ->
+
+                if
+                    score_info.ChartMeta.Hash = info.ChartMeta.Hash
+                    && Screen.change_new
+                        (fun () -> PlayScreen.Create(info, PacemakerCreationContext.FromScore(score_info)))
+                        ScreenType.Play
+                        Transitions.EnterGameplayFadeAudio
+                then
+                    enter_gameplay info.LibraryContext
+            )
 
     let watch_replay (score_info: ScoreInfo) : unit =
         SelectedChart.set_rate_and_mods(score_info.Rate, score_info.Mods)
-        SelectedChart.when_loaded true
-        <| fun info ->
 
-        if score_info.ChartMeta.Hash = info.ChartMeta.Hash then
-            Screen.change_new
-                (fun () -> ReplayScreen.Create(info, ReplayMode.Replay score_info))
-                ScreenType.Replay
-                Transitions.EnterGameplayFadeAudio
-            |> ignore
+        SelectedChart.when_loaded
+            true
+            (fun info ->
+
+                if score_info.ChartMeta.Hash = info.ChartMeta.Hash then
+                    Screen.change_new
+                        (fun () -> ReplayScreen.Create(info, ReplayMode.Replay(score_info)))
+                        ScreenType.Replay
+                        Transitions.EnterGameplayFadeAudio
+                    |> ignore
+            )
 
 // todo: rename; relocate
 [<RequireQualifiedAccess>]

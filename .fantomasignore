@@ -3,6 +3,7 @@
 interlude
 !interlude/src/Features/Wiki
 !interlude/src/Features/Skins
+!interlude/src/Features/LevelSelect
 engine
 !engine/src/Audio
 libraries
