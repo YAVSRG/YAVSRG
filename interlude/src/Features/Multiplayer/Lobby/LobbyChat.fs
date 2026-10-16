@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Multiplayer
+namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -20,7 +20,7 @@ type LobbyChat(lobby: Lobby) =
     let current_message = Setting.simple ""
 
     let chat_msg (sender: string, message: string) : Container =
-        let w = Text.measure (Style.font, sender) * 0.6f * MESSAGE_HEIGHT
+        let w = Text.measure(Style.font, sender) * 0.6f * MESSAGE_HEIGHT
 
         let sender_color =
             if sender = Network.credentials.Username then
@@ -29,55 +29,48 @@ type LobbyChat(lobby: Lobby) =
                 lobby.Players.[sender].Color, Colors.shadow_2
 
         Container(NodeType.None)
-        |+ Text(sender)
-            .Color(sender_color)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceL(w))
-        |+ Text(": " + message)
-            .Color(Colors.text)
-            .Align(Alignment.LEFT)
-            .Position(Position.ShrinkL(w))
+        |+ Text(sender).Color(sender_color).Align(Alignment.RIGHT).Position(Position.SliceL(w))
+        |+ Text(": " + message).Color(Colors.text).Align(Alignment.LEFT).Position(Position.ShrinkL(w))
 
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
 
     let message_history =
-        ScrollContainer(messages)
-            .Position(Position.ShrinkB(60.0f).Shrink(5.0f))
+        ScrollContainer(messages).Position(Position.ShrinkB(60.0f).Shrink(5.0f))
 
     let chatline =
-        TextEntry(current_message, "none", true)
-            .Position(Position.SliceB(50.0f).Shrink(5.0f))
+        TextEntry(current_message, "none", true).Position(Position.SliceB(50.0f).Shrink(5.0f))
 
     let mutable last_msg: Widget option = None
 
     let add_msg (w: Widget) =
-        messages.Add w
+        messages.Add(w)
 
         match last_msg with
         | Some m ->
             if m.Bounds.Top - message_history.RemainingScrollAnimation - message_history.Bounds.Bottom < 200.0f then
-                GameThread.defer (fun () -> message_history.Scroll infinityf)
+                GameThread.defer(fun () -> message_history.Scroll(infinityf))
         | None -> ()
 
         last_msg <- Some w
 
     let game_end_report () =
         let replays = lobby.Replays
+
         if replays.Keys.Count > 0 then
-            add_msg (
-                Text(sprintf "== %s ==" ([lobby.Chart.Value.Title] %> "lobby.results_title"))
+            add_msg(
+                Text(sprintf "== %s ==" ([ lobby.Chart.Value.Title ] %> "lobby.results_title"))
                     .Color(Colors.text)
                     .Align(Alignment.CENTER)
             )
 
             let scores =
                 replays.Keys
-                |> Seq.map (fun username ->
+                |> Seq.map(fun username ->
                     let replay_info = replays.[username]
                     replay_info.ScoreProcessor.ProcessEntireReplay()
                     username, replay_info.GetScoreInfo()
                 )
-                |> Seq.sortByDescending (fun (_, s) -> s.Scoring.Accuracy)
+                |> Seq.sortByDescending(fun (_, s) -> s.Scoring.Accuracy)
 
             let mutable place = 0
 
@@ -115,30 +108,21 @@ type LobbyChat(lobby: Lobby) =
                         )
                         .FocusOnHover(container)
                     |+ Text(sprintf "%i. %s" place username)
-                        .Color(fun () ->
-                            if container.Focused then
-                                Colors.text_yellow_2
-                            else
-                                (color, Colors.shadow_1)
-                        )
+                        .Color(fun () -> if container.Focused then Colors.text_yellow_2 else (color, Colors.shadow_1))
                         .Align(Alignment.LEFT)
                     |+ Text(data.Scoring.FormattedAccuracy)
-                        .Color(data.Ruleset.GradeColor grade, Colors.shadow_1)
+                        .Color(data.Ruleset.GradeColor(grade), Colors.shadow_1)
                         .Align(Alignment.CENTER)
-                    |+ Text(data.Ruleset.LampName lamp)
-                        .Color(data.Ruleset.LampColor lamp, Colors.shadow_1)
+                    |+ Text(data.Ruleset.LampName(lamp))
+                        .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
                         .Align(0.75f)
                     |+ Text(sprintf "%ix" data.Scoring.BestCombo)
-                        .Color(data.Ruleset.LampColor lamp, Colors.shadow_1)
+                        .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
                         .Align(Alignment.RIGHT)
 
                 add_msg cmp
 
-            add_msg (
-                Text(%"lobby.results_hint")
-                    .Color(Colors.text_greyout)
-                    .Align(Alignment.CENTER)
-            )
+            add_msg(Text(%"lobby.results_hint").Color(Colors.text_greyout).Align(Alignment.CENTER))
 
     let countdown (reason, seconds) =
         let now = System.DateTime.UtcNow
@@ -150,13 +134,8 @@ type LobbyChat(lobby: Lobby) =
             max 0 (seconds - elapsed)
 
         Container(NodeType.None)
-        |+ Text(fun () -> sprintf "%s %s: %i" Icons.CLOCK reason (seconds_left ()))
-            .Color(fun () ->
-                if seconds_left () > 0 then
-                    Colors.text_green_2
-                else
-                    Colors.text_greyout
-            )
+        |+ Text(fun () -> sprintf "%s %s: %i" Icons.CLOCK reason (seconds_left()))
+            .Color(fun () -> if seconds_left() > 0 then Colors.text_green_2 else Colors.text_greyout)
             .Align(Alignment.CENTER)
         |> add_msg
 
@@ -171,44 +150,44 @@ type LobbyChat(lobby: Lobby) =
         |* message_history
 
         lobby.OnChatMessage.Add(chat_msg >> add_msg)
-        lobby.OnSystemMessage.Add(fun msg -> add_msg (Text(msg).Align(Alignment.CENTER)))
+        lobby.OnSystemMessage.Add(fun msg -> add_msg(Text(msg).Align(Alignment.CENTER)))
 
         lobby.OnLobbyEvent.Add(fun (kind, data) ->
             let text, color =
                 match (kind, data) with
-                | LobbyEvent.Join, who -> sprintf "%s %s %s" Icons.LOG_IN who %"lobby.action.joined", Colors.green_accent
+                | LobbyEvent.Join, who ->
+                    sprintf "%s %s %s" Icons.LOG_IN who %"lobby.action.joined", Colors.green_accent
                 | LobbyEvent.Leave, who -> sprintf "%s %s %s" Icons.LOG_OUT who %"lobby.action.left", Colors.red_accent
-                | LobbyEvent.Host, who -> sprintf "%s %s %s" Icons.STAR who %"lobby.action.became_host", Colors.yellow_accent
+                | LobbyEvent.Host, who ->
+                    sprintf "%s %s %s" Icons.STAR who %"lobby.action.became_host", Colors.yellow_accent
                 | LobbyEvent.Ready, who -> sprintf "%s %s %s" Icons.CHECK who %"lobby.action.ready", Colors.green
-                | LobbyEvent.Ready_Spectate, who -> sprintf "%s %s %s" Icons.EYE who %"lobby.action.ready", Colors.green
+                | LobbyEvent.Ready_Spectate, who ->
+                    sprintf "%s %s %s" Icons.EYE who %"lobby.action.ready", Colors.green
                 | LobbyEvent.NotReady, who -> sprintf "%s %s %s" Icons.X who %"lobby.action.not_ready", Colors.pink
-                | LobbyEvent.Invite, who -> sprintf "%s %s %s" Icons.MAIL who %"lobby.action.invited", Colors.cyan_accent
+                | LobbyEvent.Invite, who ->
+                    sprintf "%s %s %s" Icons.MAIL who %"lobby.action.invited", Colors.cyan_accent
                 | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.INFO msg, Colors.grey_1
                 | _, msg -> msg, Colors.white
 
-            add_msg(
-                Text(text)
-                    .Color(fun () -> color, Colors.shadow_1)
-                    .Align(Alignment.CENTER)
-            )
+            add_msg(Text(text).Color(fun () -> color, Colors.shadow_1).Align(Alignment.CENTER))
         )
 
-        lobby.OnGameEnd.Add game_end_report
-        lobby.OnCountdown.Add countdown
+        lobby.OnGameEnd.Add(game_end_report)
+        lobby.OnCountdown.Add(countdown)
 
-        base.Init parent
+        base.Init(parent)
 
     override this.Draw() =
-        Render.rect (this.Bounds.ShrinkB 60.0f) Colors.shadow_2.O3
-        Render.rect (this.Bounds.SliceB 50.0f) Colors.shadow_2.O3
+        Render.rect (this.Bounds.ShrinkB(60.0f)) Colors.shadow_2.O3
+        Render.rect (this.Bounds.SliceB(50.0f)) Colors.shadow_2.O3
         base.Draw()
 
     override this.Update(elapsed_ms, moved) =
         if (%%"select").Pressed() then
             if chatline.Selected && current_message.Value <> "" then
-                lobby.SendMessage current_message.Value
-                current_message.Set ""
+                lobby.SendMessage(current_message.Value)
+                current_message.Set("")
             else
-                chatline.Select false
+                chatline.Select(false)
 
         base.Update(elapsed_ms, moved)

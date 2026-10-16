@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Stats
+namespace Interlude.Features.Stats
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -24,36 +24,80 @@ type PlayerInfo(rank: int, data: Stats.Leaderboard.KeymodeLeaderboardEntry) =
     override this.Draw() =
         let bounds = if is_you then this.Bounds else this.Bounds.ShrinkX(20.0f)
         Render.rect (if is_you then this.Bounds else bounds) Colors.shadow_2.O2
-        if is_you then
-            Render.rect (bounds.BorderT Style.PADDING) Colors.white
-            Render.rect (bounds.BorderB Style.PADDING) Colors.white
 
-        Text.fill_b(Style.font, sprintf "#%i" rank, bounds.SliceL(NUMBER_WIDTH).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.LEFT)
+        if is_you then
+            Render.rect (bounds.BorderT(Style.PADDING)) Colors.white
+            Render.rect (bounds.BorderB(Style.PADDING)) Colors.white
+
+        Text.fill_b(
+            Style.font,
+            sprintf "#%i" rank,
+            bounds.SliceL(NUMBER_WIDTH).Shrink(10.0f, 5.0f),
+            Colors.text_subheading,
+            Alignment.LEFT
+        )
 
         let bounds = bounds.ShrinkL(NUMBER_WIDTH)
 
-        Text.fill_b(Style.font, data.Username, bounds.SlicePercentL(0.25f).Shrink(10.0f, 5.0f), (color, Colors.shadow_2), Alignment.LEFT)
+        Text.fill_b(
+            Style.font,
+            data.Username,
+            bounds.SlicePercentL(0.25f).Shrink(10.0f, 5.0f),
+            (color, Colors.shadow_2),
+            Alignment.LEFT
+        )
 
-        Text.fill_b(Style.font, sprintf "%.0f" data.Combined, bounds.SlicePercentL(0.25f, 0.15f).Shrink(10.0f, 5.0f), Colors.text, Alignment.LEFT)
-        Text.fill_b(Style.font, sprintf "%.0f" data.Jacks, bounds.SlicePercentL(0.4f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_red, Alignment.LEFT)
-        Text.fill_b(Style.font, sprintf "%.0f" data.Chordstream, bounds.SlicePercentL(0.55f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_green, Alignment.LEFT)
-        Text.fill_b(Style.font, sprintf "%.0f" data.Stream, bounds.SlicePercentL(0.7f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_cyan, Alignment.LEFT)
+        Text.fill_b(
+            Style.font,
+            sprintf "%.0f" data.Combined,
+            bounds.SlicePercentL(0.25f, 0.15f).Shrink(10.0f, 5.0f),
+            Colors.text,
+            Alignment.LEFT
+        )
 
-        Text.fill_b(Style.font, playtime, bounds.SlicePercentR(0.20f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
+        Text.fill_b(
+            Style.font,
+            sprintf "%.0f" data.Jacks,
+            bounds.SlicePercentL(0.4f, 0.15f).Shrink(10.0f, 5.0f),
+            Colors.text_red,
+            Alignment.LEFT
+        )
+
+        Text.fill_b(
+            Style.font,
+            sprintf "%.0f" data.Chordstream,
+            bounds.SlicePercentL(0.55f, 0.15f).Shrink(10.0f, 5.0f),
+            Colors.text_green,
+            Alignment.LEFT
+        )
+
+        Text.fill_b(
+            Style.font,
+            sprintf "%.0f" data.Stream,
+            bounds.SlicePercentL(0.7f, 0.15f).Shrink(10.0f, 5.0f),
+            Colors.text_cyan,
+            Alignment.LEFT
+        )
+
+        Text.fill_b(
+            Style.font,
+            playtime,
+            bounds.SlicePercentR(0.20f).Shrink(10.0f, 5.0f),
+            Colors.text_subheading,
+            Alignment.RIGHT
+        )
 
 type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.Sort -> unit) =
     inherit Container(NodeType.None)
 
     let label_or_button (for_sort: Stats.Leaderboard.Sort, label: string) =
-        let align = if for_sort = Stats.Leaderboard.Sort.Playtime then Alignment.RIGHT else Alignment.CENTER
+        let align =
+            if for_sort = Stats.Leaderboard.Sort.Playtime then Alignment.RIGHT else Alignment.CENTER
+
         if sort = for_sort then
-            Text(Icons.CHEVRON_DOWN + " " + label)
-                .Color(Colors.text_cyan_2)
-                .Align(align)
-            :> Widget
+            Text(Icons.CHEVRON_DOWN + " " + label).Color(Colors.text_cyan_2).Align(align) :> Widget
         else
-            Button(label, (fun () -> change_sort for_sort))
-                .Align(align)
+            Button(label, (fun () -> change_sort for_sort)).Align(align)
 
     let player_column_label =
         Text(%"stats.leaderboards.rating.player")
@@ -62,26 +106,26 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
             .Position(Position.SlicePercentL(0.25f).ShrinkL(PlayerInfo.HEIGHT * 1.5f).Shrink(10.0f, 5.0f))
 
     override this.Init(parent) =
-        this
-            .Add(
-                player_column_label,
+        this.Add(
+            player_column_label,
 
-                label_or_button(Stats.Leaderboard.Sort.Combined, %"stats.leaderboards.rating.combined")
-                    .Position(Position.SlicePercentL(0.20f, 0.25f).ShrinkY(5.0f)),
+            label_or_button(Stats.Leaderboard.Sort.Combined, %"stats.leaderboards.rating.combined")
+                .Position(Position.SlicePercentL(0.20f, 0.25f).ShrinkY(5.0f)),
 
-                label_or_button(Stats.Leaderboard.Sort.Jacks, %"stats.leaderboards.rating.jacks")
-                    .Position(Position.SlicePercentL(0.35f, 0.25f).ShrinkY(5.0f)),
+            label_or_button(Stats.Leaderboard.Sort.Jacks, %"stats.leaderboards.rating.jacks")
+                .Position(Position.SlicePercentL(0.35f, 0.25f).ShrinkY(5.0f)),
 
-                label_or_button(Stats.Leaderboard.Sort.Chordstream, %"stats.leaderboards.rating.chordstream")
-                    .Position(Position.SlicePercentL(0.5f, 0.25f).ShrinkY(5.0f)),
+            label_or_button(Stats.Leaderboard.Sort.Chordstream, %"stats.leaderboards.rating.chordstream")
+                .Position(Position.SlicePercentL(0.5f, 0.25f).ShrinkY(5.0f)),
 
-                label_or_button(Stats.Leaderboard.Sort.Stream, %"stats.leaderboards.rating.stream")
-                    .Position(Position.SlicePercentL(0.65f, 0.25f).ShrinkY(5.0f)),
+            label_or_button(Stats.Leaderboard.Sort.Stream, %"stats.leaderboards.rating.stream")
+                .Position(Position.SlicePercentL(0.65f, 0.25f).ShrinkY(5.0f)),
 
-                label_or_button(Stats.Leaderboard.Sort.Playtime, %"stats.leaderboards.rating.playtime")
-                    .Position(Position.SlicePercentR(0.20f).Shrink(10.0f, 5.0f))
-            )
-        base.Init parent
+            label_or_button(Stats.Leaderboard.Sort.Playtime, %"stats.leaderboards.rating.playtime")
+                .Position(Position.SlicePercentR(0.20f).Shrink(10.0f, 5.0f))
+        )
+
+        base.Init(parent)
 
     override this.Draw() =
         Render.rect this.Bounds Colors.black.O2
@@ -96,17 +140,16 @@ type private KeymodesLeaderboard() =
 
     let load (container: WebRequestContainer<_>) =
         if Network.status = Network.Status.LoggedIn then
-            (if monthly.Value then Stats.Leaderboard.MonthlyKeymode.get else Stats.Leaderboard.Keymode.get)
-                (
-                    keymode.Value,
-                    sort_by.Value,
-                    fun response ->
-                        GameThread.defer
-                        <| fun () ->
-                            match response with
-                            | Some result -> container.SetData result
-                            | None -> container.ServerError()
-                )
+            (if monthly.Value then Stats.Leaderboard.MonthlyKeymode.get else Stats.Leaderboard.Keymode.get) (
+                keymode.Value,
+                sort_by.Value,
+                fun response ->
+                    GameThread.defer
+                    <| fun () ->
+                        match response with
+                        | Some result -> container.SetData(result)
+                        | None -> container.ServerError()
+            )
         else
             container.Offline()
 
@@ -115,25 +158,34 @@ type private KeymodesLeaderboard() =
         let title =
             Text(
                 if monthly.Value then
-                    sprintf "%iK %s  -  %s"
+                    sprintf
+                        "%iK %s  -  %s"
                         keymode.Value
                         %"stats.leaderboards.rating.monthly"
                         ((Timestamp.now() |> Timestamp.to_datetime).ToString("MMMM yyyy"))
                 else
-                    sprintf "%iK %s"
-                        keymode.Value
-                        %"stats.leaderboards.rating.all_time"
+                    sprintf "%iK %s" keymode.Value %"stats.leaderboards.rating.all_time"
             )
 
-        let header = KeymodeHeader(sort_by.Value, (fun v -> sort_by.Set v; container.Reload()))
+        let header =
+            KeymodeHeader(
+                sort_by.Value,
+                (fun v ->
+                    sort_by.Set(v)
+                    container.Reload()
+                )
+            )
 
         let player_content =
-            FlowContainer.Vertical<PlayerInfo>(PlayerInfo.HEIGHT)
+            FlowContainer
+                .Vertical<PlayerInfo>(PlayerInfo.HEIGHT)
                 .Spacing(Style.PADDING)
-                .With(seq {
-                    for i, d in Seq.indexed data.Leaderboard do
-                        yield PlayerInfo(i + 1, d)
-                })
+                .With(
+                    seq {
+                        for i, d in Seq.indexed data.Leaderboard do
+                            yield PlayerInfo(i + 1, d)
+                    }
+                )
 
         let title_and_header =
             Container(NodeType.None)
@@ -143,34 +195,27 @@ type private KeymodesLeaderboard() =
                 )
 
         match data.You with
-        | Some (rank, you) ->
-            title_and_header
-                .With(
-                    ScrollContainer(player_content)
-                        .Position(Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING)),
-                    PlayerInfo(int32 rank, you)
-                        .Position(Position.SliceB(PlayerInfo.HEIGHT))
-                )
+        | Some(rank, you) ->
+            title_and_header.With(
+                ScrollContainer(player_content)
+                    .Position(Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING)),
+                PlayerInfo(int32 rank, you).Position(Position.SliceB(PlayerInfo.HEIGHT))
+            )
 
-        | None ->
-            title_and_header
-                .With(
-                    ScrollContainer(player_content)
-                        .Position(Position.ShrinkT(125.0f))
-                )
+        | None -> title_and_header.With(ScrollContainer(player_content).Position(Position.ShrinkT(125.0f)))
         :> Widget
 
-    let container = WebRequestContainer<Stats.Leaderboard.KeymodeResponse>(load, rerender)
+    let container =
+        WebRequestContainer<Stats.Leaderboard.KeymodeResponse>(load, rerender)
 
-    let sort_by = sort_by |> Setting.trigger (fun _ -> container.Reload())
-    let monthly = monthly |> Setting.trigger (fun _ -> container.Reload())
-    let keymode = keymode |> Setting.trigger (fun _ -> container.Reload())
+    let sort_by = sort_by |> Setting.trigger(fun _ -> container.Reload())
+    let monthly = monthly |> Setting.trigger(fun _ -> container.Reload())
+    let keymode = keymode |> Setting.trigger(fun _ -> container.Reload())
 
     member this.SortBy = sort_by
     member this.MonthlyLeaderboard = monthly
     member this.Keymode = keymode
 
     override this.Init(parent) =
-        this
-        |* container
-        base.Init parent
+        this |* container
+        base.Init(parent)

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import.Osu
+namespace Interlude.Features.Import.Osu
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -24,7 +24,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                 this.Download()
             )
         )
-        
+
     static let STAT_WIDTH = 150.0f
 
     let mutable status = NotDownloaded
@@ -34,27 +34,43 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         if status = NotDownloaded || status = DownloadFailed then
 
             let task_tracking = TaskTracking.add data.title
-            let progress_callback = fun p ->
-                match p with
-                | Data.Downloading percent -> progress <- percent
-                | _ -> ()
-                task_tracking.Progress <- p
 
-            let task = OnlineImports.download_osu_set(sprintf "https://catboy.best/d/%in" data.id, Content.Library, progress_callback)
-            import_queue.Request(task,
+            let progress_callback =
+                fun p ->
+                    match p with
+                    | Data.Downloading percent -> progress <- percent
+                    | _ -> ()
+
+                    task_tracking.Progress <- p
+
+            let task =
+                OnlineImports.download_osu_set(
+                    sprintf "https://catboy.best/d/%in" data.id,
+                    Content.Library,
+                    progress_callback
+                )
+
+            import_queue.Request(
+                task,
                 function
                 | Ok result ->
-                    Notifications.task_feedback (
+                    Notifications.task_feedback(
                         Icons.DOWNLOAD,
                         %"notification.install_song",
-                        [data.title; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_song.body"
+                        [
+                            data.title
+                            result.ConvertedCharts.ToString()
+                            result.SkippedCharts.Length.ToString()
+                        ]
+                        %> "notification.install_song.body"
                     )
+
                     Content.TriggerChartAdded()
                     progress <- 1.0f
                     status <- Installed
                 | Error reason ->
                     Logging.Error "Error importing %s: %s" data.title reason
-                    Notifications.error (%"notification.install_song_failed", data.title)
+                    Notifications.error(%"notification.install_song_failed", data.title)
                     status <- DownloadFailed
             )
 
@@ -70,13 +86,13 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         | "graveyard"
         | _ -> Colors.grey_2, Colors.grey_1, %"beatmap_browser.status.graveyard"
 
-    let beatmaps = data.beatmaps |> Array.filter (fun x -> x.mode = "mania")
+    let beatmaps = data.beatmaps |> Array.filter(fun x -> x.mode = "mania")
 
     let keymodes_string =
         let modes =
             beatmaps
-            |> Seq.map (fun bm -> int bm.cs)
-            |> Seq.filter (fun k -> k >= 3 && k <= 10)
+            |> Seq.map(fun bm -> int bm.cs)
+            |> Seq.filter(fun k -> k >= 3 && k <= 10)
             |> Seq.distinct
             |> Seq.sort
             |> Array.ofSeq
@@ -84,8 +100,8 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         if modes.Length > 3 then
             sprintf "%i-%iK" modes.[0] modes.[modes.Length - 1]
         else
-            modes |> Seq.map (fun k -> sprintf "%iK" k) |> String.concat ", "
-        
+            modes |> Seq.map(fun k -> sprintf "%iK" k) |> String.concat ", "
+
     static member HEIGHT = 80.0f
 
     override this.Init(parent) =
@@ -99,10 +115,11 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         //    ,
         //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
         |* MouseListener().Button(this)
-        base.Init parent
+
+        base.Init(parent)
 
     override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
     override this.Draw() =
@@ -112,7 +129,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         | Downloading -> Render.rect (this.Bounds.SliceL(this.Bounds.Width * progress)) Colors.white.O1
         | _ -> ()
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             data.title,
             this.Bounds.SliceT(45.0f).Shrink(Style.PADDING * 2.0f, 0.0f),
@@ -120,7 +137,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             data.artist + "  •  " + data.creator,
             this.Bounds.SliceB(45.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING),
@@ -128,9 +145,12 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             Alignment.LEFT
         )
 
-        let download_bounds = this.Bounds.SliceR(BeatmapImportCard.HEIGHT).Shrink(Style.PADDING * 2.0f)
+        let download_bounds =
+            this.Bounds.SliceR(BeatmapImportCard.HEIGHT).Shrink(Style.PADDING * 2.0f)
+
         Render.rect download_bounds Colors.shadow_2.O2
-        Text.fill_b (
+
+        Text.fill_b(
             Style.font,
             (match status with
              | NotDownloaded -> Icons.DOWNLOAD
@@ -146,39 +166,61 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             Alignment.CENTER
         )
 
-        let status = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentB(0.5f).SliceR(STAT_WIDTH).ShrinkT(Style.PADDING)
+        let status =
+            this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentB(0.5f).SliceR(STAT_WIDTH).ShrinkT(Style.PADDING)
+
         Render.rect status Colors.shadow_2.O2
-        Text.fill_b (
+
+        Text.fill_b(
             Style.font,
             ranked_status,
             status.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
             (border, Colors.shadow_2),
             Alignment.CENTER
         )
-        
-        let favourites = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentT(0.5f).SliceR(STAT_WIDTH).ShrinkB(Style.PADDING)
+
+        let favourites =
+            this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentT(0.5f).SliceR(STAT_WIDTH).ShrinkB(Style.PADDING)
+
         Render.rect favourites Colors.shadow_2.O2
-        Text.fill_b (
+
+        Text.fill_b(
             Style.font,
             (sprintf "%s %i" Icons.HEART data.favourite_count),
             favourites.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
             Colors.text_subheading,
             Alignment.CENTER
         )
-        
-        let keymodes = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentB(0.5f).ShrinkR(STAT_WIDTH + Style.PADDING).SliceR(STAT_WIDTH).ShrinkT(Style.PADDING)
+
+        let keymodes =
+            this.Bounds
+                .ShrinkR(BeatmapImportCard.HEIGHT)
+                .SlicePercentB(0.5f)
+                .ShrinkR(STAT_WIDTH + Style.PADDING)
+                .SliceR(STAT_WIDTH)
+                .ShrinkT(Style.PADDING)
+
         Render.rect keymodes Colors.shadow_2.O2
-        Text.fill_b (
+
+        Text.fill_b(
             Style.font,
             keymodes_string,
             keymodes.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
             Colors.text_subheading,
             Alignment.CENTER
         )
-        
-        let playcount = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentT(0.5f).ShrinkR(STAT_WIDTH + Style.PADDING).SliceR(STAT_WIDTH).ShrinkB(Style.PADDING)
+
+        let playcount =
+            this.Bounds
+                .ShrinkR(BeatmapImportCard.HEIGHT)
+                .SlicePercentT(0.5f)
+                .ShrinkR(STAT_WIDTH + Style.PADDING)
+                .SliceR(STAT_WIDTH)
+                .ShrinkB(Style.PADDING)
+
         Render.rect playcount Colors.shadow_2.O2
-        Text.fill_b (
+
+        Text.fill_b(
             Style.font,
             (sprintf "%s %i" Icons.PLAY data.play_count),
             playcount.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
@@ -186,7 +228,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             Alignment.CENTER
         )
 
-        if this.Focused && Mouse.x () > this.Bounds.Right - 600.0f then
+        if this.Focused && Mouse.x() > this.Bounds.Right - 600.0f then
             let popover_bounds =
                 Rect.FromSize(
                     this.Bounds.Right - 600.0f,
@@ -199,7 +241,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             let mutable y = 0.0f
 
             for beatmap in beatmaps do
-                Text.fill_b (
+                Text.fill_b(
                     Style.font,
                     beatmap.version,
                     popover_bounds.SliceT(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),
@@ -207,7 +249,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                     Alignment.LEFT
                 )
 
-                Text.fill_b (
+                Text.fill_b(
                     Style.font,
                     sprintf "%.2f*" beatmap.difficulty_rating,
                     popover_bounds.SliceT(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),
@@ -217,18 +259,21 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
                 y <- y + 45.0f
 
-    member private this.Download() = download ()
+    member private this.Download() = download()
 
 type SortingDropdown =
 
-    static member Create(options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
+    static member Create
+        (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey)
+        =
 
         let mutable display_value =
             Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
-        let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
+        let dropdown_wrapper =
+            DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
 
-        let toggle_dropdown() =
+        let toggle_dropdown () =
             dropdown_wrapper.Toggle(fun () ->
                 Dropdown
                     {
@@ -236,7 +281,7 @@ type SortingDropdown =
                         ColorFunc = K Colors.text
                         Setting =
                             setting
-                            |> Setting.trigger (fun v ->
+                            |> Setting.trigger(fun v ->
                                 display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
                             )
                     }
@@ -244,26 +289,20 @@ type SortingDropdown =
 
         let LABEL_AREA_SIZE = 120.0f
 
-        NavigationContainer.Row()
+        NavigationContainer
+            .Row()
             .WrapNavigation(false)
             .With(
-                AngledButton(
-                    label + ":",
-                    toggle_dropdown,
-                    Colors.cyan.O3
-                )
+                AngledButton(label + ":", toggle_dropdown, Colors.cyan.O3)
                     .Hotkey(bind)
-                    .Position(Position.SliceL LABEL_AREA_SIZE),
+                    .Position(Position.SliceL(LABEL_AREA_SIZE)),
 
                 AngledButton(
                     (fun () ->
                         sprintf
                             "%s %s"
                             display_value
-                            (if reverse.Value then
-                                    Icons.CHEVRONS_DOWN
-                                else
-                                    Icons.CHEVRONS_UP)
+                            (if reverse.Value then Icons.CHEVRONS_DOWN else Icons.CHEVRONS_UP)
                     ),
                     (fun () -> reverse.Value <- not reverse.Value),
                     Colors.cyan_shadow.O3

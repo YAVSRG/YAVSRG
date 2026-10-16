@@ -24,13 +24,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 this.Install()
             ),
             Fill = (fun () -> if this.Focused then Colors.pink.O2 else Colors.shadow_2.O2),
-            Border =
-                (fun () ->
-                    if this.Focused then
-                        Colors.pink_accent
-                    else
-                        Colors.grey_2.O3
-                )
+            Border = (fun () -> if this.Focused then Colors.pink_accent else Colors.grey_2.O3)
         )
 
     let mutable existing = None
@@ -64,10 +58,10 @@ type TableCard(online_table: Tables.List.Table) as this =
             | Some _ -> TableStatus.Installed
             | None -> TableStatus.NotInstalled
 
-        base.Init parent
+        base.Init(parent)
 
     override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
     member this.Install() =
@@ -76,11 +70,11 @@ type TableCard(online_table: Tables.List.Table) as this =
         | TableStatus.OutOfDate as current_status ->
             status <- TableStatus.Installing
 
-            Tables.Charts.get (
+            Tables.Charts.get(
                 online_table.Id,
                 function
                 | Some charts ->
-                    GameThread.defer (fun () ->
+                    GameThread.defer(fun () ->
                         let table =
                             {
                                 Id = online_table.Id
@@ -88,7 +82,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                                 LastUpdated = online_table.LastUpdated
                                 Charts =
                                     charts.Charts
-                                    |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level })
+                                    |> Array.map(fun c -> { Hash = c.Hash; Level = c.Level })
                                     |> List.ofArray
                             }
 
@@ -101,7 +95,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 | None ->
                     Logging.Error("Error getting charts for table")
                     // error toast
-                    GameThread.defer (fun () -> status <- current_status)
+                    GameThread.defer(fun () -> status <- current_status)
             )
         | TableStatus.Installing -> ()
         | TableStatus.Installed ->
@@ -112,22 +106,19 @@ type TableBrowserPage() =
     inherit Page()
 
     let flow = FlowContainer.Vertical<TableCard>(200.0f).Spacing(Style.PADDING * 3.0f)
+
     let scroll =
-        ScrollContainer(flow, Margin = Style.PADDING)
-            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        ScrollContainer(flow, Margin = Style.PADDING).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Content() =
-        Tables.List.get (
-                function
-                | Some tables ->
-                    for table in tables.Tables do
-                        GameThread.defer (fun () -> flow.Add(TableCard(table)))
-                | None -> Logging.Error("Error getting online tables list")
-            )
+        Tables.List.get(
+            function
+            | Some tables ->
+                for table in tables.Tables do
+                    GameThread.defer(fun () -> flow.Add(TableCard(table)))
+            | None -> Logging.Error("Error getting online tables list")
+        )
 
-        NavigationContainer.Column()
-        |+ Dummy(NodeType.Leaf)
-        |+ scroll
-        :> Widget
+        NavigationContainer.Column() |+ Dummy(NodeType.Leaf) |+ scroll :> Widget
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"tables.browser")

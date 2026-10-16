@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -10,15 +10,20 @@ open Interlude.Features.Play
 
 type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let timers = Array.init keys (fun _ ->
-        let anim = Animation.Delay ns.ColumnLightDuration
-        anim.Update ns.ColumnLightDuration
-        anim
-    )
-    let sprite = Content.Texture "receptorlighting"
 
-    let column_spacing = ns.KeymodeColumnSpacing keys
-    let column_width = ns.KeymodeColumnWidth keys
+    let timers =
+        Array.init
+            keys
+            (fun _ ->
+                let anim = Animation.Delay(ns.ColumnLightDuration)
+                anim.Update(ns.ColumnLightDuration)
+                anim
+            )
+
+    let sprite = Content.Texture("receptorlighting")
+
+    let column_spacing = ns.KeymodeColumnSpacing(keys)
+    let column_width = ns.KeymodeColumnWidth(keys)
     let column_light_colors = ns.ColumnLightColors.[keys - 3]
 
     let offset = ns.ColumnLightOffset * column_width
@@ -39,7 +44,7 @@ type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        timers |> Array.iter (fun s -> s.Update elapsed_ms)
+        timers |> Array.iter(fun s -> s.Update(elapsed_ms))
 
         Array.iteri
             (fun k (s: Animation.Delay) ->
@@ -52,8 +57,7 @@ type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
 
         let draw_column k (s: Animation.Delay) =
             if not s.Complete then
-                let percent_remaining =
-                    1.0f - float32 s.Progress |> min 1.0f |> max 0.0f
+                let percent_remaining = 1.0f - float32 s.Progress |> min 1.0f |> max 0.0f
 
                 let a = 255.0f * percent_remaining |> int
 
@@ -79,7 +83,7 @@ type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
                               1.0f / percent_remaining)
                              sprite)
                         .AsQuad
-                    (Color.White.O4a a).AsQuad
+                    (Color.White.O4a(a)).AsQuad
                     (Sprite.pick_texture (0, column_light_colors.[k]) sprite)
 
         Array.iteri draw_column timers

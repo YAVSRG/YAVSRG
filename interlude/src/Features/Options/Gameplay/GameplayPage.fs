@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Gameplay
+namespace Interlude.Features.OptionsMenu.Gameplay
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -19,7 +19,10 @@ type GameplayPage() =
                         ((1080.0f - options.HitPosition.Value) / float32 options.ScrollSpeed.Value).ToString("F0")
                         (float32 options.ScrollSpeed.Value * 12.698412f).ToString("F1")
                         (float32 options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
-                        "C" + (60000.0f * float32 options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
+                        "C"
+                        + (60000.0f * float32 options.ScrollSpeed.Value
+                           / Interlude.Content.Content.NoteskinConfig.DefaultColumnWidth)
+                            .ToString("F0")
                     ]
                     %> "gameplay.scrollspeed.info"
                 )
@@ -33,8 +36,7 @@ type GameplayPage() =
             .Help(Help.Info("gameplay.hitposition"))
 
     static member Upscroll() : PageSetting =
-        PageSetting(%"gameplay.upscroll", Checkbox options.Upscroll)
-            .Help(Help.Info("gameplay.upscroll"))
+        PageSetting(%"gameplay.upscroll", Checkbox options.Upscroll).Help(Help.Info("gameplay.upscroll"))
 
     static member BackgroundDim() : PageSetting =
         PageSetting(%"gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
@@ -49,7 +51,8 @@ type GameplayPage() =
             .Help(Help.Info("gameplay.hide_hit_notes"))
 
     static member OnQuitOut() : PageSetting =
-        PageSetting(%"gameplay.on_quit_out",
+        PageSetting(
+            %"gameplay.on_quit_out",
             SelectDropdown(
                 [|
                     QuitOutBehaviour.SaveAndShow, %"gameplay.on_quit_out.save_and_show"
@@ -61,20 +64,18 @@ type GameplayPage() =
         )
 
     static member Lanecover() : PageButton =
-        PageButton(%"gameplay.lanecover", fun () -> LanecoverPage().Show())
-            .Help(Help.Info("gameplay.lanecover"))
+        PageButton(%"gameplay.lanecover", fun () -> LanecoverPage().Show()).Help(Help.Info("gameplay.lanecover"))
 
     static member Pacemaker() : PageButton =
-        PageButton(%"gameplay.pacemaker", fun () -> PacemakerOptionsPage().Show())
-            .Help(Help.Info("gameplay.pacemaker"))
+        PageButton(%"gameplay.pacemaker", fun () -> PacemakerOptionsPage().Show()).Help(Help.Info("gameplay.pacemaker"))
 
     static member Keybinds() : PageButton =
-        PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show())
-            .Help(Help.Info("gameplay.keybinds"))
+        PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show()).Help(Help.Info("gameplay.keybinds"))
 
     override this.Content() =
         let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(200.0f))
         this.DisposeOnDestroy(preview)
+
         page_container()
             .With(
                 GameplayPage.ScrollSpeed().Pos(0),

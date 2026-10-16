@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Score
+namespace Interlude.Features.Score
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -15,7 +15,8 @@ type Username() =
         let username =
             if Network.credentials.Username <> "" then
                 Network.credentials.Username
-            else %"network.connection.not_logged_in"
+            else
+                %"network.connection.not_logged_in"
 
         let icon, color =
             match Network.status with
@@ -26,4 +27,11 @@ type Username() =
             | Network.LoggedIn -> Icons.GLOBE, Colors.green_accent
 
         Render.rect area Colors.shadow_1.O2
-        Text.fill_b (Style.font, icon + "  " + username, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
+
+        Text.fill_b(
+            Style.font,
+            icon + "  " + username,
+            area.Shrink(10.0f, 5.0f),
+            (color, Colors.shadow_1),
+            Alignment.CENTER
+        )

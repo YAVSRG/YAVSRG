@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.Replay
+namespace Interlude.Features.Play.Replay
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
@@ -28,74 +28,53 @@ type ReplayScreen =
                 SelectedChart.rate.Value,
                 false
             | ReplayMode.Replay score_info ->
-                StoredReplaySource(score_info.Replay),
-                false,
-                score_info.Rate,
-                score_info.IsFailed
+                StoredReplaySource(score_info.Replay), false, score_info.Rate, score_info.IsFailed
 
         let LAST_NOTE = info.WithColors.LastNote
         let ruleset = Rulesets.current
 
-        let replay_ended_fade = Animation.Fade 0.0f
+        let replay_ended_fade = Animation.Fade(0.0f)
 
         let mutable last_time = -Time.infinity
         let mutable replay_data = replay_data
 
-        let mutable scoring = ScoreProcessor.Create(ruleset, replay_data, info.WithMods, rate)
+        let mutable scoring =
+            ScoreProcessor.Create(ruleset, replay_data, info.WithMods, rate)
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplaySource(replay_data.GetFullReplay())
             scoring <- ScoreProcessor.Create(ruleset, replay_data, info.WithMods, rate)
-            screen.State.ChangeScoring scoring
+            screen.State.ChangeScoring(scoring)
 
-        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Replay (is_auto, overlay_shown)) with
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Replay(is_auto, overlay_shown)) with
             override this.Init(parent: Widget) =
 
-                this
-                    .Add(
-                        { new StaticWidget(NodeType.None) with
-                            override _.Draw() =
-                                if show_input_overlay.Value || show_hit_overlay.Value then
-                                    Render.rect
-                                        this.Playfield.Bounds
-                                        (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
-                        },
-                        InputOverlay(
-                            info.WithMods.Keys,
-                            replay_data.GetFullReplay(),
-                            this.State,
-                            this.Playfield
-                        ),
-                        HitOverlay(
-                            rate,
-                            info.WithMods,
-                            replay_data.GetFullReplay(),
-                            this.State,
-                            this.Playfield
-                        ),
-                        DifficultyOverlay(
-                            info.WithMods,
-                            this.Playfield,
-                            info.Difficulty,
-                            this.State
+                this.Add(
+                    { new StaticWidget(NodeType.None) with
+                        override _.Draw() =
+                            if show_input_overlay.Value || show_hit_overlay.Value then
+                                Render.rect
+                                    this.Playfield.Bounds
+                                    (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
+                    },
+                    InputOverlay(info.WithMods.Keys, replay_data.GetFullReplay(), this.State, this.Playfield),
+                    HitOverlay(rate, info.WithMods, replay_data.GetFullReplay(), this.State, this.Playfield),
+                    DifficultyOverlay(info.WithMods, this.Playfield, info.Difficulty, this.State)
+                        .Conditional(show_difficulty_overlay.Get),
+                    Text(%"replay.end_of_data")
+                        .Color(fun () ->
+                            Colors.red_accent.O4a(replay_ended_fade.Alpha),
+                            Colors.shadow_2.O4a(replay_ended_fade.Alpha)
                         )
-                            .Conditional(show_difficulty_overlay.Get),
-                        Text(%"replay.end_of_data")
-                            .Color(fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha)
-                            .Position(Position.ShrinkB(100.0f).SliceB(60.0f)),
-                        ReplayControls(
-                            info.WithMods,
-                            is_auto,
-                            rate,
-                            Song.Seek
-                        )
-                    )
+                        .Position(Position.ShrinkB(100.0f).SliceB(60.0f)),
+                    ReplayControls(info.WithMods, is_auto, rate, Song.Seek)
+                )
 
                 base.Init(parent)
 
             override this.OnEnter p =
                 Song.SetRate(rate)
-                DiscordRPC.playing (%"discord_status.replay", SelectedChart.CACHE_DATA.Value.Title)
+                DiscordRPC.playing(%"discord_status.replay", SelectedChart.CACHE_DATA.Value.Title)
                 base.OnEnter(p)
 
             override this.OnExit p =
@@ -107,15 +86,16 @@ type ReplayScreen =
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
                 replay_ended_fade.Target <- if is_failed && replay_data.Finished then 1.0f else 0.0f
-                replay_ended_fade.Update elapsed_ms
+                replay_ended_fade.Update(elapsed_ms)
                 let now = this.State.CurrentTime()
                 let chart_time = this.State.CurrentChartTime()
 
                 if last_time > now then
                     seek_backwards(this)
+
                 last_time <- now
 
-                this.State.Scoring.Update chart_time
+                this.State.Scoring.Update(chart_time)
 
                 if now > LAST_NOTE && replay_data.Finished then
                     match mode with

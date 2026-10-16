@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Stats
+namespace Interlude.Features.Stats
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -16,7 +16,7 @@ type StatsPage() =
     let all_time_stats = OverallTab.Create()
     let leaderboards = LeaderboardsTab.Create()
 
-    let tab_options : (Widget * string * (unit -> bool)) array =
+    let tab_options: (Widget * string * (unit -> bool)) array =
         [|
             session_stats, %"stats.sessions", K false
             all_time_stats, %"stats.overall", K false
@@ -24,12 +24,13 @@ type StatsPage() =
         |]
 
     override this.Header() =
-        if selected_tab.Value = 2 && Network.status <> Network.LoggedIn then selected_tab.Value <- 0
+        if selected_tab.Value = 2 && Network.status <> Network.LoggedIn then
+            selected_tab.Value <- 0
 
-        TabButtons.CreatePersistent(tab_options, tab_container, selected_tab)
+        TabButtons
+            .CreatePersistent(tab_options, tab_container, selected_tab)
             .Position(Position.SlicePercentL(0.4f).ShrinkT(50.0f).SliceT(TabButtons.HEIGHT).ShrinkX(40.0f))
 
-    override this.Content() =
-        tab_container
+    override this.Content() = tab_container
 
     override this.Title = %"menu.stats"

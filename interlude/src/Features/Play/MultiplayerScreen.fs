@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open System.IO
 open Percyqaz.Common
@@ -28,7 +28,8 @@ type MultiplayerScreen =
         let first_note = info.WithMods.FirstNote
         let liveplay = GameplayReplaySource first_note
 
-        let scoring = ScoreProcessor.Create(ruleset, liveplay, info.WithMods, SelectedChart.rate.Value)
+        let scoring =
+            ScoreProcessor.Create(ruleset, liveplay, info.WithMods, SelectedChart.rate.Value)
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = Bitmask.Empty
@@ -48,57 +49,63 @@ type MultiplayerScreen =
         )
 
         lobby.StartPlaying()
+
         lobby.AddReplayInfo(
             Network.credentials.Username,
             {
                 ReplaySource = liveplay
                 ScoreProcessor = scoring
-                GetScoreInfo = fun () ->
-                    if not (liveplay :> ReplaySource).Finished then
-                        liveplay.Finish()
+                GetScoreInfo =
+                    fun () ->
+                        if not (liveplay :> ReplaySource).Finished then
+                            liveplay.Finish()
 
-                    scoring.ProcessEntireReplay()
+                        scoring.ProcessEntireReplay()
 
-                    let replay = (liveplay :> ReplaySource).GetFullReplay()
+                        let replay = (liveplay :> ReplaySource).GetFullReplay()
 
-                    {
-                        ChartMeta = info.ChartMeta
-                        Chart = info.Chart
-                        WithMods = info.WithMods
+                        {
+                            ChartMeta = info.ChartMeta
+                            Chart = info.Chart
+                            WithMods = info.WithMods
 
-                        PlayedBy = ScorePlayedBy.You
-                        TimePlayed = Timestamp.now ()
-                        Rate = SelectedChart.rate.Value
+                            PlayedBy = ScorePlayedBy.You
+                            TimePlayed = Timestamp.now()
+                            Rate = SelectedChart.rate.Value
 
-                        Replay = replay
-                        Scoring = scoring
-                        Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-                        Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
+                            Replay = replay
+                            Scoring = scoring
+                            Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+                            Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
-                        Rating = info.Difficulty
-                        Performance = Performance.calculate info.Difficulty scoring
+                            Rating = info.Difficulty
+                            Performance = Performance.calculate info.Difficulty scoring
 
-                        ImportedFromOsu = false
-                        IsFailed = quit_out_early
-                    }
+                            ImportedFromOsu = false
+                            IsFailed = quit_out_early
+                        }
             }
         )
 
         let send_replay_packet (chart_time: ChartTime) =
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
-            liveplay.ExportLiveBlock bw
+            liveplay.ExportLiveBlock(bw)
             lobby.SendReplayData(float32 chart_time, ms.ToArray())
             packet_count <- packet_count + 1
 
         let give_up () =
-            let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.Time - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
+            let is_giving_up_play =
+                not (liveplay :> ReplaySource).Finished
+                && (Song.Time - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
+
             quit_out_early <- true
 
             if
                 if is_giving_up_play then
                     liveplay.Finish()
                     scoring.ProcessEntireReplay()
+
                     Screen.change_new
                         (fun () ->
                             let score_info =
@@ -107,6 +114,7 @@ type MultiplayerScreen =
                                     scoring
                                     ((liveplay :> ReplaySource).GetFullReplay())
                                     quit_out_early
+
                             ScoreScreen(score_info, (ImprovementFlags.None, None), true)
                         )
                         ScreenType.Score
@@ -120,6 +128,7 @@ type MultiplayerScreen =
             liveplay.Finish()
             send_replay_packet chart_time
             lobby.FinishPlaying()
+
             Screen.change_new
                 (fun () ->
                     let score_info =
@@ -129,34 +138,32 @@ type MultiplayerScreen =
                             ((liveplay :> ReplaySource).GetFullReplay())
                             false
 
-                    (score_info, Gameplay.set_score false score_info info.SaveData, true)
-                    |> ScoreScreen
+                    (score_info, Gameplay.set_score false score_info info.SaveData, true) |> ScoreScreen
                 )
                 ScreenType.Score
                 Transitions.EnterGameplayNoFadeAudio
             |> ignore
 
-        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer lobby.Replays) with
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer(lobby.Replays)) with
             override this.Init(parent: Widget) =
-                this
-                    .Add(
-                        HotkeyHoldAction(
-                            "exit",
-                            (if options.HoldToGiveUp.Value then ignore else give_up),
-                            (if options.HoldToGiveUp.Value then give_up else ignore)
-                        )
+                this.Add(
+                    HotkeyHoldAction(
+                        "exit",
+                        (if options.HoldToGiveUp.Value then ignore else give_up),
+                        (if options.HoldToGiveUp.Value then give_up else ignore)
                     )
+                )
 
                 base.Init(parent)
 
             override this.OnEnter(previous) =
                 Content.Stats.StartOrContinueSession()
                 info.SaveData.LastPlayed <- Timestamp.now()
-                Toolbar.hide_cursor ()
+                Toolbar.hide_cursor()
 
                 base.OnEnter(previous)
 
-                DiscordRPC.playing_timed (
+                DiscordRPC.playing_timed(
                     %"discord_status.play_multiplayer",
                     info.ChartMeta.Title,
                     info.ChartMeta.Length / SelectedChart.rate.Value
@@ -167,22 +174,24 @@ type MultiplayerScreen =
                     Content.Stats.QuitOutOfPlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
                 else
                     Content.Stats.CompletePlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
-                
+
                 LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
 
-                Toolbar.show_cursor ()
+                Toolbar.show_cursor()
                 base.OnExit(next)
 
             override this.Update(elapsed_ms, moved) =
                 stats_play_time <- stats_play_time + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.TimeWithOffset
-                let chart_time : ChartTime = now - first_note
+                let chart_time: ChartTime = now - first_note
 
                 if not (liveplay :> ReplaySource).Finished then
 
-                    Input.pop_gameplay now binds (
-                        fun column time is_release ->
+                    Input.pop_gameplay
+                        now
+                        binds
+                        (fun column time is_release ->
                             if is_release then
                                 key_state <- key_state.Remove(column)
                             else
@@ -190,13 +199,14 @@ type MultiplayerScreen =
 
                             liveplay.AddFrame(time, key_state)
                             liveplay_position <- max liveplay_position (time - first_note)
-                    )
+                        )
 
                     if chart_time / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
                         send_replay_packet liveplay_position
 
-                    this.State.Scoring.Update liveplay_position
+                    this.State.Scoring.Update(liveplay_position)
                     liveplay_position <- max liveplay_position chart_time
 
-                if this.State.Scoring.Finished && not (liveplay :> ReplaySource).Finished then finish_play chart_time
+                if this.State.Scoring.Finished && not (liveplay :> ReplaySource).Finished then
+                    finish_play chart_time
         }

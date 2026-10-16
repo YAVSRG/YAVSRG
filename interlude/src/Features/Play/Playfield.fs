@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
@@ -145,18 +145,24 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         if noteskin_config.UseExplosions then
             explosions.Update(elapsed_ms, moved)
-            
+
     member private this.DrawStageTextures() : unit =
-        let inline draw_stage_left() : unit =
+        let inline draw_stage_left () : unit =
             let width = stage_left.AspectRatio * this.Bounds.Height
-            let bounds = Rect.FromSize(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height)
+
+            let bounds =
+                Rect.FromSize(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height)
+
             Render.sprite bounds Color.White stage_left
-                
-        let inline draw_stage_right() : unit =
+
+        let inline draw_stage_right () : unit =
             let width = stage_right.AspectRatio * this.Bounds.Height
-            let bounds = Rect.FromSize(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)
+
+            let bounds =
+                Rect.FromSize(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)
+
             Render.sprite bounds Color.White stage_right
-        
+
         if noteskin_config.EnableStageTextures then
             draw_stage_left()
             draw_stage_right()
@@ -341,8 +347,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 sv_seek <- sv_seek + 1
 
         let now =
-            Song.TimeWithOffset
-            + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.Rate
+            Song.TimeWithOffset + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.Rate
 
         if now < last_time then
             handle_seek_back_in_time()
@@ -408,8 +413,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                 let tailpos =
                     let pos = current_render_position - holdnote_trim
+
                     let min_pos =
                         if noteskin_config.MinimumHoldNoteLength then headpos else headpos - note_height * 0.5f
+
                     max pos min_pos
 
                 draw_body(key, headpos, tailpos, head_and_body_color, tint)
@@ -431,8 +438,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                 let tailpos =
                     let pos = current_render_position - holdnote_trim
+
                     let min_pos =
                         if noteskin_config.MinimumHoldNoteLength then headpos else headpos - note_height * 0.5f
+
                     max pos min_pos
 
                 draw_body(key, headpos, tailpos, head_and_body_color, tint)

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -37,7 +37,7 @@ type PracticeScreen =
                 Paused = Setting.simple true
                 SyncMode = Setting.simple SyncMode.AUDIO_OFFSET
                 SyncSuggestions = None
-                PracticePoint = start_at |> Setting.bounded (0.0f<ms>, last_allowed_practice_point)
+                PracticePoint = start_at |> Setting.bounded(0.0f<ms>, last_allowed_practice_point)
             }
 
         let FIRST_NOTE = info.WithMods.FirstNote
@@ -47,8 +47,10 @@ type PracticeScreen =
 
             scoring <- ScoreProcessor.Create(Rulesets.current, liveplay, info.WithMods, SelectedChart.rate.Value)
 
-            let ignore_notes_before_time : Time = state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value
-            scoring.IgnoreNotesBefore ignore_notes_before_time
+            let ignore_notes_before_time: Time =
+                state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value
+
+            scoring.IgnoreNotesBefore(ignore_notes_before_time)
 
             scoring.OnEvent.Add(fun h ->
                 match h.Inner with
@@ -57,14 +59,14 @@ type PracticeScreen =
                 | _ -> ()
             )
 
-        do reset_to_practice_point ()
+        do reset_to_practice_point()
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable input_key_state = Bitmask.Empty
 
         let restart (screen: IPlayScreen) =
-            reset_to_practice_point ()
-            screen.State.ChangeScoring scoring
+            reset_to_practice_point()
+            screen.State.ChangeScoring(scoring)
             Song.PlayFrom(state.PracticePoint.Value)
             state.Paused.Set(false)
 
@@ -77,7 +79,7 @@ type PracticeScreen =
         let resume (screen: IPlayScreen) =
             if not scoring.Finished && resume_from_current_place then
                 Song.Resume()
-                state.Paused.Set false
+                state.Paused.Set(false)
             else
                 restart screen
 
@@ -86,22 +88,22 @@ type PracticeScreen =
                 state,
                 info.WithMods,
                 fun t ->
-                    state.PracticePoint.Set t
+                    state.PracticePoint.Set(t)
                     Song.Seek(t)
                     resume_from_current_place <- false
             )
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Play) with
             override this.Init(parent: Widget) =
-                this.Add (paused_overlay this)
+                this.Add(paused_overlay this)
                 base.Init(parent)
 
             override this.OnEnter(p) =
                 base.OnEnter(p)
                 Song.Seek(state.PracticePoint.Value)
                 Song.Pause()
-                DiscordRPC.playing (%"discord_status.practice", info.ChartMeta.Title)
-                
+                DiscordRPC.playing(%"discord_status.practice", info.ChartMeta.Title)
+
             override this.OnExit(next: ScreenType) : unit =
                 base.OnExit(next)
                 Content.Stats.AddPracticeTime(stats_practice_time, stats_notes_hit)
@@ -118,9 +120,13 @@ type PracticeScreen =
                     restart this
 
                 elif (%%"offset").Pressed() then
-                    if not state.Paused.Value then pause this
+                    if not state.Paused.Value then
+                        pause this
+
                     LocalOffsetPage(
-                        (match state.SyncSuggestions with Some s -> s.AudioOffset | None -> state.SaveData.Offset),
+                        (match state.SyncSuggestions with
+                         | Some s -> s.AudioOffset
+                         | None -> state.SaveData.Offset),
                         LocalOffset.offset_setting state.SaveData
                     )
                         .WithOnClose(fun () -> restart this)
@@ -146,7 +152,9 @@ type PracticeScreen =
                     if (%%"pause").Pressed() then
                         resume this
                     else
-                        SelectedChart.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
+                        SelectedChart.change_rate_hotkeys(fun change_by ->
+                            SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by
+                        )
 
                 elif (%%"exit").Pressed() then
                     if not state.Paused.Value then
@@ -156,17 +164,19 @@ type PracticeScreen =
                         Screen.back Transitions.Default |> ignore
 
                 elif not (liveplay :> ReplaySource).Finished then
-                    Input.pop_gameplay now binds (
-                        fun column time is_release ->
+                    Input.pop_gameplay
+                        now
+                        binds
+                        (fun column time is_release ->
                             if is_release then
                                 input_key_state <- input_key_state.Remove(column)
                             else
                                 input_key_state <- input_key_state.Add(column)
 
                             liveplay.AddFrame(time, input_key_state)
-                    )
+                        )
 
-                    this.State.Scoring.Update chart_time
+                    this.State.Scoring.Update(chart_time)
 
                 if not state.Paused.Value then
                     stats_practice_time <- stats_practice_time + elapsed_ms

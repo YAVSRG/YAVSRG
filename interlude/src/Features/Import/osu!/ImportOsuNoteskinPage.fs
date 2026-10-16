@@ -9,7 +9,8 @@ open Interlude.UI
 open Interlude.Options
 open Interlude.Content
 
-type ImportOsuNoteskinPage(osu_skin_conversion: OsuSkinConversion, folder_name: string, existing_folder: string option) =
+type ImportOsuNoteskinPage(osu_skin_conversion: OsuSkinConversion, folder_name: string, existing_folder: string option)
+    =
     inherit Page()
 
     let keymode: Setting<Keymode> = Setting.simple Keymode.``4K``
@@ -18,21 +19,19 @@ type ImportOsuNoteskinPage(osu_skin_conversion: OsuSkinConversion, folder_name: 
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"osu_skin_import.keymode", SelectDropdown.FromEnum(keymode))
-            .Pos(0)
+        |+ PageSetting(%"osu_skin_import.keymode", SelectDropdown.FromEnum(keymode)).Pos(0)
         |+ PageSetting(%"osu_skin_import.isarrows", Checkbox is_arrows)
             .Pos(2)
             .Conditional(fun () -> keymode.Value = Keymode.``4K``)
-        |+
-            match existing_folder with
-            | Some folder ->
-                [
-                    Text([folder] %> "osu_skin_import.delete_prompt")
-                        .Align(Alignment.LEFT)
-                        .Position(page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
-                    PageSetting(%"osu_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
-                ]
-            | None -> []
+        |+ match existing_folder with
+           | Some folder ->
+               [
+                   Text([ folder ] %> "osu_skin_import.delete_prompt")
+                       .Align(Alignment.LEFT)
+                       .Position(page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
+                   PageSetting(%"osu_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
+               ]
+           | None -> []
         |+ PageButton
             .Once(
                 %"osu_skin_import.confirm",
@@ -49,11 +48,13 @@ type ImportOsuNoteskinPage(osu_skin_conversion: OsuSkinConversion, folder_name: 
                                 match existing_folder with
                                 | Some old_name ->
                                     let skin_path = Path.Combine(get_game_folder("Skins"), old_name)
+
                                     if Directory.Exists(skin_path) then
                                         Directory.Delete(skin_path, true)
                                 | None -> failwith "impossible"
                             with err ->
-                                Logging.Error "Error deleting old skin"
+                                Logging.Error("Error deleting old skin")
+
                         Skins.load()
                         Skins.selected_noteskin_id.Set(folder_name)
                         Skins.selected_hud_id.Set(folder_name)

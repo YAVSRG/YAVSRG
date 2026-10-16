@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.Replay
+namespace Interlude.Features.Play.Replay
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
@@ -13,18 +13,13 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type private HitOverlay
-    (
-        rate: Rate,
-        chart: ModdedChart,
-        replay: Replay,
-        state: PlayState,
-        playfield: Playfield
-    ) =
+type private HitOverlay(rate: Rate, chart: ModdedChart, replay: Replay, state: PlayState, playfield: Playfield) =
     inherit StaticWidget(NodeType.None)
 
     let hit_events =
-        let full_score = ScoreProcessor.ProcessEntireReplay(state.Ruleset, replay, chart, rate)
+        let full_score =
+            ScoreProcessor.ProcessEntireReplay(state.Ruleset, replay, chart, rate)
+
         full_score.Events |> Array.ofSeq
 
     let mutable seek = 0
@@ -53,9 +48,7 @@ type private HitOverlay
             .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 note_y,
-                playfield.Bounds.Left
-                + playfield.ColumnPositions.[column]
-                + playfield.ColumnWidth,
+                playfield.Bounds.Left + playfield.ColumnPositions.[column] + playfield.ColumnWidth,
                 note_y
             )
             .Shrink((playfield.ColumnWidth - 5.0f) * 0.75f, -2.5f)
@@ -66,9 +59,7 @@ type private HitOverlay
             .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 action_y,
-                playfield.Bounds.Left
-                + playfield.ColumnPositions.[column]
-                + playfield.ColumnWidth,
+                playfield.Bounds.Left + playfield.ColumnPositions.[column] + playfield.ColumnWidth,
                 note_y
             )
             .Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
@@ -79,9 +70,7 @@ type private HitOverlay
             .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 action_y,
-                playfield.Bounds.Left
-                + playfield.ColumnPositions.[column]
-                + playfield.ColumnWidth,
+                playfield.Bounds.Left + playfield.ColumnPositions.[column] + playfield.ColumnWidth,
                 action_y
             )
             .Shrink(20.0f, -2.5f)
@@ -94,14 +83,14 @@ type private HitOverlay
                 .FromEdges(
                     playfield.Bounds.Left + playfield.ColumnPositions.[column],
                     y,
-                    playfield.Bounds.Left
-                    + playfield.ColumnPositions.[column]
-                    + playfield.ColumnWidth,
+                    playfield.Bounds.Left + playfield.ColumnPositions.[column] + playfield.ColumnWidth,
                     y
                 )
-                .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentT(0.45f).ShrinkPercentT(0.5f)
+                .Shrink(0.0f, -playfield.ColumnWidth * 0.5f)
+                .SlicePercentT(0.45f)
+                .ShrinkPercentT(0.5f)
             |> scroll_direction_pos playfield.Bounds.Bottom
-            |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
+            |> fun a -> Text.fill_b(Style.font, text, a, (color, Colors.black), 0.5f)
 
     let label_after (column: int) (y: float32) (text: string) (color: Color) : unit =
         if show_hit_overlay_labels.Value then
@@ -109,28 +98,27 @@ type private HitOverlay
                 .FromEdges(
                     playfield.Bounds.Left + playfield.ColumnPositions.[column],
                     y,
-                    playfield.Bounds.Left
-                    + playfield.ColumnPositions.[column]
-                    + playfield.ColumnWidth,
+                    playfield.Bounds.Left + playfield.ColumnPositions.[column] + playfield.ColumnWidth,
                     y
                 )
-                .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentB(0.45f).ShrinkPercentB(0.5f)
+                .Shrink(0.0f, -playfield.ColumnWidth * 0.5f)
+                .SlicePercentB(0.45f)
+                .ShrinkPercentB(0.5f)
             |> scroll_direction_pos playfield.Bounds.Bottom
-            |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
+            |> fun a -> Text.fill_b(Style.font, text, a, (color, Colors.black), 0.5f)
 
     let draw_icon (column: int) (y: float32) (icon: string) (color: Color) : unit =
         Rect
             .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 y,
-                playfield.Bounds.Left
-                + playfield.ColumnPositions.[column]
-                + playfield.ColumnWidth,
+                playfield.Bounds.Left + playfield.ColumnPositions.[column] + playfield.ColumnWidth,
                 y
             )
-            .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).ShrinkPercent(0.15f)
+            .Shrink(0.0f, -playfield.ColumnWidth * 0.5f)
+            .ShrinkPercent(0.15f)
         |> scroll_direction_pos playfield.Bounds.Bottom
-        |> fun a -> Text.fill_b (Style.font, icon, a, (color, Colors.black), 0.5f)
+        |> fun a -> Text.fill_b(Style.font, icon, a, (color, Colors.black), 0.5f)
 
     let draw_event (now: ChartTime) (ev: ScoringEvent) : unit =
         let ms_to_y (time: Time) =
@@ -145,9 +133,9 @@ type private HitOverlay
             let color =
                 match x.Judgement with
                 | None -> Colors.grey_1.O2
-                | Some (i, _) -> state.Ruleset.JudgementColor i
+                | Some(i, _) -> state.Ruleset.JudgementColor(i)
 
-            let note_y = ms_to_y (ev.Time - x.Delta * SelectedChart.rate.Value)
+            let note_y = ms_to_y(ev.Time - x.Delta * SelectedChart.rate.Value)
 
             if x.Missed then
                 draw_icon ev.Column note_y Icons.X color
@@ -164,9 +152,9 @@ type private HitOverlay
             let color =
                 match x.Judgement with
                 | None -> Colors.grey_1.O2
-                | Some (i, _) -> state.Ruleset.JudgementColor i
+                | Some(i, _) -> state.Ruleset.JudgementColor(i)
 
-            let note_y = ms_to_y (ev.Time - x.Delta * SelectedChart.rate.Value)
+            let note_y = ms_to_y(ev.Time - x.Delta * SelectedChart.rate.Value)
 
             if x.Missed then
                 draw_icon ev.Column note_y Icons.X color
@@ -183,7 +171,8 @@ type private HitOverlay
             let color =
                 match x.Judgement with
                 | None -> Colors.red_accent.O2
-                | Some (i, _) -> state.Ruleset.JudgementColor i
+                | Some(i, _) -> state.Ruleset.JudgementColor(i)
+
             let action_y = ms_to_y ev.Time
 
             draw_delta ev.Column action_y action_y color
@@ -210,14 +199,15 @@ type private HitOverlay
     override this.Draw() =
         if show_hit_overlay.Value then
             let now =
-                state.CurrentChartTime() +
-                (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.Rate
+                state.CurrentChartTime() + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.Rate
 
             while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1
 
             let until_time =
-                now + 1080.0f / (options.ScrollSpeed.Value / SelectedChart.rate.Value) + MAX_WINDOW * SelectedChart.rate.Value
+                now
+                + 1080.0f / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+                + MAX_WINDOW * SelectedChart.rate.Value
 
             let mutable peek = seek
 
@@ -225,11 +215,13 @@ type private HitOverlay
                 draw_event now hit_events.[peek]
                 peek <- peek + 1
 
-    override this.Update (elapsed_ms, moved) =
+    override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()
+
         if time < last_time then
             while seek > 0 && hit_events.[seek].Time > time do
                 seek <- seek - 1
+
         last_time <- state.CurrentChartTime()

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open System
 open Percyqaz.Flux.Audio
@@ -33,31 +33,39 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
         scoring <- new_scoring
         scoring_changed_ev.Trigger()
 
-    member this.OnScoringChanged(action: unit -> unit) : IDisposable =
-        scoring_changed.Subscribe action
+    member this.OnScoringChanged(action: unit -> unit) : IDisposable = scoring_changed.Subscribe(action)
 
     member this.Subscribe(handler: ScoringEvent -> unit) : IDisposable =
-        let mutable obj: IDisposable = scoring.OnEvent.Subscribe handler
+        let mutable obj: IDisposable = scoring.OnEvent.Subscribe(handler)
 
-        let resubscribe_on_change = scoring_changed.Subscribe(fun () ->
-            obj.Dispose()
-            obj <- scoring.OnEvent.Subscribe handler
-        )
+        let resubscribe_on_change =
+            scoring_changed.Subscribe(fun () ->
+                obj.Dispose()
+                obj <- scoring.OnEvent.Subscribe(handler)
+            )
 
-        { new IDisposable with override this.Dispose() = resubscribe_on_change.Dispose(); obj.Dispose() }
+        { new IDisposable with
+            override this.Dispose() =
+                resubscribe_on_change.Dispose()
+                obj.Dispose()
+        }
 
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
         let replay = Autoplay.CreateReplay(info.WithColors)
         let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
+
+        let scoring =
+            ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
 
         let state = PlayState(info, PacemakerState.None, scoring, Song.get_TimeWithOffset)
 
-        scoring.Update (state.CurrentChartTime())
+        scoring.Update(state.CurrentChartTime())
 
         let reset () =
-            let recreated = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
-            recreated.Update (state.CurrentChartTime())
-            state.ChangeScoring recreated
+            let recreated =
+                ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
+
+            recreated.Update(state.CurrentChartTime())
+            state.ChangeScoring(recreated)
 
         state, reset

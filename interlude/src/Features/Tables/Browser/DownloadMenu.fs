@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Tables.Browser
+namespace Interlude.Features.Tables.Browser
 
 open System.Collections.Generic
 open Percyqaz.Common
@@ -38,23 +38,22 @@ module TableDownloader =
             download_service: Async.Queue<DownloaderState * string * Tables.Charts.ChartInfo, unit>
         ) =
 
-        let levels_by_chart = charts |> Seq.map (fun c -> c.Hash, c.Level) |> Map.ofSeq
+        let levels_by_chart = charts |> Seq.map(fun c -> c.Hash, c.Level) |> Map.ofSeq
 
         let charts_by_level =
-            charts |> Array.groupBy (fun x -> x.Level) |> Array.sortBy fst |> Map.ofArray
+            charts |> Array.groupBy(fun x -> x.Level) |> Array.sortBy fst |> Map.ofArray
 
         let sections =
             table.Info.Sections
-            |> List.sortBy (fun s -> s.LevelStart)
-            |> List.map (fun section ->
+            |> List.sortBy(fun s -> s.LevelStart)
+            |> List.map(fun section ->
                 section,
-                charts_by_level
-                |> Map.filter (fun level _ -> level >= section.LevelStart && level <= section.LevelEnd)
+                charts_by_level |> Map.filter(fun level _ -> level >= section.LevelStart && level <= section.LevelEnd)
             )
 
         let sections_by_level =
             sections
-            |> Seq.map (fun (info, levels) -> levels |> Map.toSeq |> Seq.map (fun (l, _) -> l, info.Name))
+            |> Seq.map(fun (info, levels) -> levels |> Map.toSeq |> Seq.map(fun (l, _) -> l, info.Name))
             |> Seq.concat
             |> Map.ofSeq
 
@@ -69,13 +68,13 @@ module TableDownloader =
             for chart in charts do
                 statuses.[chart.Hash] <-
                     match Content.Charts.GetChartMeta(chart.Hash) with
-                    | Some chart_meta when chart_meta.Packs.Contains table.Info.Name -> ChartStatus.Downloaded
+                    | Some chart_meta when chart_meta.Packs.Contains(table.Info.Name) -> ChartStatus.Downloaded
                     | _ -> ChartStatus.Missing
 
             for level in charts_by_level.Keys do
                 let counts =
                     charts_by_level.[level]
-                    |> Seq.map (fun c -> statuses.[c.Hash])
+                    |> Seq.map(fun c -> statuses.[c.Hash])
                     |> Seq.countBy id
                     |> fun s ->
                         seq {
@@ -103,7 +102,7 @@ module TableDownloader =
                 let counts =
                     levels
                     |> Map.keys
-                    |> Seq.map (fun level -> level_status.[level])
+                    |> Seq.map(fun level -> level_status.[level])
                     |> Seq.countBy id
                     |> fun s ->
                         seq {
@@ -116,14 +115,10 @@ module TableDownloader =
                     |> Map.ofSeq
 
                 section_status.[section.Name] <-
-                    if counts.[GroupStatus.SomeMissing] > 0 then
-                        GroupStatus.SomeMissing
-                    elif counts.[GroupStatus.Downloaded] > 0 && counts.[GroupStatus.AllMissing] > 0 then
-                        GroupStatus.SomeMissing
-                    elif counts.[GroupStatus.Downloaded] = 0 then
-                        GroupStatus.AllMissing
-                    else
-                        GroupStatus.Downloaded
+                    if counts.[GroupStatus.SomeMissing] > 0 then GroupStatus.SomeMissing
+                    elif counts.[GroupStatus.Downloaded] > 0 && counts.[GroupStatus.AllMissing] > 0 then GroupStatus.SomeMissing
+                    elif counts.[GroupStatus.Downloaded] = 0 then GroupStatus.AllMissing
+                    else GroupStatus.Downloaded
 
         member this.Charts = charts
 
@@ -141,7 +136,7 @@ module TableDownloader =
             level_status.[level] <-
                 let chart_statuses =
                     charts_by_level.[level]
-                    |> Seq.map (fun c -> statuses.[c.Hash])
+                    |> Seq.map(fun c -> statuses.[c.Hash])
                     |> Seq.countBy id
                     |> fun s ->
                         seq {
@@ -154,15 +149,11 @@ module TableDownloader =
                         }
                     |> Map.ofSeq
 
-                if
-                    chart_statuses.[ChartStatus.Downloading] > 0
-                    || chart_statuses.[ChartStatus.Queued] > 0
-                then
+                if chart_statuses.[ChartStatus.Downloading] > 0 || chart_statuses.[ChartStatus.Queued] > 0 then
                     GroupStatus.Downloading
                 elif
                     chart_statuses.[ChartStatus.Downloaded] > 0
-                    && (chart_statuses.[ChartStatus.DownloadFailed] > 0
-                        || chart_statuses.[ChartStatus.Missing] > 0)
+                    && (chart_statuses.[ChartStatus.DownloadFailed] > 0 || chart_statuses.[ChartStatus.Missing] > 0)
                 then
                     GroupStatus.SomeMissing
                 elif chart_statuses.[ChartStatus.Downloaded] = 0 then
@@ -175,10 +166,10 @@ module TableDownloader =
             section_status.[section] <-
                 let level_statuses =
                     sections
-                    |> List.find (fun (x, _) -> x.Name = section)
+                    |> List.find(fun (x, _) -> x.Name = section)
                     |> snd
                     |> Map.keys
-                    |> Seq.map (fun level -> level_status.[level])
+                    |> Seq.map(fun level -> level_status.[level])
                     |> Seq.countBy id
                     |> fun s ->
                         seq {
@@ -194,10 +185,7 @@ module TableDownloader =
                     GroupStatus.Downloading
                 elif level_statuses.[GroupStatus.SomeMissing] > 0 then
                     GroupStatus.SomeMissing
-                elif
-                    level_statuses.[GroupStatus.Downloaded] > 0
-                    && level_statuses.[GroupStatus.AllMissing] > 0
-                then
+                elif level_statuses.[GroupStatus.Downloaded] > 0 && level_statuses.[GroupStatus.AllMissing] > 0 then
                     GroupStatus.SomeMissing
                 elif level_statuses.[GroupStatus.Downloaded] = 0 then
                     GroupStatus.AllMissing
@@ -220,13 +208,8 @@ module TableDownloader =
                 this.OnSelectedChanged()
 
         member this.QueueSection(section: string) =
-            for chart in
-                sections
-                |> List.find (fun (info, _) -> info.Name = section)
-                |> snd
-                |> Map.values
-                |> Seq.concat do
-                match this.Status chart.Hash with
+            for chart in sections |> List.find(fun (info, _) -> info.Name = section) |> snd |> Map.values |> Seq.concat do
+                match this.Status(chart.Hash) with
                 | ChartStatus.DownloadFailed
                 | ChartStatus.Missing ->
                     this.SetStatus(chart.Hash, ChartStatus.Queued)
@@ -235,7 +218,7 @@ module TableDownloader =
 
         member this.QueueLevel(level: int) =
             for chart in charts_by_level.[level] do
-                match this.Status chart.Hash with
+                match this.Status(chart.Hash) with
                 | ChartStatus.DownloadFailed
                 | ChartStatus.Missing ->
                     this.SetStatus(chart.Hash, ChartStatus.Queued)
@@ -246,18 +229,20 @@ module TableDownloader =
         { new Async.Queue<DownloaderState * string * Tables.Charts.ChartInfo, unit>() with
             override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
                 async {
-                    GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
+                    GameThread.defer(fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
 
                     match Content.Charts.GetChartMeta(chart.Hash) with
                     | Some chart_meta ->
                         Content.Charts.AddToPack(chart_meta, table_name)
-                        GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        GameThread.defer(fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
-                        match! OnlineImports.cdn_install (table_name, chart.Hash, chart.Chart, chart.Song, Content.Charts) with
-                        | Ok() -> GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        match!
+                            OnlineImports.cdn_install(table_name, chart.Hash, chart.Chart, chart.Song, Content.Charts)
+                        with
+                        | Ok() -> GameThread.defer(fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                         | Error reason ->
                             Logging.Error "Error downloading '%s' from CDN: %s" chart.Hash reason
-                            GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
+                            GameThread.defer(fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
 
                     return ()
                 }
@@ -284,11 +269,9 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
     override this.Init(parent: Widget) =
         this
         |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
-        |+ Text(chart.Song.FormattedTitle)
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(5.0f, 0.0f))
+        |+ Text(chart.Song.FormattedTitle).Align(Alignment.LEFT).Position(Position.Shrink(5.0f, 0.0f))
         |* Text(fun () ->
-            match state.Status chart.Hash with
+            match state.Status(chart.Hash) with
             | ChartStatus.Missing -> Icons.X
             | ChartStatus.Queued -> Icons.REFRESH_CW
             | ChartStatus.Downloading -> Icons.DOWNLOAD
@@ -296,7 +279,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
             | ChartStatus.DownloadFailed -> Icons.X
         )
             .Color(fun () ->
-                match state.Status chart.Hash with
+                match state.Status(chart.Hash) with
                 | ChartStatus.Missing -> Colors.text_greyout
                 | ChartStatus.Queued -> Colors.text_subheading
                 | ChartStatus.Downloading -> Colors.text_yellow_2
@@ -306,7 +289,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
             .Position(Position.Shrink(5.0f, 0.0f))
             .Align(Alignment.RIGHT)
 
-        base.Init parent
+        base.Init(parent)
 
 type private LevelHeader(section: TableSectionInfo, level: int, level_name: string, state: DownloaderState) as this =
     inherit
@@ -321,26 +304,23 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
     override this.Visible = state.OpenSection = section.Name
 
     member this.OnClick() =
-        if state.OpenLevel = level then
-            state.OpenLevel <- -1
-        else
-            state.OpenLevel <- level
+        if state.OpenLevel = level then state.OpenLevel <- -1 else state.OpenLevel <- level
 
     member this.Button =
         Button(
             (fun () ->
-                match state.LevelStatus level with
+                match state.LevelStatus(level) with
                 | GroupStatus.AllMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.download"
                 | GroupStatus.SomeMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.update"
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
             ),
-            (fun () -> state.QueueLevel level)
+            (fun () -> state.QueueLevel(level))
         )
             .Position(Position.ShrinkR(160.0f).SliceR(200.0f).Shrink(20.0f, 5.0f))
 
     override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
     override this.Init(parent: Widget) =
@@ -351,14 +331,14 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
             .Position(Position.Shrink(5.0f, 0.0f))
         |+ Text(fun () ->
-            match state.LevelStatus level with
+            match state.LevelStatus(level) with
             | GroupStatus.AllMissing -> Icons.X
             | GroupStatus.SomeMissing -> Icons.X
             | GroupStatus.Downloading -> Icons.REFRESH_CW
             | GroupStatus.Downloaded -> Icons.CHECK
         )
             .Color(fun () ->
-                match state.LevelStatus level with
+                match state.LevelStatus(level) with
                 | GroupStatus.AllMissing -> Colors.text_greyout
                 | GroupStatus.SomeMissing -> Colors.text_yellow_2
                 | GroupStatus.Downloading -> Colors.text_yellow_2
@@ -366,19 +346,14 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             )
             .Position(Position.Shrink(85.0f, 0.0f))
             .Align(Alignment.RIGHT)
-        |+ Text(fun () ->
-            if state.OpenLevel = level then
-                Icons.CHEVRON_UP
-            else
-                Icons.CHEVRON_DOWN
-        )
+        |+ Text(fun () -> if state.OpenLevel = level then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
             .Color(Colors.text)
             .Align(Alignment.RIGHT)
             .Position(Position.Shrink(5.0f, 0.0f))
         |+ MouseListener().Button(this)
         |* this.Button
 
-        base.Init parent
+        base.Init(parent)
 
 type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as this =
     inherit
@@ -393,25 +368,22 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
     override this.Visible = true
 
     member this.OnClick() =
-        if state.OpenSection = info.Name then
-            state.OpenSection <- ""
-        else
-            state.OpenSection <- info.Name
+        if state.OpenSection = info.Name then state.OpenSection <- "" else state.OpenSection <- info.Name
 
     member this.Button =
         Button(
             fun () ->
-                match state.SectionStatus info.Name with
+                match state.SectionStatus(info.Name) with
                 | GroupStatus.AllMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.download"
                 | GroupStatus.SomeMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.update"
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
-            , (fun () -> state.QueueSection info.Name)
+            , (fun () -> state.QueueSection(info.Name))
         )
             .Position(Position.ShrinkR(100.0f).SliceR(200.0f).Shrink(20.0f, 20.0f))
 
     override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
     override this.Init(parent: Widget) =
@@ -425,19 +397,14 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.Shrink(5.0f).SliceB(50.0f))
-        |+ Text(fun () ->
-                if state.OpenSection = info.Name then
-                    Icons.CHEVRON_UP
-                else
-                    Icons.CHEVRON_DOWN
-            )
+        |+ Text(fun () -> if state.OpenSection = info.Name then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
             .Color(Colors.text)
             .Align(Alignment.RIGHT)
             .Position(Position.Shrink(25.0f, 20.0f))
         |+ MouseListener().Button(this)
         |* this.Button
 
-        base.Init parent
+        base.Init(parent)
 
 type private TableDownloadMenu(table: Table, state: DownloaderState) =
     inherit Page()
@@ -448,11 +415,11 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
 
     let sections =
         table.Info.Sections
-        |> List.sortBy (fun s -> s.LevelStart)
-        |> List.map (fun section ->
+        |> List.sortBy(fun s -> s.LevelStart)
+        |> List.map(fun section ->
             section,
             charts_by_level
-            |> Array.filter (fun (level, _) -> level >= section.LevelStart && level <= section.LevelEnd)
+            |> Array.filter(fun (level, _) -> level >= section.LevelStart && level <= section.LevelEnd)
             |> Array.sortBy fst
         )
 
@@ -464,29 +431,27 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
             container.Add(SectionHeader(section_info, state))
 
             for level, level_charts in section_levels do
-                container.Add(LevelHeader(section_info, level, table.Info.LevelName level, state))
+                container.Add(LevelHeader(section_info, level, table.Info.LevelName(level), state))
 
                 for chart in level_charts do
                     container.Add(Chart(chart, state))
 
-        ScrollContainer(container)
-            .Margin(Style.PADDING * 2.0f)
-            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        ScrollContainer(container).Margin(Style.PADDING * 2.0f).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = table.Info.Name
 
     static member LoadOrOpen(table: Table) =
-        match existing_states.TryFind table.Id with
+        match existing_states.TryFind(table.Id) with
         | Some state -> TableDownloadMenu(table, state).Show()
         | None ->
-            Tables.Charts.get (
+            Tables.Charts.get(
                 table.Id,
                 function
                 | Some charts ->
                     let state = DownloaderState(table, charts.Charts, download_service)
 
-                    GameThread.defer (fun () ->
-                        match existing_states.TryFind table.Id with
+                    GameThread.defer(fun () ->
+                        match existing_states.TryFind(table.Id) with
                         | Some _ -> () // do nothing if they spam clicked the table button
                         | None ->
                             existing_states <- Map.add table.Id state existing_states

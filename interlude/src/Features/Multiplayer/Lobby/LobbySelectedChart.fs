@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Multiplayer
+namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
@@ -21,13 +21,9 @@ type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
     inherit Page()
 
     override this.Content() =
-        FlowContainer.Vertical(PAGE_ITEM_HEIGHT)
-            .Position(Position.Shrink(100.0f, 200.0f))
+        FlowContainer.Vertical(PAGE_ITEM_HEIGHT).Position(Position.Shrink(100.0f, 200.0f))
 
-        |+ PageButton(
-            %"chart.add_to_collection",
-            fun () -> AddToCollectionPage(chart_meta).Show()
-        )
+        |+ PageButton(%"chart.add_to_collection", fun () -> AddToCollectionPage(chart_meta).Show())
             .Icon(Icons.FOLDER_PLUS)
         :> Widget
 
@@ -35,23 +31,21 @@ type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
 
 module LobbySelectedChart =
 
-    let mutable private last_seen_lobby_chart : LobbyChart option = None
-    let mutable private last_seen_loaded_chart : LoadedChartInfo option = None
+    let mutable private last_seen_lobby_chart: LobbyChart option = None
+    let mutable private last_seen_loaded_chart: LoadedChartInfo option = None
     let mutable private is_loading = false
 
-    let info_if_selected() : LoadedChartInfo option =
+    let info_if_selected () : LoadedChartInfo option =
         match last_seen_loaded_chart, last_seen_lobby_chart with
         | Some real_chart, Some expected_chart ->
-            if real_chart.ChartMeta.Hash = expected_chart.Hash then
-                Some real_chart
-            else None
+            if real_chart.ChartMeta.Hash = expected_chart.Hash then Some real_chart else None
         | _ -> None
 
-    let is_loaded_or_loading() =
-        is_loading || info_if_selected().IsSome
+    let is_loaded_or_loading () = is_loading || info_if_selected().IsSome
 
     let attempt_match_lobby_chart (lobby: Lobby) =
         last_seen_lobby_chart <- lobby.Chart
+
         match lobby.Chart with
         | None -> ()
         | Some chart ->
@@ -60,49 +54,53 @@ module LobbySelectedChart =
         | Some _ ->
             SelectedChart.set_rate_and_mods(
                 chart.Rate,
-                chart.Mods
-                |> Map.ofArray
-                |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
+                chart.Mods |> Map.ofArray |> Map.filter(fun id _ -> Mods.AVAILABLE_MODS.ContainsKey(id))
             )
         | None ->
             match Content.Charts.GetChartMeta(chart.Hash) with
             | None ->
                 is_loading <- true
                 Logging.Debug("Multiplayer chart not found, downloading")
-                Backbeat.download_missing_chart.Request((chart.Hash, "Multiplayer"),
+
+                Backbeat.download_missing_chart.Request(
+                    (chart.Hash, "Multiplayer"),
                     function
                     | false ->
                         Logging.Debug("Multiplayer chart not found on the server either")
                         lobby.ReportMissingChart()
                         is_loading <- false
-                        Notifications.error(%"notification.multiplayer_chart_not_found.title", %"notification.multiplayer_chart_not_found.body")
+
+                        Notifications.error(
+                            %"notification.multiplayer_chart_not_found.title",
+                            %"notification.multiplayer_chart_not_found.body"
+                        )
                     | true ->
                         let newly_installed = Content.Charts.GetChartMeta(chart.Hash).Value
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
+
                         GameThread.defer
                         <| fun () ->
-                        SelectedChart.change (newly_installed, LibraryContext.None, true)
-                        SelectedChart.rate.Set chart.Rate
-                        SelectedChart.selected_mods.Set(
-                            chart.Mods
-                            |> Map.ofArray
-                            |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
-                        )
+                            SelectedChart.change(newly_installed, LibraryContext.None, true)
+                            SelectedChart.rate.Set(chart.Rate)
+
+                            SelectedChart.selected_mods.Set(
+                                chart.Mods |> Map.ofArray |> Map.filter(fun id _ -> Mods.AVAILABLE_MODS.ContainsKey(id))
+                            )
                 )
             | Some chart_meta ->
-                SelectedChart.change (chart_meta, LibraryContext.None, true)
+                SelectedChart.change(chart_meta, LibraryContext.None, true)
+
                 SelectedChart.set_rate_and_mods(
                     chart.Rate,
-                    chart.Mods
-                    |> Map.ofArray
-                    |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
+                    chart.Mods |> Map.ofArray |> Map.filter(fun id _ -> Mods.AVAILABLE_MODS.ContainsKey(id))
                 )
 
-    let on_screen_enter(lobby: Lobby) =
-        SelectedChart.if_loaded (fun info ->
+    let on_screen_enter (lobby: Lobby) =
+        SelectedChart.if_loaded(fun info ->
             is_loading <- false
             last_seen_loaded_chart <- Some info
         )
+
         attempt_match_lobby_chart(lobby)
 
     do
@@ -114,10 +112,7 @@ module LobbySelectedChart =
         Content.OnChartAdded.Add(fun () ->
             match Network.lobby with
             | Some lobby ->
-                if
-                    Screen.current_type = ScreenType.Lobby
-                    && not (is_loaded_or_loading())
-                then
+                if Screen.current_type = ScreenType.Lobby && not(is_loaded_or_loading()) then
                     attempt_match_lobby_chart(lobby)
             | None -> ()
         )
@@ -175,7 +170,7 @@ type LobbySelectedChart(lobby: Lobby) =
             .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
         |+ Text(fun () ->
             match LobbySelectedChart.info_if_selected() with
-            | Some _ -> ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+            | Some _ -> ModState.format(SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
             | None -> ""
         )
             .Align(Alignment.LEFT)
@@ -187,18 +182,14 @@ type LobbySelectedChart(lobby: Lobby) =
         )
             .Align(Alignment.RIGHT)
             .Position(Position.ShrinkT(160.0f).SliceT(40.0f))
-        |+ Text(fun () ->
-            if LobbySelectedChart.is_loaded_or_loading() then
-                ""
-            else
-                %"lobby.missing_chart"
-        )
+        |+ Text(fun () -> if LobbySelectedChart.is_loaded_or_loading() then "" else %"lobby.missing_chart")
             .Align(Alignment.CENTER)
             .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
 
         |+ MouseListener()
             .OnLeftClick(fun () ->
-                if lobby.YouAreHost then Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
+                if lobby.YouAreHost then
+                    Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
             )
             .Position(Position.SliceT(100.0f))
 
@@ -212,12 +203,7 @@ type LobbySelectedChart(lobby: Lobby) =
             (fun () -> lobby.Spectate <- not lobby.Spectate),
             Palette.MAIN_100
         )
-            .Position(
-                Position
-                    .SliceB(AngledButton.HEIGHT)
-                    .SlicePercentL(0.5f)
-                    .ShrinkR(AngledButton.LEAN_AMOUNT)
-            )
+            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.5f).ShrinkR(AngledButton.LEAN_AMOUNT))
             .Conditional(fun () ->
                 LobbySelectedChart.info_if_selected().IsSome
                 && not lobby.GameInProgress
@@ -228,7 +214,7 @@ type LobbySelectedChart(lobby: Lobby) =
             sprintf "%s %s" Icons.EYE (%"lobby.spectate"),
             (fun () ->
                 match lobby.Replays |> Seq.tryHead with
-                | Some (KeyValue (username, replay_info)) ->
+                | Some(KeyValue(username, replay_info)) ->
                     match LobbySelectedChart.info_if_selected() with
                     | Some info ->
                         Screen.change_new
@@ -243,10 +229,7 @@ type LobbySelectedChart(lobby: Lobby) =
         )
             .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
             .LeanRight(false)
-            .Conditional(fun () ->
-                LobbySelectedChart.info_if_selected().IsSome
-                && lobby.GameInProgress
-            )
+            .Conditional(fun () -> LobbySelectedChart.info_if_selected().IsSome && lobby.GameInProgress)
 
         |+ AngledButton(
             (fun () ->
@@ -259,13 +242,9 @@ type LobbySelectedChart(lobby: Lobby) =
                 | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
             ),
             (fun () ->
-                lobby.SetReadyStatus (
+                lobby.SetReadyStatus(
                     match lobby.ReadyStatus with
-                    | ReadyFlag.NotReady ->
-                        if lobby.Spectate then
-                            ReadyFlag.Spectate
-                        else
-                            ReadyFlag.Play
+                    | ReadyFlag.NotReady -> if lobby.Spectate then ReadyFlag.Spectate else ReadyFlag.Play
                     | _ -> ReadyFlag.NotReady
                 )
             ),
@@ -274,9 +253,7 @@ type LobbySelectedChart(lobby: Lobby) =
             .LeanRight(false)
             .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
             .Conditional(fun () ->
-                LobbySelectedChart.info_if_selected().IsSome
-                && not Song.IsLoading
-                && not lobby.GameInProgress
+                LobbySelectedChart.info_if_selected().IsSome && not Song.IsLoading && not lobby.GameInProgress
             )
 
         |* AngledButton(
@@ -286,24 +263,12 @@ type LobbySelectedChart(lobby: Lobby) =
                 else
                     sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
             ),
-            (fun () ->
-                if lobby.Countdown then
-                    lobby.CancelRound()
-                else
-                    lobby.StartRound()
-            ),
+            (fun () -> if lobby.Countdown then lobby.CancelRound() else lobby.StartRound()),
             Palette.MAIN_100
         )
-            .Position(
-                Position
-                    .SliceB(AngledButton.HEIGHT)
-                    .SlicePercentL(0.5f)
-                    .ShrinkR(AngledButton.LEAN_AMOUNT)
-            )
+            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.5f).ShrinkR(AngledButton.LEAN_AMOUNT))
             .Conditional(fun () ->
-                lobby.YouAreHost
-                && lobby.ReadyStatus <> ReadyFlag.NotReady
-                && not lobby.GameInProgress
+                lobby.YouAreHost && lobby.ReadyStatus <> ReadyFlag.NotReady && not lobby.GameInProgress
             )
 
         lobby.OnChartChanged.Add(fun _ ->
@@ -311,29 +276,19 @@ type LobbySelectedChart(lobby: Lobby) =
                 LobbySelectedChart.attempt_match_lobby_chart lobby
         )
 
-        base.Init parent
+        base.Init(parent)
 
     override this.Draw() =
         let is_loaded = LobbySelectedChart.is_loaded_or_loading()
+
         Render.rect
             (this.Bounds.SliceT(70.0f))
-            (if is_loaded then
-                 (!*Palette.DARK).O4a 180
-             else
-                 Color.FromArgb(180, 100, 100, 100))
+            (if is_loaded then (!*Palette.DARK).O4a 180 else Color.FromArgb(180, 100, 100, 100))
 
         Render.rect
             (this.Bounds.SliceT(100.0f).SliceB(30.0f))
-            (if is_loaded then
-                 (!*Palette.DARKER).O4a 180
-             else
-                 Color.FromArgb(180, 50, 50, 50))
+            (if is_loaded then (!*Palette.DARKER).O4a 180 else Color.FromArgb(180, 50, 50, 50))
 
-        Render.rect
-            (this.Bounds.SliceT(100.0f).SliceL(5.0f))
-            (if is_loaded then
-                 !*Palette.MAIN
-             else
-                 Colors.white)
+        Render.rect (this.Bounds.SliceT(100.0f).SliceL(5.0f)) (if is_loaded then !*Palette.MAIN else Colors.white)
 
         base.Draw()

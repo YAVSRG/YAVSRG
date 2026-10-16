@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Score
+namespace Interlude.Features.Score
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -16,15 +16,16 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     static let JUDGEMENT_TEXT_MAX_HEIGHT = 70.0f
-    
+
     let show_more_info = Setting.simple false
 
-    let mod_string = ModState.format (score_info.Rate, score_info.Mods)
+    let mod_string = ModState.format(score_info.Rate, score_info.Mods)
 
     let category, main_clusters =
         let c = score_info.ChartMeta.Patterns
+
         c.Category,
-        c.ImportantClusters |> Seq.truncate 3 |> Seq.map (fun c -> c.Format score_info.Rate) |> String.concat ", "
+        c.ImportantClusters |> Seq.truncate 3 |> Seq.map(fun c -> c.Format(score_info.Rate)) |> String.concat ", "
 
     let keymode_label =
         if score_info.WithMods.Keys <> score_info.Chart.Keys then
@@ -53,8 +54,15 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Align(Alignment.RIGHT)
             .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
         |+ Button(
-            (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.2fms  •  SD: %.2fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
-            (fun () -> show_more_info.Set true)
+            (fun () ->
+                sprintf
+                    "MA: %s  •  PA: %s  •  M: %.2fms  •  SD: %.2fms"
+                    (!stats).MA
+                    (!stats).PA
+                    (!stats).TapMean
+                    (!stats).TapStandardDeviation
+            ),
+            (fun () -> show_more_info.Set(true))
         )
             .TextColor(fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text)
             .Position(Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f))
@@ -71,16 +79,14 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
         |+ Button(
             (fun () -> sprintf "MA: %s  •  PA: %s" (!stats).MA (!stats).PA),
-            (fun () -> show_more_info.Set false)
+            (fun () -> show_more_info.Set(false))
         )
-            .TextColor(fun () ->
-                if (!stats).ColumnFilterApplied then Colors.text_green
-                else Colors.text
-            )
+            .TextColor(fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text)
             .Position(Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |+ Text(fun () ->
-            sprintf "%s ~ M: %.2fms  •  SD: %.2fms  •  G: %i"
+            sprintf
+                "%s ~ M: %.2fms  •  SD: %.2fms  •  G: %i"
                 (%"score.stats.taps")
                 (!stats).TapMean
                 (!stats).TapStandardDeviation
@@ -91,7 +97,8 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Position(Position.ShrinkT(640.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |+ Text(fun () ->
-            sprintf "%.1fms %s  •  +%.1fms %s  •  %.1f%% %s"
+            sprintf
+                "%.1fms %s  •  +%.1fms %s  •  %.1f%% %s"
                 (fst (!stats).TapRange)
                 (%"score.stats.earliest")
                 (snd (!stats).TapRange)
@@ -104,7 +111,8 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Position(Position.ShrinkT(675.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |+ Text(fun () ->
-            sprintf "%s ~ M: %.2fms  •  SD: %.2fms"
+            sprintf
+                "%s ~ M: %.2fms  •  SD: %.2fms"
                 (%"score.stats.releases")
                 (!stats).ReleaseMean
                 (!stats).ReleaseStandardDeviation
@@ -114,7 +122,8 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Position(Position.ShrinkT(715.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |* Text(fun () ->
-            sprintf "%.1fms %s  •  +%.1fms %s  •  %.1f%% %s"
+            sprintf
+                "%.1fms %s  •  +%.1fms %s  •  %.1f%% %s"
                 (fst (!stats).ReleaseRange)
                 (%"score.stats.earliest")
                 (snd (!stats).ReleaseRange)
@@ -131,7 +140,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
     override this.Draw() =
         Render.rect (this.Bounds.Translate(Style.PADDING * 2.0f, Style.PADDING * 2.0f)) Colors.black
-        Background.draw (this.Bounds, Colors.white, 2.0f)
+        Background.draw(this.Bounds, Colors.white, 2.0f)
         Render.rect_c this.Bounds (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)
         base.Draw()
 
@@ -144,7 +153,11 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         let mutable y = 0.0f
 
         for i, j in judgements do
-            let percentage_of_total = if (!stats).JudgementCount = 0 then 0.0f else float32 judgement_counts.[i] / float32 (!stats).JudgementCount
+            let percentage_of_total =
+                if (!stats).JudgementCount = 0 then
+                    0.0f
+                else
+                    float32 judgement_counts.[i] / float32 (!stats).JudgementCount
 
             let judgement_box = counters.SliceT(y, judgement_box_height)
             Render.rect judgement_box j.Color.O1
@@ -152,7 +165,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
             let padding = Style.PADDING + 6.0f - float32 judgement_counts.Length |> max 0.0f
 
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 sprintf "%s: %i" j.Name judgement_counts.[i],
                 judgement_box
@@ -163,7 +176,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
                 Alignment.LEFT
             )
 
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 sprintf "%.2f%%" (percentage_of_total * 100.0f),
                 judgement_box
@@ -175,14 +188,17 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             )
 
             if show_more_info.Value && i > 0 then
-                Text.fill_b (
+                Text.fill_b(
                     Style.font,
                     JudgementRatio.FormatWithSpaces(judgement_counts, i - 1),
                     judgement_box
                         .SliceY(min judgement_box_height JUDGEMENT_TEXT_MAX_HEIGHT)
                         .TranslateY(-judgement_box_height * 0.5f)
                         .Shrink(Style.PADDING * 2.0f, Style.PADDING + padding * 2.0f),
-                    (if (!stats).ColumnFilterApplied then (Colors.green_accent.O3, Colors.green_shadow) else (Colors.white.O3, Colors.shadow_2)),
+                    (if (!stats).ColumnFilterApplied then
+                         (Colors.green_accent.O3, Colors.green_shadow)
+                     else
+                         (Colors.white.O3, Colors.shadow_2)),
                     Alignment.RIGHT
                 )
 

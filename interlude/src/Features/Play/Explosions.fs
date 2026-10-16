@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -19,6 +19,7 @@ type private Explosion =
         IsRelease: bool
         Time: ChartTime
     }
+
     static member Nothing =
         {
             Column = 0
@@ -30,18 +31,18 @@ type private Explosion =
 type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
-    let mutable last_time : Time = -Time.infinity
+    let mutable last_time: Time = -Time.infinity
 
     let hold_colors: int array = Array.zeroCreate keys
     let holding: bool array = Array.create keys false
     let holding_since: Time array = Array.create keys 0.0f<ms>
 
-    let note_explosion = Content.Texture "noteexplosion"
-    let hold_explosion = Content.Texture "holdexplosion"
+    let note_explosion = Content.Texture("noteexplosion")
+    let hold_explosion = Content.Texture("holdexplosion")
 
     let release_explosion =
         if noteskin.HoldExplosionSettings.UseReleaseExplosion then
-            Content.Texture "releaseexplosion"
+            Content.Texture("releaseexplosion")
         else
             hold_explosion
 
@@ -66,9 +67,7 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
     let EXPLOSION_POOL_SIZE = 10
 
     let explosion_pool: Explosion array =
-        Array.init
-            EXPLOSION_POOL_SIZE
-            (fun _ -> Explosion.Nothing)
+        Array.init EXPLOSION_POOL_SIZE (fun _ -> Explosion.Nothing)
 
     let mutable explosion_pool_pointer = 0
 
@@ -101,10 +100,10 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
         else
             fun _ quad -> quad
 
-    let column_width = noteskin.KeymodeColumnWidth keys
+    let column_width = noteskin.KeymodeColumnWidth(keys)
 
     let column_positions =
-        let column_spacing = noteskin.KeymodeColumnSpacing keys
+        let column_spacing = noteskin.KeymodeColumnSpacing(keys)
         let mutable x = 0.0f
 
         Array.init
@@ -124,7 +123,10 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
             hold_colors.[ev.Column] <-
                 match noteskin.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
-                | ExplosionColors.Judgements -> match e.Judgement with Some (j, _) -> j | None -> -1
+                | ExplosionColors.Judgements ->
+                    match e.Judgement with
+                    | Some(j, _) -> j
+                    | None -> -1
 
             holding.[ev.Column] <- true
             holding_since.[ev.Column] <- state.CurrentChartTime()
@@ -133,17 +135,23 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
             let color =
                 match noteskin.NoteExplosionSettings.Colors with
                 | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
-                | ExplosionColors.Judgements -> match e.Judgement with Some (j, _) -> j | None -> -1
+                | ExplosionColors.Judgements ->
+                    match e.Judgement with
+                    | Some(j, _) -> j
+                    | None -> -1
 
-            add_note_explosion (ev.Column, color)
+            add_note_explosion(ev.Column, color)
 
         | Release e when holding.[ev.Column] ->
             let color =
                 match noteskin.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> hold_colors.[ev.Column]
-                | ExplosionColors.Judgements -> match e.Judgement with Some (j, _) -> j | None -> -1
+                | ExplosionColors.Judgements ->
+                    match e.Judgement with
+                    | Some(j, _) -> j
+                    | None -> -1
 
-            add_release_explosion (ev.Column, color)
+            add_release_explosion(ev.Column, color)
             holding.[ev.Column] <- false
 
         | DropHold ->
@@ -152,13 +160,12 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
                 | ExplosionColors.Note -> hold_colors.[ev.Column]
                 | ExplosionColors.Judgements -> -1
 
-            add_release_explosion (ev.Column, color)
+            add_release_explosion(ev.Column, color)
             holding.[ev.Column] <- false
 
         | _ -> ()
 
-    do
-        state.Subscribe handle_event |> ignore
+    do state.Subscribe(handle_event) |> ignore
 
     override this.Draw() =
         let now = state.CurrentChartTime()
@@ -166,6 +173,7 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
         if now < last_time then
             for i = 0 to EXPLOSION_POOL_SIZE - 1 do
                 explosion_pool.[i] <- Explosion.Nothing
+
             for k = 0 to keys - 1 do
                 holding.[k] <- false
 
@@ -178,7 +186,7 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
             else
 
                 let frame =
-                    float32 (now - holding_since.[k])
+                    float32(now - holding_since.[k])
                     / float32 SelectedChart.rate.Value
                     / float32 noteskin.HoldExplosionSettings.AnimationFrameTime
                     |> floor
@@ -187,7 +195,12 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
                 let bounds =
                     (if options.Upscroll.Value then
                          Rect
-                             .FromSize(this.Bounds.Left + column_positions.[k], this.Bounds.Top + options.HitPosition.Value, column_width, column_width)
+                             .FromSize(
+                                 this.Bounds.Left + column_positions.[k],
+                                 this.Bounds.Top + options.HitPosition.Value,
+                                 column_width,
+                                 column_width
+                             )
                              .Translate(0.0f, column_width * noteskin.HoldExplosionSettings.Offset)
                      else
                          Rect
@@ -219,17 +232,14 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
                 else
 
                     let frame =
-                        float32 (now - ex.Time)
+                        float32(now - ex.Time)
                         / float32 SelectedChart.rate.Value
                         / float32 noteskin.HoldExplosionSettings.AnimationFrameTime
                         |> floor
                         |> int
 
                     let expand =
-                        if noteskin.HoldExplosionSettings.UseBuiltInAnimation then
-                            1.0f - percent_remaining
-                        else
-                            0.0f
+                        if noteskin.HoldExplosionSettings.UseBuiltInAnimation then 1.0f - percent_remaining else 0.0f
 
                     let alpha =
                         if noteskin.HoldExplosionSettings.UseBuiltInAnimation then
@@ -261,7 +271,7 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
 
                     Render.tex_quad
                         (bounds.AsQuad |> rotation ex.Column)
-                        (Color.White.O4a alpha).AsQuad
+                        (Color.White.O4a(alpha)).AsQuad
                         (Sprite.pick_texture (frame, ex.Color) release_explosion)
 
             // tap animations
@@ -274,17 +284,14 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
                 else
 
                     let frame =
-                        float32 (now - ex.Time)
+                        float32(now - ex.Time)
                         / float32 SelectedChart.rate.Value
                         / float32 noteskin.NoteExplosionSettings.AnimationFrameTime
                         |> floor
                         |> int
 
                     let expand =
-                        if noteskin.NoteExplosionSettings.UseBuiltInAnimation then
-                            1.0f - percent_remaining
-                        else
-                            0.0f
+                        if noteskin.NoteExplosionSettings.UseBuiltInAnimation then 1.0f - percent_remaining else 0.0f
 
                     let alpha =
                         if noteskin.NoteExplosionSettings.UseBuiltInAnimation then
@@ -316,5 +323,5 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
 
                     Render.tex_quad
                         (bounds.AsQuad |> rotation ex.Column)
-                        (Color.White.O4a alpha).AsQuad
+                        (Color.White.O4a(alpha)).AsQuad
                         (Sprite.pick_texture (frame, ex.Color) note_explosion)

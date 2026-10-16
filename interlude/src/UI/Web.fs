@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -12,8 +12,9 @@ type private WebRequestState =
     | ServerError = 2
     | Loaded = 3
 
-type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: WebRequestContainer<'T> -> 'T -> Widget) as this =
-    inherit Container(NodeType.Container (fun () -> Some this.Content))
+type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: WebRequestContainer<'T> -> 'T -> Widget) as this
+    =
+    inherit Container(NodeType.Container(fun () -> Some this.Content))
 
     let mutable status = WebRequestState.Loading
 
@@ -23,7 +24,7 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
         content <- render_ui this v
 
         if this.Initialised && not content.Initialised then
-            content.Init this
+            content.Init(this)
 
     let data = Setting.simple Unchecked.defaultof<'T> |> Setting.trigger rerender
 
@@ -52,15 +53,12 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
         load this
 
         this
-        |+ LoadingIndicator.Strip(fun () -> status = WebRequestState.Loading)
-            .Position(Position.SliceT(Style.PADDING))
-        |+ EmptyState(Icons.GLOBE, %"misc.offline")
-            .Conditional(fun () -> status = WebRequestState.Offline)
-        |* EmptyState(Icons.GLOBE, %"misc.server_error")
-            .Conditional(fun () -> status = WebRequestState.ServerError)
+        |+ LoadingIndicator.Strip(fun () -> status = WebRequestState.Loading).Position(Position.SliceT(Style.PADDING))
+        |+ EmptyState(Icons.GLOBE, %"misc.offline").Conditional(fun () -> status = WebRequestState.Offline)
+        |* EmptyState(Icons.GLOBE, %"misc.server_error").Conditional(fun () -> status = WebRequestState.ServerError)
 
-        base.Init parent
-        content.Init this
+        base.Init(parent)
+        content.Init(this)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

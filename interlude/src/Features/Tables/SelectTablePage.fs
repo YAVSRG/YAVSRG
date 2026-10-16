@@ -18,15 +18,10 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
     let rec refresh () =
         container.Clear()
 
-        container
-        |+ PageButton(
-            %"tables.browser",
-            (fun () -> TableBrowserPage().Show())
-        )
-            .Icon(Icons.DOWNLOAD)
+        container |+ PageButton(%"tables.browser", (fun () -> TableBrowserPage().Show())).Icon(Icons.DOWNLOAD)
         |* Dummy()
 
-        for e in Tables.list () do
+        for e in Tables.list() do
             container
             |* PageButton(
                 e.Info.Name,
@@ -46,17 +41,15 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
 
         match Content.Table with
         | Some table ->
-            container |+ Dummy()
-            |* PageButton(%"table.suggestions", (fun () -> SuggestionsPage(table).Show()))
+            container |+ Dummy() |* PageButton(%"table.suggestions", (fun () -> SuggestionsPage(table).Show()))
         | None -> ()
 
         if container.Focused then
-            container.Focus false
+            container.Focus(false)
 
     override this.Content() =
-        refresh ()
-        ScrollContainer(container)
-            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        refresh()
+        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"table")
-        override this.OnReturnFromNestedPage() = refresh ()
+    override this.OnReturnFromNestedPage() = refresh()

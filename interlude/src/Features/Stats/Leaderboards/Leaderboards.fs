@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Stats
+namespace Interlude.Features.Stats
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -15,9 +15,11 @@ type LeaderboardsTab =
         let content_panel = SwapContainer(activity)
 
         let options =
-            NavigationContainer.Column()
+            NavigationContainer
+                .Column()
                 .With(
-                    PageSetting(%"stats.leaderboards.leaderboard_type",
+                    PageSetting(
+                        %"stats.leaderboards.leaderboard_type",
                         Selector(
                             [| activity :> Widget, %"stats.leaderboards.activity" |],
                             Setting.make content_panel.set_Current content_panel.get_Current
@@ -30,7 +32,13 @@ type LeaderboardsTab =
 
                     PageSetting(
                         %"stats.leaderboards.time",
-                        Selector([| false, %"stats.leaderboards.time.all"; true, %"stats.leaderboards.time.monthly" |], activity.MonthlyLeaderboard)
+                        Selector(
+                            [|
+                                false, %"stats.leaderboards.time.all"
+                                true, %"stats.leaderboards.time.monthly"
+                            |],
+                            activity.MonthlyLeaderboard
+                        )
                     )
                         .Pos(3, 2, PageWidth.Full)
                 )
@@ -39,15 +47,18 @@ type LeaderboardsTab =
 
                     PageSetting(
                         %"stats.leaderboards.time",
-                        Selector([| false, %"stats.leaderboards.time.all"; true, %"stats.leaderboards.time.monthly" |], keymodes.MonthlyLeaderboard)
+                        Selector(
+                            [|
+                                false, %"stats.leaderboards.time.all"
+                                true, %"stats.leaderboards.time.monthly"
+                            |],
+                            keymodes.MonthlyLeaderboard
+                        )
                     )
                         .Pos(3, 2, PageWidth.Full)
-                        :> Widget,
+                    :> Widget,
 
-                    PageSetting(
-                        %"generic.keymode",
-                        Selector([| 4, "4K"; 7, "7K" |], keymodes.Keymode)
-                    )
+                    PageSetting(%"generic.keymode", Selector([| 4, "4K"; 7, "7K" |], keymodes.Keymode))
                         .Conditional(fun () -> content_panel.Current = keymodes)
                         .Pos(5, 2, PageWidth.Full)
                 )
