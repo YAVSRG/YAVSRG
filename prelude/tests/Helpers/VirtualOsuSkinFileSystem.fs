@@ -42,4 +42,4 @@ type VirtualOsuSkinFileSystem() =
         image.SaveAsPng(stream)
         this.Add(path, stream)
 
-    override this.Dispose() = ()
+    override this.Dispose() : unit = ()

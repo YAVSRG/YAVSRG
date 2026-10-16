@@ -236,7 +236,7 @@ type LevelSelectScreen() =
 
     override this.OnEnter(_: ScreenType) =
         LevelSelect.exit_gameplay()
-        Song.on_finish <- SongFinishAction.LoopFromPreview
+        Song.OnFinish(SongFinishAction.LoopFromPreview)
 
         Tree.refresh ()
         DiscordRPC.in_menus (%"discord_status.level_select")

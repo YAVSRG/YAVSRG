@@ -150,14 +150,17 @@ type Preset =
 type GameOptions =
     {
         Language: Setting<string>
+        CurrentChart: Setting<string>
+        Theme: Setting<string>
 
         VisualOffset: Setting.Bounded<GameplayTime>
         AudioOffset: Setting.Bounded<GameplayTime>
         AudioVolume: Setting.Bounded<float>
         AudioPitchRatesDown: Setting<bool>
         AudioPitchRatesUp: Setting<bool>
-        CurrentChart: Setting<string>
-        Theme: Setting<string>
+        MenusMuffleSong: Setting<bool>
+        AudioCrossfadeEnabled: Setting<bool>
+        
 
         ScrollSpeed: Setting.Bounded<float32<rate/ms>>
         HitPosition: Setting.Bounded<float32>
@@ -214,19 +217,20 @@ type GameOptions =
         ScoreGraphLineOnTop: Setting<bool>
         ScoreGraphWindowBackground: Setting<bool>
         HoldToGiveUp: Setting<bool>
-        MenusMuffleSong: Setting<bool>
     }
     static member Default =
         {
             Language = Setting.simple "en_GB"
+            CurrentChart = Setting.simple ""
+            Theme = Themes.selected_id
 
             VisualOffset = 0.0f<ms / rate> |> Setting.bounded  (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
             AudioOffset =  0.0f<ms / rate> |> Setting.bounded (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
             AudioVolume = Setting.bounded (0.0, 1.0) 0.05
             AudioPitchRatesDown = Setting.simple true
             AudioPitchRatesUp = Setting.simple true
-            CurrentChart = Setting.simple ""
-            Theme = Themes.selected_id
+            MenusMuffleSong = Setting.simple true
+            AudioCrossfadeEnabled = Setting.simple true
 
             ScrollSpeed = 2.05f<rate/ms> |> Setting.bounded (0.5f<rate/ms>, 5.0f<rate/ms>) |> Setting.roundf_uom 2
             HitPosition = 0.0f |> Setting.bounded (-300.0f, 600.0f)
@@ -338,7 +342,6 @@ type GameOptions =
             ScoreGraphLineOnTop = Setting.simple false
             ScoreGraphWindowBackground = Setting.simple false
             HoldToGiveUp = Setting.simple false
-            MenusMuffleSong = Setting.simple true
         }
 
 [<AutoOpen>]

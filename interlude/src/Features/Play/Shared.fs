@@ -114,7 +114,7 @@ type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring:
     =
     inherit Screen()
 
-    let state: PlayState = PlayState(info, pacemaker_info, scoring, Song.time_with_offset)
+    let state: PlayState = PlayState(info, pacemaker_info, scoring, Song.get_TimeWithOffset)
 
     let noteskin_config = Content.NoteskinConfig
 
@@ -136,10 +136,10 @@ type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring:
         Dialog.close ()
         Background.dim (float32 options.BackgroundDim.Value)
         Toolbar.hide ()
-        Song.change_rate(SelectedChart.rate.Value)
-        Song.set_global_offset(options.AudioOffset.Value)
-        Song.on_finish <- SongFinishAction.Wait
-        Song.play_leadin(info.WithColors.FirstNote)
+        Song.SetRate(SelectedChart.rate.Value)
+        Song.SetGlobalOffset(options.AudioOffset.Value)
+        Song.OnFinish(SongFinishAction.Wait)
+        Song.PlayLeadin(info.WithColors.FirstNote)
         Input.remove_listener ()
         Input.finish_frame_events ()
         WindowThread.defer WindowThread.disable_windows_key

@@ -87,22 +87,22 @@ type ReplayScreen =
                             info.WithMods,
                             is_auto,
                             rate,
-                            Song.seek
+                            Song.Seek
                         )
                     )
 
                 base.Init(parent)
 
             override this.OnEnter p =
-                Song.change_rate rate
+                Song.SetRate(rate)
                 DiscordRPC.playing (%"discord_status.replay", SelectedChart.CACHE_DATA.Value.Title)
-                base.OnEnter p
+                base.OnEnter(p)
 
             override this.OnExit p =
-                base.OnExit p
-                Song.change_rate SelectedChart.rate.Value
-                Toolbar.show_cursor ()
-                Song.resume()
+                base.OnExit(p)
+                Song.SetRate(SelectedChart.rate.Value)
+                Toolbar.show_cursor()
+                Song.Resume()
 
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)

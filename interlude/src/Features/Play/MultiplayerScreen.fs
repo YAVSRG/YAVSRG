@@ -92,7 +92,7 @@ type MultiplayerScreen =
             packet_count <- packet_count + 1
 
         let give_up () =
-            let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
+            let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.Time - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
             quit_out_early <- true
 
             if
@@ -176,7 +176,7 @@ type MultiplayerScreen =
             override this.Update(elapsed_ms, moved) =
                 stats_play_time <- stats_play_time + elapsed_ms
                 base.Update(elapsed_ms, moved)
-                let now = Song.time_with_offset ()
+                let now = Song.TimeWithOffset
                 let chart_time : ChartTime = now - first_note
 
                 if not (liveplay :> ReplaySource).Finished then

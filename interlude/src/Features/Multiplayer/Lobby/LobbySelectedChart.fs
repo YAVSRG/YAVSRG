@@ -275,7 +275,7 @@ type LobbySelectedChart(lobby: Lobby) =
             .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
             .Conditional(fun () ->
                 LobbySelectedChart.info_if_selected().IsSome
-                && not Song.loading
+                && not Song.IsLoading
                 && not lobby.GameInProgress
             )
 

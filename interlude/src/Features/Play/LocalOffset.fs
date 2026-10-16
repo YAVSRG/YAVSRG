@@ -19,7 +19,7 @@ module LocalOffset =
     let offset_setting (save_data: ChartSaveData) : Setting<Time> =
         Setting.make save_data.set_Offset save_data.get_Offset
         |> Setting.roundf_uom 0
-        |> Setting.trigger Song.set_local_offset
+        |> Setting.trigger Song.SetLocalOffset
 
     let get_automatic (state: PlayState) (save_data: ChartSaveData) : Time =
         let mutable sum = 0.0f<ms / rate>

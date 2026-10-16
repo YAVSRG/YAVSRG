@@ -156,20 +156,24 @@ module SelectedChart =
                         yield
                             fun () ->
                                 CHART <- Some chart
-
-                                Song.change (
-                                    chart_meta.Audio.Path,
-                                    save_data.Offset,
-                                    rate,
-                                    (chart_meta.PreviewTime, chart.LastNote),
-                                    (
-                                        if play_audio then
-                                            if Screen.current_type = ScreenType.MainMenu then
-                                                SongLoadAction.PlayFromBeginning
-                                            else
-                                                SongLoadAction.PlayFromPreview
-                                        else SongLoadAction.Wait
-                                    )
+                                
+                                let after_load =
+                                    if play_audio then
+                                        if Screen.current_type = ScreenType.MainMenu then
+                                            SongLoadAction.PlayFromBeginning
+                                        else
+                                            SongLoadAction.PlayFromPreview
+                                    else SongLoadAction.Wait
+                                    
+                                Song.LoadSong (
+                                    {
+                                        Path = chart_meta.Audio.Path
+                                        AfterLoad = after_load
+                                        PreviewPoint = chart_meta.PreviewTime
+                                        LastNote = chart.LastNote
+                                        LocalOffset = save_data.Offset
+                                    },
+                                    rate
                                 )
 
                                 SAVE_DATA <- Some save_data
@@ -192,7 +196,7 @@ module SelectedChart =
                                 FMT_NOTECOUNTS <- Some note_counts
                                 chart_change_finished.Trigger(create_loaded_chart_info ())
 
-                                if not Song.loading then
+                                if not Song.IsLoading then
                                     for _, action in on_load_succeeded do
                                         action ()
                                 else
@@ -229,7 +233,7 @@ module SelectedChart =
                                 else
                                     chart_update_finished.Trigger(create_loaded_chart_info ())
 
-                                if not Song.loading then
+                                if not Song.IsLoading then
                                     for _, action in on_load_succeeded do
                                         action ()
                                 else
@@ -249,7 +253,7 @@ module SelectedChart =
                         yield fun () ->
                             WITH_COLORS <- Some with_colors
 
-                            if not Song.loading then
+                            if not Song.IsLoading then
                                 for _, action in on_load_succeeded do
                                     action ()
                             else
@@ -367,7 +371,7 @@ module SelectedChart =
             if_loading_or_loaded
             <| fun info ->
                 collections_on_rate_changed info.LibraryContext v
-                Song.change_rate v
+                Song.SetRate(v)
                 update ()
         )
 
@@ -388,7 +392,7 @@ module SelectedChart =
             <| fun info ->
                 collections_on_mods_changed info.LibraryContext mods
                 collections_on_rate_changed info.LibraryContext rate
-                Song.change_rate rate
+                Song.SetRate(rate)
                 Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
                 update ()
 
@@ -433,7 +437,7 @@ module SelectedChart =
         on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext _rate _selected_mods)
         on_chart_change_started.Add(fun info -> Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value))
 
-        Song.on_loaded.Add(fun () ->
+        Song.OnLoaded.Add(fun () ->
             for action in on_song_load_succeeded do action()
             on_song_load_succeeded <- []
         )
