@@ -209,5 +209,5 @@ type private ActivityLeaderboard() =
     member this.MonthlyLeaderboard = monthly
 
     override this.Init(parent: Widget) : unit =
-        this |* container
+        this.Add(container)
         base.Init(parent)

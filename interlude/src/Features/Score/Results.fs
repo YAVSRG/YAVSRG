@@ -14,10 +14,11 @@ type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     override this.Init(parent: Widget) : unit =
-        this
-        |* Text(fun () -> score_info.Ruleset.GradeName((!grade).Grade))
-            .Color(fun () -> (score_info.Ruleset.GradeColor((!grade).Grade), Colors.black))
-            .Position(Position.Expand(10.0f))
+        this.Add(
+            Text(fun () -> score_info.Ruleset.GradeName((!grade).Grade))
+                .Color(fun () -> (score_info.Ruleset.GradeColor((!grade).Grade), Colors.black))
+                .Position(Position.Expand(10.0f))
+        )
 
         base.Init(parent)
 
@@ -154,10 +155,11 @@ type Lamp
     let glint_animation = Animation.Delay(375.0)
 
     override this.Init(parent: Widget) : unit =
-        this
-        |* Text(fun () -> score_info.Ruleset.LampName((!lamp).Lamp))
-            .Color(fun () -> (score_info.Ruleset.LampColor((!lamp).Lamp), Colors.black))
-            .Position(Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE))
+        this.Add(
+            Text(fun () -> score_info.Ruleset.LampName((!lamp).Lamp))
+                .Color(fun () -> (score_info.Ruleset.LampColor((!lamp).Lamp), Colors.black))
+                .Position(Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE))
+        )
 
         if (!improvements).Lamp <> Improvement.None then
             ScoreScreenHelpers.animation_queue.Add(glint_animation)
@@ -236,25 +238,26 @@ type Results
     inherit Container(NodeType.None)
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ Grade(grade, score_info).Position(Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
-        |+ Accuracy(grade, improvements, previous_personal_bests, stats, score_info)
-            .Position(
-                {
-                    Left = 0.0f %+ 200.0f ^+ 40.0f
-                    Right = 0.5f %+ 100.0f ^- 20.0f
-                    Top = 0.0f %+ 40.0f
-                    Bottom = 0.0f %+ 200.0f
-                }
-            )
-        |* Lamp(lamp, improvements, previous_personal_bests, score_info)
-            .Position(
-                {
-                    Left = 0.5f %+ 100.0f ^+ 20.0f
-                    Right = 1.0f %- 40.0f
-                    Top = 0.0f %+ 40.0f
-                    Bottom = 0.0f %+ 200.0f
-                }
-            )
+        this.Add(
+            Grade(grade, score_info).Position(Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f)),
+            Accuracy(grade, improvements, previous_personal_bests, stats, score_info)
+                .Position(
+                    {
+                        Left = 0.0f %+ 200.0f ^+ 40.0f
+                        Right = 0.5f %+ 100.0f ^- 20.0f
+                        Top = 0.0f %+ 40.0f
+                        Bottom = 0.0f %+ 200.0f
+                    }
+                ),
+            Lamp(lamp, improvements, previous_personal_bests, score_info)
+                .Position(
+                    {
+                        Left = 0.5f %+ 100.0f ^+ 20.0f
+                        Right = 1.0f %- 40.0f
+                        Top = 0.0f %+ 40.0f
+                        Bottom = 0.0f %+ 200.0f
+                    }
+                )
+        )
 
         base.Init(parent)

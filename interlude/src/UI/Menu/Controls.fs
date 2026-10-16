@@ -17,15 +17,16 @@ type PageTextEntry(name: string, setting: Setting<string>) =
                         Style.hover.Play()
                 }
 
-            entry
-            |+ Frame(
-                Position = Position.DEFAULT.ExpandX(Style.PADDING * 3.0f),
-                Fill = K Color.Transparent,
-                Border =
-                    fun () ->
-                        if entry.Selected then Colors.pink_accent
-                        elif entry.Focused then Colors.yellow_accent
-                        else Colors.grey_2
+            entry.With(
+                Frame(
+                    Position = Position.DEFAULT.ExpandX(Style.PADDING * 3.0f),
+                    Fill = K Color.Transparent,
+                    Border =
+                        fun () ->
+                            if entry.Selected then Colors.pink_accent
+                            elif entry.Focused then Colors.yellow_accent
+                            else Colors.grey_2
+                )
             )
         )
 
@@ -46,7 +47,7 @@ type OptionsMenuButton(label: string, on_click: unit -> unit) =
         Style.hover.Play()
 
     override this.Init(parent: Widget) : unit =
-        this |* MouseListener().Button(this)
+        this.Add(MouseListener().Button(this))
         base.Init(parent)
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =

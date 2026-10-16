@@ -18,30 +18,33 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
     let rec refresh () =
         container.Clear()
 
-        container |+ PageButton(%"tables.browser", (fun () -> TableBrowserPage().Show())).Icon(Icons.DOWNLOAD)
-        |* Dummy()
+        container.Add(
+            PageButton(%"tables.browser", (fun () -> TableBrowserPage().Show())).Icon(Icons.DOWNLOAD),
+            Dummy()
+        )
 
         for e in Tables.list() do
-            container
-            |* PageButton(
-                e.Info.Name,
-                fun () ->
-                    options.Table.Set(Some e.Id)
+            container.Add(
+                PageButton(
+                    e.Info.Name,
+                    fun () ->
+                        options.Table.Set(Some e.Id)
 
-                    if options.ChartGroupMode.Value = "level" && Screen.current_type = ScreenType.LevelSelect then
-                        refresh_table_view()
+                        if options.ChartGroupMode.Value = "level" && Screen.current_type = ScreenType.LevelSelect then
+                            refresh_table_view()
 
-                    GameThread.defer refresh
-            )
-                .TextColor(fun () ->
-                    match Content.Table with
-                    | Some t when t.Info.Name = e.Info.Name -> Colors.text_pink_2
-                    | _ -> Colors.text
+                        GameThread.defer refresh
                 )
+                    .TextColor(fun () ->
+                        match Content.Table with
+                        | Some t when t.Info.Name = e.Info.Name -> Colors.text_pink_2
+                        | _ -> Colors.text
+                    )
+            )
 
         match Content.Table with
         | Some table ->
-            container |+ Dummy() |* PageButton(%"table.suggestions", (fun () -> SuggestionsPage(table).Show()))
+            container.Add(Dummy(), PageButton(%"table.suggestions", (fun () -> SuggestionsPage(table).Show())))
         | None -> ()
 
         if container.Focused then

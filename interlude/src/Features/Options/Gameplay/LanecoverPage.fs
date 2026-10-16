@@ -34,7 +34,7 @@ type LanecoverPage() =
                     .Pos(11)
             )
         |> Container.Create
-        |+ preview
+        |> fun container -> container.With(preview)
         :> Widget
 
     override this.Title = %"gameplay.lanecover"

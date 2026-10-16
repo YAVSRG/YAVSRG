@@ -39,9 +39,11 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
 
     override this.Content() : Widget =
         page_container()
-        |+ PageSetting(%"osu_replay_import.rate", Slider(Setting.uom rate)).Pos(0)
-        |+ PageButton(%"osu_replay_import.import", import).Pos(3)
-        |+ info.Pos(6, 9, PageWidth.Custom((info :> IWidth).Width))
+            .With(
+                PageSetting(%"osu_replay_import.rate", Slider(Setting.uom rate)).Pos(0),
+                PageButton(%"osu_replay_import.import", import).Pos(3),
+                info.Pos(6, 9, PageWidth.Custom((info :> IWidth).Width))
+            )
         :> Widget
 
     override this.Title = %"osu_replay_import.missing_map"

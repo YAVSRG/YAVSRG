@@ -20,8 +20,10 @@ module private Dropdown =
             )
 
         override this.Init(parent: Widget) : unit =
-            this |+ MouseListener().Button(this).Floating()
-            |* Text(label).Align(Alignment.LEFT).Color(color).Position(Position.Shrink(10.0f, 5.0f))
+            this.Add(
+                MouseListener().Button(this).Floating(),
+                Text(label).Align(Alignment.LEFT).Color(color).Position(Position.Shrink(10.0f, 5.0f))
+            )
 
             base.Init(parent)
 
@@ -119,24 +121,25 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
     override this.Init(parent: Widget) : unit =
         let mutable what_to_focus: Widget = this
 
-        flow
-        |+ seq {
-            for i, (value, label) in Seq.indexed options.Items do
-                let item =
-                    Dropdown.Item(
-                        label,
-                        i % 2 = 1,
-                        options.ColorFunc(value),
-                        fun () ->
-                            Selection.up false
-                            options.Setting.Set(value)
-                    )
+        flow.With(
+            seq {
+                for i, (value, label) in Seq.indexed options.Items do
+                    let item =
+                        Dropdown.Item(
+                            label,
+                            i % 2 = 1,
+                            options.ColorFunc(value),
+                            fun () ->
+                                Selection.up false
+                                options.Setting.Set(value)
+                        )
 
-                if value = options.Setting.Value then
-                    what_to_focus <- item
+                    if value = options.Setting.Value then
+                        what_to_focus <- item
 
-                yield item
-        }
+                    yield item
+            }
+        )
         |> ScrollContainer
         |> this.Add
 
@@ -158,19 +161,20 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
     override this.Init(parent: Widget) : unit =
-        flow
-        |+ seq {
-            for i, (action, label) in Seq.indexed options.Items do
-                yield
-                    Dropdown.Item(
-                        label,
-                        i % 2 = 1,
-                        Colors.text,
-                        fun () ->
-                            Selection.up false
-                            action()
-                    )
-        }
+        flow.With(
+            seq {
+                for i, (action, label) in Seq.indexed options.Items do
+                    yield
+                        Dropdown.Item(
+                            label,
+                            i % 2 = 1,
+                            Colors.text,
+                            fun () ->
+                                Selection.up false
+                                action()
+                        )
+            }
+        )
         |> ScrollContainer
         |> this.Add
 

@@ -75,61 +75,63 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
     override this.Init(parent: Widget) : unit =
 
         if Network.lobby.IsNone && played_just_now then
-            this
-            |+ AngledButton(
-                sprintf "%s %s" Icons.PLAY %"score.continue",
-                Gameplay.continue_endless_mode >> ignore,
-                Palette.MAIN.O2
-            )
-                .LeanRight(false)
-                .Floating()
-                .Position(Position.BorderT(AngledButton.HEIGHT).SliceR(300.0f))
-            |+ AngledButton(sprintf "%s %s" Icons.REPEAT %"score.retry", Gameplay.retry, Palette.DARK.O2)
-                .Floating()
-                .Position(Position.BorderT(AngledButton.HEIGHT).SliceR(300.0f).Translate(-325.0f, 0.0f))
-            |+ HotkeyListener("retry", Gameplay.retry)
-            |* HotkeyListener("select", Gameplay.continue_endless_mode >> ignore)
-
-        this
-        |+ graph
-        |+ Text(Updates.version + "  : :  www.yavsrg.net")
-            .Color(Colors.text_subheading)
-            .Align(Alignment.CENTER)
-            .Position(Position.SlicePercentL(0.35f).ShrinkX(20.0f).SliceB(15.0f, 40.0f))
-        |+ NavigationContainer
-            .Row()
-            .Position(Position.ShrinkPercentL(0.35f).ShrinkX(20.0f).ShrinkL(10.0f).SliceB(10.0f, 50.0f))
-            .With(
-                InlaidButton(
-                    %"score.graph.settings",
-                    fun () -> ScoreGraphSettingsPage(score_info.WithMods.Keys, graph.ApplyColumnFilter).Show()
+            this.Add(
+                AngledButton(
+                    sprintf "%s %s" Icons.PLAY %"score.continue",
+                    Gameplay.continue_endless_mode >> ignore,
+                    Palette.MAIN.O2
                 )
-                    .Icon(Icons.EDIT_2)
-                    .Position(Position.GridX(1, 4, 30.0f)),
-
-                InlaidButton(%"score.chart_actions", fun () -> ScoreChartContextMenu(score_info).Show())
-                    .Icon(Icons.SETTINGS)
-                    .Hotkey("context_menu")
-                    .Position(Position.GridX(2, 4, 30.0f)),
-
-                InlaidButton(%"score.watch_replay", fun () -> Gameplay.watch_replay(score_info))
-                    .Icon(Icons.FILM)
-                    .Position(Position.GridX(3, 4, 30.0f)),
-
-                RulesetSwitcher(
-                    Setting.simple Rulesets.selected_id.Value
-                    |> Setting.trigger(fun id ->
-                        score_info.Ruleset <- Rulesets.by_id id
-                        refresh()
-                    ),
-                    (fun ruleset ->
-                        score_info.Ruleset <- ruleset
-                        refresh()
-                    ),
-                    score_info
-                )
-                    .Position(Position.GridX(4, 4, 30.0f))
+                    .LeanRight(false)
+                    .Floating()
+                    .Position(Position.BorderT(AngledButton.HEIGHT).SliceR(300.0f)),
+                AngledButton(sprintf "%s %s" Icons.REPEAT %"score.retry", Gameplay.retry, Palette.DARK.O2)
+                    .Floating()
+                    .Position(Position.BorderT(AngledButton.HEIGHT).SliceR(300.0f).Translate(-325.0f, 0.0f)),
+                HotkeyListener("retry", Gameplay.retry),
+                HotkeyListener("select", Gameplay.continue_endless_mode >> ignore)
             )
-        |* HotkeyListener("like", fun () -> CollectionActions.toggle_liked score_info.ChartMeta)
+
+        this.Add(
+            graph,
+            Text(Updates.version + "  : :  www.yavsrg.net")
+                .Color(Colors.text_subheading)
+                .Align(Alignment.CENTER)
+                .Position(Position.SlicePercentL(0.35f).ShrinkX(20.0f).SliceB(15.0f, 40.0f)),
+            NavigationContainer
+                .Row()
+                .Position(Position.ShrinkPercentL(0.35f).ShrinkX(20.0f).ShrinkL(10.0f).SliceB(10.0f, 50.0f))
+                .With(
+                    InlaidButton(
+                        %"score.graph.settings",
+                        fun () -> ScoreGraphSettingsPage(score_info.WithMods.Keys, graph.ApplyColumnFilter).Show()
+                    )
+                        .Icon(Icons.EDIT_2)
+                        .Position(Position.GridX(1, 4, 30.0f)),
+
+                    InlaidButton(%"score.chart_actions", fun () -> ScoreChartContextMenu(score_info).Show())
+                        .Icon(Icons.SETTINGS)
+                        .Hotkey("context_menu")
+                        .Position(Position.GridX(2, 4, 30.0f)),
+
+                    InlaidButton(%"score.watch_replay", fun () -> Gameplay.watch_replay(score_info))
+                        .Icon(Icons.FILM)
+                        .Position(Position.GridX(3, 4, 30.0f)),
+
+                    RulesetSwitcher(
+                        Setting.simple Rulesets.selected_id.Value
+                        |> Setting.trigger(fun id ->
+                            score_info.Ruleset <- Rulesets.by_id id
+                            refresh()
+                        ),
+                        (fun ruleset ->
+                            score_info.Ruleset <- ruleset
+                            refresh()
+                        ),
+                        score_info
+                    )
+                        .Position(Position.GridX(4, 4, 30.0f))
+                ),
+            HotkeyListener("like", fun () -> CollectionActions.toggle_liked score_info.ChartMeta)
+        )
 
         base.Init(parent)

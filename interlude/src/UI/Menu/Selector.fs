@@ -74,8 +74,11 @@ type SelectDropdown<'T when 'T: equality>(items: ('T * string) array, setting: S
         |> Setting.trigger(fun (v, _) -> setting.Set(v))
 
     override this.Init(parent: Widget) : unit =
-        this |+ Text(fun () -> snd wrapped_setting.Value).Align(Alignment.LEFT) |+ MouseListener().Button(this)
-        |* dropdown_wrapper
+        this.Add(
+            Text(fun () -> snd wrapped_setting.Value).Align(Alignment.LEFT),
+            MouseListener().Button(this),
+            dropdown_wrapper
+        )
 
         base.Init(parent)
 

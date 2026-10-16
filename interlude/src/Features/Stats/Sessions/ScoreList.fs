@@ -164,7 +164,7 @@ type Score(score_info: ScoreInfo) =
         base.OnFocus(by_mouse)
 
     override this.Init(parent: Widget) : unit =
-        this |* MouseListener().Button(this)
+        this.Add(MouseListener().Button(this))
 
         base.Init(parent)
 

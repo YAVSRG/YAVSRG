@@ -105,16 +105,13 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
     static member HEIGHT = 80.0f
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ Frame(
-            Fill = (fun () -> if this.Focused then fill.O3 else fill.O2),
-            Border = fun () -> if this.Focused then Colors.white else border.O2
+        this.Add(
+            Frame(
+                Fill = (fun () -> if this.Focused then fill.O3 else fill.O2),
+                Border = fun () -> if this.Focused then Colors.white else border.O2
+            ),
+            MouseListener().Button(this)
         )
-        //|+ Button(Icons.OPEN_IN_BROWSER,
-        //    fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
-        //    ,
-        //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
-        |* MouseListener().Button(this)
 
         base.Init(parent)
 

@@ -1,5 +1,6 @@
 **/bin
 **/obj
+online
 interlude
 !interlude/src/Features/Wiki
 !interlude/src/Features/Skins
@@ -26,4 +27,3 @@ prelude/src
 prelude/playground
 !prelude/src/Formats/osu!
 tools
-online

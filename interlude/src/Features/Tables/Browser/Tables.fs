@@ -31,24 +31,25 @@ type TableCard(online_table: Tables.List.Table) as this =
     let mutable status = TableStatus.NotInstalled
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ Text(online_table.Info.Name)
-            .Align(Alignment.CENTER)
-            .Position(Position.SliceT(80.0f).Shrink(20.0f, Style.PADDING))
-        |+ Text(online_table.Info.Description)
-            .Align(Alignment.CENTER)
-            .Position(Position.ShrinkT(65.0f).SliceT(60.0f).Shrink(20.0f, Style.PADDING))
-        |+ Text(fun () ->
-            match status with
-            | TableStatus.NotInstalled -> %"table.not_installed"
-            | TableStatus.OutOfDate -> %"table.out_of_date"
-            | TableStatus.Installing -> %"table.installing"
-            | TableStatus.Installed -> %"table.installed"
+        this.Add(
+            Text(online_table.Info.Name)
+                .Align(Alignment.CENTER)
+                .Position(Position.SliceT(80.0f).Shrink(20.0f, Style.PADDING)),
+            Text(online_table.Info.Description)
+                .Align(Alignment.CENTER)
+                .Position(Position.ShrinkT(65.0f).SliceT(60.0f).Shrink(20.0f, Style.PADDING)),
+            Text(fun () ->
+                match status with
+                | TableStatus.NotInstalled -> %"table.not_installed"
+                | TableStatus.OutOfDate -> %"table.out_of_date"
+                | TableStatus.Installing -> %"table.installing"
+                | TableStatus.Installed -> %"table.installed"
+            )
+                .Align(Alignment.CENTER)
+                .Position(Position.SliceB(60.0f).Shrink(20.0f, Style.PADDING)),
+            LoadingIndicator.Border(fun () -> status = TableStatus.Installing),
+            MouseListener().Button(this)
         )
-            .Align(Alignment.CENTER)
-            .Position(Position.SliceB(60.0f).Shrink(20.0f, Style.PADDING))
-        |+ LoadingIndicator.Border(fun () -> status = TableStatus.Installing)
-        |* MouseListener().Button(this)
 
         existing <- Tables.by_id online_table.Id
 
@@ -119,6 +120,6 @@ type TableBrowserPage() =
             | None -> Logging.Error("Error getting online tables list")
         )
 
-        NavigationContainer.Column() |+ Dummy(NodeType.Leaf) |+ scroll :> Widget
+        NavigationContainer.Column().With(Dummy(NodeType.Leaf), scroll) :> Widget
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"tables.browser")

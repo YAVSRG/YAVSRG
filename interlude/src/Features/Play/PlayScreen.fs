@@ -142,7 +142,7 @@ type PlayScreen =
                     stats_exit_reason <- ExitReason.Quit
 
             fade_in.Target <- 0.5f
-            this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
+            this.Add(FailOverlay(pacemaker_state, retry, view_score, skip_song))
 
         let finish_play (this: IPlayScreen) =
             liveplay.Finish()

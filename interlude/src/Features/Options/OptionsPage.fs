@@ -81,17 +81,19 @@ type OptionsPage() =
 
     override this.Footer() : Widget =
         OptionsPageFooter()
-        |+ HotkeyListener(
-            "reload_content",
-            fun () ->
-                Menu.Exit()
-                Themes.reload_current()
-                Skins.load()
-                Rulesets.load()
-                Notifications.action_feedback(Icons.CHECK, %"notification.reload_content", "")
-                OptionsPage().Show()
-                SkinPreview.RefreshAll()
-        )
+            .With(
+                HotkeyListener(
+                    "reload_content",
+                    fun () ->
+                        Menu.Exit()
+                        Themes.reload_current()
+                        Skins.load()
+                        Rulesets.load()
+                        Notifications.action_feedback(Icons.CHECK, %"notification.reload_content", "")
+                        OptionsPage().Show()
+                        SkinPreview.RefreshAll()
+                )
+            )
         |> OverlayContainer
         :> Widget
 

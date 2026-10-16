@@ -217,5 +217,5 @@ type private KeymodesLeaderboard() =
     member this.Keymode = keymode
 
     override this.Init(parent: Widget) : unit =
-        this |* container
+        this.Add(container)
         base.Init(parent)

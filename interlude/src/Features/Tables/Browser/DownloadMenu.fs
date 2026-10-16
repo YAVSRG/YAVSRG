@@ -6,7 +6,6 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
-open Prelude.Data.Library
 open Prelude.Data.Imports
 open Interlude.Web.Shared.Requests
 open Interlude.Content
@@ -267,27 +266,28 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
     override this.Visible = state.OpenLevel = chart.Level
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
-        |+ Text(chart.Song.FormattedTitle).Align(Alignment.LEFT).Position(Position.Shrink(5.0f, 0.0f))
-        |* Text(fun () ->
-            match state.Status(chart.Hash) with
-            | ChartStatus.Missing -> Icons.X
-            | ChartStatus.Queued -> Icons.REFRESH_CW
-            | ChartStatus.Downloading -> Icons.DOWNLOAD
-            | ChartStatus.Downloaded -> Icons.CHECK
-            | ChartStatus.DownloadFailed -> Icons.X
-        )
-            .Color(fun () ->
+        this.Add(
+            Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2),
+            Text(chart.Song.FormattedTitle).Align(Alignment.LEFT).Position(Position.Shrink(5.0f, 0.0f)),
+            Text(fun () ->
                 match state.Status(chart.Hash) with
-                | ChartStatus.Missing -> Colors.text_greyout
-                | ChartStatus.Queued -> Colors.text_subheading
-                | ChartStatus.Downloading -> Colors.text_yellow_2
-                | ChartStatus.Downloaded -> Colors.text_green_2
-                | ChartStatus.DownloadFailed -> Colors.text_red_2
+                | ChartStatus.Missing -> Icons.X
+                | ChartStatus.Queued -> Icons.REFRESH_CW
+                | ChartStatus.Downloading -> Icons.DOWNLOAD
+                | ChartStatus.Downloaded -> Icons.CHECK
+                | ChartStatus.DownloadFailed -> Icons.X
             )
-            .Position(Position.Shrink(5.0f, 0.0f))
-            .Align(Alignment.RIGHT)
+                .Color(fun () ->
+                    match state.Status(chart.Hash) with
+                    | ChartStatus.Missing -> Colors.text_greyout
+                    | ChartStatus.Queued -> Colors.text_subheading
+                    | ChartStatus.Downloading -> Colors.text_yellow_2
+                    | ChartStatus.Downloaded -> Colors.text_green_2
+                    | ChartStatus.DownloadFailed -> Colors.text_red_2
+                )
+                .Position(Position.Shrink(5.0f, 0.0f))
+                .Align(Alignment.RIGHT)
+        )
 
         base.Init(parent)
 
@@ -324,34 +324,35 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
         Style.hover.Play()
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ Frame(Fill = K(Color.FromArgb(section.Color).O1), Border = K(Color.FromArgb(section.Color).O1))
-        |+ Text(level_name)
-            .Align(Alignment.LEFT)
-            .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
-            .Position(Position.Shrink(5.0f, 0.0f))
-        |+ Text(fun () ->
-            match state.LevelStatus(level) with
-            | GroupStatus.AllMissing -> Icons.X
-            | GroupStatus.SomeMissing -> Icons.X
-            | GroupStatus.Downloading -> Icons.REFRESH_CW
-            | GroupStatus.Downloaded -> Icons.CHECK
-        )
-            .Color(fun () ->
+        this.Add(
+            Frame(Fill = K(Color.FromArgb(section.Color).O1), Border = K(Color.FromArgb(section.Color).O1)),
+            Text(level_name)
+                .Align(Alignment.LEFT)
+                .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
+                .Position(Position.Shrink(5.0f, 0.0f)),
+            Text(fun () ->
                 match state.LevelStatus(level) with
-                | GroupStatus.AllMissing -> Colors.text_greyout
-                | GroupStatus.SomeMissing -> Colors.text_yellow_2
-                | GroupStatus.Downloading -> Colors.text_yellow_2
-                | GroupStatus.Downloaded -> Colors.text_green_2
+                | GroupStatus.AllMissing -> Icons.X
+                | GroupStatus.SomeMissing -> Icons.X
+                | GroupStatus.Downloading -> Icons.REFRESH_CW
+                | GroupStatus.Downloaded -> Icons.CHECK
             )
-            .Position(Position.Shrink(85.0f, 0.0f))
-            .Align(Alignment.RIGHT)
-        |+ Text(fun () -> if state.OpenLevel = level then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
-            .Color(Colors.text)
-            .Align(Alignment.RIGHT)
-            .Position(Position.Shrink(5.0f, 0.0f))
-        |+ MouseListener().Button(this)
-        |* this.Button
+                .Color(fun () ->
+                    match state.LevelStatus(level) with
+                    | GroupStatus.AllMissing -> Colors.text_greyout
+                    | GroupStatus.SomeMissing -> Colors.text_yellow_2
+                    | GroupStatus.Downloading -> Colors.text_yellow_2
+                    | GroupStatus.Downloaded -> Colors.text_green_2
+                )
+                .Position(Position.Shrink(85.0f, 0.0f))
+                .Align(Alignment.RIGHT),
+            Text(fun () -> if state.OpenLevel = level then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
+                .Color(Colors.text)
+                .Align(Alignment.RIGHT)
+                .Position(Position.Shrink(5.0f, 0.0f)),
+            MouseListener().Button(this),
+            this.Button
+        )
 
         base.Init(parent)
 
@@ -387,22 +388,23 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
         Style.hover.Play()
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ Frame(Fill = K(Color.FromArgb(info.Color).O2), Border = K(Color.FromArgb(info.Color).O3))
-        |+ Text(info.Name)
-            .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(5.0f).ShrinkB(50.0f))
-        |+ Text(info.Description)
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(5.0f).SliceB(50.0f))
-        |+ Text(fun () -> if state.OpenSection = info.Name then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
-            .Color(Colors.text)
-            .Align(Alignment.RIGHT)
-            .Position(Position.Shrink(25.0f, 20.0f))
-        |+ MouseListener().Button(this)
-        |* this.Button
+        this.Add(
+            Frame(Fill = K(Color.FromArgb(info.Color).O2), Border = K(Color.FromArgb(info.Color).O3)),
+            Text(info.Name)
+                .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
+                .Align(Alignment.LEFT)
+                .Position(Position.Shrink(5.0f).ShrinkB(50.0f)),
+            Text(info.Description)
+                .Color(Colors.text_subheading)
+                .Align(Alignment.LEFT)
+                .Position(Position.Shrink(5.0f).SliceB(50.0f)),
+            Text(fun () -> if state.OpenSection = info.Name then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
+                .Color(Colors.text)
+                .Align(Alignment.RIGHT)
+                .Position(Position.Shrink(25.0f, 20.0f)),
+            MouseListener().Button(this),
+            this.Button
+        )
 
         base.Init(parent)
 

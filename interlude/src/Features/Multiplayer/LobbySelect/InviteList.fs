@@ -48,6 +48,6 @@ type InviteList() =
     //    Notifications.add([name] %> "notification.invited_to_lobby.title", NotificationType.Info)
 
     override this.Init(parent: Widget) : unit =
-        this |* container
+        this.Add(container)
         this.UpdateList()
         base.Init(parent)

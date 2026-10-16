@@ -90,7 +90,7 @@ type GameplayPage() =
                 GameplayPage.Keybinds().Pos(21)
             )
         |> Container.Create
-        |+ preview
+        |> fun container -> container.With(preview)
         :> Widget
 
     override this.Title = %"gameplay"

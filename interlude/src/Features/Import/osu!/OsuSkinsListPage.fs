@@ -22,16 +22,20 @@ type OsuSkinsListPage(on_select: string -> unit) =
 
     override this.Content() : Widget =
         if List.isEmpty osu_skin_paths then
-            Container(NodeType.Leaf).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
-            |+ EmptyState(Icons.IMAGE, %"osu_skin_import.no_skins_found")
+            Container(NodeType.Leaf)
+                .With(EmptyState(Icons.IMAGE, %"osu_skin_import.no_skins_found"))
+                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
             :> Widget
         else
             ScrollContainer(
-                FlowContainer.Vertical<_>(PAGE_ITEM_HEIGHT)
-                |+ seq {
-                    for path in osu_skin_paths do
-                        yield PageButton(Path.GetFileName(path), fun () -> on_select(path))
-                }
+                FlowContainer
+                    .Vertical<_>(PAGE_ITEM_HEIGHT)
+                    .With(
+                        seq {
+                            for path in osu_skin_paths do
+                                yield PageButton(Path.GetFileName(path), fun () -> on_select(path))
+                        }
+                    )
             )
                 .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
             :> Widget

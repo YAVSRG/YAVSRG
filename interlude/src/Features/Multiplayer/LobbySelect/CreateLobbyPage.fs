@@ -18,16 +18,18 @@ type CreateLobbyPage() =
 
     override this.Content() : Widget =
         page_container()
-        |+ PageTextEntry(%"create_lobby.name", name).Pos(0)
-        |+ PageButton(
-            %"confirm.yes",
-            (fun () ->
-                submit()
-                Menu.Back()
-            ),
-            Disabled = fun () -> name.Value = ""
-        )
-            .Pos(3)
+            .With(
+                PageTextEntry(%"create_lobby.name", name).Pos(0),
+                PageButton(
+                    %"confirm.yes",
+                    (fun () ->
+                        submit()
+                        Menu.Back()
+                    ),
+                    Disabled = fun () -> name.Value = ""
+                )
+                    .Pos(3)
+            )
         :> Widget
 
     override this.Title = %"create_lobby"

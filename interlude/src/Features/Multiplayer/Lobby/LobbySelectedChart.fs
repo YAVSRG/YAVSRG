@@ -21,10 +21,13 @@ type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
     inherit Page()
 
     override this.Content() : Widget =
-        FlowContainer.Vertical(PAGE_ITEM_HEIGHT).Position(Position.Shrink(100.0f, 200.0f))
-
-        |+ PageButton(%"chart.add_to_collection", fun () -> AddToCollectionPage(chart_meta).Show())
-            .Icon(Icons.FOLDER_PLUS)
+        FlowContainer
+            .Vertical(PAGE_ITEM_HEIGHT)
+            .With(
+                PageButton(%"chart.add_to_collection", fun () -> AddToCollectionPage(chart_meta).Show())
+                    .Icon(Icons.FOLDER_PLUS)
+            )
+            .Position(Position.Shrink(100.0f, 200.0f))
         :> Widget
 
     override this.Title = chart_meta.Title
@@ -124,154 +127,155 @@ type LobbySelectedChart(lobby: Lobby) =
 
     override this.Init(parent: Widget) : unit =
 
-        this
-        |+ Text(fun () ->
-            match lobby.Chart with
-            | Some c -> c.Title
-            | None -> %"lobby.no_song_selected"
-        )
-            .Align(Alignment.LEFT)
-            .Position(Position.SliceT(40.0f).Shrink(10.0f, 0.0f))
-        |+ Text(fun () ->
-            match lobby.Chart with
-            | Some c -> c.Artist + "  •  " + c.Creator
-            | None -> ""
-        )
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(Position.ShrinkT(40.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
-        |+ Text(fun () ->
-            match LobbySelectedChart.info_if_selected() with
-            | Some info -> info.ChartMeta.DifficultyName
-            | None -> "???"
-        )
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(Position.ShrinkT(70.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
-
-        |+ Text(fun () ->
-            match LobbySelectedChart.info_if_selected() with
-            | Some info -> sprintf "%s %.2f" Icons.STAR info.Difficulty.Overall
-            | None -> ""
-        )
-            .Align(Alignment.LEFT)
-            .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
-        |+ Text(fun () ->
-            match LobbySelectedChart.info_if_selected() with
-            | Some info -> info.DurationString
-            | None -> ""
-        )
-            .Align(Alignment.CENTER)
-            .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
-        |+ Text(fun () ->
-            match LobbySelectedChart.info_if_selected() with
-            | Some info -> info.BpmString
-            | None -> ""
-        )
-            .Align(Alignment.RIGHT)
-            .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
-        |+ Text(fun () ->
-            match LobbySelectedChart.info_if_selected() with
-            | Some _ -> ModState.format(SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
-            | None -> ""
-        )
-            .Align(Alignment.LEFT)
-            .Position(Position.ShrinkT(160.0f).SliceT(40.0f))
-        |+ Text(fun () ->
-            match LobbySelectedChart.info_if_selected() with
-            | Some info -> info.NotecountsString
-            | None -> ""
-        )
-            .Align(Alignment.RIGHT)
-            .Position(Position.ShrinkT(160.0f).SliceT(40.0f))
-        |+ Text(fun () -> if LobbySelectedChart.is_loaded_or_loading() then "" else %"lobby.missing_chart")
-            .Align(Alignment.CENTER)
-            .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
-
-        |+ MouseListener()
-            .OnLeftClick(fun () ->
-                if lobby.YouAreHost then
-                    Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
+        this.Add(
+            Text(fun () ->
+                match lobby.Chart with
+                | Some c -> c.Title
+                | None -> %"lobby.no_song_selected"
             )
-            .Position(Position.SliceT(100.0f))
-
-        |+ AngledButton(
-            (fun () ->
-                if lobby.Spectate then
-                    sprintf "%s %s" Icons.EYE (%"lobby.spectator")
-                else
-                    sprintf "%s %s" Icons.PLAY (%"lobby.player")
-            ),
-            (fun () -> lobby.Spectate <- not lobby.Spectate),
-            Palette.MAIN_100
-        )
-            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.5f).ShrinkR(AngledButton.LEAN_AMOUNT))
-            .Conditional(fun () ->
-                LobbySelectedChart.info_if_selected().IsSome
-                && not lobby.GameInProgress
-                && lobby.ReadyStatus = ReadyFlag.NotReady
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceT(40.0f).Shrink(10.0f, 0.0f)),
+            Text(fun () ->
+                match lobby.Chart with
+                | Some c -> c.Artist + "  •  " + c.Creator
+                | None -> ""
             )
+                .Color(Colors.text_subheading)
+                .Align(Alignment.LEFT)
+                .Position(Position.ShrinkT(40.0f).SliceT(30.0f).Shrink(10.0f, 0.0f)),
+            Text(fun () ->
+                match LobbySelectedChart.info_if_selected() with
+                | Some info -> info.ChartMeta.DifficultyName
+                | None -> "???"
+            )
+                .Color(Colors.text_subheading)
+                .Align(Alignment.LEFT)
+                .Position(Position.ShrinkT(70.0f).SliceT(30.0f).Shrink(10.0f, 0.0f)),
 
-        |+ AngledButton(
-            sprintf "%s %s" Icons.EYE (%"lobby.spectate"),
-            (fun () ->
-                match lobby.Replays |> Seq.tryHead with
-                | Some(KeyValue(username, replay_info)) ->
-                    match LobbySelectedChart.info_if_selected() with
-                    | Some info ->
-                        Screen.change_new
-                            (fun () -> SpectateScreen.Create(info, username, replay_info, lobby))
-                            ScreenType.Replay
-                            Transitions.Default
-                        |> ignore
-                    | None -> ()
-                | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")
-            ),
-            Palette.DARK_100
-        )
-            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
-            .LeanRight(false)
-            .Conditional(fun () -> LobbySelectedChart.info_if_selected().IsSome && lobby.GameInProgress)
+            Text(fun () ->
+                match LobbySelectedChart.info_if_selected() with
+                | Some info -> sprintf "%s %.2f" Icons.STAR info.Difficulty.Overall
+                | None -> ""
+            )
+                .Align(Alignment.LEFT)
+                .Position(Position.ShrinkT(100.0f).SliceT(60.0f)),
+            Text(fun () ->
+                match LobbySelectedChart.info_if_selected() with
+                | Some info -> info.DurationString
+                | None -> ""
+            )
+                .Align(Alignment.CENTER)
+                .Position(Position.ShrinkT(100.0f).SliceT(60.0f)),
+            Text(fun () ->
+                match LobbySelectedChart.info_if_selected() with
+                | Some info -> info.BpmString
+                | None -> ""
+            )
+                .Align(Alignment.RIGHT)
+                .Position(Position.ShrinkT(100.0f).SliceT(60.0f)),
+            Text(fun () ->
+                match LobbySelectedChart.info_if_selected() with
+                | Some _ -> ModState.format(SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+                | None -> ""
+            )
+                .Align(Alignment.LEFT)
+                .Position(Position.ShrinkT(160.0f).SliceT(40.0f)),
+            Text(fun () ->
+                match LobbySelectedChart.info_if_selected() with
+                | Some info -> info.NotecountsString
+                | None -> ""
+            )
+                .Align(Alignment.RIGHT)
+                .Position(Position.ShrinkT(160.0f).SliceT(40.0f)),
+            Text(fun () -> if LobbySelectedChart.is_loaded_or_loading() then "" else %"lobby.missing_chart")
+                .Align(Alignment.CENTER)
+                .Position(Position.ShrinkT(100.0f).SliceT(60.0f)),
 
-        |+ AngledButton(
-            (fun () ->
-                match lobby.ReadyStatus with
-                | ReadyFlag.NotReady ->
-                    if lobby.Spectate then
-                        sprintf "%s %s" Icons.EYE (%"lobby.ready")
-                    else
-                        sprintf "%s %s" Icons.CHECK (%"lobby.ready")
-                | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
-            ),
-            (fun () ->
-                lobby.SetReadyStatus(
-                    match lobby.ReadyStatus with
-                    | ReadyFlag.NotReady -> if lobby.Spectate then ReadyFlag.Spectate else ReadyFlag.Play
-                    | _ -> ReadyFlag.NotReady
+            MouseListener()
+                .OnLeftClick(fun () ->
+                    if lobby.YouAreHost then
+                        Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
                 )
-            ),
-            Palette.DARK_100
-        )
-            .LeanRight(false)
-            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
-            .Conditional(fun () ->
-                LobbySelectedChart.info_if_selected().IsSome && not Song.IsLoading && not lobby.GameInProgress
-            )
+                .Position(Position.SliceT(100.0f)),
 
-        |* AngledButton(
-            (fun () ->
-                if lobby.Countdown then
-                    sprintf "%s %s" Icons.SLASH (%"lobby.cancel_game")
-                else
-                    sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
-            ),
-            (fun () -> if lobby.Countdown then lobby.CancelRound() else lobby.StartRound()),
-            Palette.MAIN_100
-        )
-            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.5f).ShrinkR(AngledButton.LEAN_AMOUNT))
-            .Conditional(fun () ->
-                lobby.YouAreHost && lobby.ReadyStatus <> ReadyFlag.NotReady && not lobby.GameInProgress
+            AngledButton(
+                (fun () ->
+                    if lobby.Spectate then
+                        sprintf "%s %s" Icons.EYE (%"lobby.spectator")
+                    else
+                        sprintf "%s %s" Icons.PLAY (%"lobby.player")
+                ),
+                (fun () -> lobby.Spectate <- not lobby.Spectate),
+                Palette.MAIN_100
             )
+                .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.5f).ShrinkR(AngledButton.LEAN_AMOUNT))
+                .Conditional(fun () ->
+                    LobbySelectedChart.info_if_selected().IsSome
+                    && not lobby.GameInProgress
+                    && lobby.ReadyStatus = ReadyFlag.NotReady
+                ),
+
+            AngledButton(
+                sprintf "%s %s" Icons.EYE (%"lobby.spectate"),
+                (fun () ->
+                    match lobby.Replays |> Seq.tryHead with
+                    | Some(KeyValue(username, replay_info)) ->
+                        match LobbySelectedChart.info_if_selected() with
+                        | Some info ->
+                            Screen.change_new
+                                (fun () -> SpectateScreen.Create(info, username, replay_info, lobby))
+                                ScreenType.Replay
+                                Transitions.Default
+                            |> ignore
+                        | None -> ()
+                    | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")
+                ),
+                Palette.DARK_100
+            )
+                .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
+                .LeanRight(false)
+                .Conditional(fun () -> LobbySelectedChart.info_if_selected().IsSome && lobby.GameInProgress),
+
+            AngledButton(
+                (fun () ->
+                    match lobby.ReadyStatus with
+                    | ReadyFlag.NotReady ->
+                        if lobby.Spectate then
+                            sprintf "%s %s" Icons.EYE (%"lobby.ready")
+                        else
+                            sprintf "%s %s" Icons.CHECK (%"lobby.ready")
+                    | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
+                ),
+                (fun () ->
+                    lobby.SetReadyStatus(
+                        match lobby.ReadyStatus with
+                        | ReadyFlag.NotReady -> if lobby.Spectate then ReadyFlag.Spectate else ReadyFlag.Play
+                        | _ -> ReadyFlag.NotReady
+                    )
+                ),
+                Palette.DARK_100
+            )
+                .LeanRight(false)
+                .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
+                .Conditional(fun () ->
+                    LobbySelectedChart.info_if_selected().IsSome && not Song.IsLoading && not lobby.GameInProgress
+                ),
+
+            AngledButton(
+                (fun () ->
+                    if lobby.Countdown then
+                        sprintf "%s %s" Icons.SLASH (%"lobby.cancel_game")
+                    else
+                        sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
+                ),
+                (fun () -> if lobby.Countdown then lobby.CancelRound() else lobby.StartRound()),
+                Palette.MAIN_100
+            )
+                .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.5f).ShrinkR(AngledButton.LEAN_AMOUNT))
+                .Conditional(fun () ->
+                    lobby.YouAreHost && lobby.ReadyStatus <> ReadyFlag.NotReady && not lobby.GameInProgress
+                )
+        )
 
         lobby.OnChartChanged.Add(fun _ ->
             if Screen.current_type = ScreenType.Lobby then

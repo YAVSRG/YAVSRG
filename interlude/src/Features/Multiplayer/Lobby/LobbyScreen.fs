@@ -54,34 +54,41 @@ type LobbyUI(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ Button(Icons.SETTINGS, fun () -> LobbySettingsPage(lobby).Show())
-            .Position(Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f))
-            .Conditional(fun () -> lobby.YouAreHost)
-        |+ Text(fun () -> lobby.Settings.Name)
-            .Align(Alignment.CENTER)
-            .Position(Position.SliceT(90.0f).ShrinkPercentL(0.4f).Shrink(10.0f))
-        |+ LobbyPlayerList(lobby).Position(Position.SlicePercentL(0.4f).Shrink(50.0f, 100.0f))
-        |+ AngledButton(
-            sprintf "%s %s" Icons.EYE (%"levelselect.preview"),
-            (fun () -> SelectedChart.if_loaded(fun info -> ChartPreview(info, ignore).Show())),
-            Palette.MAIN_100
+        this.Add(
+            Button(Icons.SETTINGS, fun () -> LobbySettingsPage(lobby).Show())
+                .Position(Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f))
+                .Conditional(fun () -> lobby.YouAreHost),
+            Text(fun () -> lobby.Settings.Name)
+                .Align(Alignment.CENTER)
+                .Position(Position.SliceT(90.0f).ShrinkPercentL(0.4f).Shrink(10.0f)),
+            LobbyPlayerList(lobby).Position(Position.SlicePercentL(0.4f).Shrink(50.0f, 100.0f)),
+            AngledButton(
+                sprintf "%s %s" Icons.EYE (%"levelselect.preview"),
+                (fun () -> SelectedChart.if_loaded(fun info -> ChartPreview(info, ignore).Show())),
+                Palette.MAIN_100
+            )
+                .LeanLeft(false)
+                .Hotkey("preview")
+                .Position(
+                    Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(1, 3, AngledButton.LEAN_AMOUNT)
+                )
+                .Help(Help.Info("levelselect.preview")),
+            AngledButton(sprintf "%s %s" Icons.ZAP (%"levelselect.mods"), ignore, Palette.DARK_100)
+                .Hotkey("mods")
+                .Disabled()
+                .Position(
+                    Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(2, 3, AngledButton.LEAN_AMOUNT)
+                )
+                .Help(Help.Info("levelselect.mods")),
+            RulesetSwitcher(options.SelectedRuleset)
+                .Position(
+                    Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(3, 3, AngledButton.LEAN_AMOUNT)
+                )
+                .Help(Help.Info("levelselect.rulesets", "ruleset_switch")),
+            LobbySelectedChart(lobby)
+                .Position(Position.SlicePercentT(0.5f).SlicePercentR(0.5f).ShrinkX(20.0f).ShrinkT(100.0f)),
+            LobbyChat(lobby).Position(Position.ShrinkPercentL(0.4f).SlicePercentB(0.5f).ShrinkX(20.0f).ShrinkB(20.0f))
         )
-            .LeanLeft(false)
-            .Hotkey("preview")
-            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(1, 3, AngledButton.LEAN_AMOUNT))
-            .Help(Help.Info("levelselect.preview"))
-        |+ AngledButton(sprintf "%s %s" Icons.ZAP (%"levelselect.mods"), ignore, Palette.DARK_100)
-            .Hotkey("mods")
-            .Disabled()
-            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(2, 3, AngledButton.LEAN_AMOUNT))
-            .Help(Help.Info("levelselect.mods"))
-        |+ RulesetSwitcher(options.SelectedRuleset)
-            .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(3, 3, AngledButton.LEAN_AMOUNT))
-            .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
-        |+ LobbySelectedChart(lobby)
-            .Position(Position.SlicePercentT(0.5f).SlicePercentR(0.5f).ShrinkX(20.0f).ShrinkT(100.0f))
-        |* LobbyChat(lobby).Position(Position.ShrinkPercentL(0.4f).SlicePercentB(0.5f).ShrinkX(20.0f).ShrinkB(20.0f))
 
         base.Init(parent)
 
@@ -203,7 +210,7 @@ type LobbyScreen() =
         | None -> Some ScreenType.LevelSelect
 
     override this.Init(parent: Widget) : unit =
-        this |* current_lobby_ui
+        this.Add(current_lobby_ui)
 
         base.Init(parent)
 

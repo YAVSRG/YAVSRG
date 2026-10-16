@@ -29,8 +29,10 @@ type LobbyChat(lobby: Lobby) =
                 lobby.Players.[sender].Color, Colors.shadow_2
 
         Container(NodeType.None)
-        |+ Text(sender).Color(sender_color).Align(Alignment.RIGHT).Position(Position.SliceL(w))
-        |+ Text(": " + message).Color(Colors.text).Align(Alignment.LEFT).Position(Position.ShrinkL(w))
+            .With(
+                Text(sender).Color(sender_color).Align(Alignment.RIGHT).Position(Position.SliceL(w)),
+                Text(": " + message).Color(Colors.text).Align(Alignment.LEFT).Position(Position.ShrinkL(w))
+            )
 
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
 
@@ -97,28 +99,31 @@ type LobbyChat(lobby: Lobby) =
                                 base.Draw()
                         }
 
-                    container
-                    |+ MouseListener()
-                        .OnLeftClick(fun () ->
-                            Screen.change_new
-                                (fun () -> ScoreScreen(data, (ImprovementFlags.None, None), false) :> Screen)
-                                ScreenType.Score
-                                Transitions.EnterGameplayNoFadeAudio
-                            |> ignore
-                        )
-                        .FocusOnHover(container)
-                    |+ Text(sprintf "%i. %s" place username)
-                        .Color(fun () -> if container.Focused then Colors.text_yellow_2 else (color, Colors.shadow_1))
-                        .Align(Alignment.LEFT)
-                    |+ Text(data.Scoring.FormattedAccuracy)
-                        .Color(data.Ruleset.GradeColor(grade), Colors.shadow_1)
-                        .Align(Alignment.CENTER)
-                    |+ Text(data.Ruleset.LampName(lamp))
-                        .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
-                        .Align(0.75f)
-                    |+ Text(sprintf "%ix" data.Scoring.BestCombo)
-                        .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
-                        .Align(Alignment.RIGHT)
+                    container.With(
+                        MouseListener()
+                            .OnLeftClick(fun () ->
+                                Screen.change_new
+                                    (fun () -> ScoreScreen(data, (ImprovementFlags.None, None), false) :> Screen)
+                                    ScreenType.Score
+                                    Transitions.EnterGameplayNoFadeAudio
+                                |> ignore
+                            )
+                            .FocusOnHover(container),
+                        Text(sprintf "%i. %s" place username)
+                            .Color(fun () ->
+                                if container.Focused then Colors.text_yellow_2 else (color, Colors.shadow_1)
+                            )
+                            .Align(Alignment.LEFT),
+                        Text(data.Scoring.FormattedAccuracy)
+                            .Color(data.Ruleset.GradeColor(grade), Colors.shadow_1)
+                            .Align(Alignment.CENTER),
+                        Text(data.Ruleset.LampName(lamp))
+                            .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
+                            .Align(0.75f),
+                        Text(sprintf "%ix" data.Scoring.BestCombo)
+                            .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
+                            .Align(Alignment.RIGHT)
+                    )
 
                 add_msg cmp
 
@@ -134,20 +139,23 @@ type LobbyChat(lobby: Lobby) =
             max 0 (seconds - elapsed)
 
         Container(NodeType.None)
-        |+ Text(fun () -> sprintf "%s %s: %i" Icons.CLOCK reason (seconds_left()))
-            .Color(fun () -> if seconds_left() > 0 then Colors.text_green_2 else Colors.text_greyout)
-            .Align(Alignment.CENTER)
+            .With(
+                Text(fun () -> sprintf "%s %s: %i" Icons.CLOCK reason (seconds_left()))
+                    .Color(fun () -> if seconds_left() > 0 then Colors.text_green_2 else Colors.text_greyout)
+                    .Align(Alignment.CENTER)
+            )
         |> add_msg
 
     override this.Init(parent: Widget) : unit =
-        this
-        |+ chatline
-        |+ Text([ (%%"select").ToString().ToUpperInvariant() ] %> "lobby.chat_hint")
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(Position.SliceB(50.0f).Shrink(5.0f))
-            .Conditional(fun () -> current_message.Value = "")
-        |* message_history
+        this.Add(
+            chatline,
+            Text([ (%%"select").ToString().ToUpperInvariant() ] %> "lobby.chat_hint")
+                .Color(Colors.text_subheading)
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceB(50.0f).Shrink(5.0f))
+                .Conditional(fun () -> current_message.Value = ""),
+            message_history
+        )
 
         lobby.OnChatMessage.Add(chat_msg >> add_msg)
         lobby.OnSystemMessage.Add(fun msg -> add_msg(Text(msg).Align(Alignment.CENTER)))

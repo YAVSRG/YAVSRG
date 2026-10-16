@@ -15,39 +15,40 @@ type TopBanner(score_info: ScoreInfo) as this =
     let current_session = Content.Stats.GetCurrentSession()
 
     do
-        this
-        |+ Text(score_info.ChartMeta.Artist + " - " + score_info.ChartMeta.Title)
-            .Align(Alignment.LEFT)
-            .Position(Position.SliceT(85.0f).ShrinkX(20.0f).ShrinkR(300.0f))
-        |+ Text(score_info.ChartMeta.DifficultyName)
-            .Align(Alignment.LEFT)
-            .Position(Position.SliceT(75.0f, 55.0f).ShrinkX(20.0f))
-        |+ Text(
-            sprintf
-                "%s  •  %s"
-                ([ score_info.ChartMeta.OriginString ] %> "score.source")
-                ([ score_info.ChartMeta.Creator ] %> "score.creator")
-        )
-            .Align(Alignment.LEFT)
-            .Position(Position.SliceT(125.0f, 40.0f).ShrinkX(20.0f))
+        this.Add(
+            Text(score_info.ChartMeta.Artist + " - " + score_info.ChartMeta.Title)
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceT(85.0f).ShrinkX(20.0f).ShrinkR(300.0f)),
+            Text(score_info.ChartMeta.DifficultyName)
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceT(75.0f, 55.0f).ShrinkX(20.0f)),
+            Text(
+                sprintf
+                    "%s  •  %s"
+                    ([ score_info.ChartMeta.OriginString ] %> "score.source")
+                    ([ score_info.ChartMeta.Creator ] %> "score.creator")
+            )
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceT(125.0f, 40.0f).ShrinkX(20.0f)),
 
-        |+ Text((score_info.TimePlayed |> Timestamp.to_datetime).ToLocalTime().ToString())
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(65.0f, 55.0f).ShrinkX(20.0f))
-        |* Text(
-            match score_info.PlayedBy with
-            | ScorePlayedBy.Username p -> K([ p ] %> "score.played_by")
-            | ScorePlayedBy.You ->
-                (fun () ->
-                    [
-                        format_short_time current_session.GameTime
-                        format_short_time current_session.PlayTime
-                    ]
-                    %> "score.session_time"
-                )
+            Text((score_info.TimePlayed |> Timestamp.to_datetime).ToLocalTime().ToString())
+                .Align(Alignment.RIGHT)
+                .Position(Position.SliceT(65.0f, 55.0f).ShrinkX(20.0f)),
+            Text(
+                match score_info.PlayedBy with
+                | ScorePlayedBy.Username p -> K([ p ] %> "score.played_by")
+                | ScorePlayedBy.You ->
+                    (fun () ->
+                        [
+                            format_short_time current_session.GameTime
+                            format_short_time current_session.PlayTime
+                        ]
+                        %> "score.session_time"
+                    )
+            )
+                .Align(Alignment.RIGHT)
+                .Position(Position.SliceT(115.0f, 50.0f).ShrinkX(20.0f))
         )
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(115.0f, 50.0f).ShrinkX(20.0f))
 
         match score_info.PlayedBy with
         | ScorePlayedBy.You -> this.Add(Username().Position(Position.SliceT(Toolbar.HEIGHT).SliceR(300.0f)))

@@ -11,10 +11,17 @@ type PlayerListPage() =
     let PADDING = 40.0f
 
     override this.Content() =
-        NavigationContainer.Row()
+        NavigationContainer
+            .Row()
             .With(
-                PlayerListSidebar.Create()
-                    .Position(Position.SlicePercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING).ExpandR(PADDING)),
+                PlayerListSidebar
+                    .Create()
+                    .Position(
+                        Position
+                            .SlicePercentL(SIDEBAR_PERCENTAGE_SPLIT)
+                            .Shrink(PADDING)
+                            .ExpandR(PADDING)
+                    ),
                 Profile()
                     .Position(Position.ShrinkPercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING)),
 

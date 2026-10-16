@@ -43,7 +43,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         |> Async.Start
 
     override this.Init(parent: Widget) : unit =
-        this |* LoadingIndicator.Strip(fun () -> not closing).Position(Position.SliceT(165.0f, 10.0f).SliceX(400.0f))
+        this.Add(LoadingIndicator.Strip(fun () -> not closing).Position(Position.SliceT(165.0f, 10.0f).SliceX(400.0f)))
         base.Init(parent)
 
     override this.OnEnter(prev: ScreenType) : unit =

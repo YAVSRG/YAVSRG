@@ -63,7 +63,7 @@ type LobbyPlayerList(lobby: Lobby) =
         )
 
     override this.Init(parent: Widget) : unit =
-        this |* other_players_scroll
+        this.Add(other_players_scroll)
         refresh()
 
         lobby.OnPlayersUpdated.Add(refresh)

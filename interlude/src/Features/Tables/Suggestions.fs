@@ -95,8 +95,10 @@ type RejectSuggestionPage(table: Table, suggestion: Suggestion) =
 
     override this.Content() : Widget =
         page_container()
-        |+ PageTextEntry(%"table.suggestions.reject_reason", reason).Pos(0)
-        |+ PageButton.Once(%"table.suggestions.reject", reject).Pos(3)
+            .With(
+                PageTextEntry(%"table.suggestions.reject_reason", reason).Pos(0),
+                PageButton.Once(%"table.suggestions.reject", reject).Pos(3)
+            )
         :> Widget
 
     override this.Title = suggestion.SongTitle
@@ -145,72 +147,89 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
         this.OnClose(fun () -> still_open <- false)
 
         page_container()
-        |+ PageButton
-            .Once(
-                %"table.suggestions.playtest",
-                playtest_suggestion,
-                K(suggestion.LocalChart.IsNone && suggestion.BackbeatInfo.IsNone)
+            .With(
+                PageButton
+                    .Once(
+                        %"table.suggestions.playtest",
+                        playtest_suggestion,
+                        K(suggestion.LocalChart.IsNone && suggestion.BackbeatInfo.IsNone)
+                    )
+                    .Icon(Icons.PLAY)
+                    .Pos(6)
+                :> Widget,
+                PageButton(
+                    %"table.suggestions.vote_another_level",
+                    fun () -> SuggestChartPage(table, suggestion.ChartId).Show()
+                )
+                    .Icon(Icons.EDIT_2)
+                    .Pos(8),
+                PageButton(%"table.suggestions.accept", fun () -> SelectTableLevelPage(table, accept_level).Show())
+                    .Icon(Icons.CHECK)
+                    .Disabled(suggestion.BackbeatInfo.IsNone)
+                    .Conditional(fun () -> Network.credentials.Username = "Percyqaz") // todo: add permission check instead of temporary check
+                    .Pos(10),
+                PageButton(%"table.suggestions.reject", (fun () -> RejectSuggestionPage(table, suggestion).Show()))
+                    .Icon(Icons.X)
+                    .Conditional(fun () -> Network.credentials.Username = "Percyqaz")
+                    .Pos(12)
             )
-            .Icon(Icons.PLAY)
-            .Pos(6)
-        |+ PageButton(
-            %"table.suggestions.vote_another_level",
-            fun () -> SuggestChartPage(table, suggestion.ChartId).Show()
-        )
-            .Icon(Icons.EDIT_2)
-            .Pos(8)
-        |+ PageButton(%"table.suggestions.accept", fun () -> SelectTableLevelPage(table, accept_level).Show())
-            .Icon(Icons.CHECK)
-            .Disabled(suggestion.BackbeatInfo.IsNone)
-            .Conditional(fun () -> Network.credentials.Username = "Percyqaz") // todo: add permission check instead of temporary check
-            .Pos(10)
-        |+ PageButton(%"table.suggestions.reject", (fun () -> RejectSuggestionPage(table, suggestion).Show()))
-            .Icon(Icons.X)
-            .Conditional(fun () -> Network.credentials.Username = "Percyqaz")
-            .Pos(12)
-        |+ seq {
-            let vote_text =
-                suggestion.Votes
-                |> Map.toSeq
-                |> Seq.map(fun (level, count) -> sprintf "%s (%i)" (table.Info.LevelName(level)) count)
-                |> String.concat ", "
+            .With(
+                seq {
+                    let vote_text =
+                        suggestion.Votes
+                        |> Map.toSeq
+                        |> Seq.map(fun (level, count) -> sprintf "%s (%i)" (table.Info.LevelName(level)) count)
+                        |> String.concat ", "
 
-            match suggestion.BackbeatInfo with
-            | Some(server_chart, server_song) ->
-                yield Text(server_song.FormattedTitle).Align(Alignment.LEFT).Pos(0, 2, PageWidth.Full)
+                    match suggestion.BackbeatInfo with
+                    | Some(server_chart, server_song) ->
+                        yield Text(server_song.FormattedTitle).Align(Alignment.LEFT).Pos(0, 2, PageWidth.Full) :> Widget
 
-                yield
-                    Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators)
-                        .Color(Colors.text_subheading)
-                        .Align(Alignment.LEFT)
-                        .Pos(2, 1, PageWidth.Full)
+                        yield
+                            Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators)
+                                .Color(Colors.text_subheading)
+                                .Align(Alignment.LEFT)
+                                .Pos(2, 1, PageWidth.Full)
 
-                yield Text(vote_text).Color(Colors.text_subheading).Align(Alignment.LEFT).Pos(3, 1, PageWidth.Full)
-            | None ->
+                        yield
+                            Text(vote_text)
+                                .Color(Colors.text_subheading)
+                                .Align(Alignment.LEFT)
+                                .Pos(3, 1, PageWidth.Full)
+                    | None ->
 
-            match suggestion.LocalChart with
-            | Some local_chart_meta ->
-                yield
-                    Text(local_chart_meta.Artist + " - " + local_chart_meta.Title)
-                        .Align(Alignment.LEFT)
-                        .Pos(0, 2, PageWidth.Full)
+                    match suggestion.LocalChart with
+                    | Some local_chart_meta ->
+                        yield
+                            Text(local_chart_meta.Artist + " - " + local_chart_meta.Title)
+                                .Align(Alignment.LEFT)
+                                .Pos(0, 2, PageWidth.Full)
 
-                yield
-                    Text(local_chart_meta.DifficultyName + "  •  " + local_chart_meta.Creator)
-                        .Color(Colors.text_subheading)
-                        .Align(Alignment.LEFT)
-                        .Pos(2, 1, PageWidth.Full)
+                        yield
+                            Text(local_chart_meta.DifficultyName + "  •  " + local_chart_meta.Creator)
+                                .Color(Colors.text_subheading)
+                                .Align(Alignment.LEFT)
+                                .Pos(2, 1, PageWidth.Full)
 
-                yield Text(vote_text).Color(Colors.text_subheading).Align(Alignment.LEFT).Pos(3, 1, PageWidth.Full)
-            | None ->
-                yield
-                    Text(%"table.suggestions.info_missing")
-                        .Color(Colors.text_red_2)
-                        .Align(Alignment.LEFT)
-                        .Pos(0, 2, PageWidth.Full)
+                        yield
+                            Text(vote_text)
+                                .Color(Colors.text_subheading)
+                                .Align(Alignment.LEFT)
+                                .Pos(3, 1, PageWidth.Full)
+                    | None ->
+                        yield
+                            Text(%"table.suggestions.info_missing")
+                                .Color(Colors.text_red_2)
+                                .Align(Alignment.LEFT)
+                                .Pos(0, 2, PageWidth.Full)
 
-                yield Text(vote_text).Color(Colors.text_subheading).Align(Alignment.LEFT).Pos(2, 1, PageWidth.Full)
-        }
+                        yield
+                            Text(vote_text)
+                                .Color(Colors.text_subheading)
+                                .Align(Alignment.LEFT)
+                                .Pos(2, 1, PageWidth.Full)
+                }
+            )
         :> Widget
 
     override this.Title = %"table.suggestion"
