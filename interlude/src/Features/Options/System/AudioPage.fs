@@ -55,6 +55,15 @@ type AudioPage() =
         )
             .Help(Help.Info("system.menus_muffle_song"))
 
+    static member CrossfadeEnabled() : PageSetting =
+        PageSetting(%"system.audio_enable_crossfade",
+            Checkbox (
+                options.AudioCrossfadeEnabled
+                |> Setting.trigger Song.set_CrossfadeEnabled
+            )
+        )
+            .Help(Help.Info("system.audio_enable_crossfade"))
+
     static member AudioOffset() : PageSetting =
         PageSetting(
             %"system.audiooffset",
@@ -78,8 +87,9 @@ type AudioPage() =
                 AudioPage.RatesChangePitchDown().Pos(5),
                 AudioPage.RatesChangePitchUp().Pos(7),
                 AudioPage.MenusMuffleSong().Pos(9),
-                AudioPage.AudioOffset().Pos(12),
-                AudioPage.AutomaticOffset().Pos(14)
+                AudioPage.CrossfadeEnabled().Pos(11),
+                AudioPage.AudioOffset().Pos(14),
+                AudioPage.AutomaticOffset().Pos(16)
             )
 
     override this.Title = Icons.SPEAKER + " " + %"system.audio"

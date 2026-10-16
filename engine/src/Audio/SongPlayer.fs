@@ -72,6 +72,7 @@ type SongPlayer() =
     let mutable enable_pitch_rate_down = true
     let mutable enable_pitch_rate_up = true
     let mutable global_offset = 0.0f<ms / rate>
+    let mutable crossfade_enabled = true
 
     let mutable low_pass_amount = 0.0f
     let mutable low_pass_target = 0.0f
@@ -110,7 +111,7 @@ type SongPlayer() =
         | PlayingWithoutAudio ->
             let run_time =
                 float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate>
-            // attempt to cancel unpause-delay
+
             compensation_at_start_of_frame <- min run_time ASSUMED_BASS_DELAY
         | Paused -> compensation_at_start_of_frame <- 0.0f<ms / rate>
 
@@ -210,6 +211,10 @@ type SongPlayer() =
             if rate > 1.0f<rate> then
                 this.ApplyRateChange()
 
+    member this.CrossfadeEnabled
+        with get () = crossfade_enabled
+        and set (enabled: bool) = crossfade_enabled <- enabled
+
     member this.ApplyLowPassFilter(amount: float32) : unit =
         low_pass_target <- amount
         song.SetLowPassFilter(low_pass_amount)
@@ -228,7 +233,9 @@ type SongPlayer() =
 
         match after_load with
         | SongLoadAction.PlayFromPreview ->
-            song.FadeIn(SongPlayer.CROSSFADE_DURATION_MS)
+            if crossfade_enabled then
+                song.FadeIn(SongPlayer.CROSSFADE_DURATION_MS)
+
             if was_paused then this.Seek(song.PreviewPoint) else this.PlayFrom(song.PreviewPoint)
 
         | SongLoadAction.PlayFromBeginning -> if was_paused then this.Seek(0.0f<ms>) else this.PlayFrom(0.0f<ms>)
@@ -260,7 +267,7 @@ type SongPlayer() =
 
         if path_changed then
             load_path <- request.Path
-            song.FadeOutThenFree(SongPlayer.CROSSFADE_DURATION_MS)
+            if crossfade_enabled then song.FadeOutThenFree(SongPlayer.CROSSFADE_DURATION_MS) else song.Free()
             loading <- true
             this.AsyncSongLoader.Request(request, this)
         else

@@ -46,7 +46,9 @@ module SearchResults =
             if token_match tokens [|%"system.audio_pitch_rates_up"|] then
                 yield AudioPage.RatesChangePitchUp()
             if token_match tokens [|%"system.menus_muffle_song"|] then
-                yield AudioPage.MenusMuffleSong(), 2, 3, PageWidth.Normal
+                yield AudioPage.MenusMuffleSong()
+            if token_match tokens [|%"system.audio_enable_crossfade"|] then
+                yield AudioPage.CrossfadeEnabled()
 
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 yield SystemPage.Hotkeys()
