@@ -122,10 +122,8 @@ type SongPlayer() =
     member this.IsPlaying: bool = state <> Paused
 
     member this.PlayFrom(time: Time) : unit =
-        if time >= 0.0f<ms> && time < song.Duration && song.ID <> 0 then
-            song.Pause() |> ignore
-            song.Seek(time)
-            song.Play(delay_callback)
+        if song.ShouldPlayAt(time) then
+            song.PlayFrom(time, delay_callback)
 
         else if song.Playing then
             song.Pause() |> ignore
@@ -142,7 +140,7 @@ type SongPlayer() =
         if this.IsPlaying then
             this.PlayFrom(time)
         else
-            if time >= 0.0f<ms> && time < song.Duration && song.ID <> 0 then
+            if song.ShouldPlayAt(time) then
                 song.Seek(time)
 
             timer_position <- time
@@ -152,7 +150,7 @@ type SongPlayer() =
         let time = this.PositionRealtime()
         timer_position <- time
 
-        if time >= 0.0f<ms> && time < song.Duration then
+        if song.ShouldPlayAt(time) then
             timer_position <- song.Pause()
 
         state <- Paused
@@ -161,10 +159,8 @@ type SongPlayer() =
     member this.Resume() : unit =
         let time = this.PositionRealtime()
 
-        if time >= 0.0f<ms> && time < song.Duration then
-            song.Pause() |> ignore
-            song.Seek(time)
-            song.Play(delay_callback)
+        if song.ShouldPlayAt(time) then
+            song.PlayFrom(time, delay_callback)
 
         timer_position <- time
         timer_start <- Stopwatch.GetTimestamp()
@@ -173,11 +169,11 @@ type SongPlayer() =
 
     // Local offset is a Time with `ms` units AKA *chart units* which scale with rate - for offsetting notes relative to audio where they are misaligned
     member this.LocalOffset: Time = song.LocalOffset
-    member this.SetLocalOffset(offset: Time) = song.LocalOffset <- offset
+    member this.SetLocalOffset(offset: Time) : unit = song.LocalOffset <- offset
 
     // Global offset is with `ms / rate` units AKA *real time ms*, for offsetting a constant realtime delay with hardware
     member this.GlobalOffset: float32<ms / rate> = global_offset
-    member this.SetGlobalOffset(offset: float32<ms / rate>) = global_offset <- offset
+    member this.SetGlobalOffset(offset: float32<ms / rate>) : unit = global_offset <- offset
 
     member this.OnFinish(action: SongFinishAction) : unit = on_finish <- action
 
@@ -302,16 +298,8 @@ type SongPlayer() =
         this.AsyncSongLoader.Join()
 
         // if playback is running and the audio should have started, then start it
-        if
-            state.IsPlayingWithoutAudio
-            && time_at_start_of_frame >= 0.0f<ms>
-            && time_at_start_of_frame < song.Duration
-            && not song.Playing
-            && song.ID <> 0
-        then
-            song.Pause() |> ignore
-            song.Seek(time_at_start_of_frame)
-            song.Play(delay_callback)
+        if state.IsPlayingWithoutAudio && not song.Playing && song.ShouldPlayAt(time_at_start_of_frame) then
+            song.PlayFrom(time_at_start_of_frame, delay_callback)
 
         elif time_at_start_of_frame > song.Duration then
             on_song_finished()

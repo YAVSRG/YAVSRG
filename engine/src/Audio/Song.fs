@@ -76,6 +76,9 @@ type Song =
     member this.CurrentPosition() : Time =
         float32(Bass.ChannelBytes2Seconds(this.ID, Bass.ChannelGetPosition(this.ID))) * 1000.0f<ms>
 
+    member this.ShouldPlayAt(time: Time) : bool =
+        this.ID <> 0 && time >= 0.0f<ms> && time < this.Duration
+
     member this.ChangeRate(rate: float32<rate>, change_pitch: bool) : unit =
 
         let set_frequency_multiplier (rate: float32<rate>) =
@@ -139,6 +142,11 @@ type Song =
 
             Bass.ChannelSetSync(this.ID, sync_flags, Bass.ChannelGetPosition(this.ID) + 1L, callback).LogBassError()
             Bass.ChannelPlay(this.ID).LogBassError()
+
+    member inline this.PlayFrom(time: Time, delay_callback: float32<ms / rate> -> unit) : unit =
+        ignore(this.Pause())
+        this.Seek(time)
+        this.Play(delay_callback)
 
     member this.Seek(time: Time) : unit =
         if this.Playing then

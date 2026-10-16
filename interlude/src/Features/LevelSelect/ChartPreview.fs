@@ -98,7 +98,6 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         if not (Mouse.held Mouse.LEFT) then
             let scroll = Mouse.scroll()
             if scroll <> 0.0f then
-                //
                 Song.Seek(Song.Time - scroll * 40.0f<ms/rate> * Song.Rate)
 
     override this.Close() =
