@@ -224,7 +224,7 @@ module Song =
         let mutable low_pass_target = 0.0f
 
     /// The exact audio position the engine thinks we are at; Can be called mid-frame for sub-frame precision
-    let private exact_time () : Time =
+    let private position_realtime () : Time =
         if state = SongPlaybackState.Paused then
             timer_position
         else
@@ -232,8 +232,8 @@ module Song =
             + float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate> * AudioSettings.rate
 
     /// Used by the input engine at the instant an input is polled for precise mapping of inputs to audio positions
-    let exact_time_with_offset () : Time =
-        exact_time() - compensation_at_start_of_frame * AudioSettings.rate
+    let input_engine_time () : Time =
+        position_realtime() - compensation_at_start_of_frame * AudioSettings.rate
         + now_playing.LocalOffset
         + AudioSettings._global_offset * AudioSettings.rate
 
@@ -254,11 +254,12 @@ module Song =
                 float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate>
             // attempt to cancel unpause-delay
             compensation_at_start_of_frame <- min run_time ASSUMED_BASS_DELAY
-        | SongPlaybackState.Paused -> compensation_at_start_of_frame <- -ASSUMED_BASS_DELAY
+        | SongPlaybackState.Paused -> compensation_at_start_of_frame <- 0.0f<ms / rate>
 
-        time_at_start_of_frame <- exact_time()
+        time_at_start_of_frame <- position_realtime()
 
-    let frame_compensation () : Time = exact_time() - time_at_start_of_frame
+    let frame_compensation () : Time =
+        position_realtime() - time_at_start_of_frame
 
     let time () : Time = time_at_start_of_frame
 
@@ -299,7 +300,7 @@ module Song =
             start_of_frame()
 
     let pause () : unit =
-        let time = exact_time()
+        let time = position_realtime()
 
         timer_position <- time
 
@@ -310,7 +311,7 @@ module Song =
         start_of_frame()
 
     let resume () : unit =
-        let time = exact_time()
+        let time = position_realtime()
 
         if time >= 0.0f<ms> && time < now_playing.Duration then
             now_playing.Pause() |> ignore
@@ -424,18 +425,25 @@ module Song =
         else
             now_playing.LocalOffset <- request.LocalOffset
 
-    let update (elapsed_ms: float) : unit =
-        start_of_frame()
+    let update_low_pass_filter_slide (elapsed_ms: float) : unit =
+        let is_sliding = AudioSettings.low_pass_target <> AudioSettings.low_pass_amount
 
-        if AudioSettings.low_pass_target <> AudioSettings.low_pass_amount then
+        if is_sliding then
             AudioSettings.low_pass_amount <-
                 lerp (float32(Math.Pow(0.994, elapsed_ms))) AudioSettings.low_pass_target AudioSettings.low_pass_amount
 
-            if abs(AudioSettings.low_pass_amount - AudioSettings.low_pass_target) < 0.01f then
-                AudioSettings.low_pass_amount <- AudioSettings.low_pass_target
-
             now_playing.SetLowPassFilter(AudioSettings.low_pass_amount)
 
+            let is_slide_complete =
+                abs(AudioSettings.low_pass_amount - AudioSettings.low_pass_target) < 0.01f
+
+            if is_slide_complete then
+                AudioSettings.low_pass_amount <- AudioSettings.low_pass_target
+
+
+    let update (elapsed_ms: float) : unit =
+        start_of_frame() // Update time_at_start_of_frame, compensation_at_start_of_frame
+        update_low_pass_filter_slide(elapsed_ms)
         song_loader.Join()
 
         // if playback is running and the audio should have started, then start it
@@ -465,9 +473,13 @@ module Song =
                     action()
 
     let debug_timeline_drift () : Time =
+        if now_playing.ID = 0 then
+            0.0f<ms>
+        else
+
         let bass_reported_time = now_playing.CurrentPosition()
 
         let timeline_time =
-            exact_time() - compensation_at_start_of_frame * AudioSettings.rate
+            position_realtime() - compensation_at_start_of_frame * AudioSettings.rate
 
         timeline_time - bass_reported_time

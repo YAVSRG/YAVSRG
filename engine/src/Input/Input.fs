@@ -191,7 +191,7 @@ module internal InputThread =
                     ) |> Bind.Key
                 Action = action
                 GLFWTimestamp = GLFW.GetTime()
-                AudioPosition = Song.exact_time_with_offset()
+                AudioPosition = Song.input_engine_time()
             }
         lock LOCK_OBJ (fun () ->
             if typing then
@@ -221,7 +221,7 @@ module internal InputThread =
                 Bind = Bind.Mouse button
                 Action = action
                 GLFWTimestamp = GLFW.GetTime()
-                AudioPosition = Song.exact_time_with_offset()
+                AudioPosition = Song.input_engine_time()
             }
         lock LOCK_OBJ (fun () ->
             events_buffer <- List.append events_buffer [ event ]
