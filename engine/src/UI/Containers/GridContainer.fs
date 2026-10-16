@@ -328,17 +328,6 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     member this.Add(child: 'T) = (this :> IContainer<'T>).Add child
     member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove child
 
-    static member (|+)(parent: #GridFlowContainer<'T>, child: 'T) =
-        parent.Add child
-        parent
-
-    static member (|+)(parent: #GridFlowContainer<'T>, children: 'T seq) =
-        Seq.iter parent.Add children
-        parent
-
-    static member (|*)(parent: #GridFlowContainer<'T>, child: 'T) = parent.Add child
-    static member (|*)(parent: #GridFlowContainer<'T>, children: 'T seq) = Seq.iter parent.Add children
-
     interface IHeight with
         member this.Height = content_height
 

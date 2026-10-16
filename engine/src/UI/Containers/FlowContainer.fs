@@ -170,17 +170,6 @@ module FlowContainer =
             for { Widget = c } in children do
                 f c
 
-        static member (|+)(parent: #Base<'T>, child: 'T) =
-            parent.Add child
-            parent
-
-        static member (|+)(parent: #Base<'T>, children: 'T seq) =
-            Seq.iter parent.Add children
-            parent
-
-        static member (|*)(parent: #Base<'T>, child: 'T) = parent.Add child
-        static member (|*)(parent: #Base<'T>, children: 'T seq) = Seq.iter parent.Add children
-
         interface IContainer<'T> with
 
             member this.Add(child: 'T) : unit =
