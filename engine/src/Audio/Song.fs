@@ -213,29 +213,24 @@ module Song =
             actual_bass_delay <- delay
             state <- SongPlaybackState.PlayingWithAudio
 
-    module AudioSettings =
+    let mutable rate = 1.0f<rate>
+    let mutable enable_pitch_rate_down = true
+    let mutable enable_pitch_rate_up = true
+    let mutable global_offset = 0.0f<ms / rate>
 
-        let mutable rate = 1.0f<rate>
-        let mutable enable_pitch_rate_down = true
-        let mutable enable_pitch_rate_up = true
-        let mutable _global_offset = 0.0f<ms / rate>
-
-        let mutable low_pass_amount = 0.0f
-        let mutable low_pass_target = 0.0f
+    let mutable low_pass_amount = 0.0f
+    let mutable low_pass_target = 0.0f
 
     /// The exact audio position the engine thinks we are at; Can be called mid-frame for sub-frame precision
     let private position_realtime () : Time =
         if state = SongPlaybackState.Paused then
             timer_position
         else
-            timer_position
-            + float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate> * AudioSettings.rate
+            timer_position + float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate> * rate
 
     /// Used by the input engine at the instant an input is polled for precise mapping of inputs to audio positions
     let input_engine_time () : Time =
-        position_realtime() - compensation_at_start_of_frame * AudioSettings.rate
-        + now_playing.LocalOffset
-        + AudioSettings._global_offset * AudioSettings.rate
+        position_realtime() - compensation_at_start_of_frame * rate + now_playing.LocalOffset + global_offset * rate
 
     let start_of_frame () : unit =
         match state with
@@ -264,10 +259,10 @@ module Song =
     let time () : Time = time_at_start_of_frame
 
     let time_compensated () : Time =
-        time() - compensation_at_start_of_frame * AudioSettings.rate
+        time() - compensation_at_start_of_frame * rate
 
     let time_with_offset () : Time =
-        time_compensated() + now_playing.LocalOffset + AudioSettings._global_offset * AudioSettings.rate
+        time_compensated() + now_playing.LocalOffset + global_offset * rate
 
     let playing () : bool = state <> SongPlaybackState.Paused
 
@@ -287,7 +282,7 @@ module Song =
         state <- SongPlaybackState.PlayingWithoutAudio
 
     let play_leadin (first_note: Time) : unit =
-        play_from(min 0.0f<ms> (first_note - LEADIN_TIME * AudioSettings.rate))
+        play_from(min 0.0f<ms> (first_note - LEADIN_TIME * rate))
 
     let seek (time: Time) : unit =
         if playing() then
@@ -329,45 +324,45 @@ module Song =
             and set (offset: Time) = now_playing.LocalOffset <- offset
 
         static member GlobalOffset
-            with get (): float32<ms / rate> = AudioSettings._global_offset
-            and set (offset: float32<ms / rate>) = AudioSettings._global_offset <- offset
+            with get (): float32<ms / rate> = global_offset
+            and set (offset: float32<ms / rate>) = global_offset <- offset
 
         static let handle_rate_change () =
-            now_playing.ChangeRate(AudioSettings.rate, AudioSettings.RateChangesPitch())
+            now_playing.ChangeRate(rate, AudioSettings.RateChangesPitch())
             seek(time())
 
         static member RateChangesPitch() : bool =
-            if AudioSettings.rate = 1.0f<rate> then true
-            elif AudioSettings.rate > 1.0f<rate> then AudioSettings.enable_pitch_rate_up
-            else AudioSettings.enable_pitch_rate_down
+            if rate = 1.0f<rate> then true
+            elif rate > 1.0f<rate> then enable_pitch_rate_up
+            else enable_pitch_rate_down
 
         static member Rate
-            with get (): float32<rate> = AudioSettings.rate
+            with get (): float32<rate> = rate
             and set (new_rate: float32<rate>) =
-                if AudioSettings.rate <> new_rate then
-                    AudioSettings.rate <- new_rate
+                if rate <> new_rate then
+                    rate <- new_rate
                     handle_rate_change()
 
         static member DownRatesChangePitch
-            with get () = AudioSettings.enable_pitch_rate_down
+            with get () = enable_pitch_rate_down
             and set (enabled: bool) =
-                AudioSettings.enable_pitch_rate_down <- enabled
+                enable_pitch_rate_down <- enabled
 
-                if AudioSettings.rate < 1.0f<rate> then
+                if rate < 1.0f<rate> then
                     handle_rate_change()
 
         static member UpRatesChangePitch
-            with get () = AudioSettings.enable_pitch_rate_up
+            with get () = enable_pitch_rate_up
             and set (enabled: bool) =
-                AudioSettings.enable_pitch_rate_up <- enabled
+                enable_pitch_rate_up <- enabled
 
-                if AudioSettings.rate > 1.0f<rate> then
+                if rate > 1.0f<rate> then
                     handle_rate_change()
 
         static member LowPassFilter
             with set (amount: float32) =
-                AudioSettings.low_pass_target <- amount
-                now_playing.SetLowPassFilter(AudioSettings.low_pass_amount)
+                low_pass_target <- amount
+                now_playing.SetLowPassFilter(low_pass_amount)
 
     [<Struct>]
     type SongLoadRequest =
@@ -395,8 +390,8 @@ module Song =
 
             override this.Handle((song: Song, after_load: SongLoadAction)) : unit =
                 loading <- false
-                song.ChangeRate(AudioSettings.rate, AudioSettings.RateChangesPitch())
-                song.SetLowPassFilter(AudioSettings.low_pass_amount)
+                song.ChangeRate(rate, AudioSettings.RateChangesPitch())
+                song.SetLowPassFilter(low_pass_amount)
                 let was_paused = state = SongPlaybackState.Paused
                 state <- SongPlaybackState.Paused
                 now_playing <- song
@@ -426,19 +421,17 @@ module Song =
             now_playing.LocalOffset <- request.LocalOffset
 
     let update_low_pass_filter_slide (elapsed_ms: float) : unit =
-        let is_sliding = AudioSettings.low_pass_target <> AudioSettings.low_pass_amount
+        let is_sliding = low_pass_target <> low_pass_amount
 
         if is_sliding then
-            AudioSettings.low_pass_amount <-
-                lerp (float32(Math.Pow(0.994, elapsed_ms))) AudioSettings.low_pass_target AudioSettings.low_pass_amount
+            low_pass_amount <- lerp (float32(Math.Pow(0.994, elapsed_ms))) low_pass_target low_pass_amount
 
-            now_playing.SetLowPassFilter(AudioSettings.low_pass_amount)
+            now_playing.SetLowPassFilter(low_pass_amount)
 
-            let is_slide_complete =
-                abs(AudioSettings.low_pass_amount - AudioSettings.low_pass_target) < 0.01f
+            let is_slide_complete = abs(low_pass_amount - low_pass_target) < 0.01f
 
             if is_slide_complete then
-                AudioSettings.low_pass_amount <- AudioSettings.low_pass_target
+                low_pass_amount <- low_pass_target
 
 
     let update (elapsed_ms: float) : unit =
@@ -479,7 +472,6 @@ module Song =
 
         let bass_reported_time = now_playing.CurrentPosition()
 
-        let timeline_time =
-            position_realtime() - compensation_at_start_of_frame * AudioSettings.rate
+        let timeline_time = position_realtime() - compensation_at_start_of_frame * rate
 
         timeline_time - bass_reported_time
