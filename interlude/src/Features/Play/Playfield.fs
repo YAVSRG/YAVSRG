@@ -341,8 +341,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 sv_seek <- sv_seek + 1
 
         let now =
-            Song.time_with_offset()
-            + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.AudioSettings.Rate
+            Song.TimeWithOffset
+            + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.Rate
 
         if now < last_time then
             handle_seek_back_in_time()

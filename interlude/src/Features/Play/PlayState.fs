@@ -51,7 +51,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
         let ruleset = Rulesets.current
         let scoring = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
 
-        let state = PlayState(info, PacemakerState.None, scoring, Song.time_with_offset)
+        let state = PlayState(info, PacemakerState.None, scoring, Song.get_TimeWithOffset)
 
         scoring.Update (state.CurrentChartTime())
 

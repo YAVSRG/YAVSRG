@@ -37,7 +37,7 @@ type DebugOverlay() =
         DebugGraph.Create(Color.Orange, fun () -> GameThread.draw_time * 2.0)
         DebugGraph.Create(Color.Yellow, fun () -> GameThread.update_time * 10.0)
         DebugGraph.Create(Color.Green, fun () -> GameThread.visual_latency_hi)
-        DebugGraph.Create(Color.Blue.O2, fun () -> float(Song.debug_timeline_drift())).Enabled()
+        DebugGraph.Create(Color.Blue.O2, fun () -> float(Song.DebugTimelineDrift())).Enabled()
     |]
     let mutable fps = 0.0
 
@@ -88,8 +88,8 @@ type DebugOverlay() =
             debug_text(sprintf "FPS: %.3f" fps, Color.DarkRed)
             debug_text(sprintf "playfield latency: %.1f - %.1fms" GameThread.visual_latency_lo GameThread.visual_latency_hi, Color.DarkGreen)
             debug_text(sprintf "frame compensation: %.1fms" (GameThread.frame_compensation()), Color.Black)
-            debug_text(sprintf "audio comp. (actual): %.1fms" Song.compensation_at_start_of_frame, Color.Black)
-            debug_text(sprintf "audio comp. (target): %.1fms" Song.actual_bass_delay, Color.Black)           
+            debug_text(sprintf "audio comp. (actual): %.1fms" Song.DebugCompensationAtStartOfFrame, Color.Black)
+            debug_text(sprintf "audio comp. (target): %.1fms" Song.DebugActualBassDelay, Color.Black)           
 
             Text.draw_aligned_b (
                 Style.font,

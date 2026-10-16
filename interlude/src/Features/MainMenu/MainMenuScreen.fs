@@ -69,7 +69,7 @@ type MainMenuScreen() =
             fun () ->
                 confirmed_quit <- true
                 Screen.back Transitions.UnderLogo |> ignore
-                GameThread.defer (fun () -> Song.AudioSettings.LowPassFilter <- 1.0f)
+                GameThread.defer (fun () -> Song.ApplyLowPassFilter())
         )
             .Show()
 
@@ -155,11 +155,12 @@ type MainMenuScreen() =
         Screen.logo.MoveMenu()
         Background.dim 0.0f
         Toolbar.show ()
-        Song.on_finish <-
+        Song.OnFinish(
             SongFinishAction.Custom (fun () ->
                 LevelSelect.random_chart ()
                 splash_text <- choose_splash ()
             )
+        )
 
         button_sequence.Add
         <| Animation.seq

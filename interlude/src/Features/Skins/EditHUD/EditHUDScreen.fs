@@ -61,8 +61,8 @@ module EditHudScreen =
                 Dialog.close ()
                 Background.dim (float32 options.BackgroundDim.Value)
                 Toolbar.hide ()
-                Song.on_finish <- SongFinishAction.LoopFromBeginning
-                Song.resume()
+                Song.OnFinish(SongFinishAction.LoopFromBeginning)
+                Song.Resume()
                 Input.remove_listener ()
 
             override this.OnExit s =

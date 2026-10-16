@@ -18,7 +18,7 @@ open Interlude.Features.Online
 type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGain option, played_just_now: bool) =
     inherit Screen()
 
-    let pbs, xp_gain = results
+    let pbs, _xp_gain = results
     let personal_bests = ref pbs
 
     let grade =
@@ -115,7 +115,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
     override this.OnEnter(_: ScreenType) =
         Toolbar.hide()
-        Song.on_finish <- SongFinishAction.Wait
+        Song.OnFinish(SongFinishAction.Wait)
         DiscordRPC.in_menus(%"discord_status.score_screen")
 
     override this.OnExit(_: ScreenType) =

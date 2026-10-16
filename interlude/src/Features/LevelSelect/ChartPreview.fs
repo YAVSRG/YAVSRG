@@ -20,7 +20,7 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     let mutable playfield =
         Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
 
-    let mutable timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
+    let mutable timeline = Timeline(info.WithMods, Song.Seek, SelectedChart.rate)
 
     let mutable difficulty_overlay = DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
     let mutable show_difficulty_overlay = false
@@ -32,14 +32,14 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             recreate_scoring <- _recreate_scoring
             playfield <- Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
             difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
-            timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
+            timeline <- Timeline(info.WithMods, Song.Seek, SelectedChart.rate)
             if this.Initialised then
                 difficulty_overlay.Init this
                 playfield.Init this
                 timeline.Init this
         )
 
-    let unpause_song_on_exit = Song.playing()
+    let unpause_song_on_exit = Song.IsPlaying
 
     let volume = VolumeSlider()
 
@@ -64,7 +64,7 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         if show_difficulty_overlay then difficulty_overlay.Update(elapsed_ms, moved)
         playfield.Update(elapsed_ms, moved)
 
-        if Song.playing() then
+        if Song.IsPlaying then
             let now = playstate.CurrentChartTime()
             playstate.Scoring.Update now
             if last_time > now then
@@ -89,24 +89,20 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         elif (%%"difficulty_overlay").Pressed() then
             show_difficulty_overlay <- not show_difficulty_overlay
         elif (%%"pause").Pressed() || (%%"pause_music").Pressed() then
-            if Song.playing () then
-                (if Song.time () > 0.0f<ms> then Song.pause ())
-            elif not (Mouse.held Mouse.LEFT) then Song.resume ()
+            if Song.IsPlaying then
+                (if Song.Time > 0.0f<ms> then Song.Pause())
+            elif not (Mouse.held Mouse.LEFT) then Song.Resume()
         else
             SelectedChart.change_rate_hotkeys change_rate
 
         if not (Mouse.held Mouse.LEFT) then
             let scroll = Mouse.scroll()
             if scroll <> 0.0f then
-                if Song.playing() then
-                    Song.pause()
-                    Song.seek(Song.time() - scroll * 40.0f<ms>)
-                    Song.resume()
-                else
-                    Song.seek(Song.time() - scroll * 40.0f<ms>)
+                //
+                Song.Seek(Song.Time - scroll * 40.0f<ms/rate> * Song.Rate)
 
     override this.Close() =
         change_chart_listener.Dispose()
         if unpause_song_on_exit then
-            Song.resume ()
+            Song.Resume()
         base.Close()

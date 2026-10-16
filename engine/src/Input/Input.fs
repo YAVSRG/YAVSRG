@@ -172,13 +172,13 @@ module internal InputThread =
         )
     let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
 
-    let private scroll_callback (_: nativeptr<Window>) (offset_x: float) (offset_y: float) : unit =
+    let private scroll_callback (_: nativeptr<Window>) (_offset_x: float) (offset_y: float) : unit =
         lock LOCK_OBJ (fun () ->
             mouse_z <- mouse_z + float32 offset_y
         )
     let private scroll_callback_d = GLFWCallbacks.ScrollCallback(scroll_callback)
 
-    let private key_callback (_: nativeptr<Window>) (key: Keys) (scancode: int) (action: InputAction) (modifiers: KeyModifiers) : unit =
+    let private key_callback (_: nativeptr<Window>) (key: Keys) (_scancode: int) (action: InputAction) (modifiers: KeyModifiers) : unit =
         let event =
             {
                 Bind =
@@ -191,7 +191,7 @@ module internal InputThread =
                     ) |> Bind.Key
                 Action = action
                 GLFWTimestamp = GLFW.GetTime()
-                AudioPosition = Song.input_engine_time()
+                AudioPosition = Song.PositionInputEngine()
             }
         lock LOCK_OBJ (fun () ->
             if typing then
@@ -215,13 +215,13 @@ module internal InputThread =
         )
     let private key_callback_d = GLFWCallbacks.KeyCallback(key_callback)
 
-    let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (modifiers: KeyModifiers) : unit =
+    let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (_modifiers: KeyModifiers) : unit =
         let event =
             {
                 Bind = Bind.Mouse button
                 Action = action
                 GLFWTimestamp = GLFW.GetTime()
-                AudioPosition = Song.input_engine_time()
+                AudioPosition = Song.PositionInputEngine()
             }
         lock LOCK_OBJ (fun () ->
             events_buffer <- List.append events_buffer [ event ]

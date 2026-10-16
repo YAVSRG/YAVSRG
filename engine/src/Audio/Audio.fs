@@ -14,6 +14,11 @@ type Device =
 
     override this.ToString() : string = this.Name
 
+[<AutoOpen>]
+module SongPlayerInstance =
+
+    let Song = SongPlayer()
+
 module Audio =
 
     /// In BASS units; 10000 is the actual max
@@ -25,8 +30,8 @@ module Audio =
     let private update_waveform (elapsed_ms: float) : unit =
         let lerp_amount = MathF.Pow(0.988f, float32 elapsed_ms)
 
-        if Song.now_playing.Playing then
-            Bass.ChannelGetData(Song.now_playing.ID, fft, int DataFlags.FFT2048) |> ignore
+        if Song.Current.Playing then
+            Bass.ChannelGetData(Song.Current.ID, fft, int DataFlags.FFT2048) |> ignore
             //algorithm adapted from here
             //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
             let mutable b0 = 0
@@ -52,7 +57,7 @@ module Audio =
 
     let update (elapsed_ms: float) : unit =
         update_waveform elapsed_ms
-        Song.update elapsed_ms
+        Song.Update(elapsed_ms)
 
     let change_volume (fx_volume: float, song_volume: float) =
         Bass.GlobalSampleVolume <- int(fx_volume * MAX_VOLUME) |> max 0
@@ -136,8 +141,8 @@ module Audio =
                 else
                     Logging.Critical "Initialising with no sound also failed: %O" Bass.LastError
 
-            if Song.now_playing.ID <> 0 then
-                Bass.ChannelSetDevice(Song.now_playing.ID, device_index).LogBassError()
+            if Song.Current.ID <> 0 then
+                Bass.ChannelSetDevice(Song.Current.ID, device_index).LogBassError()
 
             current_device_changed_ev.Trigger()
 

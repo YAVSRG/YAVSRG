@@ -20,6 +20,7 @@
 	  <Compile Include="Graphics\Text.fs" />
 	  <Compile Include="Audio\BassErrorExtensions.fs" />
 	  <Compile Include="Audio\Song.fs" />
+	  <Compile Include="Audio\SongPlayer.fs" />
 	  <Compile Include="Audio\SoundEffect.fs" />
 	  <Compile Include="Audio\Audio.fs" />
 	  <Compile Include="Audio\Waveform.fs" />

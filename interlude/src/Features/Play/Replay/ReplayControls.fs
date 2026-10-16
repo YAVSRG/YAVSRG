@@ -30,7 +30,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
                     setting.Set SelectedChart.rate.Value
                 else
                     SelectedChart.rate.Set rate
-                    Song.AudioSettings.Rate <- v
+                    Song.SetRate(v)
                     setting.Set v
 
                 fade.Target <- 1.0f
@@ -112,22 +112,22 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
         if not (Mouse.held Mouse.LEFT) then
             let scroll = Mouse.scroll()
             if scroll <> 0.0f then
-                if Song.playing() then
-                    Song.pause()
-                    Song.seek(Song.time() - scroll * SCROLL_SEEK_SPEED)
-                    Song.resume()
+                if Song.IsPlaying then
+                    Song.Pause()
+                    Song.Seek(Song.Time - scroll * SCROLL_SEEK_SPEED)
+                    Song.Resume()
                 else
-                    Song.seek(Song.time() - scroll * SCROLL_SEEK_SPEED)
+                    Song.Seek(Song.Time - scroll * SCROLL_SEEK_SPEED)
 
         if (%%"difficulty_overlay").Pressed() then
             show_difficulty_overlay.Set (not show_difficulty_overlay.Value)
         elif (%%"pause").Pressed() || (%%"pause_music").Pressed() then
-            if Song.playing () then
-                (if Song.time () > 0.0f<ms> then Song.pause ())
-            elif not (Mouse.held Mouse.LEFT) then Song.resume ()
+            if Song.IsPlaying then
+                (if Song.Time > 0.0f<ms> then Song.Pause())
+            elif not (Mouse.held Mouse.LEFT) then Song.Resume()
         elif (%%"left").Pressed() then
-            Song.seek(Song.time() - ARROW_SEEK_INCREMENT |> max 0.0f<ms>)
+            Song.Seek(Song.Time - ARROW_SEEK_INCREMENT |> max 0.0f<ms>)
         elif (%%"right").Pressed() then
-            Song.seek(Song.time() + ARROW_SEEK_INCREMENT)
+            Song.Seek(Song.Time + ARROW_SEEK_INCREMENT)
         else
             SelectedChart.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
