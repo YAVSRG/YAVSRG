@@ -12,14 +12,16 @@ type DebugGraph =
     {
         Color: Color
         mutable IsEnabled: bool
+        IsDuringDraw: bool
         Func: unit -> float
         Data: float array
     }
     
     static member Create(color: Color, func: unit -> float) : DebugGraph =
-        { Color = color; IsEnabled =false; Data = Array.zeroCreate<float> 600; Func = func }
+        { Color = color; IsEnabled = false; Data = Array.zeroCreate<float> 600; Func = func; IsDuringDraw = false }
         
     member this.Enabled() : DebugGraph = { this with IsEnabled = true }
+    member this.DuringDraw() : DebugGraph = { this with IsDuringDraw = true }
 
 type DebugOverlay() =
     inherit StaticWidget(NodeType.None)
@@ -33,11 +35,12 @@ type DebugOverlay() =
     let mutable enable_graph = false
     let mutable i = 0
     let graphs = [|
-        DebugGraph.Create(Color.Red, fun () -> GameThread.update_draw_elapsed_ms).Enabled()
-        DebugGraph.Create(Color.Orange, fun () -> GameThread.draw_time * 2.0)
-        DebugGraph.Create(Color.Yellow, fun () -> GameThread.update_time * 10.0)
+        DebugGraph.Create(Color.Red, fun () -> GameThread.update_draw_elapsed_ms * 2.0).Enabled()
+        DebugGraph.Create(Color.Orange, fun () -> GameThread.draw_time * 2.0).Enabled()
+        DebugGraph.Create(Color.Yellow, fun () -> GameThread.update_time * 2.0).Enabled()
         DebugGraph.Create(Color.Green, fun () -> GameThread.visual_latency_hi)
         DebugGraph.Create(Color.Blue.O2, fun () -> float(Song.DebugTimelineDrift())).Enabled()
+        DebugGraph.Create(Color.Purple.O2, fun () -> float(Song.FrameCompensation) * 4.0).DuringDraw().Enabled()
     |]
     let mutable fps = 0.0
 
@@ -66,10 +69,10 @@ type DebugOverlay() =
             enable_graph <- enable
 
         if enable then
-
             i <- (i + 599) % 600
             for graph in graphs do
-                graph.Data.[i] <- graph.Func()
+                if not graph.IsDuringDraw then
+                    graph.Data.[i] <- graph.Func()
 
             let frames, ticks = GameThread.framecount_tickcount
             fps <- float frames / (float ticks / float Stopwatch.Frequency)
@@ -89,7 +92,8 @@ type DebugOverlay() =
             debug_text(sprintf "playfield latency: %.1f - %.1fms" GameThread.visual_latency_lo GameThread.visual_latency_hi, Color.DarkGreen)
             debug_text(sprintf "frame compensation: %.1fms" (GameThread.frame_compensation()), Color.Black)
             debug_text(sprintf "audio comp. (actual): %.1fms" Song.DebugCompensationAtStartOfFrame, Color.Black)
-            debug_text(sprintf "audio comp. (target): %.1fms" Song.DebugActualBassDelay, Color.Black)           
+            debug_text(sprintf "audio comp. (target): %.1fms" Song.DebugActualBassDelay, Color.Black)
+            debug_text(sprintf "audio drift: %.1fms" (Song.DebugTimelineDrift()), Color.Blue)
 
             Text.draw_aligned_b (
                 Style.font,
@@ -129,6 +133,9 @@ type DebugOverlay() =
                             graph.Color
                             
                         offset <- offset + 50.0f
+            for graph in graphs do  
+                if graph.IsEnabled && graph.IsDuringDraw then
+                    graph.Data.[i] <- graph.Func()
 
             for a = i to 599 do
                 draw_graphs a
