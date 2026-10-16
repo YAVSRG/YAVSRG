@@ -272,6 +272,7 @@ type SongPlayer() =
             loading <- true
             this.AsyncSongLoader.Request(request, this)
         else
+            this.ApplyRateChange()
             song.LocalOffset <- request.LocalOffset
 
     member this.Update(elapsed_ms: float) : unit =
