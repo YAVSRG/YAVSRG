@@ -49,7 +49,6 @@ type Song =
             let frequency = channel_info.Frequency
 
             let fx_handle = BassFx.TempoCreate(handle, BassFlags.FxFreeSource)
-            Bass.ChannelSetDevice(fx_handle, Bass.CurrentDevice).LogBassError()
             Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.NoBuffer, 1f).LogBassError()
             Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoUseQuickAlgorithm, 1).LogBassError()
             Bass.ChannelSetAttribute(fx_handle, ChannelAttribute.TempoOverlapMilliseconds, 4).LogBassError()
@@ -69,6 +68,12 @@ type Song =
                 LowPassFilterEffect = 0
                 Playing = false
             }
+
+    member this.ChangeDevice(device_id: int) : unit =
+        if this.ID <> 0 then
+            Bass.ChannelSetDevice(this.ID, device_id).LogBassError()
+
+    member this.ChangeToCurrentDevice() : unit = this.ChangeDevice(Bass.CurrentDevice)
 
     member this.TimeToBytes(time: Time) : int64 =
         Bass.ChannelSeconds2Bytes(this.ID, time / 1000.0f<ms> |> float)

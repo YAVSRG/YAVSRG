@@ -141,9 +141,7 @@ module Audio =
                 else
                     Logging.Critical "Initialising with no sound also failed: %O" Bass.LastError
 
-            if Song.Current.ID <> 0 then
-                Bass.ChannelSetDevice(Song.Current.ID, device_index).LogBassError()
-
+            Song.Current.ChangeToCurrentDevice()
             current_device_changed_ev.Trigger()
 
         with err ->

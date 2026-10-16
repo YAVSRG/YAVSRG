@@ -227,6 +227,7 @@ type SongPlayer() =
         loading <- false
         new_song.ChangeRate(rate, this.RateChangesPitch(rate))
         new_song.SetLowPassFilter(low_pass_amount)
+        new_song.ChangeToCurrentDevice()
         let was_paused = state = Paused
         state <- Paused
         song <- new_song
@@ -304,13 +305,13 @@ type SongPlayer() =
         update_low_pass_filter_slide(elapsed_ms)
         this.AsyncSongLoader.Join()
 
-        // if playback is running and the audio should have started, then start it
         if state.IsPlayingWithoutAudio && not song.Playing && song.ShouldPlayAt(time_at_start_of_frame) then
             song.PlayFrom(time_at_start_of_frame, delay_callback)
 
         elif time_at_start_of_frame > song.Duration then
             on_song_finished()
 
+    // todo: go through and property identify/label these
     member this.FrameCompensation = this.PositionRealtime() - time_at_start_of_frame
     member this.Time = time_at_start_of_frame
     member this.TimeCompensated = this.Time - compensation_at_start_of_frame * rate
@@ -325,9 +326,6 @@ type SongPlayer() =
         if song.ID = 0 then
             0.0f<ms>
         else
-
-        let bass_reported_time = song.CurrentPosition()
-
-        let timeline_time = this.PositionRealtime() - compensation_at_start_of_frame * rate
-
-        timeline_time - bass_reported_time
+            let bass_reported_time = song.CurrentPosition()
+            let timeline_time = this.PositionRealtime() - compensation_at_start_of_frame * rate
+            timeline_time - bass_reported_time
