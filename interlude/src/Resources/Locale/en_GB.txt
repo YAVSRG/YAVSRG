@@ -1426,4 +1426,5 @@ update.restart=Restart game
 wiki.changelog=Changelog
 wiki.close=Close
 wiki.contents=Table of contents
+wiki.home=Home
 wiki.openinbrowser=Open in browser
