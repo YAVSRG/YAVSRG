@@ -15,18 +15,20 @@ type HoldNoteSettingsPage() =
 
     let data = Content.NoteskinConfig
 
-    let hold_note_trim = data.HoldNoteTrim |> Setting.bounded (-1.0f, 2.0f) |> Setting.roundf 2
+    let hold_note_trim =
+        data.HoldNoteTrim |> Setting.bounded(-1.0f, 2.0f) |> Setting.roundf 2
+
     let minimum_hold_note_length = Setting.simple data.MinimumHoldNoteLength
     let use_tail_texture = Setting.simple data.UseHoldTailTexture
     let flip_hold_tail = Setting.simple data.FlipHoldTail
     let dropped_color = Setting.simple data.DroppedHoldColor
 
-    let head = Content.Texture "holdhead"
-    let body = Content.Texture "holdbody"
-    let tail = Content.Texture "holdtail"
+    let head = Content.Texture("holdhead")
+    let body = Content.Texture("holdbody")
+    let tail = Content.Texture("holdtail")
     let animation = Animation.Counter(float data.AnimationFrameTime)
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 HoldNoteTrim = hold_note_trim.Value
@@ -36,8 +38,9 @@ type HoldNoteSettingsPage() =
                 DroppedHoldColor = dropped_color.Value
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageSetting(%"noteskin.holdnotetrim", Slider.Percent(hold_note_trim))
@@ -53,13 +56,16 @@ type HoldNoteSettingsPage() =
                     .Help(Help.Info("noteskin.flipholdtail"))
                     .Conditional(use_tail_texture.Get)
                     .Pos(7),
-                PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, false))
+                PageSetting(
+                    %"noteskin.droppedholdcolor",
+                    ColorPicker(%"noteskin.droppedholdcolor", dropped_color, false)
+                )
                     .Help(Help.Info("noteskin.droppedholdcolor"))
                     .Pos(10),
                 HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some HoldNoteSettingsPage))
             )
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         let COLUMN_WIDTH = 120.0f
@@ -106,16 +112,22 @@ type HoldNoteSettingsPage() =
                 color.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
 
-            Text.fill_b (Style.font, label, Rect.FromSize(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
+            Text.fill_b(
+                Style.font,
+                label,
+                Rect.FromSize(left, bottom, COLUMN_WIDTH, 30.0f),
+                Colors.text,
+                Alignment.CENTER
+            )
 
             left <- left - COLUMN_WIDTH - 50.0f
 
-        draw_ln_preview (%"noteskin.holdnotes.upscroll", Color.White, false)
-        draw_ln_preview (%"noteskin.holdnotes.dropped", dropped_color.Value, not options.Upscroll.Value)
-        draw_ln_preview (%"noteskin.holdnotes.downscroll", Color.White, true)
+        draw_ln_preview(%"noteskin.holdnotes.upscroll", Color.White, false)
+        draw_ln_preview(%"noteskin.holdnotes.dropped", dropped_color.Value, not options.Upscroll.Value)
+        draw_ln_preview(%"noteskin.holdnotes.downscroll", Color.White, true)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        animation.Update elapsed_ms
+        animation.Update(elapsed_ms)
 
     override this.Title = %"noteskin.holdnotes"

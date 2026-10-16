@@ -12,12 +12,10 @@ type EarlyLatePage() =
     let config = Content.HUD
 
     let duration =
-        config.EarlyLateMeterDuration
-        |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
+        config.EarlyLateMeterDuration |> Setting.bounded(100.0f<ms / rate>, 2000.0f<ms / rate>)
 
     let frame_time =
-        config.EarlyLateMeterFrameTime
-        |> Setting.bounded (2.0f<ms / rate>, 500.0f<ms / rate>)
+        config.EarlyLateMeterFrameTime |> Setting.bounded(2.0f<ms / rate>, 500.0f<ms / rate>)
 
     let use_texture = Setting.simple config.EarlyLateMeterUseTexture
 
@@ -26,7 +24,7 @@ type EarlyLatePage() =
     let early_color = Setting.simple config.EarlyLateMeterEarlyColor
     let late_color = Setting.simple config.EarlyLateMeterLateColor
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 EarlyLateMeterDuration = duration.Value
@@ -37,7 +35,7 @@ type EarlyLatePage() =
                 EarlyLateMeterLateColor = late_color.Value
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -62,18 +60,16 @@ type EarlyLatePage() =
                 PageTextEntry(%"hud.early_late.earlytext", early_text)
                     .Help(Help.Info("hud.early_late.earlytext"))
                     .Pos(4),
-                PageSetting(%"hud.early_late.earlycolor",
-                    ColorPicker(%"hud.early_late.earlycolor", early_color, false)
-                        .Preview(early_text.get_Value)
+                PageSetting(
+                    %"hud.early_late.earlycolor",
+                    ColorPicker(%"hud.early_late.earlycolor", early_color, false).Preview(early_text.get_Value)
                 )
                     .Help(Help.Info("hud.early_late.earlycolor"))
                     .Pos(6),
-                PageTextEntry(%"hud.early_late.latetext", late_text)
-                    .Help(Help.Info("hud.early_late.latetext"))
-                    .Pos(9),
-                PageSetting(%"hud.early_late.latecolor",
-                    ColorPicker(%"hud.early_late.latecolor", late_color, false)
-                        .Preview(late_text.get_Value)
+                PageTextEntry(%"hud.early_late.latetext", late_text).Help(Help.Info("hud.early_late.latetext")).Pos(9),
+                PageSetting(
+                    %"hud.early_late.latecolor",
+                    ColorPicker(%"hud.early_late.latecolor", late_color, false).Preview(late_text.get_Value)
                 )
                     .Help(Help.Info("hud.early_late.latecolor"))
                     .Pos(11)

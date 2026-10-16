@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Prelude.Skins.HudLayouts
 

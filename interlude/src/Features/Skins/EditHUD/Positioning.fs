@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -19,32 +19,29 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
 
     let SHIFT = Bind.mk Keys.LeftShift
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
 
         hover <- (this.Parent :?> Positioner).IsSelectedElement && Mouse.hover this.Bounds
 
         match dragging_from with
         | Some(x, y) ->
-            let new_x, new_y = Mouse.pos ()
-            drag (Input.held SHIFT, (x, y), (new_x, new_y))
+            let new_x, new_y = Mouse.pos()
+            drag(Input.held SHIFT, (x, y), (new_x, new_y))
 
-            if not (Mouse.held Mouse.LEFT) then
+            if not(Mouse.held Mouse.LEFT) then
                 dragging_from <- None
-                finish_drag ()
-                this.Focus true
+                finish_drag()
+                this.Focus(true)
         | None ->
-            if hover && Mouse.left_clicked () then
-                dragging_from <- Some(Mouse.pos ())
-                this.Select true
+            if hover && Mouse.left_clicked() then
+                dragging_from <- Some(Mouse.pos())
+                this.Select(true)
 
         base.Update(elapsed_ms, moved)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if (this.Parent :?> Positioner).IsSelectedElement then
-            if hover then
-                Render.rect this.Bounds Colors.white.O4
-            else
-                Render.rect this.Bounds Colors.white.O2
+            if hover then Render.rect this.Bounds Colors.white.O4 else Render.rect this.Bounds Colors.white.O2
 
 and Positioner(element: HudElement, ctx: PositionerContext) =
     inherit Container(NodeType.None)
@@ -58,17 +55,13 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
     let x_axis_align (position: Position) =
         let center = (fst position.Left + fst position.Right) * 0.5f
         let adjustment = System.MathF.Round(center / increment) * increment - center
-        { position with
-            Left = position.Left ^+ adjustment
-            Right = position.Right ^+ adjustment
-        }
+        { position with Left = position.Left ^+ adjustment; Right = position.Right ^+ adjustment }
 
     let mutable moving_with_keyboard = false
     let mutable dragging_from: (float32 * float32) option = None
     let mutable hover = false
 
-    let child =
-        HudElement.constructor element ctx.HudContext
+    let child = HudElement.constructor element ctx.HudContext
 
     let position = HudElement.position_setting element
 
@@ -77,20 +70,19 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
     let validate_pos (parent_bounds: Rect) (pos: Position) =
         let bounds = Position.calculate pos parent_bounds
 
-        if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then
-            new_unsaved_pos
-        else
-            pos
+        if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then new_unsaved_pos else pos
 
     let save_pos () =
         ctx.AddUndoHistory(element, position.Value)
-        position.Set
+
+        position.Set(
             { position.Value with
                 Left = new_unsaved_pos.Left
                 Top = new_unsaved_pos.Top
                 Right = new_unsaved_pos.Right
                 Bottom = new_unsaved_pos.Bottom
             }
+        )
 
     member this.IsSelectedElement = ctx.Selected = Some element
 
@@ -113,7 +105,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
             base.set_Position value
             new_unsaved_pos <- value
 
-    member this.Translate(x, y) =
+    member this.Translate(x: float32, y: float32) : unit =
         this.Position <-
             {
                 Left = new_unsaved_pos.Left ^+ x
@@ -123,7 +115,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
             }
             |> x_axis_align
 
-    member this.Resize(x, y) =
+    member this.Resize(x: float32, y: float32) : unit =
         this.Position <-
             {
                 Left = new_unsaved_pos.Left
@@ -132,7 +124,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                 Bottom = new_unsaved_pos.Bottom ^+ y
             }
 
-    member this.Expand(x, y) =
+    member this.Expand(x: float32, y: float32) : unit =
         this.Position <-
             {
                 Left = new_unsaved_pos.Left ^- x
@@ -141,217 +133,217 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                 Bottom = new_unsaved_pos.Bottom ^+ y
             }
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
-        |+ child
-        |+ SubPositioner(
-            (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left ^- (new_x - old_x) |> round
-                            Top = current.Top ^- (new_x - old_x) |> round
-                            Right = current.Right ^+ (new_x - old_x) |> round
-                            Bottom = current.Bottom ^+ (new_x - old_x) |> round
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left
-                            Top = current.Top
-                            Right = current.Right ^+ (new_x - old_x) |> round
-                            Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                        }
-            ),
-            save_pos
-        )
-            .Position(Position.BorderCornersB(15.0f).SliceR(15.0f).Translate(5.0f, 5.0f))
-        |+ SubPositioner(
-            (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left ^+ (new_x - old_x) |> round
-                            Top = current.Top ^- (new_y - old_y) |> round
-                            Right = current.Right ^- (new_x - old_x) |> round
-                            Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left ^+ (new_x - old_x) |> round
-                            Top = current.Top
-                            Right = current.Right
-                            Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                        }
-            ),
-            save_pos
-        )
-            .Position(Position.BorderCornersB(15.0f).SliceL(15.0f).Translate(-5.0f, 5.0f))
-        |+ SubPositioner(
-            (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left ^- (new_x - old_x) |> round
-                            Top = current.Top ^+ (new_y - old_y) |> round
-                            Right = current.Right ^+ (new_x - old_x) |> round
-                            Bottom = current.Bottom ^- (new_y - old_y) |> round
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left
-                            Top = current.Top ^+ (new_y - old_y) |> round
-                            Right = current.Right ^+ (new_x - old_x) |> round
-                            Bottom = current.Bottom
-                        }
-            ),
-            save_pos
-        )
-            .Position(Position.BorderCornersT(15.0f).SliceR(15.0f).Translate(5.0f, -5.0f))
-        |+ SubPositioner(
-            (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left ^+ (new_x - old_x) |> round
-                            Top = current.Top ^+ (new_y - old_y) |> round
-                            Right = current.Right ^- (new_x - old_x) |> round
-                            Bottom = current.Bottom ^- (new_y - old_y) |> round
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left ^+ (new_x - old_x) |> round
-                            Top = current.Top ^+ (new_y - old_y) |> round
-                            Right = current.Right
-                            Bottom = current.Bottom
-                        }
-            ),
-            save_pos
-        )
-            .Position(Position.BorderCornersT(15.0f).SliceL(15.0f).Translate(-5.0f, -5.0f))
-
-        |+ SubPositioner(
-            (fun (preserve_center, (old_x, _), (new_x, _)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left ^+ (new_x - old_x) |> round
-                            Top = current.Top
-                            Right = current.Right ^- (new_x - old_x) |> round
-                            Bottom = current.Bottom
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left ^+ (new_x - old_x) |> round
-                            Top = current.Top
-                            Right = current.Right
-                            Bottom = current.Bottom
-                        }
-            ),
-            save_pos
-        )
-            .Position(Position.BorderL(15.0f).SliceY(15.0f).TranslateX(-5.0f))
-        |+ SubPositioner(
-            (fun (preserve_center, (_, old_y), (_, new_y)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left
-                            Top = current.Top ^+ (new_y - old_y) |> round
-                            Right = current.Right
-                            Bottom = current.Bottom ^- (new_y - old_y) |> round
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left
-                            Top = current.Top ^+ (new_y - old_y) |> round
-                            Right = current.Right
-                            Bottom = current.Bottom
-                        }
-            ),
-            save_pos
-        )
-            .Position(Position.BorderT(15.0f).SliceX(15.0f).TranslateY(-5.0f))
-        |+ SubPositioner(
-            (fun (preserve_center, (old_x, _), (new_x, _)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left ^- (new_x - old_x) |> round
-                            Top = current.Top
-                            Right = current.Right ^+ (new_x - old_x) |> round
-                            Bottom = current.Bottom
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left
-                            Top = current.Top
-                            Right = current.Right ^+ (new_x - old_x) |> round
-                            Bottom = current.Bottom
-                        }
-            ),
-            save_pos
-        )
-            .Position(Position.BorderR(15.0f).SliceY(15.0f).TranslateX(5.0f))
-        |* SubPositioner(
-            (fun (preserve_center, (_, old_y), (_, new_y)) ->
-                let current = position.Value
-
-                if preserve_center then
-                    this.Position <-
-                        {
-                            Left = current.Left
-                            Top = current.Top ^- (new_y - old_y) |> round
-                            Right = current.Right
-                            Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                        }
-                else
-                    this.Position <-
-                        {
-                            Left = current.Left
-                            Top = current.Top
-                            Right = current.Right
-                            Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                        }
-            ),
-            save_pos
-        )
             .Position(Position.BorderB(15.0f).SliceX(15.0f).TranslateY(5.0f))
+            .Add(
+                child,
+                SubPositioner(
+                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                        let current = position.Value
 
-        base.Init parent
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left ^- (new_x - old_x) |> round
+                                    Top = current.Top ^- (new_x - old_x) |> round
+                                    Right = current.Right ^+ (new_x - old_x) |> round
+                                    Bottom = current.Bottom ^+ (new_x - old_x) |> round
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left
+                                    Top = current.Top
+                                    Right = current.Right ^+ (new_x - old_x) |> round
+                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                                }
+                    ),
+                    save_pos
+                )
+                    .Position(Position.BorderCornersB(15.0f).SliceR(15.0f).Translate(5.0f, 5.0f)),
+                SubPositioner(
+                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                        let current = position.Value
 
-    member this.KeyboardMovement(dx: float32, dy: float32, (ctrl: bool, alt: bool, shift: bool)) =
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left ^+ (new_x - old_x) |> round
+                                    Top = current.Top ^- (new_y - old_y) |> round
+                                    Right = current.Right ^- (new_x - old_x) |> round
+                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left ^+ (new_x - old_x) |> round
+                                    Top = current.Top
+                                    Right = current.Right
+                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                                }
+                    ),
+                    save_pos
+                )
+                    .Position(Position.BorderCornersB(15.0f).SliceL(15.0f).Translate(-5.0f, 5.0f)),
+                SubPositioner(
+                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                        let current = position.Value
+
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left ^- (new_x - old_x) |> round
+                                    Top = current.Top ^+ (new_y - old_y) |> round
+                                    Right = current.Right ^+ (new_x - old_x) |> round
+                                    Bottom = current.Bottom ^- (new_y - old_y) |> round
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left
+                                    Top = current.Top ^+ (new_y - old_y) |> round
+                                    Right = current.Right ^+ (new_x - old_x) |> round
+                                    Bottom = current.Bottom
+                                }
+                    ),
+                    save_pos
+                )
+                    .Position(Position.BorderCornersT(15.0f).SliceR(15.0f).Translate(5.0f, -5.0f)),
+                SubPositioner(
+                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                        let current = position.Value
+
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left ^+ (new_x - old_x) |> round
+                                    Top = current.Top ^+ (new_y - old_y) |> round
+                                    Right = current.Right ^- (new_x - old_x) |> round
+                                    Bottom = current.Bottom ^- (new_y - old_y) |> round
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left ^+ (new_x - old_x) |> round
+                                    Top = current.Top ^+ (new_y - old_y) |> round
+                                    Right = current.Right
+                                    Bottom = current.Bottom
+                                }
+                    ),
+                    save_pos
+                )
+                    .Position(Position.BorderCornersT(15.0f).SliceL(15.0f).Translate(-5.0f, -5.0f)),
+                SubPositioner(
+                    (fun (preserve_center, (old_x, _), (new_x, _)) ->
+                        let current = position.Value
+
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left ^+ (new_x - old_x) |> round
+                                    Top = current.Top
+                                    Right = current.Right ^- (new_x - old_x) |> round
+                                    Bottom = current.Bottom
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left ^+ (new_x - old_x) |> round
+                                    Top = current.Top
+                                    Right = current.Right
+                                    Bottom = current.Bottom
+                                }
+                    ),
+                    save_pos
+                )
+                    .Position(Position.BorderL(15.0f).SliceY(15.0f).TranslateX(-5.0f)),
+                SubPositioner(
+                    (fun (preserve_center, (_, old_y), (_, new_y)) ->
+                        let current = position.Value
+
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left
+                                    Top = current.Top ^+ (new_y - old_y) |> round
+                                    Right = current.Right
+                                    Bottom = current.Bottom ^- (new_y - old_y) |> round
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left
+                                    Top = current.Top ^+ (new_y - old_y) |> round
+                                    Right = current.Right
+                                    Bottom = current.Bottom
+                                }
+                    ),
+                    save_pos
+                )
+                    .Position(Position.BorderT(15.0f).SliceX(15.0f).TranslateY(-5.0f)),
+                SubPositioner(
+                    (fun (preserve_center, (old_x, _), (new_x, _)) ->
+                        let current = position.Value
+
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left ^- (new_x - old_x) |> round
+                                    Top = current.Top
+                                    Right = current.Right ^+ (new_x - old_x) |> round
+                                    Bottom = current.Bottom
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left
+                                    Top = current.Top
+                                    Right = current.Right ^+ (new_x - old_x) |> round
+                                    Bottom = current.Bottom
+                                }
+                    ),
+                    save_pos
+                )
+                    .Position(Position.BorderR(15.0f).SliceY(15.0f).TranslateX(5.0f)),
+                SubPositioner(
+                    (fun (preserve_center, (_, old_y), (_, new_y)) ->
+                        let current = position.Value
+
+                        if preserve_center then
+                            this.Position <-
+                                {
+                                    Left = current.Left
+                                    Top = current.Top ^- (new_y - old_y) |> round
+                                    Right = current.Right
+                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                                }
+                        else
+                            this.Position <-
+                                {
+                                    Left = current.Left
+                                    Top = current.Top
+                                    Right = current.Right
+                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                                }
+                    ),
+                    save_pos
+                )
+            )
+
+        base.Init(parent)
+
+    member this.KeyboardMovement(dx: float32, dy: float32, (ctrl: bool, alt: bool, shift: bool)) : unit =
         let increment = if alt then 1.0f else 5.0f
         let direction = dx * increment, dy * increment
-        if ctrl && shift then
-            this.Expand direction
-        elif ctrl then
-            this.Resize direction
-        else
-            this.Translate direction
+
+        if ctrl && shift then this.Expand(direction)
+        elif ctrl then this.Resize(direction)
+        else this.Translate(direction)
+
         moving_with_keyboard <- true
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
 
         let mutable moved = moved
 
@@ -379,21 +371,26 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
             let any_repeat =
                 Input.pop_key_any_modifiers(Keys.Up, InputAction.Repeat)
-                |> ValueOption.orElseWith (fun () -> Input.pop_key_any_modifiers(Keys.Down, InputAction.Repeat))
-                |> ValueOption.orElseWith (fun () -> Input.pop_key_any_modifiers(Keys.Left, InputAction.Repeat))
-                |> ValueOption.orElseWith (fun () -> Input.pop_key_any_modifiers(Keys.Right, InputAction.Repeat))
+                |> ValueOption.orElseWith(fun () -> Input.pop_key_any_modifiers(Keys.Down, InputAction.Repeat))
+                |> ValueOption.orElseWith(fun () -> Input.pop_key_any_modifiers(Keys.Left, InputAction.Repeat))
+                |> ValueOption.orElseWith(fun () -> Input.pop_key_any_modifiers(Keys.Right, InputAction.Repeat))
+
             match any_repeat with
             | ValueSome modifiers ->
-                if hold_up then this.KeyboardMovement(0.0f, -1.0f, modifiers)
-                if hold_down then this.KeyboardMovement(0.0f, 1.0f, modifiers)
-                if hold_left then this.KeyboardMovement(-1.0f, 0.0f, modifiers)
-                if hold_right then this.KeyboardMovement(1.0f, 0.0f, modifiers)
+                if hold_up then
+                    this.KeyboardMovement(0.0f, -1.0f, modifiers)
+
+                if hold_down then
+                    this.KeyboardMovement(0.0f, 1.0f, modifiers)
+
+                if hold_left then
+                    this.KeyboardMovement(-1.0f, 0.0f, modifiers)
+
+                if hold_right then
+                    this.KeyboardMovement(1.0f, 0.0f, modifiers)
             | _ -> ()
 
-            if
-                moving_with_keyboard
-                && not (hold_up || hold_down || hold_left || hold_right)
-            then
+            if moving_with_keyboard && not(hold_up || hold_down || hold_left || hold_right) then
                 moving_with_keyboard <- false
                 save_pos()
 
@@ -410,7 +407,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
         match dragging_from with
         | Some(x, y) ->
             let current = position.Value
-            let new_x, new_y = Mouse.pos ()
+            let new_x, new_y = Mouse.pos()
             moved <- true
 
             this.Position <-
@@ -422,21 +419,21 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                 }
                 |> x_axis_align
 
-            if not (Mouse.held Mouse.LEFT) then
+            if not(Mouse.held Mouse.LEFT) then
                 dragging_from <- None
                 save_pos()
         | None ->
 
-            if hover && this.IsSelectedElement && Mouse.left_clicked () then
-                dragging_from <- Some(Mouse.pos ())
-            elif hover && this.IsSelectedElement && Mouse.right_clicked () && HudElement.can_configure element then
+            if hover && this.IsSelectedElement && Mouse.left_clicked() then
+                dragging_from <- Some(Mouse.pos())
+            elif hover && this.IsSelectedElement && Mouse.right_clicked() && HudElement.can_configure element then
                 ctx.ConfigureElement()
-            elif hover && ctx.Selected.IsNone && Mouse.left_clicked () then
-                ctx.Select element
+            elif hover && ctx.Selected.IsNone && Mouse.left_clicked() then
+                ctx.Select(element)
             elif not hover && this.IsSelectedElement && Mouse.left_clicked() then
                 ctx.ClearSelection()
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         if dragging_from.IsSome then
             let pos = position.Value
@@ -466,7 +463,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
                 let other_center_x, other_center_y = other_positioner.Bounds.Center
 
-                if abs (this_center_x - other_center_x) < 5.0f then
+                if abs(this_center_x - other_center_x) < 5.0f then
                     Render.rect_edges
                         (other_center_x - 2.5f)
                         (min this.Bounds.Top other_positioner.Bounds.Top)
@@ -474,7 +471,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                         (max this.Bounds.Bottom other_positioner.Bounds.Bottom)
                         Colors.green_accent.O1
 
-                if abs (this_center_y - other_center_y) < 5.0f then
+                if abs(this_center_y - other_center_y) < 5.0f then
                     Render.rect_edges
                         (min this.Bounds.Left other_positioner.Bounds.Left)
                         (other_center_y - 2.5f)
@@ -502,9 +499,9 @@ and PositionerContext =
         mutable HudContext: HudContext
     }
 
-    member this.Recreate(element: HudElement) =
-        match this.Positioners.TryFind element with
-        | Some existing -> (this.Playfield.Remove existing || this.Screen.Remove existing) |> ignore
+    member this.Recreate(element: HudElement) : unit =
+        match this.Positioners.TryFind(element) with
+        | Some existing -> (this.Playfield.Remove(existing) || this.Screen.Remove(existing)) |> ignore
         | None -> ()
 
         let enabled = HudElement.enabled_setting element
@@ -524,21 +521,18 @@ and PositionerContext =
                     Bottom = pos.Bottom
                 }
 
-            if pos.RelativeToPlayfield then
-                this.Playfield.Add p
-            else
-                this.Screen.Add p
+            if pos.RelativeToPlayfield then this.Playfield.Add(p) else this.Screen.Add(p)
 
             this.Positioners <- this.Positioners.Add(element, p)
 
-    member this.CreateAll() =
+    member this.CreateAll() : unit =
         for element in HudElement.DRAW_ORDER do
-            this.Recreate element
+            this.Recreate(element)
 
-    member this.Select(element: HudElement) = this.Selected <- Some element
-    member this.ClearSelection() = this.Selected <- None
+    member this.Select(element: HudElement) : unit = this.Selected <- Some element
+    member this.ClearSelection() : unit = this.Selected <- None
 
-    member this.ChangeCurrentAnchor(to_playfield: bool, anchor: float32) =
+    member this.ChangeCurrentAnchor(to_playfield: bool, anchor: float32) : unit =
         match this.Selected |> Option.bind this.Positioners.TryFind with
         | Some p ->
             let setting = HudElement.position_setting this.Selected.Value
@@ -547,9 +541,13 @@ and PositionerContext =
             this.AddUndoHistory(this.Selected.Value, current)
 
             let bounds = p.Bounds
-            let parent_bounds = if to_playfield then this.Playfield.Bounds else this.Screen.Bounds
+
+            let parent_bounds =
+                if to_playfield then this.Playfield.Bounds else this.Screen.Bounds
+
             let axis = parent_bounds.Left + parent_bounds.Width * anchor
-            setting.Set
+
+            setting.Set(
                 {
                     RelativeToPlayfield = to_playfield
                     Left = anchor %+ (bounds.Left - axis)
@@ -557,72 +555,86 @@ and PositionerContext =
                     Right = anchor %+ (bounds.Right - axis)
                     Bottom = current.Bottom
                 }
-            this.Recreate this.Selected.Value
+            )
+
+            this.Recreate(this.Selected.Value)
         | None -> ()
 
-    member this.ResetCurrentPosition() =
+    member this.ResetCurrentPosition() : unit =
         match this.Selected with
         | Some element ->
             let setting = HudElement.position_setting element
             this.AddUndoHistory(element, setting.Value)
             setting.Set(HudElement.default_position element)
-            GameThread.defer (fun () -> this.Recreate element)
+            GameThread.defer(fun () -> this.Recreate(element))
         | None -> ()
 
-    member this.AddUndoHistory(element: HudElement, position: HudPosition) =
+    member this.AddUndoHistory(element: HudElement, position: HudPosition) : unit =
         this.UndoHistory <- (element, position) :: this.UndoHistory
 
-    member this.Undo() =
+    member this.Undo() : unit =
         match this.UndoHistory with
         | (element, previous_position) :: xs ->
             this.Selected <- Some element
             HudElement.position_setting(element).Set previous_position
-            this.Recreate element
+            this.Recreate(element)
             Style.click.Play()
             this.UndoHistory <- xs
         | _ -> ()
 
-    member this.ConfigureElement() =
+    member this.ConfigureElement() : unit =
         match this.Selected with
         | Some element ->
-            show_menu element (fun () ->
-                this.HudContext <- { this.HudContext with Config = Interlude.Content.Content.HUD }
-                GameThread.defer (fun () -> this.Recreate element)
-            )
+            show_menu
+                element
+                (fun () ->
+                    this.HudContext <- { this.HudContext with Config = Interlude.Content.Content.HUD }
+                    GameThread.defer(fun () -> this.Recreate(element))
+                )
         | None -> ()
 
-    member this.RemoveElement() =
+    member this.RemoveElement() : unit =
         match this.Selected with
         | Some element ->
             let enabled = HudElement.enabled_setting element
-            enabled.Set false
-            this.Recreate element
+            enabled.Set(false)
+            this.Recreate(element)
             this.Selected <- None
             Style.click.Play()
         | None -> ()
 
-    member this.HorizontalFlip() =
+    member this.HorizontalFlip() : unit =
         match this.Selected with
         | Some element ->
             (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
-            this.Recreate element
+            this.Recreate(element)
         | None -> ()
 
-    member this.VerticalFlip() =
+    member this.VerticalFlip() : unit =
         match this.Selected with
         | Some element ->
             (HudElement.position_setting element) |> Setting.app _.FlipVertical
-            this.Recreate element
+            this.Recreate(element)
         | None -> ()
 
-    member this.HorizontalFlipAll() =
+    member this.HorizontalFlipAll() : unit =
         for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
-            this.Recreate element
-        Notifications.action_feedback(Icons.REPEAT, %"hud.horiontal_flip_all.success", [(%%"hud_flip_horizontal_all").ToString()] %> "hud.horizontal_flip_all.undo_hint")
+            this.Recreate(element)
 
-    member this.VerticalFlipAll() =
+        Notifications.action_feedback(
+            Icons.REPEAT,
+            %"hud.horiontal_flip_all.success",
+            [ (%%"hud_flip_horizontal_all").ToString() ] %> "hud.horizontal_flip_all.undo_hint"
+        )
+
+    member this.VerticalFlipAll() : unit =
         for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipVertical
-            this.Recreate element
-        Notifications.action_feedback(Icons.REPEAT, %"hud.vertical_flip_all.success", [(%%"hud_flip_horizontal_all").ToString()] %> "hud.vertical_flip_all.undo_hint")
+            this.Recreate(element)
+
+        Notifications.action_feedback(
+            Icons.REPEAT,
+            %"hud.vertical_flip_all.success",
+            [ (%%"hud_flip_horizontal_all").ToString() ] %> "hud.vertical_flip_all.undo_hint"
+        )

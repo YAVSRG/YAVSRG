@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -17,35 +17,52 @@ type AccuracyPage() =
     let show_name = Setting.simple config.AccuracyShowName
 
     let use_font = Setting.simple config.AccuracyUseFont
-    let font_spacing = config.AccuracyFontSpacing |> Setting.bounded (-1.0f, 1.0f)
-    let font_dot_spacing = config.AccuracyDotExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
-    let font_percent_spacing = config.AccuracyPercentExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
+    let font_spacing = config.AccuracyFontSpacing |> Setting.bounded(-1.0f, 1.0f)
+
+    let font_dot_spacing =
+        config.AccuracyDotExtraSpacing |> Setting.bounded(-1.0f, 1.0f)
+
+    let font_percent_spacing =
+        config.AccuracyPercentExtraSpacing |> Setting.bounded(-1.0f, 1.0f)
 
     let alignment = config.AccuracyPosition.TextAlignment
 
-    let texture = Content.Texture "accuracy-font"
+    let texture = Content.Texture("accuracy-font")
+
     let preview =
         { new ElementPreview(config.AccuracyPosition) with
-            override this.DrawComponent(bounds) =
+            override this.DrawComponent(bounds: Rect) : unit =
                 if use_font.Value then
                     Accuracy.draw_accuracy_aligned(
                         texture,
                         bounds.ShrinkB(bounds.Height * 0.4f),
                         Color.White,
-                        Rulesets.current.FormatAccuracy 0.967234,
+                        Rulesets.current.FormatAccuracy(0.967234),
                         font_spacing.Value,
                         font_dot_spacing.Value,
                         font_percent_spacing.Value,
                         alignment
                     )
                 else
-                    Text.fill (Style.font, Rulesets.current.FormatAccuracy 0.967234, bounds.ShrinkB(bounds.Height * 0.3f), Color.White, alignment)
+                    Text.fill(
+                        Style.font,
+                        Rulesets.current.FormatAccuracy(0.967234),
+                        bounds.ShrinkB(bounds.Height * 0.3f),
+                        Color.White,
+                        alignment
+                    )
 
                 if show_name.Value then
-                    Text.fill (Style.font, Rulesets.current.Name, bounds.SliceB(bounds.Height * 0.4f), Color.White, alignment)
+                    Text.fill(
+                        Style.font,
+                        Rulesets.current.Name,
+                        bounds.SliceB(bounds.Height * 0.4f),
+                        Color.White,
+                        alignment
+                    )
         }
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
 
         Skins.save_hud_config
             { Content.HUD with
@@ -58,7 +75,7 @@ type AccuracyPage() =
                 AccuracyPercentExtraSpacing = font_percent_spacing.Value
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -69,9 +86,7 @@ type AccuracyPage() =
                 PageSetting(%"hud.accuracy.showname", Checkbox show_name)
                     .Help(Help.Info("hud.accuracy.showname"))
                     .Pos(2),
-                PageSetting(%"hud.generic.use_font", Checkbox use_font)
-                    .Help(Help.Info("hud.generic.use_font"))
-                    .Pos(7),
+                PageSetting(%"hud.generic.use_font", Checkbox use_font).Help(Help.Info("hud.generic.use_font")).Pos(7),
                 PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
                     .Help(Help.Info("hud.generic.font_spacing"))
                     .Pos(9)
@@ -86,7 +101,7 @@ type AccuracyPage() =
                     .Conditional(use_font.Get)
             )
         |> Container.Create
-        |+ preview
+        |> _.With(preview)
         :> Widget
 
     override this.Title = %"hud.accuracy"

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open Prelude
 open Percyqaz.Flux.Graphics
@@ -12,14 +12,14 @@ type CustomImage(ctx: HudContext) =
 
     let animation = Animation.Counter(float ctx.Config.CustomImageFrameTime)
 
-    let texture = Content.Texture "custom-image"
+    let texture = Content.Texture("custom-image")
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.tex_quad
             (Sprite.fill this.Bounds texture).AsQuad
             Color.White.AsQuad
             (Sprite.pick_texture (animation.Loops % texture.Columns, 0) texture)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         animation.Update(elapsed_ms)
         base.Update(elapsed_ms, moved)

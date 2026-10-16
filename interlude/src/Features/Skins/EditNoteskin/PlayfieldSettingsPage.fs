@@ -18,31 +18,32 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
     let add (amount: float32) =
         Setting.app (fun x -> x + amount) spacing
 
-    override this.Init(parent: Widget) =
-        this
-        |+ Text((fun () -> sprintf "%.0f" spacing.Value))
-            .Color(Colors.text_subheading)
-            .Align(Alignment.CENTER)
-        |* MouseListener()
-            .SelectOnClick(this, fun () ->
-                add 5.0f
-                Style.click.Play()
-            )
-            .FocusOnHover(this)
-            .OnRightClick(fun () ->
-                this.Select true
-                add -5.0f
-                Style.click.Play()
-            )
-            .Floating()
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Text((fun () -> sprintf "%.0f" spacing.Value)).Color(Colors.text_subheading).Align(Alignment.CENTER),
+            MouseListener()
+                .SelectOnClick(
+                    this,
+                    fun () ->
+                        add 5.0f
+                        Style.click.Play()
+                )
+                .FocusOnHover(this)
+                .OnRightClick(fun () ->
+                    this.Select(true)
+                    add -5.0f
+                    Style.click.Play()
+                )
+                .Floating()
+        )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Selected then
             Render.rect this.Bounds Colors.pink_accent.O2
         elif this.Focused then
@@ -50,7 +51,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
 
         base.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
@@ -68,32 +69,28 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
                 Style.click.Play()
 
         if Mouse.hover this.Bounds then
-            add (Mouse.scroll())
+            add(Mouse.scroll())
 
 type PlayfieldSettingsPage() =
     inherit Page()
 
     let data = Content.NoteskinConfig
 
-    let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+    let keymode: Setting<Keymode> = Setting.simple(SelectedChart.keymode())
 
-    let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
-    let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
+    let align_anchor = Setting.percentf(fst data.PlayfieldAlignment)
+    let align_offset = Setting.percentf(snd data.PlayfieldAlignment)
     let playfield_color = Setting.simple data.PlayfieldColor
     let use_stage_textures = Setting.simple data.EnableStageTextures
 
     let column_width =
-        data.ColumnWidth
-        |> Setting.bounded (10.0f, 300.0f)
-        |> Setting.roundf 0
+        data.ColumnWidth |> Setting.bounded(10.0f, 300.0f) |> Setting.roundf 0
 
     let use_specific_column_widths = Setting.simple data.UseKeymodeSpecificColumnWidth
     let column_widths = data.KeymodeSpecificColumnWidth
 
     let column_spacing =
-        data.ColumnSpacing
-        |> Setting.bounded (-150.0f, 300.0f)
-        |> Setting.roundf 0
+        data.ColumnSpacing |> Setting.bounded(-150.0f, 300.0f) |> Setting.roundf 0
 
     let use_advanced_column_spacing = Setting.simple data.UseAdvancedColumnSpacing
     let spacing = data.AdvancedColumnSpacing
@@ -103,14 +100,21 @@ type PlayfieldSettingsPage() =
         let k = int keymode - 3
 
         Setting.make (fun v -> spacing.[k].[i] <- v) (fun () -> spacing.[k].[i])
-        |> Setting.bound (-150.0f, 300.0f)
+        |> Setting.bound(-150.0f, 300.0f)
         |> Setting.roundf 0
 
     let width_setting =
         Setting.make
-            (fun v -> if use_specific_column_widths.Value then column_widths.[int keymode.Value - 3] <- v else column_width.Set v)
-            (fun () -> if use_specific_column_widths.Value then column_widths.[int keymode.Value - 3] else column_width.Value)
-        |> Setting.bound (10.0f, 300.0f)
+            (fun v ->
+                if use_specific_column_widths.Value then
+                    column_widths.[int keymode.Value - 3] <- v
+                else
+                    column_width.Set(v)
+            )
+            (fun () ->
+                if use_specific_column_widths.Value then column_widths.[int keymode.Value - 3] else column_width.Value
+            )
+        |> Setting.bound(10.0f, 300.0f)
         |> Setting.roundf 0
 
     let PICKER_WIDTH = 120.0f
@@ -131,7 +135,7 @@ type PlayfieldSettingsPage() =
                     )
             )
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 UseKeymodeSpecificColumnWidth = use_specific_column_widths.Value
@@ -145,7 +149,7 @@ type PlayfieldSettingsPage() =
                 EnableStageTextures = use_stage_textures.Value
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -163,14 +167,13 @@ type PlayfieldSettingsPage() =
                     .Pos(6),
 
                 PageSetting(
-                        %"generic.keymode",
-                        SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
-                    )
+                    %"generic.keymode",
+                    SelectDropdown.FromEnum(keymode |> Setting.trigger(ignore >> refresh_spacings))
+                )
                     .Pos(10)
                     .Conditional(fun () -> use_specific_column_widths.Value || use_advanced_column_spacing.Value),
 
-                PageSetting(%"noteskin.keymode_specific_column_widths", Checkbox use_specific_column_widths)
-                    .Pos(14),
+                PageSetting(%"noteskin.keymode_specific_column_widths", Checkbox use_specific_column_widths).Pos(14),
                 PageSetting(%"noteskin.columnwidth", Slider(width_setting, Step = 1f))
                     .Help(Help.Info("noteskin.columnwidth"))
                     .Pos(16),
@@ -189,10 +192,13 @@ type PlayfieldSettingsPage() =
                     .Help(Help.Info("noteskin.advancedcolumnspacing"))
                     .Pos(22, 2, PageWidth.Full)
                     .Conditional(use_advanced_column_spacing.Get),
-                HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some PlayfieldSettingsPage))
+                HotkeyListener(
+                    "reload_content",
+                    fun () -> SkinHotReload.hot_reload_noteskin(Some PlayfieldSettingsPage)
+                )
             )
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         let PREVIEW_SCALE = 0.3f
@@ -207,18 +213,18 @@ type PlayfieldSettingsPage() =
 
         let keys = int keymode.Value
 
-        let frame = preview_bounds.Expand Style.PADDING
-        Render.rect (frame.SliceL Style.PADDING) Colors.white
-        Render.rect (frame.SliceT Style.PADDING) Colors.white
-        Render.rect (frame.SliceR Style.PADDING) Colors.white
-        Render.rect (frame.SliceB Style.PADDING) Colors.white
+        let frame = preview_bounds.Expand(Style.PADDING)
+        Render.rect (frame.SliceL(Style.PADDING)) Colors.white
+        Render.rect (frame.SliceT(Style.PADDING)) Colors.white
+        Render.rect (frame.SliceR(Style.PADDING)) Colors.white
+        Render.rect (frame.SliceB(Style.PADDING)) Colors.white
 
         let pw =
             (float32 keys * width_setting.Value
              + if use_advanced_column_spacing.Value then
                    Array.sum spacing.[keys - 3]
                else
-                   float32 (keys - 1) * column_spacing.Value)
+                   float32(keys - 1) * column_spacing.Value)
             * PREVIEW_SCALE
 
         let start = preview_bounds.Width * align_anchor.Value - pw * align_offset.Value
@@ -234,10 +240,7 @@ type PlayfieldSettingsPage() =
 
                 if i < keys then
                     let s =
-                        if use_advanced_column_spacing.Value then
-                            spacing.[keys - 3].[i - 1]
-                        else
-                            column_spacing.Value
+                        if use_advanced_column_spacing.Value then spacing.[keys - 3].[i - 1] else column_spacing.Value
 
                     left <- left + (width_setting.Value + s) * PREVIEW_SCALE
 

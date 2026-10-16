@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open System
 open Percyqaz.Common
@@ -26,117 +26,126 @@ type ErrorBar(ctx: HudContext) =
 
     let mutable last_seen_time = -Time.infinity
 
-    let ln_mult =
-        if ctx.Config.TimingDisplayHalfScaleReleases then
-            0.5f
-        else
-            1.0f
+    let ln_mult = if ctx.Config.TimingDisplayHalfScaleReleases then 0.5f else 1.0f
 
     let animation_time = ctx.Config.TimingDisplayFadeTime * SelectedChart.rate.Value
-    let moving_average_sensitivity = ctx.Config.TimingDisplayMovingAverageSensitivity * 0.5f
-    let moving_average_fade_time = float (1.0f - ctx.Config.TimingDisplayMovingAverageSensitivity) * 3000.0 |> min 1500.0 |> max 75.0
+
+    let moving_average_sensitivity =
+        ctx.Config.TimingDisplayMovingAverageSensitivity * 0.5f
+
+    let moving_average_fade_time =
+        float(1.0f - ctx.Config.TimingDisplayMovingAverageSensitivity) * 3000.0 |> min 1500.0 |> max 75.0
+
     let moving_average = Animation.Fade(0.0f, moving_average_fade_time)
 
-    let window_opacity = ctx.Config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
+    let window_opacity =
+        ctx.Config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
     let MAX_WINDOW = ctx.State.Ruleset.LargestWindow
 
     let log_factor = ctx.Config.TimingDisplayLogSensitivity
 
-    static member log_error (delta: float32, width: float32, log_factor: float32, max_window: GameplayTime) =
-        if delta = 0.0f then 0.0f
-        elif log_factor = 0.0f then delta / float32 max_window * width * 0.5f
+    static member ApplyLogScale
+        (delta: float32, width: float32, log_factor: float32, max_window: GameplayTime)
+        : float32 =
+        if delta = 0.0f then
+            0.0f
+        elif log_factor = 0.0f then
+            delta / float32 max_window * width * 0.5f
         else
             let sign = if delta < 0.0f then -1.0f else 1.0f
             let abs_delta = MathF.Abs(delta)
             let norm = abs_delta / float32 max_window
-            sign * (MathF.Asinh(norm * (6.0f * log_factor) ** 1.5f) / MathF.Asinh((6.0f * log_factor) ** 1.5f)) * width * 0.5f 
 
-    override this.Init(parent: Widget) =
+            sign
+            * (MathF.Asinh(norm * (6.0f * log_factor) ** 1.5f) / MathF.Asinh((6.0f * log_factor) ** 1.5f))
+            * width
+            * 0.5f
+
+    override this.Init(parent: Widget) : unit =
         if ctx.Config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
             ctx.State.Subscribe(fun ev ->
                 match ev.Inner with
                 | Hit e ->
                     if not e.Missed then
-                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
-                        moving_average.Target <-
-                            lerp
-                                moving_average_sensitivity
-                                moving_average.Target
-                                log_hit_err
+                        let log_hit_err = ErrorBar.ApplyLogScale(float32 e.Delta, w, log_factor, MAX_WINDOW)
+                        moving_average.Target <- lerp moving_average_sensitivity moving_average.Target log_hit_err
                 | Hold e ->
                     if not e.Missed then
-                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
-                        moving_average.Target <-
-                            lerp
-                                moving_average_sensitivity
-                                moving_average.Target
-                                log_hit_err
+                        let log_hit_err = ErrorBar.ApplyLogScale(float32 e.Delta, w, log_factor, MAX_WINDOW)
+                        moving_average.Target <- lerp moving_average_sensitivity moving_average.Target log_hit_err
                 | Release e ->
                     if not e.Missed then
-                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
+                        let log_hit_err = ErrorBar.ApplyLogScale(float32 e.Delta, w, log_factor, MAX_WINDOW)
+
                         moving_average.Target <-
-                            lerp
-                                moving_average_sensitivity
-                                moving_average.Target
-                                (log_hit_err * ln_mult)
+                            lerp moving_average_sensitivity moving_average.Target (log_hit_err * ln_mult)
                 | GhostTap _
                 | DropHold
                 | RegrabHold -> ()
             )
             |> ignore
+
         if ctx.Config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.ReplaceBars then
             ctx.State.Subscribe(fun ev ->
                 if ev.Time >= last_seen_time - animation_time then
                     match ev.Inner with
                     | Hit e ->
-                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
-                        hits.Add
-                            {
-                                Time = ev.Time
-                                Position =  log_hit_err
-                                IsRelease = false
-                                Judgement = e.Judgement |> Option.map fst
-                            }
-                    | Hold e ->
-                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW) 
-                        hits.Add
+                        let log_hit_err = ErrorBar.ApplyLogScale(float32 e.Delta, w, log_factor, MAX_WINDOW)
+
+                        hits.Add(
                             {
                                 Time = ev.Time
                                 Position = log_hit_err
                                 IsRelease = false
                                 Judgement = e.Judgement |> Option.map fst
                             }
+                        )
+                    | Hold e ->
+                        let log_hit_err = ErrorBar.ApplyLogScale(float32 e.Delta, w, log_factor, MAX_WINDOW)
+
+                        hits.Add(
+                            {
+                                Time = ev.Time
+                                Position = log_hit_err
+                                IsRelease = false
+                                Judgement = e.Judgement |> Option.map fst
+                            }
+                        )
                     | Release e ->
-                        let log_hit_err = ErrorBar.log_error (float32 e.Delta, w, log_factor, MAX_WINDOW)
-                        hits.Add
+                        let log_hit_err = ErrorBar.ApplyLogScale(float32 e.Delta, w, log_factor, MAX_WINDOW)
+
+                        hits.Add(
                             {
                                 Time = ev.Time
                                 Position = log_hit_err
                                 IsRelease = true
                                 Judgement = e.Judgement |> Option.map fst
                             }
+                        )
                     | GhostTap e ->
                         match e.Judgement with
-                        | Some (j, _) ->
-                            hits.Add
+                        | Some(j, _) ->
+                            hits.Add(
                                 {
                                     Time = ev.Time
                                     Position = -w * 0.5f
                                     IsRelease = false
                                     Judgement = Some j
                                 }
+                            )
                         | None -> ()
                     | DropHold
                     | RegrabHold -> ()
             )
             |> ignore
+
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
-        moving_average.Update elapsed_ms
+        moving_average.Update(elapsed_ms)
 
         if w = 0.0f || moved then
             w <- this.Bounds.Width
@@ -151,22 +160,18 @@ type ErrorBar(ctx: HudContext) =
         while hits.Count > 0 && hits.[0].Time + animation_time < now do
             hits.RemoveAt(0)
 
-    member this.DrawWindows(opacity: int) =
+    member this.DrawWindows(opacity: int) : unit =
 
-        let draw (r: float32<ms/rate> -> float32<ms/rate> -> Rect) =
+        let draw (r: float32<ms / rate> -> float32<ms / rate> -> Rect) =
             let mutable previous_early = 0.0f<ms / rate>
             let mutable previous_late = 0.0f<ms / rate>
 
             for j in ctx.State.Scoring.Ruleset.Judgements do
                 match j.TimingWindows with
-                | Some (early, late) ->
-                    Render.rect
-                        (r early previous_early)
-                        (j.Color.O4a opacity)
+                | Some(early, late) ->
+                    Render.rect (r early previous_early) (j.Color.O4a(opacity))
                     previous_early <- early
-                    Render.rect
-                        (r previous_late late)
-                        (j.Color.O4a opacity)
+                    Render.rect (r previous_late late) (j.Color.O4a(opacity))
                     previous_late <- late
                 | None -> ()
 
@@ -174,13 +179,16 @@ type ErrorBar(ctx: HudContext) =
         let w = this.Bounds.Width
 
         let ms_to_x =
-            fun (time: float32<ms/rate>) -> center + ErrorBar.log_error (float32 time, w, log_factor, MAX_WINDOW)
-        let r time1 time2 = Rect.FromEdges(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
+            fun (time: float32<ms / rate>) -> center + ErrorBar.ApplyLogScale(float32 time, w, log_factor, MAX_WINDOW)
+
+        let r time1 time2 =
+            Rect.FromEdges(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
+
         draw r
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if window_opacity > 0 then
-            this.DrawWindows window_opacity
+            this.DrawWindows(window_opacity)
 
         let bar p1 p2 =
             let center = this.Bounds.CenterX
@@ -188,7 +196,9 @@ type ErrorBar(ctx: HudContext) =
 
         if ctx.Config.TimingDisplayShowGuide then
             Render.rect
-                (bar (-ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness) (ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness))
+                (bar
+                    (-ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness)
+                    (ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness))
                 Color.White
 
         let now = ctx.State.CurrentChartTime()
@@ -196,11 +206,14 @@ type ErrorBar(ctx: HudContext) =
         match ctx.Config.TimingDisplayMovingAverageType with
         | ErrorBarMovingAverageType.ReplaceBars ->
             Render.rect
-                (bar (moving_average.Value - ctx.Config.TimingDisplayThickness) (moving_average.Value + ctx.Config.TimingDisplayThickness))
+                (bar
+                    (moving_average.Value - ctx.Config.TimingDisplayThickness)
+                    (moving_average.Value + ctx.Config.TimingDisplayThickness))
                 ctx.Config.TimingDisplayMovingAverageColor
         | ErrorBarMovingAverageType.Arrow ->
             let center = this.Bounds.CenterX
             let arrow_height = this.Bounds.Height * 0.5f
+
             let arrow =
                 Quad.from_points(
                     (center + moving_average.Value, this.Bounds.Top - 10.0f),
@@ -208,30 +221,30 @@ type ErrorBar(ctx: HudContext) =
                     (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height),
                     (center + moving_average.Value, this.Bounds.Top - 10.0f)
                 )
+
             Render.quad arrow ctx.Config.TimingDisplayMovingAverageColor
         | _ -> ()
 
         for hit in hits do
-            let rect = bar (hit.Position - ctx.Config.TimingDisplayThickness) (hit.Position + ctx.Config.TimingDisplayThickness)
+            let rect =
+                bar
+                    (hit.Position - ctx.Config.TimingDisplayThickness)
+                    (hit.Position + ctx.Config.TimingDisplayThickness)
+
             let color =
                 match hit.Judgement with
                 | None ->
                     Color.FromArgb(
-                        Math.Clamp(127 - int (127.0f * (now - hit.Time) / animation_time), 0, 127),
+                        Math.Clamp(127 - int(127.0f * (now - hit.Time) / animation_time), 0, 127),
                         Color.Silver
                     )
                 | Some j ->
                     Color.FromArgb(
-                        Math.Clamp(255 - int (255.0f * (now - hit.Time) / animation_time), 0, 255),
-                        ctx.State.Ruleset.JudgementColor j
+                        Math.Clamp(255 - int(255.0f * (now - hit.Time) / animation_time), 0, 255),
+                        ctx.State.Ruleset.JudgementColor(j)
                     )
 
             if ctx.Config.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
                 Render.rect
-                    (
-                        if hit.IsRelease then
-                            rect.ExpandY(ctx.Config.TimingDisplayReleasesExtraHeight)
-                        else
-                            rect
-                    )
+                    (if hit.IsRelease then rect.ExpandY(ctx.Config.TimingDisplayReleasesExtraHeight) else rect)
                     color

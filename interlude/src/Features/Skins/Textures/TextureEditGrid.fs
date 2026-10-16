@@ -16,7 +16,7 @@ module TextureEditorExtensions =
 
     type Storage with
 
-        member this.Reload() =
+        member this.Reload() : unit =
             match this with
             | :? Noteskin as _ -> Skins.reload_current_noteskin()
             | :? HudLayout as _ -> Skins.reload_current_hud()
@@ -37,39 +37,37 @@ type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool 
             )
         )
 
-    override this.Init(parent) =
-        this
-        |+ Frame(
-            Fill =
-                (fun () ->
-                    if selected.[x].[y] then Colors.pink_accent.O2
-                    elif this.Focused then Colors.yellow_accent.O2
-                    else Color.Transparent
-                ),
-            Border =
-                (fun () ->
-                    if this.Focused then Colors.white.O3
-                    elif selected.[x].[y] then Colors.pink_accent
-                    else Color.Transparent
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Frame(
+                Fill =
+                    (fun () ->
+                        if selected.[x].[y] then Colors.pink_accent.O2
+                        elif this.Focused then Colors.yellow_accent.O2
+                        else Color.Transparent
+                    ),
+                Border =
+                    (fun () ->
+                        if this.Focused then Colors.white.O3
+                        elif selected.[x].[y] then Colors.pink_accent
+                        else Color.Transparent
+                    )
+            ),
+            MouseListener()
+                .SelectOnClick(this)
+                .OnHover(fun now_hovering ->
+                    if now_hovering then
+                        if Mouse.held Mouse.LEFT then this.Select(true) else this.Focus(true)
                 )
         )
-        |* MouseListener()
-            .SelectOnClick(this)
-            .OnHover(fun now_hovering ->
-                if now_hovering then
-                    if Mouse.held Mouse.LEFT then
-                            this.Select true
-                        else
-                            this.Focus true
-            )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
         Render.tex_quad this.Bounds.AsQuad Color.White.AsQuad (Sprite.pick_texture (x, y) sprite)
 
@@ -78,7 +76,7 @@ type private DeleteButton(on_click: unit -> unit) =
 
     member val VerticalPad = 0.0f with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Focused then
             Render.rect (this.Bounds.ExpandY(this.VerticalPad)) Colors.yellow_accent.O2
 
@@ -87,29 +85,31 @@ type private DeleteButton(on_click: unit -> unit) =
 type TextureEditGrid(source: Storage, texture_id: string) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Items))
 
-    let rules = source.GetTextureRules texture_id
+    let rules = source.GetTextureRules(texture_id)
 
     let mutable sprite = Unchecked.defaultof<Sprite>
     let mutable selected: bool array array = [||]
     let mutable items: NavigationContainer.Grid = Unchecked.defaultof<_>
 
-    member this.Refresh() =
-        sprite <- Content.Texture texture_id
+    member this.Refresh() : unit =
+        sprite <- Content.Texture(texture_id)
 
         if sprite.Columns <> selected.Length || sprite.Rows <> selected.[0].Length then
             selected <- Array.init sprite.Columns (fun _ -> Array.zeroCreate sprite.Rows)
 
         let item_height =
             min
-                ((this.Bounds.Width - 10.0f * float32 (sprite.Columns - 1)) / float32 sprite.Columns / sprite.AspectRatio)
-                ((this.Bounds.Height - 10.0f * float32 (sprite.Rows - 1)) / float32 sprite.Rows)
+                ((this.Bounds.Width - 10.0f * float32(sprite.Columns - 1)) / float32 sprite.Columns / sprite.AspectRatio)
+                ((this.Bounds.Height - 10.0f * float32(sprite.Rows - 1)) / float32 sprite.Rows)
+
         let item_width = item_height * sprite.AspectRatio
 
         let grid_width =
-            item_width * float32 sprite.Columns + 10.0f * float32 (sprite.Columns - 1)
+            item_width * float32 sprite.Columns + 10.0f * float32(sprite.Columns - 1)
 
         items <-
-            NavigationContainer.Grid()
+            NavigationContainer
+                .Grid()
                 .WrapNavigation(false)
                 .Floating()
                 .Position(Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height))
@@ -120,23 +120,29 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
             for c = 0 to sprite.Columns - 1 do
 
                 grid.Add(
-                    TextureEditGridItem(
-                        sprite,
-                        c,
-                        r,
-                        selected
-                    )
-                        .Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), float32 r * (item_height + 10.0f), item_width, item_height)),
+                    TextureEditGridItem(sprite, c, r, selected)
+                        .Position(
+                            Position.Box(
+                                0.0f,
+                                0.0f,
+                                float32 c * (item_width + 10.0f),
+                                float32 r * (item_height + 10.0f),
+                                item_width,
+                                item_height
+                            )
+                        ),
                     c + 2,
                     r + 2
                 )
 
                 if r = 0 then
                     grid.Add(
-                        Text([(c + 1).ToString()] %> "texture_editor.frame_label")
+                        Text([ (c + 1).ToString() ] %> "texture_editor.frame_label")
                             .Color(Colors.text_subheading)
                             .Align(Alignment.CENTER)
-                            .Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)),
+                            .Position(
+                                Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)
+                            ),
                         c + 2,
                         0
                     )
@@ -145,7 +151,7 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                         grid.Add(
                             DeleteButton(fun () ->
                                 ConfirmPage(
-                                    [(c + 1).ToString()] %> "texture_editor.confirm_delete_frame",
+                                    [ (c + 1).ToString() ] %> "texture_editor.confirm_delete_frame",
                                     fun () ->
                                         if source.DeleteLooseTextureColumn(c, texture_id) then
                                             source.Reload()
@@ -153,13 +159,22 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                                 )
                                     .Show()
                             )
-                                .Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -50.0f, item_width, 40.0f)),
+                                .Position(
+                                    Position.Box(
+                                        0.0f,
+                                        0.0f,
+                                        float32 c * (item_width + 10.0f),
+                                        -50.0f,
+                                        item_width,
+                                        40.0f
+                                    )
+                                ),
                             c + 2,
                             1
                         )
 
             grid.Add(
-                Text([(r + 1).ToString()] %> "texture_editor.color_label")
+                Text([ (r + 1).ToString() ] %> "texture_editor.color_label")
                     .Color(Colors.text_subheading)
                     .Align(Alignment.RIGHT)
                     .Position(
@@ -176,7 +191,7 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                     DeleteButton(
                         (fun () ->
                             ConfirmPage(
-                                    [(r + 1).ToString()] %> "texture_editor.confirm_delete_color",
+                                [ (r + 1).ToString() ] %> "texture_editor.confirm_delete_color",
                                 fun () ->
                                     if source.DeleteLooseTextureRow(r, texture_id) then
                                         source.Reload()
@@ -199,24 +214,23 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
 
         if sprite.Rows < fst rules.MaxGridSize then
             items.Add(
-                { new Button(
-                    K Icons.PLUS_CIRCLE,
-                    (fun () ->
-                        let src_row =
-                            match Seq.tryHead this.SelectedTextures with
-                            | Some(_, y) -> y
-                            | None -> 0
+                { new Button(K Icons.PLUS_CIRCLE,
+                             (fun () ->
+                                 let src_row =
+                                     match Seq.tryHead this.SelectedTextures with
+                                     | Some(_, y) -> y
+                                     | None -> 0
 
-                        ConfirmPage(
-                            [(src_row + 1).ToString()] %> "texture_editor.confirm_add_color",
-                            fun () ->
-                            if source.AddLooseTextureRow(src_row, texture_id) then
-                                source.Reload()
-                                this.Refresh()
-                        )
-                            .Show()
-                    )) with
-                    override this.Draw() =
+                                 ConfirmPage(
+                                     [ (src_row + 1).ToString() ] %> "texture_editor.confirm_add_color",
+                                     fun () ->
+                                         if source.AddLooseTextureRow(src_row, texture_id) then
+                                             source.Reload()
+                                             this.Refresh()
+                                 )
+                                     .Show()
+                             )) with
+                    override this.Draw() : unit =
                         if this.Focused then
                             Render.rect this.Bounds Colors.yellow_accent.O2
 
@@ -238,26 +252,27 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                                      | None -> 0
 
                                  ConfirmPage(
-                                    [(src_col + 1).ToString()] %> "texture_editor.confirm_add_frame",
+                                     [ (src_col + 1).ToString() ] %> "texture_editor.confirm_add_frame",
                                      fun () ->
-                                        if source.AddLooseTextureColumn(src_col, texture_id) then
-                                            source.Reload()
-                                            this.Refresh()
+                                         if source.AddLooseTextureColumn(src_col, texture_id) then
+                                             source.Reload()
+                                             this.Refresh()
                                  )
                                      .Show()
                              ),
                              Floating = true) with
-                    override this.Draw() =
+                    override this.Draw() : unit =
                         if this.Focused then
                             Render.rect this.Bounds Colors.yellow_accent.O2
 
                         base.Draw()
-                }.Position(Position.Shrink(-50.0f, 0.0f).SliceR(40.0f)),
+                }
+                    .Position(Position.Shrink(-50.0f, 0.0f).SliceR(40.0f)),
                 1,
                 0
             )
 
-        items.Init this
+        items.Init(this)
 
     member this.SelectedTextures =
         seq {
@@ -269,14 +284,14 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
 
     member private this.Items = items
 
-    override this.Init(parent) =
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
         this.Refresh()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         items.Update(elapsed_ms, moved)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
         items.Draw()

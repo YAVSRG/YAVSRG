@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -16,25 +16,32 @@ type ColumnErrorBarsPage() =
     let guide_thickness = Setting.percentf config.ColumnErrorBarsGuideThickness
     let show_non_judgements = Setting.simple config.ColumnErrorBarsShowNonJudgements
 
-    let thickness = config.ColumnErrorBarsThickness |> Setting.bounded (1.0f, 25.0f)
-    let width = config.ColumnErrorBarsWidth |> Setting.bounded (5.0f, 100.0f)
+    let thickness = config.ColumnErrorBarsThickness |> Setting.bounded(1.0f, 25.0f)
+    let width = config.ColumnErrorBarsWidth |> Setting.bounded(5.0f, 100.0f)
 
-    let windows_opacity = config.ColumnErrorBarsWindowsOpacity |> Setting.bounded (0.0f, 0.6f)
+    let windows_opacity =
+        config.ColumnErrorBarsWindowsOpacity |> Setting.bounded(0.0f, 0.6f)
 
-    let release_y_scale = config.ColumnErrorBarsReleasesYScale |> Setting.bounded (0.0f, 1.0f)
-    let release_x_scale = config.ColumnErrorBarsReleasesXScale |> Setting.bounded (0.0f, 2.0f)
+    let release_y_scale =
+        config.ColumnErrorBarsReleasesYScale |> Setting.bounded(0.0f, 1.0f)
+
+    let release_x_scale =
+        config.ColumnErrorBarsReleasesXScale |> Setting.bounded(0.0f, 2.0f)
 
     let animation_time =
-        config.ColumnErrorBarsFadeTime
-        |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
+        config.ColumnErrorBarsFadeTime |> Setting.bounded(100.0f<ms / rate>, 2000.0f<ms / rate>)
 
-    let log_scale_sensitivity = config.ColumnErrorBarsLogSensitivity |> Setting.bounded(0.0f, 1.0f)
+    let log_scale_sensitivity =
+        config.ColumnErrorBarsLogSensitivity |> Setting.bounded(0.0f, 1.0f)
 
     let enable_moving_average = Setting.simple config.ColumnErrorBarsMovingAverage
-    let moving_average_sensitivity = config.ColumnErrorBarsMovingAverageSensitivity |> Setting.bounded (0.01f, 1.0f)
+
+    let moving_average_sensitivity =
+        config.ColumnErrorBarsMovingAverageSensitivity |> Setting.bounded(0.01f, 1.0f)
+
     let moving_average_color = Setting.simple config.ColumnErrorBarsMovingAverageColor
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 ColumnErrorBarsWidth = width.Value
@@ -52,7 +59,7 @@ type ColumnErrorBarsPage() =
                 ColumnErrorBarsMovingAverageColor = moving_average_color.Value
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -85,7 +92,10 @@ type ColumnErrorBarsPage() =
                 PageSetting(%"hud.column_error_bars.timing_windows_opacity", Slider.Percent(windows_opacity))
                     .Help(Help.Info("hud.column_error_bars.timing_windows_opacity"))
                     .Pos(16),
-                PageSetting(%"hud.column_error_bars.logsensitivity", Slider.Percent(log_scale_sensitivity, Step = 0.01f))
+                PageSetting(
+                    %"hud.column_error_bars.logsensitivity",
+                    Slider.Percent(log_scale_sensitivity, Step = 0.01f)
+                )
                     .Help(Help.Info("hud.column_error_bars.logsensitivity"))
                     .Pos(18),
                 PageSetting(%"hud.column_error_bars.moving_average", Checkbox(enable_moving_average))
@@ -95,10 +105,16 @@ type ColumnErrorBarsPage() =
             .WithConditional(
                 (fun () -> enable_moving_average.Value),
 
-                PageSetting(%"hud.column_error_bars.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
+                PageSetting(
+                    %"hud.column_error_bars.moving_average_sensitivity",
+                    Slider.Percent(moving_average_sensitivity, Step = 0.01f)
+                )
                     .Help(Help.Info("hud.column_error_bars.moving_average_sensitivity"))
                     .Pos(22),
-                PageSetting(%"hud.column_error_bars.moving_average_color", ColorPicker(%"hud.column_error_bars.moving_average_color", moving_average_color, true))
+                PageSetting(
+                    %"hud.column_error_bars.moving_average_color",
+                    ColorPicker(%"hud.column_error_bars.moving_average_color", moving_average_color, true)
+                )
                     .Help(Help.Info("hud.column_error_bars.moving_average_color"))
                     .Pos(24)
             )

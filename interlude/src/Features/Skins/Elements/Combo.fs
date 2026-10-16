@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open System
 open Percyqaz.Flux.Graphics
@@ -14,7 +14,10 @@ module Combo =
     let draw_combo_centered (texture: Sprite, bounds: Rect, color: Color, combo: int, spacing: float32) =
         let combo_text = combo.ToString()
         let char_width = float32 texture.Width
-        let width = (float32 combo_text.Length + (float32 combo_text.Length - 1.0f) * spacing) * char_width
+
+        let width =
+            (float32 combo_text.Length + (float32 combo_text.Length - 1.0f) * spacing) * char_width
+
         let height = float32 texture.Height
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
@@ -27,7 +30,7 @@ module Combo =
             )
 
         for c in combo_text do
-            Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+            Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int(c - '0')) texture)
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
 type Combo(ctx: HudContext) =
@@ -36,9 +39,9 @@ type Combo(ctx: HudContext) =
     let color = Animation.Color(Color.White)
     let mutable event_count = 0
 
-    let font_texture = Content.Texture "combo-font"
+    let font_texture = Content.Texture("combo-font")
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         ctx.State.Subscribe(fun ev ->
             match ev.ComboChange with
             | NoChange -> ()
@@ -48,29 +51,32 @@ type Combo(ctx: HudContext) =
 
             if (ctx.Config.ComboLampColors && event_count > 50) then
                 color.Target <-
-                    Lamp.calculate ctx.State.Ruleset.Lamps ctx.State.Scoring.JudgementCounts ctx.State.Scoring.ComboBreaks
+                    Lamp.calculate
+                        ctx.State.Ruleset.Lamps
+                        ctx.State.Scoring.JudgementCounts
+                        ctx.State.Scoring.ComboBreaks
                     |> ctx.State.Ruleset.LampColor
 
             pop_animation.Value <- ctx.Config.ComboPop
         )
         |> ignore
+
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        color.Update elapsed_ms
-        pop_animation.Update elapsed_ms
+        color.Update(elapsed_ms)
+        pop_animation.Update(elapsed_ms)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let combo = ctx.State.Scoring.CurrentCombo
 
         let amt =
-            pop_animation.Value
-            + (((combo, 1000) |> Math.Min |> float32) * ctx.Config.ComboGrowth)
+            pop_animation.Value + (((combo, 1000) |> Math.Min |> float32) * ctx.Config.ComboGrowth)
 
-        let bounds = this.Bounds.Expand amt
+        let bounds = this.Bounds.Expand(amt)
 
         if ctx.Config.ComboUseFont then
             Combo.draw_combo_centered(font_texture, bounds, color.Value, combo, ctx.Config.ComboFontSpacing)
         else
-            Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
+            Text.fill(Style.font, combo.ToString(), this.Bounds.Expand(amt), color.Value, 0.5f)

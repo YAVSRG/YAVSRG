@@ -2,6 +2,7 @@
 **/obj
 interlude
 !interlude/src/Features/Wiki
+!interlude/src/Features/Skins
 engine
 !engine/src/Audio
 libraries

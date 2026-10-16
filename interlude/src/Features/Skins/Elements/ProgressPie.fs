@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open System
 open Percyqaz.Flux.Graphics
@@ -29,43 +29,30 @@ module ProgressMeter =
             let struct (a, b) = MathF.SinCos(angle)
             (x + (r - 4f) * a, y - (r - 4f) * b)
 
-        let inner (i: int32) = inner_exact (float32 i)
+        let inner (i: int32) = inner_exact(float32 i)
 
         for i = 1 to PIE_SEGMENTS do
-            Render.quad_points
-                (x, y)
-                (x, y)
-                (inner (i - 1))
-                (inner i)
-                color_bg
+            Render.quad_points (x, y) (x, y) (inner(i - 1)) (inner i) color_bg
 
-            Render.quad_points
-                (inner (i - 1))
-                (outer (i - 1))
-                (outer i)
-                (inner i)
-                Colors.white.O2
+            Render.quad_points (inner(i - 1)) (outer(i - 1)) (outer i) (inner i) Colors.white.O2
 
         let progress_rounded_down = progress * (PIE_SEGMENTS_F - 0.1f) |> floor |> int
+
         for i = 1 to progress_rounded_down do
-            Render.quad_points
-                (x, y)
-                (x, y)
-                (inner (i - 1))
-                (inner i)
-                color_fg
+            Render.quad_points (x, y) (x, y) (inner(i - 1)) (inner i) color_fg
 
-        Render.quad_points
-            (x, y)
-            (x, y)
-            (inner progress_rounded_down)
-            (inner_exact (progress * PIE_SEGMENTS_F))
-            color_fg
+        Render.quad_points (x, y) (x, y) (inner progress_rounded_down) (inner_exact(progress * PIE_SEGMENTS_F)) color_fg
 
-    let draw_percent_progress_centered (texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32) : unit =
+    let draw_percent_progress_centered
+        (texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32)
+        : unit =
         let progress_text = sprintf "%.0f%%" (progress * 100.0f)
         let char_width = float32 texture.Width
-        let width = (percent_spacing + float32 progress_text.Length + (float32 progress_text.Length - 1.0f) * spacing) * char_width
+
+        let width =
+            (percent_spacing + float32 progress_text.Length + (float32 progress_text.Length - 1.0f) * spacing)
+            * char_width
+
         let height = float32 texture.Height
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
@@ -82,7 +69,7 @@ module ProgressMeter =
                 char_bounds <- char_bounds.Translate(scale * percent_spacing * char_width, 0.0f)
                 Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 12) texture)
             else
-                Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+                Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int(c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
     let fmt_time_left (time_left: float32<ms / rate>) : string =
@@ -91,11 +78,23 @@ module ProgressMeter =
             (time_left / 60000.0f<ms / rate> |> floor |> int)
             ((time_left % 60000.0f<ms / rate>) / 1000.0f<ms / rate> |> floor |> int)
 
-    let draw_countdown_centered (texture: Sprite, bounds: Rect, color: Color, time_left: float32<ms / rate>, spacing: float32, colon_spacing: float32) : unit =
+    let draw_countdown_centered
+        (
+            texture: Sprite,
+            bounds: Rect,
+            color: Color,
+            time_left: float32<ms / rate>,
+            spacing: float32,
+            colon_spacing: float32
+        ) : unit =
         let time_left_text = fmt_time_left time_left
 
         let char_width = float32 texture.Width
-        let width = (colon_spacing * 2.0f + float32 time_left_text.Length + (float32 time_left_text.Length - 1.0f) * spacing) * char_width
+
+        let width =
+            (colon_spacing * 2.0f + float32 time_left_text.Length + (float32 time_left_text.Length - 1.0f) * spacing)
+            * char_width
+
         let height = float32 texture.Height
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
@@ -113,7 +112,7 @@ module ProgressMeter =
                 Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing + colon_spacing) * char_width, 0.0f)
             else
-                Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+                Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int(c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
 type ProgressPie(ctx: HudContext) =
@@ -123,37 +122,43 @@ type ProgressPie(ctx: HudContext) =
         let chart = ctx.State.WithColors
         chart.LastNote - chart.FirstNote
 
-    let font_texture = Content.Texture "progress-meter-font"
+    let font_texture = Content.Texture("progress-meter-font")
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let now = ctx.State.CurrentChartTime()
         let percent = now / duration |> max 0.0f |> min 1.0f
 
-        ProgressMeter.draw_pie(this.Bounds.SliceT(this.Bounds.Width), ctx.Config.ProgressMeterColor, ctx.Config.ProgressMeterBackgroundColor, percent)
+        ProgressMeter.draw_pie(
+            this.Bounds.SliceT(this.Bounds.Width),
+            ctx.Config.ProgressMeterColor,
+            ctx.Config.ProgressMeterBackgroundColor,
+            percent
+        )
 
         if ctx.Config.ProgressMeterUseFont then
 
             match ctx.Config.ProgressMeterLabel with
-                | ProgressPieLabel.Countdown ->
-                    let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
-                    ProgressMeter.draw_countdown_centered (
-                        font_texture,
-                        this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
-                        Color.White,
-                        time_left,
-                        ctx.Config.ProgressMeterFontSpacing,
-                        ctx.Config.ProgressMeterColonExtraSpacing
-                    )
-                | ProgressPieLabel.Percentage ->
-                    ProgressMeter.draw_percent_progress_centered (
-                        font_texture,
-                        this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
-                        Color.White,
-                        percent,
-                        ctx.Config.ProgressMeterFontSpacing,
-                        ctx.Config.ProgressMeterPercentExtraSpacing
-                    )
-                | _ -> ()
+            | ProgressPieLabel.Countdown ->
+                let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
+
+                ProgressMeter.draw_countdown_centered(
+                    font_texture,
+                    this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
+                    Color.White,
+                    time_left,
+                    ctx.Config.ProgressMeterFontSpacing,
+                    ctx.Config.ProgressMeterColonExtraSpacing
+                )
+            | ProgressPieLabel.Percentage ->
+                ProgressMeter.draw_percent_progress_centered(
+                    font_texture,
+                    this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
+                    Color.White,
+                    percent,
+                    ctx.Config.ProgressMeterFontSpacing,
+                    ctx.Config.ProgressMeterPercentExtraSpacing
+                )
+            | _ -> ()
 
         else
 
@@ -165,7 +170,7 @@ type ProgressPie(ctx: HudContext) =
                 | ProgressPieLabel.Percentage -> sprintf "%.0f%%" (percent * 100.0f)
                 | _ -> ""
 
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 text,
                 this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),

@@ -18,13 +18,15 @@ type SkipButton(ctx: HudContext) =
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
     let mutable active = true
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         let background = ctx.Config.SkipButtonBackground
+
         if background.Enable then
             let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo
+
             this.Add(
-                Image(Content.Texture "skip-button-bg", StretchToFill = false)
+                Image(Content.Texture("skip-button-bg"), StretchToFill = false)
                     .Position(
                         {
                             Left = (lo - 0.5f + background.AlignmentX) %+ 0.0f
@@ -34,10 +36,11 @@ type SkipButton(ctx: HudContext) =
                         }
                     )
             )
+
         this.Add(Text(text).Color(Colors.text).Align(Alignment.CENTER))
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if active && ctx.Inner.IsPlay || ctx.Inner.IsReplay then
@@ -50,6 +53,6 @@ type SkipButton(ctx: HudContext) =
             else
                 active <- false
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if active then
             base.Draw()

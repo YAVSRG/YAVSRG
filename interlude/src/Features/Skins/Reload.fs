@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins
+namespace Interlude.Features.Skins
 
 open Interlude.Content
 open Interlude.UI
@@ -16,7 +16,10 @@ module SkinHotReload =
         SelectedChart.recolor()
         skin_select().Show()
         noteskin_edit().Show()
-        match page with Some page -> page().Show() | None -> ()
+
+        match page with
+        | Some page -> page().Show()
+        | None -> ()
 
     let init (skin_select_page: unit -> #Page) (noteskin_edit_page: unit -> #Page) =
         skin_select <- fun () -> skin_select_page() :> Page
