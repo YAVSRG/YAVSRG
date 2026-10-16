@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Wiki
+namespace Interlude.Features.Wiki
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -7,12 +7,7 @@ open Percyqaz.Flux.Windowing
 open Prelude.Data
 
 [<Json.AutoCodec>]
-type WikiPage =
-    {
-        Folder: string
-        Title: string
-        Filename: string
-    }
+type WikiPage = { Folder: string; Title: string; Filename: string }
 
 [<AutoOpen>]
 module private WikiState =
@@ -41,20 +36,24 @@ module private WikiState =
 
     let private page_loader =
         { new Async.Queue<Resource, MarkdownDocument array>() with
-            override this.Handle(resource) =
+            override this.Handle(resource: Resource) : Async<_> =
                 async {
                     match resource with
                     | WikiIndex ->
                         if Cache.index_content.IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.md" "githubusercontent"
+                                    sprintf
+                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.md"
+                                        "githubusercontent"
                                 )
                             with
                             | WebResult.Ok md ->
                                 match!
-                                    WebServices.download_json_async (
-                                        sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.json" "githubusercontent"
+                                    WebServices.download_json_async(
+                                        sprintf
+                                            "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.json"
+                                            "githubusercontent"
                                     )
                                 with
                                 | WebResult.Ok toc ->
@@ -65,7 +64,7 @@ module private WikiState =
                                         |> Map.toSeq
                                         |> Seq.map snd
                                         |> Seq.concat
-                                        |> Seq.map (fun p -> p.Filename, None)
+                                        |> Seq.map(fun p -> p.Filename, None)
                                         |> Map.ofSeq
 
                                     Cache.pages_by_filename <-
@@ -73,10 +72,10 @@ module private WikiState =
                                         |> Map.toSeq
                                         |> Seq.map snd
                                         |> Seq.concat
-                                        |> Seq.map (fun p -> p.Filename, p)
+                                        |> Seq.map(fun p -> p.Filename, p)
                                         |> Map.ofSeq
 
-                                    Cache.index_content <- Some [| Markdown.Parse md |]
+                                    Cache.index_content <- Some [| Markdown.Parse(md) |]
                                 | otherwise -> Logging.Debug "Getting wiki index.json failed: %O" otherwise
                             | otherwise -> Logging.Debug "Getting wiki index.md failed: %O" otherwise
 
@@ -86,7 +85,10 @@ module private WikiState =
                         if Cache.page_cache_by_filename.[p.Filename].IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/%s.md" "githubusercontent" p.Filename
+                                    sprintf
+                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/%s.md"
+                                        "githubusercontent"
+                                        p.Filename
                                 )
                             with
                             | WebResult.Ok md ->
@@ -108,12 +110,17 @@ module private WikiState =
                         if Cache.changelog_content.IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md" "githubusercontent"
+                                    sprintf
+                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md"
+                                        "githubusercontent"
                                 )
                             with
                             | WebResult.Ok md ->
-                                let version_split_regex = System.Text.RegularExpressions.Regex(@"\s(?=[\.0-9]+\s+====)")
-                                Cache.changelog_content <- version_split_regex.Split(md) |> Array.map Markdown.Parse |> Some
+                                let version_split_regex =
+                                    System.Text.RegularExpressions.Regex(@"\s(?=[\.0-9]+\s+====)")
+
+                                Cache.changelog_content <-
+                                    version_split_regex.Split(md) |> Array.map Markdown.Parse |> Some
                             | otherwise -> Logging.Debug "Getting changelog failed: %O" otherwise
 
                         return Cache.changelog_content |> Option.defaultValue [||]

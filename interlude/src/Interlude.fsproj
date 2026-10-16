@@ -73,7 +73,7 @@
     <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="UI\Menu\ColorPicker.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
-    <Compile Include="Features\Wiki\State.fs" />
+    <Compile Include="Features\Wiki\WikiState.fs" />
     <Compile Include="Features\Wiki\WikiBrowserPage.fs" />
     <Compile Include="Features\Online\Credentials.fs" />
     <Compile Include="Features\Online\LobbyState.fs" />

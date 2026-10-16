@@ -1,6 +1,7 @@
 **/bin
 **/obj
 interlude
+!interlude/src/Features/Wiki
 engine
 !engine/src/Audio
 libraries
