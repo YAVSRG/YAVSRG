@@ -211,9 +211,13 @@
     <Compile Include="Features\Skins\Textures\EditTexturePage.fs" />
     <Compile Include="Features\Skins\Textures\TextureList.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\MultiplayerScoresPage.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\ColumnErrorBarGuide.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\ColumnErrorBarWindow.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ColumnErrorBarsPage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ElementPreview.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Accuracy.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\ErrorBarGuide.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\ErrorBarWindow.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ErrorBar.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Judgement.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\EarlyLate.fs" />
