@@ -26,7 +26,7 @@ Interlude may change its terms of service from time to time.
 By continuing to use Interlude's online services, you are acknowledging and agreeing to abide by the terms of service and its modifications.
 
 ## Modifications to Interlude's services
-Interlude reserves the rights to modify or discontinue its services with or without notice to you. Interlude shall not be you or any third party should Interlude exercise its right to modify or discontinue its services.
+Interlude reserves the rights to modify or discontinue its services with or without notice to you. Interlude shall not be liable to you or any third party should Interlude exercise its right to modify or discontinue its services.
 
 ## Disclaimer
 YOU EXPRESSLY AGREE THAT YOUR USE OF Interlude IS AT YOUR SOLE RISK.
