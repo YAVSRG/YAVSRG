@@ -58,7 +58,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
             Style.click.Play()
             on_click()
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
@@ -68,7 +68,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
 
         base.Draw()
 
-    static member Once(localised_text: string, action: unit -> unit) =
+    static member Once(localised_text: string, action: unit -> unit) : PageButton =
         let mutable clicked = false
 
         PageButton(
@@ -80,7 +80,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
             Disabled = fun () -> clicked
         )
 
-    static member Once(localised_text: string, action: unit -> unit, disabled: unit -> bool) =
+    static member Once(localised_text: string, action: unit -> unit, disabled: unit -> bool) : PageButton =
         let mutable clicked = false
 
         PageButton(

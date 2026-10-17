@@ -157,11 +157,11 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
 
         Render.alpha_multiplier_restore before_alpha
 
-    member this.Hide() =
+    member this.Hide() : unit =
         transition_timer.Reset()
         transition <- Transition.Out
 
-    member this.Show() =
+    member this.Show() : unit =
         transition_timer.Reset()
         transition <- Transition.In
 

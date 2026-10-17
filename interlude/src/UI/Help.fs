@@ -185,13 +185,13 @@ type Help(content: Callout) =
 
     override this.Draw() : unit = ()
 
-    static member Info(feature: string) =
+    static member Info(feature: string) : Callout =
         Callout.Normal.Title(%feature).Body(%(sprintf "%s.tooltip" feature))
 
-    static member Info(feature: string, hotkey: Hotkey) =
+    static member Info(feature: string, hotkey: Hotkey) : Callout =
         Callout.Normal.Title(%feature).Body(%(sprintf "%s.tooltip" feature)).Hotkey(hotkey)
 
 type HelpExtensions =
 
     [<Extension>]
-    static member Help(this: #IContainer<Widget>, content: Callout) = this.With(Help(content))
+    static member Help(this: #IContainer<Widget>, content: Callout) : #IContainer<Widget> = this.With(Help(content))

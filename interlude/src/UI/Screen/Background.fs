@@ -27,7 +27,7 @@ module Background =
 
     let private loader =
         { new Async.CancelQueue<string option, (Bitmap * Color) option>() with
-            member this.Process(file: string option) =
+            member this.Process(file: string option) : Async<(Bitmap * Color) option> =
                 async {
                     match file with
                     | None -> return None
@@ -91,7 +91,7 @@ module Background =
                             return None
                 }
 
-            member this.Handle(res) =
+            member this.Handle(res: (Bitmap * Color) option) : unit =
                 match res with
                 | Some(bmp, col) ->
                     let sprite =

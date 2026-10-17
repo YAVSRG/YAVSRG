@@ -15,7 +15,7 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
     let color = Setting.simple judgement.Color
     let breaks_combo = Setting.simple judgement.BreaksCombo
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         let new_js = ruleset.Value.Judgements |> Array.copy
 
         new_js.[id] <-
@@ -91,4 +91,4 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
         ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.judgements"
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()

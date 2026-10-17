@@ -63,10 +63,10 @@ module Network =
     type NetworkClient() =
         inherit Client(target_ip, 32767)
 
-        override this.OnConnected() =
+        override this.OnConnected() : unit =
             GameThread.defer(fun () -> status <- Connected)
 
-        override this.OnDisconnected() =
+        override this.OnDisconnected() : unit =
             GameThread.defer(fun () ->
                 status <- if status = Connecting then ConnectionFailed else NotConnected
 
@@ -75,7 +75,7 @@ module Network =
                     NetworkEvents.leave_lobby_ev.Trigger()
             )
 
-        override this.OnPacketReceived(packet: Downstream) =
+        override this.OnPacketReceived(packet: Downstream) : unit =
             match packet with
             | Downstream.DISCONNECT reason ->
                 Logging.Info "Disconnected from server: %s" reason

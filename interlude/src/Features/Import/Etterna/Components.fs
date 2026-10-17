@@ -159,7 +159,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
@@ -171,9 +171,9 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
     member this.Data = data
 
-    member private this.Download() = download()
+    member private this.Download() : unit = download()
 
-    static member Filter(filter: FilterPart list) =
+    static member Filter(filter: FilterPart list) : EtternaPackCard -> bool =
         fun (c: EtternaPackCard) ->
             List.forall
                 (function

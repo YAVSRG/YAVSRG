@@ -124,7 +124,7 @@ module SelectedChart =
 
     let private chart_loader =
         { new Async.CancelQueueSeq<LoadRequest, unit -> unit>() with
-            override this.Process(req) =
+            override this.Process(req: LoadRequest) : (unit -> unit) seq =
                 match req with
                 | Load(chart_meta, play_audio, rate, mods) ->
                     seq {
@@ -281,7 +281,7 @@ module SelectedChart =
                                 on_load_succeeded <- []
                     }
 
-            override this.Handle(action) = action()
+            override this.Handle(action: unit -> unit) : unit = action()
         }
 
     let keymode () : Keymode =
@@ -314,12 +314,10 @@ module SelectedChart =
 
     let update () : unit =
         if CACHE_DATA.IsSome then
-
             FMT_DURATION <- format_duration CACHE_DATA
             FMT_BPM <- format_bpm CACHE_DATA
 
         if CHART.IsSome then
-
             // todo: this can be wrong: in one instant two things call update()
             // todo: the second interrupts the first but intended effect overall is update not load
             let is_interrupted = WITH_MODS.IsNone
@@ -334,9 +332,7 @@ module SelectedChart =
 
     let recolor () : unit =
         if WITH_MODS.IsSome then
-
             WITH_COLORS <- None
-
             chart_loader.Request(Recolor)
 
     let if_loading_or_loaded (action: LoadingChartInfo -> unit) : unit =

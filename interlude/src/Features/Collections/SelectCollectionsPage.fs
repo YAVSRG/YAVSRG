@@ -34,7 +34,7 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
@@ -107,7 +107,7 @@ type SelectCollectionPage
             )
 
     override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()
 
 type ManageCollectionsPage() =
     inherit

@@ -82,7 +82,7 @@ type Slider(setting: Setting.Bounded<float32>) =
 
     member val Format: float32 -> string = (fun x -> x.ToString("n" + decimal_places.ToString())) with get, set
 
-    static member Percent(setting) =
+    static member Percent(setting: Setting.Bounded<float32>) : Slider =
         Slider(
             setting,
             Format =
@@ -93,15 +93,15 @@ type Slider(setting: Setting.Bounded<float32>) =
                 )
         )
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.OnSelected(by_mouse: bool) =
+    override this.OnSelected(by_mouse: bool) : unit =
         base.OnSelected(by_mouse)
         Input.listen_to_text(typed_number, false, ignore)
 
-    override this.OnDeselected(by_mouse: bool) =
+    override this.OnDeselected(by_mouse: bool) : unit =
         base.OnDeselected(by_mouse)
         Input.remove_listener()
         typed_number.Set("")

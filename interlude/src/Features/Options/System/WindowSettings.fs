@@ -52,7 +52,7 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
     let width_box = NumberEntry.Create(width)
     let height_box = NumberEntry.Create(height)
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         if height.Value * 4 / 3 <= width.Value then
             setting.Set(width.Value, height.Value)
 
@@ -90,7 +90,7 @@ type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
     let horizontal = Setting.percentf(fst setting.Value)
     let vertical = Setting.percentf(snd setting.Value)
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         setting.Set(horizontal.Value, vertical.Value)
 
     override this.Content() : Widget =

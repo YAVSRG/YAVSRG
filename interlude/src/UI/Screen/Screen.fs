@@ -235,7 +235,7 @@ module Screen =
 
             perf.Draw()
 
-        override this.Init() =
+        override this.Init() : unit =
             base.Init()
 
             logo.Init(this)

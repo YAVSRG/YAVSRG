@@ -28,7 +28,7 @@ type private EditMountPage
         Notifications.action_feedback(Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
         Menu.Back()
 
-    member this.SaveChangesAndImport() =
+    member this.SaveChangesAndImport() : unit =
 
         if queued_import >= 0 then
             setting.Value <-

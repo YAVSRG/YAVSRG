@@ -75,7 +75,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
         | HoldMechanics.JudgeReleasesSeparately(w, _) -> w
         | _ -> ruleset.Value.Judgements |> Array.map _.TimingWindows
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         ruleset.Set(
             { ruleset.Value with
                 HitMechanics =

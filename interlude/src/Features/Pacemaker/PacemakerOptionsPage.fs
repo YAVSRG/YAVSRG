@@ -82,7 +82,7 @@ type PacemakerOptionsPage() =
 
     override this.Title = sprintf "%s %s" Icons.FLAG (%"gameplay.pacemaker")
 
-    member this.SavePacemakerSetting() =
+    member this.SavePacemakerSetting() : unit =
         options.Pacemaker.[ruleset_id] <-
             {
                 Accuracy = accuracy.Value

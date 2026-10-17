@@ -27,7 +27,7 @@ type Credentials =
 
     static member Location: string = Path.Combine(get_game_folder "Data", "login.json")
 
-    static member Load() =
+    static member Load() : Credentials =
         if File.Exists(Credentials.Location) then
             File.SetAttributes(Credentials.Location, FileAttributes.Normal)
 
@@ -41,5 +41,5 @@ type Credentials =
         else
             Credentials.Default
 
-    member this.Save() =
+    member this.Save() : unit =
         JSON.ToFile (Credentials.Location, true) this

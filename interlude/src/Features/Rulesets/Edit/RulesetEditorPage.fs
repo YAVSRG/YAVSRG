@@ -33,7 +33,7 @@ type RulesetEditorPage(id: string, original: Ruleset) =
 
     let name = Setting.simple ruleset.Value.Name
 
-    member this.SaveChangesIfValid() =
+    member this.SaveChangesIfValid() : unit =
         let has_error =
             match validation_message.Current with
             | :? Dummy -> false

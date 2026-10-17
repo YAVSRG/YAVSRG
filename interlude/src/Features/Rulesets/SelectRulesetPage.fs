@@ -85,7 +85,7 @@ type SelectRulesetPage() =
         refresh()
         ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
-    override this.Update(elapsed_ms: float, moved: bool) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if (%%"reload_content").Pressed() then
@@ -95,4 +95,4 @@ type SelectRulesetPage() =
             SelectRulesetPage().Show()
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()

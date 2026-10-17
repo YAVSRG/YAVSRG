@@ -15,7 +15,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     let color = Setting.simple grade.Color
     let acc_required = grade.Accuracy |> Setting.bounded(0.0, 1.0) |> Setting.round 6
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         let new_grades = ruleset.Value.Grades |> Array.copy
 
         new_grades.[id] <-
@@ -83,4 +83,4 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
         ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.grades"
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()

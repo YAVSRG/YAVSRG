@@ -87,7 +87,7 @@ type EtternaPacksBrowserPage() =
                     .Conditional(fun () -> not failed && not loading && items.Count = 0)
             )
 
-    override this.Header() =
+    override this.Header() : Widget =
         SearchBox(fun query -> GameThread.defer(fun () -> begin_search query))
             .Fill(Color.FromArgb(0xFF_8F60F6).O2)
             .Border(Color.FromArgb(0xFF_8F60F6))
@@ -95,7 +95,7 @@ type EtternaPacksBrowserPage() =
             .Position(Position.SliceX(WIDTH).SliceT(SearchBox.HEIGHT).TranslateY(MARGIN_TOP))
             .With(LoadingIndicator.Border(fun () -> loading))
 
-    override this.Footer() =
+    override this.Footer() : Widget =
         Text(%"etterna_pack_browser.disclaimer")
             .Align(Alignment.CENTER)
             .Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))

@@ -12,7 +12,7 @@ type EditFolderPage(name: string, folder: Folder) =
 
     let new_name = Setting.simple name |> Setting.alphanumeric
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         if new_name.Value <> name && new_name.Value.Length > 1 then
             if Content.Collections.RenameCollection(name, new_name.Value) then
                 CollectionActions.collection_modified_ev.Trigger()

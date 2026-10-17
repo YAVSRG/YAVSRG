@@ -19,7 +19,7 @@ type private HotkeyBinder(hotkey: Hotkey) as this =
             Style.key.Play()
         | _ -> Input.listen_to_next_key input_callback
 
-    override this.ToString() = (%%hotkey).ToString()
+    override this.ToString() : string = (%%hotkey).ToString()
 
     override this.Init(parent: Widget) : unit =
         this.Add(

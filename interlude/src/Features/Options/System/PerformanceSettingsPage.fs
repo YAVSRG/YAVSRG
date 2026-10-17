@@ -38,7 +38,7 @@ type PerformanceSettingsPage() =
     let custom_frame_limit_box =
         NumberEntry.Create(config.CustomFrameLimit |> Setting.trigger(fun _ -> pending_custom_frame_limit <- true))
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         if pending_custom_frame_limit then
             pending_custom_frame_limit <- false
             config.Apply()

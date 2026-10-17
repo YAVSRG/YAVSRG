@@ -28,7 +28,7 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
             | LampRequirement.JudgementAtMost(_, n) -> min 99 n
         )
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         let new_lamps = ruleset.Value.Lamps |> Array.copy
 
         new_lamps.[id] <-
@@ -133,4 +133,4 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
         ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.lamps"
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()

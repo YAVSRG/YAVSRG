@@ -24,4 +24,4 @@ type PlayerListPage() =
             )
 
     override this.Title = %"network.players"
-    override this.Header() = Dummy()
+    override this.Header() : Widget = Dummy()

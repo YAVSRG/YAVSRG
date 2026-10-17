@@ -88,7 +88,7 @@ type ImportsPage() =
                     .Position(Position.Shrink(PAGE_MARGIN_X).SliceR(MountDisplay.WIDTH).SliceY(MountDisplay.ALL_HEIGHT))
             )
 
-    override this.Footer() =
+    override this.Footer() : Widget =
         Container
             .Create(base.Footer())
             .With(

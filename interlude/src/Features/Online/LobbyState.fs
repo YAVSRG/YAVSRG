@@ -63,15 +63,15 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
 
     (* To be called by network code (via UI thread) *)
 
-    member this.PlayerJoined(username: string, color: int32) =
+    member this.PlayerJoined(username: string, color: int32) : unit =
         this.Players.[username] <- LobbyPlayer.Create(color)
         lobby_players_updated_ev.Trigger()
 
-    member this.PlayerLeft(username: string) =
+    member this.PlayerLeft(username: string) : unit =
         this.Players.Remove(username) |> ignore
         lobby_players_updated_ev.Trigger()
 
-    member this.ChartSelected(lc: LobbyChart) =
+    member this.ChartSelected(lc: LobbyChart) : unit =
         this.Chart <- Some lc
 
         for player in this.Players.Values do
@@ -81,25 +81,25 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
         change_chart_ev.Trigger(lc)
         lobby_players_updated_ev.Trigger()
 
-    member this.UpdateSettings(settings: LobbySettings) =
+    member this.UpdateSettings(settings: LobbySettings) : unit =
         this.Settings <- settings
         lobby_settings_updated_ev.Trigger(settings)
 
-    member this.LobbyEvent(kind: LobbyEvent, player: string) =
+    member this.LobbyEvent(kind: LobbyEvent, player: string) : unit =
         if player = your_username || this.Players.ContainsKey(player) then
             lobby_event_ev.Trigger(kind, player)
         else
             Logging.Warn "Received event from untracked player %s" player
 
-    member this.SystemMessage(msg: string) = system_message_ev.Trigger(msg)
+    member this.SystemMessage(msg: string) : unit = system_message_ev.Trigger(msg)
 
-    member this.ChatMessage(sender: string, msg: string) =
+    member this.ChatMessage(sender: string, msg: string) : unit =
         if sender = your_username || this.Players.ContainsKey(sender) then
             chat_message_ev.Trigger(sender, msg)
         else
             Logging.Warn "Received chat message from untracked player %s" sender
 
-    member this.PlayerStatus(username: string, status: LobbyPlayerStatus) =
+    member this.PlayerStatus(username: string, status: LobbyPlayerStatus) : unit =
         match this.Players.TryGetValue(username) with
         | true, player ->
             player.Status <- status
@@ -107,15 +107,15 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
             player_status_ev.Trigger(username, status)
         | false, _ -> Logging.Warn "Received status for untracked player %s" username
 
-    member this.StartCountdown(reason: string, seconds: int) = countdown_ev.Trigger(reason, seconds)
+    member this.StartCountdown(reason: string, seconds: int) : unit = countdown_ev.Trigger(reason, seconds)
 
-    member this.GameStart() =
+    member this.GameStart() : unit =
         replays.Clear()
         this.Countdown <- false
         this.GameInProgress <- true
         game_start_ev.Trigger()
 
-    member this.GameEnd() =
+    member this.GameEnd() : unit =
         this.GameInProgress <- false
 
         for player in this.Players.Values do
@@ -135,41 +135,41 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
     member val GameInProgress: bool = false with get, set
     member val Countdown: bool = false with get, set
 
-    member this.SendMessage(msg: string) = client.Send(Upstream.CHAT(msg))
+    member this.SendMessage(msg: string) : unit = client.Send(Upstream.CHAT(msg))
 
-    member this.InvitePlayer(username: string) =
+    member this.InvitePlayer(username: string) : unit =
         client.Send(Upstream.INVITE_TO_LOBBY(username))
 
-    member this.Leave() = client.Send(Upstream.LEAVE_LOBBY)
+    member this.Leave() : unit = client.Send(Upstream.LEAVE_LOBBY)
 
-    member this.TransferHost(username: string) =
+    member this.TransferHost(username: string) : unit =
         client.Send(Upstream.TRANSFER_HOST(username))
 
-    member this.ChangeSettings(settings: LobbySettings) =
+    member this.ChangeSettings(settings: LobbySettings) : unit =
         client.Send(Upstream.LOBBY_SETTINGS(settings))
 
-    member this.ReportMissingChart() = client.Send(Upstream.MISSING_CHART)
+    member this.ReportMissingChart() : unit = client.Send(Upstream.MISSING_CHART)
 
-    member this.SetReadyStatus(flag: ReadyFlag) =
+    member this.SetReadyStatus(flag: ReadyFlag) : unit =
         if not this.GameInProgress then
             this.ReadyStatus <- flag
             client.Send(Upstream.READY_STATUS(flag))
 
-    member this.StartRound() = client.Send(Upstream.START_GAME)
-    member this.CancelRound() = client.Send(Upstream.CANCEL_GAME)
-    member this.StartPlaying() = client.Send(Upstream.BEGIN_PLAYING)
-    member this.StartSpectating() = client.Send(Upstream.BEGIN_SPECTATING)
+    member this.StartRound() : unit = client.Send(Upstream.START_GAME)
+    member this.CancelRound() : unit = client.Send(Upstream.CANCEL_GAME)
+    member this.StartPlaying() : unit = client.Send(Upstream.BEGIN_PLAYING)
+    member this.StartSpectating() : unit = client.Send(Upstream.BEGIN_SPECTATING)
 
-    member this.SendReplayData(timestamp: float32, data: byte array) =
+    member this.SendReplayData(timestamp: float32, data: byte array) : unit =
         client.Send(Upstream.PLAY_DATA(timestamp, data))
 
-    member this.FinishPlaying() =
+    member this.FinishPlaying() : unit =
         client.Send(Upstream.FINISH_PLAYING(false))
 
-    member this.AbandonPlaying() =
+    member this.AbandonPlaying() : unit =
         client.Send(Upstream.FINISH_PLAYING(true))
 
-    member this.SelectChart(chart_meta: ChartMeta, rate: Rate, mods: ModState) = // todo: take single LoadedChartInfo parameter instead
+    member this.SelectChart(chart_meta: ChartMeta, rate: Rate, mods: ModState) : unit = // todo: take single LoadedChartInfo parameter instead
         if this.YouAreHost then
             client.Send(
                 Upstream.SELECT_CHART(
@@ -189,7 +189,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
         | true, data -> Some data
         | false, _ -> None
 
-    member this.AddReplayInfo(username: string, info: LobbyPlayerReplayInfo) =
+    member this.AddReplayInfo(username: string, info: LobbyPlayerReplayInfo) : unit =
         if replays.ContainsKey(username) then
             Logging.Warn "%s already has replay info" username
 

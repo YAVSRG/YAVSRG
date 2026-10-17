@@ -150,7 +150,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
             this.DrawHoverInfo(box, hovered_time)
 
-    member this.DrawHoverInfo(bounds: Rect, time: Time) =
+    member this.DrawHoverInfo(bounds: Rect, time: Time) : unit =
         let bpm =
             if bpms.Length > 0 then
                 MS_PER_MINUTE / bpms.[bpm_index].Data.MsPerBeat * rate.Value

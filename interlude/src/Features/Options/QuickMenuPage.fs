@@ -31,7 +31,7 @@ type QuickMenuPage() =
             )
         :> Widget
 
-    override this.Header() =
+    override this.Header() : Widget =
         Container(NodeType.None)
             .With(
                 PageHeaderBase(),
@@ -43,7 +43,7 @@ type QuickMenuPage() =
 
     override this.Direction = PageEasing.Right
     override this.Title = %"menu.quick"
-    override this.OnReturnFromNestedPage() = Menu.Back()
+    override this.OnReturnFromNestedPage() : unit = Menu.Back()
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)

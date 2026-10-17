@@ -78,7 +78,7 @@ type AngledButton(label_func: unit -> string, on_click: unit -> unit, background
 
         base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 

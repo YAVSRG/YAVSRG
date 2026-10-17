@@ -71,5 +71,5 @@ type RulesetSwitcher(setting: Setting<string>) =
 
         base.Init(parent)
 
-    member this.ToggleDropdown() =
+    member this.ToggleDropdown() : unit =
         RulesetSwitcher.make_dropdown setting dropdown_wrapper

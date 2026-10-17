@@ -42,7 +42,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
 
         base.Init(parent)
 
-    override this.OnSelected(by_mouse: bool) =
+    override this.OnSelected(by_mouse: bool) : unit =
         base.OnSelected(by_mouse)
         Style.text_open.Play()
 
@@ -54,7 +54,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
                     this.Focus(true)
         )
 
-    override this.OnDeselected(by_mouse: bool) =
+    override this.OnDeselected(by_mouse: bool) : unit =
         base.OnDeselected(by_mouse)
         Style.text_close.Play()
         Input.remove_listener()

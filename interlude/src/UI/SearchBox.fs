@@ -25,7 +25,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
     new(query_text: Setting<string>, callback: FilteredSearch -> unit) =
         SearchBox(query_text, (fun (query: string) -> callback(FilterParts.parse query |> FilteredSearch.Build)))
 
-    member private this.StartSearch() = search_timer.Restart()
+    member private this.StartSearch() : unit = search_timer.Restart()
 
     member private this.TextEntry: TextEntry = text_entry
 

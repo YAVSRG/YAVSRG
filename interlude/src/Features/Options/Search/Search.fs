@@ -39,7 +39,7 @@ module Search =
         interface IHeight with
             member this.Height = height
 
-        static member Create(height, child: Widget) =
+        static member Create(height: float32, child: Widget) : SearchResultContainer =
             SearchResultContainer(height, NodeType.Container(K(Some child))).With(child)
 
     let search (search_func: string array -> SearchResult seq) (query: string) : Widget =

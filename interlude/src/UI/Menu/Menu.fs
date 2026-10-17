@@ -41,16 +41,16 @@ type Page() as this =
     member internal this.HandleClose() : unit = List.iter (fun f -> f()) on_close
     member internal this.HandleDestroy() : unit = List.iter (fun f -> f()) on_destroy
 
-    member this.OnClose(action: unit -> unit) = on_close <- action :: on_close
+    member this.OnClose(action: unit -> unit) : unit = on_close <- action :: on_close
 
-    member this.DisposeOnClose([<ParamArray>] resources: IDisposable array) =
+    member this.DisposeOnClose([<ParamArray>] resources: IDisposable array) : unit =
         on_close <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
 
-    member this.WithOnClose(action: unit -> unit) =
+    member this.WithOnClose(action: unit -> unit) : Page =
         this.OnClose(action)
         this
 
-    member this.DisposeOnDestroy([<ParamArray>] resources: IDisposable array) =
+    member this.DisposeOnDestroy([<ParamArray>] resources: IDisposable array) : unit =
         on_destroy <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
 
     member private this._content = content
@@ -85,7 +85,7 @@ type Page() as this =
         if this.Opacity.Value > 0.01f then
             base.Update(elapsed_ms, moved)
 
-    member this.Show(dir: PageEasing) =
+    member this.Show(dir: PageEasing) : unit =
         match dir with
         | PageEasing.None ->
             this.Position <- Position.DEFAULT
@@ -102,7 +102,7 @@ type Page() as this =
         content.Focus(false)
         is_current <- true
 
-    member this.Hide(dir: PageEasing) =
+    member this.Hide(dir: PageEasing) : unit =
         match dir with
         | PageEasing.Up ->
             this.Position <-
@@ -183,17 +183,17 @@ and Menu(top_level: Page) as this =
     static let mutable _instance = None
     do _instance <- Some this
 
-    static member ShowPage(page: Page) =
+    static member ShowPage(page: Page) : unit =
         match _instance with
         | None -> Menu(page).Show()
         | Some instance -> instance.ShowPage(page)
 
-    static member ShowPage(page: unit -> #Page) =
+    static member ShowPage(page: unit -> #Page) : unit =
         match _instance with
         | None -> Menu(page()).Show()
         | Some instance -> instance.ShowPage(page())
 
-    member private this.ShowPage(page: Page) =
+    member private this.ShowPage(page: Page) : unit =
         namestack <- page.Title :: namestack
         page.Init(this)
 
@@ -209,17 +209,17 @@ and Menu(top_level: Page) as this =
 
         nest_level <- nest_level + 1
 
-    static member Back() =
+    static member Back() : unit =
         match _instance with
         | None -> ()
         | Some instance -> instance.Back()
 
-    static member Exit() =
+    static member Exit() : unit =
         match _instance with
         | None -> ()
         | Some instance -> instance.Exit()
 
-    member private this.Back() =
+    member private this.Back() : unit =
         if nest_level > 0 then
             namestack <- List.tail namestack
             nest_level <- nest_level - 1
@@ -231,7 +231,7 @@ and Menu(top_level: Page) as this =
                 stack.[nest_level - 1].Value.Show(page.Direction.Reverse)
                 stack.[nest_level - 1].Value.OnReturnFromNestedPage()
 
-    member private this.Exit() =
+    member private this.Exit() : unit =
         while namestack <> [] do
             this.Back()
 
@@ -296,21 +296,21 @@ and Menu(top_level: Page) as this =
 
             this.Close()
 
-    override this.Close() =
+    override this.Close() : unit =
         base.Close()
         Selection.unclamp()
         _instance <- None
         Song.RemoveLowPassFilter()
 
-    member private this.PageTitles() = namestack
+    member private this.PageTitles() : string list = namestack
 
-    static member PageTitles() =
+    static member PageTitles() : string list =
         match _instance with
         | None -> []
         | Some menu -> menu.PageTitles()
 
 type Page with
-    member this.Show() = Menu.ShowPage(this)
+    member this.Show() : unit = Menu.ShowPage(this)
 
 type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
     inherit Page()

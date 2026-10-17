@@ -28,7 +28,7 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
 
     let decimal_places = Setting.simple ruleset.Value.Formatting.DecimalPlaces
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         ruleset.Set(
             { ruleset.Value with
                 Formatting = { DecimalPlaces = decimal_places.Value }

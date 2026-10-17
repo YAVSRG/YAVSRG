@@ -20,7 +20,7 @@ type MountedGameType =
     | Etterna
     | Stepmania
 
-    override this.ToString() =
+    override this.ToString() : string =
         match this with
         | Osu -> "osu!mania"
         | Quaver -> "Quaver"

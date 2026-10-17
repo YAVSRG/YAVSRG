@@ -12,7 +12,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
 
     let new_name = Setting.simple name |> Setting.alphanumeric
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         if new_name.Value <> name && new_name.Value.Length > 0 then
             if Content.Collections.RenamePlaylist(name, new_name.Value) then
                 CollectionActions.collection_modified_ev.Trigger()
