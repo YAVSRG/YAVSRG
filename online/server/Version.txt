@@ -1,1 +1,1 @@
-﻿Leaderboard bug fix
+﻿Allow 3.0x rates
