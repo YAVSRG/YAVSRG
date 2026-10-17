@@ -322,10 +322,14 @@ module WindowThread =
         GLFW.WindowHint(WindowHintBool.Focused, false)
         GLFW.WindowHint(WindowHintBool.AutoIconify, true)
         GLFW.WindowHint(WindowHintBool.Decorated, false)
-        GLFW.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core)
-        GLFW.WindowHint(WindowHintBool.OpenGLForwardCompat, true)
-        GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
-        GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3)
+        if OperatingSystem.IsMacOS() then
+            GLFW.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core)
+            GLFW.WindowHint(WindowHintBool.OpenGLForwardCompat, true)
+            GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
+            GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3)
+        else
+            GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
+            GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 0)
         GLFW.WindowHint(WindowHintInt.Samples, config.MSAASamples)
         GLFW.WindowHint(WindowHintInt.StencilBits, 8)
         GLFW.WindowHint(WindowHintInt.DepthBits, 8)
@@ -342,9 +346,8 @@ module WindowThread =
             | ErrorCode.VersionUnavailable ->
                 Logging.Critical ""
                 Logging.Critical "=== Helpful message from Percyqaz ==="
-                Logging.Critical "This error means your PC doesn't support OpenGL 3.3 or higher, and so can't run '%s' :(" title
-                Logging.Critical "If you think your PC DOES support OpenGL 3.3+, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
-                Logging.Critical "If your PC is from about 2011/12 and supports OpenGL 3.0-3.2, complain in the Discord anyway and I could spend more time seeing if the engine can be more backwards compatible"
+                Logging.Critical "This error means your PC doesn't support OpenGL 3.0 or higher, and so can't run '%s' :(" title
+                Logging.Critical "If you think your PC DOES support OpenGL 3.0+, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
                 Logging.Critical ""
             | ErrorCode.ApiUnavailable ->
                 Logging.Critical ""
