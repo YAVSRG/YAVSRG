@@ -13,7 +13,7 @@ module Version =
 
         f.Substring(i, j - i).Substring("<AssemblyVersion>".Length)
 
-    let publish () =
+    let create_publish_commit () =
 
         let changelog = Path.Combine(YAVSRG_PATH, "interlude", "docs", "changelog.md")
         let logtxt = File.ReadAllText(changelog)
