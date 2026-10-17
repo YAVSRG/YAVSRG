@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Gameplay
+namespace Interlude.Features.Gameplay
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
@@ -16,11 +16,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI
 
-type LoadingChartInfo =
-    {
-        ChartMeta: ChartMeta
-        LibraryContext: LibraryContext
-    }
+type LoadingChartInfo = { ChartMeta: ChartMeta; LibraryContext: LibraryContext }
 
 type LoadedChartInfo =
     {
@@ -62,14 +58,14 @@ module SelectedChart =
 
     let private format_notecounts (chart: ModdedChart) =
         let notes, lnotes = Chart.notecount chart
+
         let hold_count =
             let pc = (100.0f * float32 lnotes / float32 notes)
-            let lnotes_suffix = if lnotes <> 1 then %"levelselect.holds" else %"levelselect.hold"
 
-            if pc < 0.5f then
-                sprintf "%i %s" lnotes lnotes_suffix
-            else
-                sprintf "%i %s (%.0f%%)" lnotes lnotes_suffix pc
+            let lnotes_suffix =
+                if lnotes <> 1 then %"levelselect.holds" else %"levelselect.hold"
+
+            if pc < 0.5f then sprintf "%i %s" lnotes lnotes_suffix else sprintf "%i %s (%.0f%%)" lnotes lnotes_suffix pc
 
         sprintf "%iK | %i %s | %s" chart.Keys notes %"levelselect.notes" hold_count
 
@@ -128,7 +124,7 @@ module SelectedChart =
 
     let private chart_loader =
         { new Async.CancelQueueSeq<LoadRequest, unit -> unit>() with
-            override this.Process(req) =
+            override this.Process(req: LoadRequest) : (unit -> unit) seq =
                 match req with
                 | Load(chart_meta, play_audio, rate, mods) ->
                     seq {
@@ -138,7 +134,7 @@ module SelectedChart =
                             Logging.Error "Couldn't load chart: %s" reason
                             Background.load None
 
-                            Notifications.error (
+                            Notifications.error(
                                 %"notification.chart_load_failed.title",
                                 %"notification.chart_load_failed.body"
                             )
@@ -147,7 +143,7 @@ module SelectedChart =
                                 fun () ->
                                     on_load_succeeded <- []
                                     on_song_load_succeeded <- []
-                                    chart_change_failed.Trigger ()
+                                    chart_change_failed.Trigger()
                         | Ok chart ->
 
                         Background.load chart_meta.Background.Path
@@ -156,16 +152,17 @@ module SelectedChart =
                         yield
                             fun () ->
                                 CHART <- Some chart
-                                
+
                                 let after_load =
                                     if play_audio then
                                         if Screen.current_type = ScreenType.MainMenu then
                                             SongLoadAction.PlayFromBeginning
                                         else
                                             SongLoadAction.PlayFromPreview
-                                    else SongLoadAction.Wait
-                                    
-                                Song.LoadSong (
+                                    else
+                                        SongLoadAction.Wait
+
+                                Song.LoadSong(
                                     {
                                         Path = chart_meta.Audio.Path
                                         AfterLoad = after_load
@@ -194,15 +191,21 @@ module SelectedChart =
                                 DIFFICULTY <- Some rating
                                 PATTERNS <- Some patterns
                                 FMT_NOTECOUNTS <- Some note_counts
-                                chart_change_finished.Trigger(create_loaded_chart_info ())
+                                chart_change_finished.Trigger(create_loaded_chart_info())
 
                                 if not Song.IsLoading then
                                     for _, action in on_load_succeeded do
-                                        action ()
+                                        action()
                                 else
                                     on_song_load_succeeded <-
-                                        on_load_succeeded |>
-                                        List.choose (function | true, action -> Some action | false, action -> action(); None)
+                                        on_load_succeeded
+                                        |> List.choose(
+                                            function
+                                            | true, action -> Some action
+                                            | false, action ->
+                                                action()
+                                                None
+                                        )
 
                                 on_load_succeeded <- []
                     }
@@ -229,17 +232,23 @@ module SelectedChart =
                                 FMT_NOTECOUNTS <- Some note_counts
 
                                 if is_interrupted_load then
-                                    chart_change_finished.Trigger(create_loaded_chart_info ())
+                                    chart_change_finished.Trigger(create_loaded_chart_info())
                                 else
-                                    chart_update_finished.Trigger(create_loaded_chart_info ())
+                                    chart_update_finished.Trigger(create_loaded_chart_info())
 
                                 if not Song.IsLoading then
                                     for _, action in on_load_succeeded do
-                                        action ()
+                                        action()
                                 else
                                     on_song_load_succeeded <-
-                                        on_load_succeeded |>
-                                        List.choose (function | true, action -> Some action | false, action -> action(); None)
+                                        on_load_succeeded
+                                        |> List.choose(
+                                            function
+                                            | true, action -> Some action
+                                            | false, action ->
+                                                action()
+                                                None
+                                        )
 
                                 on_load_succeeded <- []
                     }
@@ -250,21 +259,29 @@ module SelectedChart =
                         | Some with_mods ->
 
                         let with_colors = NoteColors.apply Content.NoteskinConfig.NoteColors with_mods
-                        yield fun () ->
-                            WITH_COLORS <- Some with_colors
 
-                            if not Song.IsLoading then
-                                for _, action in on_load_succeeded do
-                                    action ()
-                            else
-                                on_song_load_succeeded <-
-                                    on_load_succeeded |>
-                                    List.choose (function | true, action -> Some action | false, action -> action(); None)
+                        yield
+                            fun () ->
+                                WITH_COLORS <- Some with_colors
 
-                            on_load_succeeded <- []
+                                if not Song.IsLoading then
+                                    for _, action in on_load_succeeded do
+                                        action()
+                                else
+                                    on_song_load_succeeded <-
+                                        on_load_succeeded
+                                        |> List.choose(
+                                            function
+                                            | true, action -> Some action
+                                            | false, action ->
+                                                action()
+                                                None
+                                        )
+
+                                on_load_succeeded <- []
                     }
 
-            override this.Handle(action) = action ()
+            override this.Handle(action: unit -> unit) : unit = action()
         }
 
     let keymode () : Keymode =
@@ -287,11 +304,7 @@ module SelectedChart =
 
         WITH_COLORS <- None
 
-        chart_change_started.Trigger
-            {
-                ChartMeta = chart_meta
-                LibraryContext = LIBRARY_CTX
-            }
+        chart_change_started.Trigger({ ChartMeta = chart_meta; LibraryContext = LIBRARY_CTX })
 
         FMT_DURATION <- format_duration CACHE_DATA
         FMT_BPM <- format_bpm CACHE_DATA
@@ -301,12 +314,10 @@ module SelectedChart =
 
     let update () : unit =
         if CACHE_DATA.IsSome then
-
             FMT_DURATION <- format_duration CACHE_DATA
             FMT_BPM <- format_bpm CACHE_DATA
 
         if CHART.IsSome then
-
             // todo: this can be wrong: in one instant two things call update()
             // todo: the second interrupts the first but intended effect overall is update not load
             let is_interrupted = WITH_MODS.IsNone
@@ -321,28 +332,22 @@ module SelectedChart =
 
     let recolor () : unit =
         if WITH_MODS.IsSome then
-
             WITH_COLORS <- None
-
-            chart_loader.Request Recolor
+            chart_loader.Request(Recolor)
 
     let if_loading_or_loaded (action: LoadingChartInfo -> unit) : unit =
         if CACHE_DATA.IsSome then
-            action
-                {
-                    ChartMeta = CACHE_DATA.Value
-                    LibraryContext = LIBRARY_CTX
-                }
+            action { ChartMeta = CACHE_DATA.Value; LibraryContext = LIBRARY_CTX }
 
     let if_loaded (action: LoadedChartInfo -> unit) : unit =
         if WITH_COLORS.IsSome then
-            action (create_loaded_chart_info ())
+            action(create_loaded_chart_info())
 
     let when_loaded (also_require_song: bool) (action: LoadedChartInfo -> unit) : unit =
         if WITH_COLORS.IsSome then
-            action (create_loaded_chart_info ())
+            action(create_loaded_chart_info())
         else
-            on_load_succeeded <- (also_require_song, fun () -> action (create_loaded_chart_info ())) :: on_load_succeeded
+            on_load_succeeded <- (also_require_song, fun () -> action(create_loaded_chart_info())) :: on_load_succeeded
 
     let private collections_on_rate_changed (library_ctx: LibraryContext) (v: Rate) : unit =
         match library_ctx with
@@ -357,46 +362,47 @@ module SelectedChart =
     let private collections_on_chart_changed
         (library_ctx: LibraryContext)
         (rate: Setting.Bounded<Rate>)
-        (mods: Setting<ModState>) : unit
-        =
+        (mods: Setting<ModState>)
+        : unit =
         match library_ctx with
         | LibraryContext.Playlist(_, _, d) ->
             rate.Value <- d.Rate.Value
             mods.Value <- d.Mods.Value
         | _ -> ()
 
-    let rate : Setting.Bounded<float32<rate>> =
+    let rate: Setting.Bounded<float32<rate>> =
         _rate
-        |> Setting.trigger (fun v ->
-            if_loading_or_loaded
-            <| fun info ->
+        |> Setting.trigger(fun v ->
+            if_loading_or_loaded(fun info ->
                 collections_on_rate_changed info.LibraryContext v
                 Song.SetRate(v)
-                update ()
+                update()
+            )
         )
 
-    let selected_mods : Setting<ModState> =
+    let selected_mods: Setting<ModState> =
         _selected_mods
-        |> Setting.trigger (fun mods ->
-            if_loading_or_loaded
-            <| fun info ->
+        |> Setting.trigger(fun mods ->
+            if_loading_or_loaded(fun info ->
                 collections_on_mods_changed info.LibraryContext mods
                 Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
-                update ()
+                update()
+            )
         )
-        
-    let set_rate_and_mods(rate: float32<rate>, mods: ModState) =
+
+    let set_rate_and_mods (rate: float32<rate>, mods: ModState) =
         _rate.Set(rate)
         _selected_mods.Set(mods)
-        if_loading_or_loaded
-            <| fun info ->
-                collections_on_mods_changed info.LibraryContext mods
-                collections_on_rate_changed info.LibraryContext rate
-                Song.SetRate(rate)
-                Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
-                update ()
 
-    let change_rate_hotkeys(change_rate_by: Rate -> unit) =
+        if_loading_or_loaded(fun info ->
+            collections_on_mods_changed info.LibraryContext mods
+            collections_on_rate_changed info.LibraryContext rate
+            Song.SetRate(rate)
+            Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
+            update()
+        )
+
+    let change_rate_hotkeys (change_rate_by: Rate -> unit) =
         if (%%"uprate_small").Pressed() then
             change_rate_by(0.01f<rate>)
         elif (%%"uprate_half").Pressed() then
@@ -417,7 +423,7 @@ module SelectedChart =
     let init () =
 
         match Content.Charts.GetChartMeta(options.CurrentChart.Value) with
-        | Some chart_meta -> change (chart_meta, LibraryContext.None, true)
+        | Some chart_meta -> change(chart_meta, LibraryContext.None, true)
         | None ->
             match
                 Suggestion.get_random
@@ -429,16 +435,21 @@ module SelectedChart =
                         Library = Content.Library
                     }
             with
-            | Some chart_meta -> change (chart_meta, LibraryContext.None, true)
+            | Some chart_meta -> change(chart_meta, LibraryContext.None, true)
             | None ->
-                Logging.Debug "No charts installed (or loading failed twice)"
+                Logging.Debug("No charts installed (or loading failed twice)")
                 Background.load None
 
         on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext _rate _selected_mods)
-        on_chart_change_started.Add(fun info -> Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value))
+
+        on_chart_change_started.Add(fun info ->
+            Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
+        )
 
         Song.OnLoaded.Add(fun () ->
-            for action in on_song_load_succeeded do action()
+            for action in on_song_load_succeeded do
+                action()
+
             on_song_load_succeeded <- []
         )
 

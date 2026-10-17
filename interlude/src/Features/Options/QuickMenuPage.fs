@@ -12,7 +12,7 @@ type QuickMenuPage() =
 
     let mutable release_cooldown = 800.0
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageButton(%"menu.options", fun () -> OptionsPage().Show())
@@ -27,13 +27,11 @@ type QuickMenuPage() =
                     .Hotkey(Bind.mk Keys.H)
                     .Icon(Icons.ZAP)
                     .Pos(5),
-                PageButton(%"system.hotkeys", fun () -> HotkeysPage().Show())
-                    .Hotkey(Bind.mk Keys.K)
-                    .Pos(8)
+                PageButton(%"system.hotkeys", fun () -> HotkeysPage().Show()).Hotkey(Bind.mk Keys.K).Pos(8)
             )
         :> Widget
 
-    override this.Header() =
+    override this.Header() : Widget =
         Container(NodeType.None)
             .With(
                 PageHeaderBase(),
@@ -45,9 +43,11 @@ type QuickMenuPage() =
 
     override this.Direction = PageEasing.Right
     override this.Title = %"menu.quick"
-    override this.OnReturnFromNestedPage() = Menu.Back()
-    override this.Update(elapsed_ms, moved) =
+    override this.OnReturnFromNestedPage() : unit = Menu.Back()
+
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         release_cooldown <- release_cooldown - elapsed_ms
+
         if release_cooldown < 0.0 && (%%"quick_menu").Released() then
             Menu.Back()

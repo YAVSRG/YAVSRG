@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online
+namespace Interlude.Features.Online
 
 open System.IO
 open Percyqaz.Common
@@ -14,6 +14,7 @@ type Credentials =
         mutable Host: string
         mutable Api: string
     }
+
     static member Default =
         {
             DO_NOT_SHARE_THE_CONTENTS_OF_THIS_FILE_WITH_ANYONE_UNDER_ANY_CIRCUMSTANCES =
@@ -24,10 +25,10 @@ type Credentials =
             Api = "api.yavsrg.net"
         }
 
-    static member Location : string = Path.Combine(get_game_folder "Data", "login.json")
+    static member Location: string = Path.Combine(get_game_folder "Data", "login.json")
 
-    static member Load() =
-        if File.Exists Credentials.Location then
+    static member Load() : Credentials =
+        if File.Exists(Credentials.Location) then
             File.SetAttributes(Credentials.Location, FileAttributes.Normal)
 
             Credentials.Location
@@ -40,5 +41,5 @@ type Credentials =
         else
             Credentials.Default
 
-    member this.Save() =
+    member this.Save() : unit =
         JSON.ToFile (Credentials.Location, true) this

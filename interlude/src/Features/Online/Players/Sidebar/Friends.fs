@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online.Players
+namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
@@ -13,11 +13,11 @@ type private FriendList() =
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Friends.List.get(fun response ->
-                        GameThread.defer
-                        <| fun () ->
+                        GameThread.defer(fun () ->
                             match response with
-                            | Some result -> this.SetData result
+                            | Some result -> this.SetData(result)
                             | None -> this.ServerError()
+                        )
                     )
                 else
                     this.Offline()
@@ -49,6 +49,6 @@ type private FriendList() =
                 :> Widget
         )
 
-    override this.Init(parent: Widget) =
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
         Players.friends_changed <- this.Reload

@@ -21,10 +21,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     let BOX_HEIGHT = 100.0f
     let BOX_WIDTH = 200.0f
 
-    let samples =
-        int ((LAST_NOTE - FIRST_NOTE) / 1000.0f)
-        |> max 10
-        |> min 400
+    let samples = int((LAST_NOTE - FIRST_NOTE) / 1000.0f) |> max 10 |> min 400
 
     let duration_on_1x = (LAST_NOTE - FIRST_NOTE) |> format_duration_ms
 
@@ -37,7 +34,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     let mutable unpause_after_drag = false
     let mutable bpm_index = 0
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let b = this.Bounds.Shrink(10.0f, 20.0f)
         let LEADIN_TIME = SongPlayer.LEADIN_TIME * rate.Value
         let start = with_mods.FirstNote - LEADIN_TIME
@@ -95,22 +92,51 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
         let now_on_1x = max 0.0f<ms> (now - FIRST_NOTE) |> format_duration_ms
         let now = max 0.0f<ms> (now - FIRST_NOTE) / rate.Value |> format_duration_ms
 
-        Text.draw_aligned_b(Style.font, (sprintf "%.0f%%" (percent * 100.0f)), 24.0f, b.CenterX, b.Bottom - 40.0f, Colors.text, Alignment.CENTER)
+        Text.draw_aligned_b(
+            Style.font,
+            (sprintf "%.0f%%" (percent * 100.0f)),
+            24.0f,
+            b.CenterX,
+            b.Bottom - 40.0f,
+            Colors.text,
+            Alignment.CENTER
+        )
 
         Text.draw_b(Style.font, now, 24.0f, b.Left + 10.0f, b.Bottom - 40.0f, Colors.text)
-        Text.draw_aligned_b(Style.font, duration, 24.0f, b.Right - 10.0f, b.Bottom - 40.0f, Colors.text, Alignment.RIGHT)
+
+        Text.draw_aligned_b(
+            Style.font,
+            duration,
+            24.0f,
+            b.Right - 10.0f,
+            b.Bottom - 40.0f,
+            Colors.text,
+            Alignment.RIGHT
+        )
 
         if rate.Value <> 1.0f<rate> then
             Text.draw_b(Style.font, now_on_1x, 14.0f, b.Left + 10.0f, b.Bottom - 60.0f, Colors.text_greyout)
-            Text.draw_aligned_b(Style.font, duration_on_1x, 14.0f, b.Right - 10.0f, b.Bottom - 60.0f, Colors.text_greyout, Alignment.RIGHT)
 
-        if this.Bounds.Bottom - Mouse.y () < 100.0f then
+            Text.draw_aligned_b(
+                Style.font,
+                duration_on_1x,
+                14.0f,
+                b.Right - 10.0f,
+                b.Bottom - 60.0f,
+                Colors.text_greyout,
+                Alignment.RIGHT
+            )
 
-            let percent = (Mouse.x () - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
-            let hovered_time = START_OF_TIMELINE + (LAST_NOTE - START_OF_TIMELINE) * percent |> max 0.0f<ms>
+        if this.Bounds.Bottom - Mouse.y() < 100.0f then
+
+            let percent = (Mouse.x() - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
+
+            let hovered_time =
+                START_OF_TIMELINE + (LAST_NOTE - START_OF_TIMELINE) * percent |> max 0.0f<ms>
 
             while bpm_index > 0 && bpms.[bpm_index].Time > hovered_time do
                 bpm_index <- bpm_index - 1
+
             while bpm_index + 1 < bpms.Length && bpms.[bpm_index + 1].Time <= hovered_time do
                 bpm_index <- bpm_index + 1
 
@@ -124,9 +150,20 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
             this.DrawHoverInfo(box, hovered_time)
 
-    member this.DrawHoverInfo(bounds: Rect, time: Time) =
-        let bpm = if bpms.Length > 0 then MS_PER_MINUTE / bpms.[bpm_index].Data.MsPerBeat * rate.Value else 120f<beat / minute> * rate.Value
-        let s_index = (time - FIRST_NOTE) / (LAST_NOTE - FIRST_NOTE) * float32 samples |> floor |> int |> max 0 |> min (samples - 1)
+    member this.DrawHoverInfo(bounds: Rect, time: Time) : unit =
+        let bpm =
+            if bpms.Length > 0 then
+                MS_PER_MINUTE / bpms.[bpm_index].Data.MsPerBeat * rate.Value
+            else
+                120f<beat / minute> * rate.Value
+
+        let s_index =
+            (time - FIRST_NOTE) / (LAST_NOTE - FIRST_NOTE) * float32 samples
+            |> floor
+            |> int
+            |> max 0
+            |> min(samples - 1)
+
         let nps = note_density.[s_index] * rate.Value
         let cps = chord_density.[s_index] * rate.Value
 
@@ -137,20 +174,18 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
         let row_height = bounds.Height / 3.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 0.0f)
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
-            (
-                if rate.Value <> 1.0f<rate> then
-                    sprintf "%s (%s)" (format_duration_ms (time / float32 rate.Value)) (format_duration_ms time)
-                else
-                    format_duration_ms time
-            ),
+            (if rate.Value <> 1.0f<rate> then
+                 sprintf "%s (%s)" (format_duration_ms(time / float32 rate.Value)) (format_duration_ms time)
+             else
+                 format_duration_ms time),
             text_b,
             Colors.text,
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             sprintf "NPS: %.0f  CPS: %.0f" nps cps,
             text_b.TranslateY(row_height),
@@ -158,7 +193,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             sprintf "BPM: %.1f" bpm,
             text_b.TranslateY(row_height * 2.0f),
@@ -166,23 +201,24 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             Alignment.LEFT
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
-        if this.Bounds.Bottom - Mouse.y () < 100.0f && Mouse.left_clicked() then
+        if this.Bounds.Bottom - Mouse.y() < 100.0f && Mouse.left_clicked() then
             dragging <- true
             unpause_after_drag <- Song.IsPlaying
+
             if unpause_after_drag then
                 Song.Pause()
 
         if dragging then
-            let percent =
-                (Mouse.x () - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
+            let percent = (Mouse.x() - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
 
             let new_time = START_OF_TIMELINE + (LAST_NOTE - START_OF_TIMELINE) * percent
             on_seek new_time
 
-            if not (Mouse.held Mouse.LEFT) then
+            if not(Mouse.held Mouse.LEFT) then
                 dragging <- false
+
                 if unpause_after_drag then
                     Song.Resume()

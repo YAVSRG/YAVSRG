@@ -10,19 +10,18 @@ open Interlude.UI
 type OsuRulesetPage() =
     inherit Page()
 
-    let od = 8.0f |> Setting.bounded (0.0f, 10.0f)
+    let od = 8.0f |> Setting.bounded(0.0f, 10.0f)
     let mode = Setting.simple OsuMania.NoMod
 
     let create () =
-        Rulesets.install (OsuMania.create od.Value mode.Value)
+        Rulesets.install(OsuMania.create od.Value mode.Value)
         Menu.Back()
         Menu.Back()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
-                PageSetting(%"ruleset.osu_od", Slider(od, Step = 0.1f))
-                    .Pos(0),
+                PageSetting(%"ruleset.osu_od", Slider(od, Step = 0.1f)).Pos(0),
                 PageSetting(
                     %"ruleset.osu_modifier",
                     Selector(
@@ -35,8 +34,7 @@ type OsuRulesetPage() =
                     )
                 )
                     .Pos(2),
-                PageButton.Once(%"rulesets.create", create)
-                    .Pos(5)
+                PageButton.Once(%"rulesets.create", create).Pos(5)
             )
 
     override this.Title = %"rulesets.create.osu"

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System.Diagnostics
 open System.Runtime.CompilerServices
@@ -16,67 +16,51 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
     let search_timer = Stopwatch()
 
     let text_entry =
-        TextEntry(
-            query_text |> Setting.trigger (fun _ -> this.StartSearch()),
-            "search",
-            true
-        )
+        TextEntry(query_text |> Setting.trigger(fun _ -> this.StartSearch()), "search", true)
 
     static member HEIGHT = 60.0f
 
     new(callback: string -> unit) = SearchBox(Setting.simple "", callback)
-    new(query_text: Setting<string>, callback: FilteredSearch -> unit) = SearchBox(query_text, (fun (query: string) -> callback (FilterParts.parse query |> FilteredSearch.Build)))
 
-    member private this.StartSearch() = search_timer.Restart()
+    new(query_text: Setting<string>, callback: FilteredSearch -> unit) =
+        SearchBox(query_text, (fun (query: string) -> callback(FilterParts.parse query |> FilteredSearch.Build)))
+
+    member private this.StartSearch() : unit = search_timer.Restart()
 
     member private this.TextEntry: TextEntry = text_entry
 
     member val DebounceTime = 400L with get, set
-    member val TextColor : unit -> Color * Color = fun () -> !*Palette.LIGHT, !*Palette.DARKER with get, set
-    member val KeyboardAutoSelect : bool = false with get, set
+    member val TextColor: unit -> Color * Color = fun () -> !*Palette.LIGHT, !*Palette.DARKER with get, set
+    member val KeyboardAutoSelect: bool = false with get, set
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         text_entry.TextColor <-
-            fun () ->
-                if this.TextEntry.Selected then
-                    Colors.white, Colors.shadow_2
-                else
-                    this.TextColor()
+            fun () -> if this.TextEntry.Selected then Colors.white, Colors.shadow_2 else this.TextColor()
 
         this.Fill <-
             let existing = this.Fill
-            fun () ->
-                if this.TextEntry.Selected then
-                    Colors.yellow_accent.O1
-                else
-                    existing()
+            fun () -> if this.TextEntry.Selected then Colors.yellow_accent.O1 else existing()
 
         this.Border <-
             let existing = this.Border
-            fun () ->
-                if this.TextEntry.Selected then
-                    Colors.yellow_accent
-                else
-                    existing()
+            fun () -> if this.TextEntry.Selected then Colors.yellow_accent else existing()
 
-        this
-            .Add(
-                text_entry
-                    .Position(Position.Shrink(10.0f, 0.0f)),
+        this.Add(
+            text_entry.Position(Position.Shrink(10.0f, 0.0f)),
 
-                Text(fun () ->
-                    match query_text.Value with
-                    | "" -> Icons.SEARCH + " " + [ (%%"search").ToString() ] %> "misc.search"
-                    | _ -> ""
-                )
-                    .Color(text_entry.TextColor)
-                    .Align(Alignment.LEFT)
-                    .Position(Position.ShrinkX(10.0f))
+            Text(fun () ->
+                match query_text.Value with
+                | "" -> Icons.SEARCH + " " + [ (%%"search").ToString() ] %> "misc.search"
+                | _ -> ""
             )
+                .Color(text_entry.TextColor)
+                .Align(Alignment.LEFT)
+                .Position(Position.ShrinkX(10.0f))
+        )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if search_timer.ElapsedMilliseconds > this.DebounceTime then
@@ -90,15 +74,17 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
         elif search_timer.IsRunning then
             (%%"select").Pressed() |> ignore
 
-    override this.OnFocus (by_mouse: bool) : unit =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse: bool)
-        if this.KeyboardAutoSelect && not by_mouse then GameThread.defer (fun () -> this.Select false)
+
+        if this.KeyboardAutoSelect && not by_mouse then
+            GameThread.defer(fun () -> this.Select(false))
 
 type SearchBoxExtensions() =
 
     [<Extension>]
     static member inline TextColor(container: #SearchBox, color: Color) : #SearchBox =
-        container.TextColor <- K (color, Colors.shadow_2)
+        container.TextColor <- K(color, Colors.shadow_2)
         container
 
     [<Extension>]
@@ -121,4 +107,4 @@ type SearchBoxExtensions() =
         container.KeyboardAutoSelect <- true
         container
 
-    // todo: consider an extension to set all cyan settings at once
+// todo: consider an extension to set all cyan settings at once

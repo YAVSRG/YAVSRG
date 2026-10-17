@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Printerlude
+namespace Interlude.Features.Printerlude
 
 open System
 open Percyqaz.Common
@@ -11,7 +11,7 @@ open Interlude.UI
 
 module Terminal =
 
-    let private LOCK_OBJ = obj ()
+    let private LOCK_OBJ = obj()
 
     let mutable exec_command = fun (_: string) -> ()
 
@@ -65,7 +65,7 @@ module Terminal =
 
         let clear () : unit =
             log.Clear()
-            home ()
+            home()
 
     let add_message (s: string) : unit = Log.add s
 
@@ -84,7 +84,7 @@ module Terminal =
         let mutable private pos = -1
         let mutable private history: string list = []
 
-        let up () : unit=
+        let up () : unit =
             if history.Length - 1 > pos then
                 pos <- pos + 1
                 current_line.Value <- history.[pos]
@@ -102,13 +102,13 @@ module Terminal =
 
     let private hide () : unit =
         shown <- false
-        Input.remove_listener ()
+        Input.remove_listener()
 
     let private show () : unit =
         shown <- true
 
         let rec add_input () =
-            Input.listen_to_text (
+            Input.listen_to_text(
                 current_line,
                 false,
                 fun () ->
@@ -116,7 +116,7 @@ module Terminal =
                         GameThread.defer add_input
             )
 
-        add_input ()
+        add_input()
 
     let drop_file (path: string) : unit =
         let path = path.Replace("""\""", """\\""")
@@ -137,11 +137,11 @@ module Terminal =
 
         let bounds = Render.bounds().Shrink(100.0f)
 
-        Render.rect (bounds.Expand 5.0f) Colors.white.O2
-        Render.rect (bounds.ShrinkB 70.0f) Colors.shadow_1.O3
-        Render.rect (bounds.SliceB 65.0f) Colors.shadow_2.O3
+        Render.rect (bounds.Expand(5.0f)) Colors.white.O2
+        Render.rect (bounds.ShrinkB(70.0f)) Colors.shadow_1.O3
+        Render.rect (bounds.SliceB(65.0f)) Colors.shadow_2.O3
 
-        Text.draw_b (
+        Text.draw_b(
             font.Value,
             "> " + current_line.Value,
             30.0f,
@@ -155,7 +155,7 @@ module Terminal =
             (fun () ->
                 for i, line in Seq.indexed Log.visible do
                     if i < 19 then
-                        Text.draw_b (
+                        Text.draw_b(
                             font.Value,
                             line,
                             20.0f,
@@ -167,7 +167,7 @@ module Terminal =
 
     let update () : unit =
         if shown && (%%"exit").Pressed() then
-            hide ()
+            hide()
 
         if
             options.EnableConsole.Value
@@ -175,7 +175,7 @@ module Terminal =
             && Screen.current_type <> ScreenType.Play
             && (%%"console").Pressed()
         then
-            show ()
+            show()
 
         if not shown then
             ()
@@ -185,19 +185,19 @@ module Terminal =
             LOCK_OBJ
             (fun () ->
                 if cmd_send_key.Pressed() && current_line.Value <> "" then
-                    add_message ("> " + current_line.Value)
+                    add_message("> " + current_line.Value)
                     exec_command current_line.Value
                     History.add current_line.Value
-                    Log.home ()
+                    Log.home()
                     current_line.Value <- ""
                 elif cmd_up_key.Pressed() then
-                    History.up ()
+                    History.up()
                 elif cmd_down_key.Pressed() then
-                    History.down ()
+                    History.down()
                 elif log_up_key.Pressed() then
-                    Log.up ()
+                    Log.up()
                 elif log_down_key.Pressed() then
-                    Log.down ()
+                    Log.down()
                 elif log_home_key.Pressed() then
-                    Log.home ()
+                    Log.home()
             )

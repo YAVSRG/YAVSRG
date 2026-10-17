@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System
 open OpenTK.Mathematics
@@ -8,7 +8,14 @@ open Percyqaz.Flux.UI
 
 module Beam =
 
-    let private draw (direction_deg: float32) (x: float32, y: float32) (r1: float32) (r2: float32) (col: Color) (time: float32) : unit =
+    let private draw
+        (direction_deg: float32)
+        (x: float32, y: float32)
+        (r1: float32)
+        (r2: float32)
+        (col: Color)
+        (time: float32)
+        : unit =
         // angle is measured clockwise from vertical
         let cos = MathF.Cos(direction_deg / 180.0f * MathF.PI)
         let sin = MathF.Sin(direction_deg / 180.0f * MathF.PI)
@@ -28,11 +35,13 @@ module Beam =
 
 module Glint =
 
-    let COLOR = Colors.white.O4a 26
+    let COLOR = Colors.white.O4a(26)
     let RECIPROCAL_GRADIENT = 0.35f
 
     let draw (percent: float32) (bounds: Rect) (color: Color) : unit =
-        if percent <= 0.0f || percent >= 1.0f then () else
+        if percent <= 0.0f || percent >= 1.0f then
+            ()
+        else
 
         let stripe_width = bounds.Height * RECIPROCAL_GRADIENT
         let travel_distance = bounds.Width + stripe_width * 4.5f
@@ -54,12 +63,14 @@ module Glint =
             color
 
     let draw_stencilled (percent: float32) (bounds: Rect) (color: Color) : unit =
-        if percent <= 0.0f || percent >= 1.0f then () else
+        if percent <= 0.0f || percent >= 1.0f then
+            ()
+        else
 
         Render.stencil_create false
         Render.rect bounds Color.Transparent
 
-        Render.stencil_begin_draw ()
+        Render.stencil_begin_draw()
 
         draw percent bounds color
 
@@ -83,8 +94,7 @@ module Glint =
         let q = Quad.from_vectors(o, o - p, o + r2 * d, o + p2)
 
         let q2 =
-            Quad.from_vectors(o, o - p, o + r2 * 0.6f * d, o + p2)
-            |> Quad.rotate_about o 90.0
+            Quad.from_vectors(o, o - p, o + r2 * 0.6f * d, o + p2) |> Quad.rotate_about o 90.0
 
         let color = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
 
@@ -96,25 +106,20 @@ module Glint =
 module Wedge =
 
     let draw (x: float32, y: float32) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) : unit =
-        let segments = int ((a2 - a1) / 0.10) |> max 1
+        let segments = int((a2 - a1) / 0.10) |> max 1
         let segsize = (a2 - a1) / float segments
 
         let centre = Vector2(x, y)
 
         for i = 1 to segments do
             let a2 = a1 + float i * segsize
-            let a1 = a1 + float (i - 1) * segsize
-            let ang1 = Vector2(Math.Sin a1 |> float32, -Math.Cos a1 |> float32)
-            let ang2 = Vector2(Math.Sin a2 |> float32, -Math.Cos a2 |> float32)
+            let a1 = a1 + float(i - 1) * segsize
+            let ang1 = Vector2(Math.Sin(a1) |> float32, -Math.Cos(a1) |> float32)
+            let ang2 = Vector2(Math.Sin(a2) |> float32, -Math.Cos(a2) |> float32)
 
-            Render.quad_vecs
-                (centre + ang1 * r2)
-                (centre + ang2 * r2)
-                (centre + ang2 * r1)
-                (centre + ang1 * r1)
-                col
+            Render.quad_vecs (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1) col
 
-    let draw_centered = draw (Render.width() * 0.5f, Render.height() * 0.5f)
+    let draw_centered = draw(Render.width() * 0.5f, Render.height() * 0.5f)
 
     let variant_1 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
@@ -124,16 +129,24 @@ module Wedge =
 
     let variant_2 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
         let pos = (amount - lo) / (hi - lo)
-        let head = float (Math.Clamp(pos * 2.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
-        let tail = float (Math.Clamp(pos * 2.0f - 1.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
+        let head = float(Math.Clamp(pos * 2.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
+        let tail = float(Math.Clamp(pos * 2.0f - 1.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
         draw_centered r1 r2 tail head col
 
 module Bubble =
 
-    let draw (x: float32, y: float32) (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
+    let draw
+        (x: float32, y: float32)
+        (r1: float32)
+        (r2: float32)
+        (col: Color)
+        (lo: float32)
+        (hi: float32)
+        (amount: float32)
+        : unit =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
-        let head = float32 (Math.Pow(pos, 0.5)) * (r2 - r1) + r1
-        let tail = float32 (Math.Pow(pos, 2.0)) * (r2 - r1) + r1
+        let head = float32(Math.Pow(pos, 0.5)) * (r2 - r1) + r1
+        let tail = float32(Math.Pow(pos, 2.0)) * (r2 - r1) + r1
         Wedge.draw (x, y) tail head 0.0 (Math.PI * 2.0) col
 
 module DiamondsWipe =
@@ -147,8 +160,7 @@ module DiamondsWipe =
         let radius x =
             let f =
                 Math.Clamp(
-                    ((4.0f * SCALE + width) * (if inbound then amount else 1.0f - amount) - x)
-                    / (4.0f * SCALE),
+                    ((4.0f * SCALE + width) * (if inbound then amount else 1.0f - amount) - x) / (4.0f * SCALE),
                     0.0f,
                     1.0f
                 )
@@ -158,17 +170,12 @@ module DiamondsWipe =
         let draw_diamond (x: float32, y: float32) =
             let r = radius x
 
-            Render.quad_points
-                (x - r, y)
-                (x, y - r)
-                (x + r, y)
-                (x, y + r)
-                Color.Transparent
+            Render.quad_points (x - r, y) (x, y - r) (x + r, y) (x, y + r) Color.Transparent
 
         for x in 0 .. (width / SCALE |> float |> Math.Ceiling |> int) do
             for y in 0 .. (height / SCALE |> float |> Math.Ceiling |> int) do
-                draw_diamond (SCALE * float32 x, SCALE * float32 y)
-                draw_diamond (0.5f * SCALE + SCALE * float32 x, 0.5f * SCALE + SCALE * float32 y)
+                draw_diamond(SCALE * float32 x, SCALE * float32 y)
+                draw_diamond(0.5f * SCALE + SCALE * float32 x, 0.5f * SCALE + SCALE * float32 y)
 
 module TriangleWipe =
 
@@ -176,7 +183,8 @@ module TriangleWipe =
         let height = bounds.Height
         let center = bounds.CenterX
 
-        let y = if inbound then bounds.Bottom - amount * height * 2.0f else bounds.Bottom - (1.0f - amount) * height * 2.0f
+        let y =
+            if inbound then bounds.Bottom - amount * height * 2.0f else bounds.Bottom - (1.0f - amount) * height * 2.0f
 
         if inbound then
 
@@ -214,7 +222,8 @@ module TriangleWipe =
         let height = bounds.Height
         let center = bounds.CenterX
 
-        let y = if inbound then bounds.Top + amount * height * 2.0f else bounds.Top + (1.0f - amount) * height * 2.0f
+        let y =
+            if inbound then bounds.Top + amount * height * 2.0f else bounds.Top + (1.0f - amount) * height * 2.0f
 
         if inbound then
 
@@ -279,10 +288,7 @@ module LoadingAnimation =
 
         if b > 1.0f || a < corner_1 then
             Render.rect_edges
-                (if b > 1.0f then
-                        bounds.Left
-                    else
-                        bounds.Left + a * perimeter)
+                (if b > 1.0f then bounds.Left else bounds.Left + a * perimeter)
                 bounds.Top
                 (bounds.Left + (b % 1.0f) * perimeter |> min bounds.Right)
                 (bounds.Top + Style.PADDING)

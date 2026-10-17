@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Rulesets
+namespace Interlude.Features.Rulesets
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -13,22 +13,19 @@ type SCRulesetPage() =
     let judge = Setting.simple 4
 
     let create () =
-        Rulesets.install (SC.create judge.Value)
+        Rulesets.install(SC.create judge.Value)
         Menu.Back()
         Menu.Back()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
-                PageSetting(%"ruleset.sc_judge",
-                    SelectDropdown(
-                        seq { 2 .. 9 } |> Seq.map (fun j -> j, j.ToString()) |> Array.ofSeq,
-                        judge
-                    )
+                PageSetting(
+                    %"ruleset.sc_judge",
+                    SelectDropdown(seq { 2..9 } |> Seq.map(fun j -> j, j.ToString()) |> Array.ofSeq, judge)
                 )
-                    .Pos(0, 2, PageWidth.Custom (PAGE_LABEL_WIDTH + 200.0f)),
-                PageButton.Once(%"rulesets.create", create)
-                    .Pos(3)
+                    .Pos(0, 2, PageWidth.Custom(PAGE_LABEL_WIDTH + 200.0f)),
+                PageButton.Once(%"rulesets.create", create).Pos(3)
             )
 
     override this.Title = %"rulesets.create.sc"

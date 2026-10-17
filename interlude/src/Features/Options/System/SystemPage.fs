@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.SystemSettings
+namespace Interlude.Features.OptionsMenu.SystemSettings
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -23,16 +23,14 @@ type SystemPage() =
                     WindowType.Fullscreen, %"system.windowmode.fullscreen"
                     WindowType.FullscreenLetterbox, %"system.windowmode.fullscreen_letterbox"
                 |],
-                config.WindowMode
-                |> Setting.trigger window_mode_changed
-                |> Setting.trigger (ignore >> config.Apply)
+                config.WindowMode |> Setting.trigger window_mode_changed |> Setting.trigger(ignore >> config.Apply)
             )
         )
 
     static member WindowedResolution() : Conditional<PageSetting> =
         PageSetting(
             %"system.windowresolution",
-            WindowedResolutionPicker.Create(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
+            WindowedResolutionPicker.Create(config.WindowedResolution |> Setting.trigger(ignore >> config.Apply))
         )
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
 
@@ -40,9 +38,12 @@ type SystemPage() =
         PageSetting(
             %"system.monitor",
             SelectDropdown(
-                monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
+                monitors |> Seq.map(fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                 config.Display
-                |> Setting.trigger (fun _ -> select_fullscreen_size (); config.Apply())
+                |> Setting.trigger(fun _ ->
+                    select_fullscreen_size()
+                    config.Apply()
+                )
             )
         )
             .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
@@ -50,10 +51,7 @@ type SystemPage() =
     static member VideoMode() : Conditional<PageSetting> =
         PageSetting(
             %"system.videomode",
-            VideoModePicker.Create(
-                config.FullscreenVideoMode
-                |> Setting.trigger (ignore >> config.Apply)
-            )
+            VideoModePicker.Create(config.FullscreenVideoMode |> Setting.trigger(ignore >> config.Apply))
         )
             .Help(Help.Info("system.videomode"))
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
@@ -61,15 +59,12 @@ type SystemPage() =
     static member LetterboxResolution() : Conditional<PageSetting> =
         PageSetting(
             %"system.letterbox_resolution",
-            WindowedResolutionPicker.Create(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
+            WindowedResolutionPicker.Create(config.WindowedResolution |> Setting.trigger(ignore >> config.Apply))
         )
             .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)
 
     static member Performance() : PageButton =
-        PageButton(
-            %"system.performance",
-            (fun () -> PerformanceSettingsPage().Show())
-        )
+        PageButton(%"system.performance", (fun () -> PerformanceSettingsPage().Show()))
 
     static member Hotkeys() : PageButton =
         PageButton(%"system.hotkeys", (fun () -> HotkeysPage().Show()))
@@ -78,24 +73,26 @@ type SystemPage() =
         PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
             .Help(Help.Info("system.visualoffset"))
 
-    static member Language(): PageSetting = 
+    static member Language() : PageSetting =
         PageSetting(
             %"system.language",
             SelectDropdown(
                 Options.available_locales
-                |> Seq.map(fun x -> 
-                    let display_option = 
+                |> Seq.map(fun x ->
+                    let display_option =
                         if Options.EMBEDDED_LOCALES.ContainsKey(x) then
                             $"{Options.EMBEDDED_LOCALES.[x]} ({x})"
                         else
                             $"{Icons.FOLDER} ({x})"
-                    x, display_option)
+
+                    x, display_option
+                )
                 |> Seq.toArray,
-                options.Language |> Setting.trigger (fun _ -> language_restart <- true)
+                options.Language |> Setting.trigger(fun _ -> language_restart <- true)
             )
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         window_mode_changed config.WindowMode.Value
 
         page_container()

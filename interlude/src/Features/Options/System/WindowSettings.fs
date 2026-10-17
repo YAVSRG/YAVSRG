@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.SystemSettings
+namespace Interlude.Features.OptionsMenu.SystemSettings
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -11,37 +11,29 @@ open Interlude.UI
 [<AutoOpen>]
 module Monitors =
 
-    let monitors = WindowThread.get_monitors ()
+    let monitors = WindowThread.get_monitors()
 
     let get_current_supported_video_modes () : FullscreenVideoMode array =
         let reported_modes =
             if config.Display.Value >= 0 && config.Display.Value < monitors.Length then
                 monitors.[config.Display.Value].DisplayModes
-            else [||]
+            else
+                [||]
 
-        if reported_modes.Length = 0 then
-            [|
-                {
-                    Width = 1920
-                    Height = 1080
-                    RefreshRate = 60
-                }
-            |]
-        else
-            reported_modes
+        if reported_modes.Length = 0 then [| { Width = 1920; Height = 1080; RefreshRate = 60 } |] else reported_modes
 
     let select_fullscreen_size () : unit =
         try
-            let supported_video_modes = get_current_supported_video_modes ()
+            let supported_video_modes = get_current_supported_video_modes()
 
-            if not (Array.contains config.FullscreenVideoMode.Value supported_video_modes) then
-                config.FullscreenVideoMode.Set supported_video_modes.[supported_video_modes.Length - 1]
+            if not(Array.contains config.FullscreenVideoMode.Value supported_video_modes) then
+                config.FullscreenVideoMode.Set(supported_video_modes.[supported_video_modes.Length - 1])
         with err ->
             Logging.Debug "Error setting fullscreen video mode - Possibly invalid display selected\n%O" err
 
     let window_mode_changed (wm: WindowType) : unit =
         if wm = WindowType.Fullscreen then
-            select_fullscreen_size ()
+            select_fullscreen_size()
 
 type CustomWindowedResolutionPage(setting: Setting<int * int>) =
     inherit Page()
@@ -53,16 +45,18 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
         mode.Width, mode.Height
 
     let width = Setting.bounded (min 320 (max_width - 1), max_width) (fst setting.Value)
-    let height = Setting.bounded (min 240 (max_height - 1), max_height) (snd setting.Value)
 
-    let width_box = NumberEntry.Create width
-    let height_box = NumberEntry.Create height
+    let height =
+        Setting.bounded (min 240 (max_height - 1), max_height) (snd setting.Value)
 
-    member this.SaveChanges() =
+    let width_box = NumberEntry.Create(width)
+    let height_box = NumberEntry.Create(height)
+
+    member this.SaveChanges() : unit =
         if height.Value * 4 / 3 <= width.Value then
-            setting.Set (width.Value, height.Value)
+            setting.Set(width.Value, height.Value)
 
-    override this.Content () =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -77,10 +71,14 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
                 PageButton(%"confirm.yes", Menu.Back).Pos(6)
             )
 
-    override this.Update (elapsed_ms, moved) =
-        let selected = Selection.get_selected_element() |> Option.map (fun w -> (w :?> Widget).Parent)
-        if selected = Some width_box && (tab.Pressed() || (%%"select").Pressed()) then height_box.Select false
-        elif selected = Some height_box && (tab.Pressed() || (%%"select").Pressed()) then Menu.Back()
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
+        let selected =
+            Selection.get_selected_element() |> Option.map(fun w -> (w :?> Widget).Parent)
+
+        if selected = Some width_box && (tab.Pressed() || (%%"select").Pressed()) then
+            height_box.Select(false)
+        elif selected = Some height_box && (tab.Pressed() || (%%"select").Pressed()) then
+            Menu.Back()
 
         base.Update(elapsed_ms, moved)
 
@@ -89,13 +87,15 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
 type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
     inherit Page()
 
-    let horizontal = Setting.percentf (fst setting.Value)
-    let vertical = Setting.percentf (snd setting.Value)
+    let horizontal = Setting.percentf(fst setting.Value)
+    let vertical = Setting.percentf(snd setting.Value)
 
-    member this.SaveChanges() = setting.Set (horizontal.Value, vertical.Value)
+    member this.SaveChanges() : unit =
+        setting.Set(horizontal.Value, vertical.Value)
 
-    override this.Content () =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageSetting(%"system.windowresolution.offset.horizontal", Slider.Percent(horizontal)).Pos(0),
@@ -110,9 +110,16 @@ type WindowedResolutionPicker =
 
     static member Create(setting: Setting<WindowedResolution>) : Container =
 
-        let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f |> min 600.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
-        let res_setting = Setting.make (fun v -> setting.Set (v, snd setting.Value)) (setting.Get >> fst)
-        let offset_setting = Setting.make (fun v -> setting.Set (fst setting.Value, v)) (setting.Get >> snd)
+        let dropdown_wrapper =
+            DropdownWrapper(fun d ->
+                Position.SliceT(d.Height + 60.0f |> min 600.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f)
+            )
+
+        let res_setting =
+            Setting.make (fun v -> setting.Set(v, snd setting.Value)) (setting.Get >> fst)
+
+        let offset_setting =
+            Setting.make (fun v -> setting.Set(fst setting.Value, v)) (setting.Get >> snd)
 
         let toggle_resolution_dropdown () =
             dropdown_wrapper.Toggle(fun () ->
@@ -120,42 +127,49 @@ type WindowedResolutionPicker =
                     {
                         Items =
                             let max_res = get_current_supported_video_modes() |> Array.last
-                            Seq.concat [
-                                [|(0, 0), %"system.windowresolution.custom"|]
-                                WindowedResolution.PRESETS
-                                |> Array.filter (fun (w, h) -> w <= max_res.Width && h <= max_res.Height)
-                                |> Array.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
-                            ]
+
+                            Seq.concat
+                                [
+                                    [| (0, 0), %"system.windowresolution.custom" |]
+                                    WindowedResolution.PRESETS
+                                    |> Array.filter(fun (w, h) -> w <= max_res.Width && h <= max_res.Height)
+                                    |> Array.map(fun (w, h) -> (w, h), sprintf "%ix%i" w h)
+                                ]
                         ColorFunc = K Colors.text
                         Setting =
                             { res_setting with
-                                Set = fun v ->
-                                    if v = (0, 0) then
-                                        CustomWindowedResolutionPage(res_setting).Show()
-                                    else res_setting.Set v
+                                Set =
+                                    fun v ->
+                                        if v = (0, 0) then
+                                            CustomWindowedResolutionPage(res_setting).Show()
+                                        else
+                                            res_setting.Set(v)
                             }
                     }
             )
 
         let buttons =
-            NavigationContainer.Row()
+            NavigationContainer
+                .Row()
                 .WrapNavigation(false)
                 .With(
-                    Button(
-                        (fun () -> let w, h = res_setting.Value in sprintf "%ix%i" w h),
-                        toggle_resolution_dropdown
-                    )
+                    Button((fun () -> let w, h = res_setting.Value in sprintf "%ix%i" w h), toggle_resolution_dropdown)
                         .Align(Alignment.LEFT)
                         .Position(Position.GridX(1, 2, Style.PADDING * 2.0f)),
 
                     Button(
-                        (fun () -> if offset_setting.Value = (0.5f, 0.5f) then %"system.windowresolution.offset.center" else %"system.windowresolution.offset.custom"),
+                        (fun () ->
+                            if offset_setting.Value = (0.5f, 0.5f) then
+                                %"system.windowresolution.offset.center"
+                            else
+                                %"system.windowresolution.offset.custom"
+                        ),
                         (fun () -> CustomWindowedOffsetPage(offset_setting).Show())
                     )
                         .Position(Position.GridX(2, 2, Style.PADDING * 2.0f))
                 )
 
-        dropdown_wrapper.OnClose <- fun () -> buttons.Focus false
+        dropdown_wrapper.OnClose <- fun () -> buttons.Focus(false)
         Container.Create(buttons).With(dropdown_wrapper)
 
 type VideoModePicker =
@@ -176,22 +190,29 @@ type VideoModePicker =
             let mode = get_current_supported_video_modes() |> Array.last
             mode.Width, mode.Height
 
-        let setting = setting |> Setting.trigger (fun mode -> let gcd = gcd mode.Width mode.Height in aspect_ratio <- mode.Width / gcd, mode.Height / gcd)
+        let setting =
+            setting
+            |> Setting.trigger(fun mode ->
+                let gcd = gcd mode.Width mode.Height in aspect_ratio <- mode.Width / gcd, mode.Height / gcd
+            )
 
-        let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderB(min d.Height 400.0f).Shrink(Style.PADDING, 0.0f))
+        let dropdown_wrapper =
+            DropdownWrapper(fun d -> Position.BorderB(min d.Height 400.0f).Shrink(Style.PADDING, 0.0f))
 
         let toggle_resolution_dropdown () =
             dropdown_wrapper.Toggle(fun () ->
                 let current_mode = setting.Value
                 let ax, ay = aspect_ratio
+
                 Dropdown
                     {
                         Items =
-                            get_current_supported_video_modes ()
-                            |> Seq.filter (fun mode -> mode.RefreshRate = current_mode.RefreshRate && (mode.Height * ax = mode.Width * ay) || (mode.Width, mode.Height) = (max_width, max_height))
-                            |> Seq.map (fun mode ->
-                                mode, sprintf "%ix%i" mode.Width mode.Height
+                            get_current_supported_video_modes()
+                            |> Seq.filter(fun mode ->
+                                mode.RefreshRate = current_mode.RefreshRate && (mode.Height * ax = mode.Width * ay)
+                                || (mode.Width, mode.Height) = (max_width, max_height)
                             )
+                            |> Seq.map(fun mode -> mode, sprintf "%ix%i" mode.Width mode.Height)
                         ColorFunc = K Colors.text
                         Setting = setting
                     }
@@ -200,14 +221,15 @@ type VideoModePicker =
         let toggle_refresh_rate_dropdown () =
             dropdown_wrapper.Toggle(fun () ->
                 let current_mode = setting.Value
+
                 Dropdown
                     {
                         Items =
-                            get_current_supported_video_modes ()
-                            |> Seq.filter (fun mode -> mode.Width = current_mode.Width && mode.Height = current_mode.Height)
-                            |> Seq.map (fun mode ->
-                                mode, sprintf "%ihz" mode.RefreshRate
+                            get_current_supported_video_modes()
+                            |> Seq.filter(fun mode ->
+                                mode.Width = current_mode.Width && mode.Height = current_mode.Height
                             )
+                            |> Seq.map(fun mode -> mode, sprintf "%ihz" mode.RefreshRate)
                         ColorFunc = K Colors.text
                         Setting = setting
                     }
@@ -216,15 +238,18 @@ type VideoModePicker =
         let toggle_aspect_ratio_dropdown () =
             dropdown_wrapper.Toggle(fun () ->
                 let current_mode = setting.Value
+
                 Dropdown
                     {
                         Items =
-                            get_current_supported_video_modes ()
-                            |> Seq.map (fun mode -> mode, let r = gcd mode.Width mode.Height in mode.Width / r, mode.Height / r)
-                            |> Seq.sortBy (fun (mode, _) -> abs (mode.RefreshRate - current_mode.RefreshRate))
-                            |> Seq.sortBy (fun (mode, _) -> abs (mode.Height - current_mode.Height))
+                            get_current_supported_video_modes()
+                            |> Seq.map(fun mode ->
+                                mode, let r = gcd mode.Width mode.Height in mode.Width / r, mode.Height / r
+                            )
+                            |> Seq.sortBy(fun (mode, _) -> abs(mode.RefreshRate - current_mode.RefreshRate))
+                            |> Seq.sortBy(fun (mode, _) -> abs(mode.Height - current_mode.Height))
                             |> Seq.distinctBy snd
-                            |> Seq.map (fun (mode, (ax, ay)) ->
+                            |> Seq.map(fun (mode, (ax, ay)) ->
                                 mode, sprintf "%ix%i (%i:%i)" mode.Width mode.Height ax ay
                             )
                         ColorFunc = K Colors.text
@@ -233,7 +258,8 @@ type VideoModePicker =
             )
 
         let buttons =
-            NavigationContainer.Row()
+            NavigationContainer
+                .Row()
                 .WrapNavigation(false)
                 .With(
                     Button(
@@ -243,10 +269,7 @@ type VideoModePicker =
                         .Align(Alignment.LEFT)
                         .Position(Position.GridX(1, 3, Style.PADDING * 2.0f)),
 
-                    Button(
-                        (fun () -> sprintf "%ihz" setting.Value.RefreshRate),
-                        toggle_refresh_rate_dropdown
-                    )
+                    Button((fun () -> sprintf "%ihz" setting.Value.RefreshRate), toggle_refresh_rate_dropdown)
                         .Position(Position.GridX(2, 3, Style.PADDING * 2.0f)),
 
                     Button(

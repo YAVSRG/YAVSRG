@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Printerlude
+namespace Interlude.Features.Printerlude
 
 open System
 open System.Threading
@@ -45,8 +45,7 @@ module Printerlude =
             UI.Screen.enable_background <- b
             io.WriteLine(sprintf "Background rendering: %A" b)
 
-        let toggle_experiments (b: bool) =
-            options.EnableExperiments.Value <- b
+        let toggle_experiments (b: bool) = options.EnableExperiments.Value <- b
 
         let difficulty (io: IOContext) =
             match SelectedChart.DIFFICULTY with
@@ -56,7 +55,13 @@ module Printerlude =
 
                 for acc = 90 to 100 do
                     let a = float32 acc / 100.0f
-                    Performance.accuracy_to_rating (a, SelectedChart.rate.Value, SelectedChart.CHART.Value.ToNoteData(), d)
+
+                    Performance.accuracy_to_rating(
+                        a,
+                        SelectedChart.rate.Value,
+                        SelectedChart.CHART.Value.ToNoteData(),
+                        d
+                    )
                     |> sprintf "PR for %i%% %.2f" acc
                     |> io.WriteLine
             | None -> ()
@@ -76,10 +81,30 @@ module Printerlude =
                         WindowThread.exit()
                 )
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
-                .WithIOCommand("toggle_background", "Enables/disables background rendering", "enabled", toggle_background)
-                .WithCommand("enable_experiments", "Enables/disables developer experiments", "enabled", toggle_experiments)
-                .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
-                .WithCommand("fake_register", "Fakes a signup event for testing the registration page", fun () -> RegisterPage("your_discord_tag_here").Show())
+                .WithIOCommand(
+                    "toggle_background",
+                    "Enables/disables background rendering",
+                    "enabled",
+                    toggle_background
+                )
+                .WithCommand(
+                    "enable_experiments",
+                    "Enables/disables developer experiments",
+                    "enabled",
+                    toggle_experiments
+                )
+                .WithCommand(
+                    "fake_update",
+                    "Fakes an update for testing the update UI button",
+                    fun () ->
+                        if Updates.latest_release.IsSome then
+                            Updates.update_available <- true
+                )
+                .WithCommand(
+                    "fake_register",
+                    "Fakes a signup event for testing the registration page",
+                    fun () -> RegisterPage("your_discord_tag_here").Show()
+                )
                 .WithCommand("chart_info", "Dumps chart meta info", chart_info)
                 .WithIOCommand("difficulty", "Dumps chart difficulty info", difficulty)
 
@@ -99,7 +124,7 @@ module Printerlude =
         ctx.Evaluate io s
         context_writer.Flush()
         ms.Position <- current_stream_position
-        Terminal.add_message (context_output.ReadToEnd())
+        Terminal.add_message(context_output.ReadToEnd())
 
     let mutable logging_disposable: IDisposable option = None
     let mutable ipc_shutdown_token: CancellationTokenSource option = None
@@ -108,16 +133,12 @@ module Printerlude =
 
     let init (instance: int) =
 
-        ctx <-
-            ShellContext.Empty
-            |> Utils.register_ipc_commands
-            |> Utils.register_commands
+        ctx <- ShellContext.Empty |> Utils.register_ipc_commands |> Utils.register_commands
 
         Terminal.exec_command <- exec
 
         logging_disposable <-
-            Some
-            <| Logging.Subscribe(fun (level, main) -> sprintf "[%A] %s" level main |> Terminal.add_message)
+            Some(Logging.Subscribe(fun (level, main) -> sprintf "[%A] %s" level main |> Terminal.add_message))
 
         Terminal.add_message @"================================================"
         Terminal.add_message @"=   ___      _      __          __        __   ="
@@ -130,5 +151,5 @@ module Printerlude =
             ipc_shutdown_token <- Some(IPC.start_server_thread "Interlude" ipc_commands)
 
     let deinit () =
-        logging_disposable |> Option.iter (fun d -> d.Dispose())
-        ipc_shutdown_token |> Option.iter (fun token -> token.Cancel())
+        logging_disposable |> Option.iter(fun d -> d.Dispose())
+        ipc_shutdown_token |> Option.iter(fun token -> token.Cancel())

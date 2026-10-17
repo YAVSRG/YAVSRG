@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System.Drawing
 open System.Runtime.CompilerServices
@@ -12,55 +12,54 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit) =
         Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                on_click ()
+                on_click()
             )
         )
 
     static member HEIGHT = 55.0f
 
-    new (label: string, on_click: unit -> unit) = InlaidButton(K label, on_click)
+    new(label: string, on_click: unit -> unit) = InlaidButton(K label, on_click)
 
-    member val Hotkey : Hotkey = "none" with get, set
-    member val Icon : string = "" with get, set
-    member val HoverText : string = label_func() with get, set
-    member val HoverIcon : string = "" with get, set
+    member val Hotkey: Hotkey = "none" with get, set
+    member val Icon: string = "" with get, set
+    member val HoverText: string = label_func() with get, set
+    member val HoverIcon: string = "" with get, set
     member val TextColor = Colors.text_greyout with get, set
 
-    override this.Init(parent) =
-        this
-            .Add(
-                MouseListener().Button(this),
-                HotkeyListener(this.Hotkey, fun () ->
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            MouseListener().Button(this),
+            HotkeyListener(
+                this.Hotkey,
+                fun () ->
                     Style.click.Play()
-                    on_click ()
-                )
+                    on_click()
             )
+        )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         Render.rect this.Bounds (if this.Focused then Colors.shadow_1.O2 else Colors.shadow_2.O2)
 
         let text =
             if this.Focused then
-                if this.HoverIcon = "" then this.HoverText
-                else sprintf "%s %s" this.HoverIcon this.HoverText
-            elif this.Icon = "" then label_func()
-            else sprintf "%s %s" this.Icon (label_func())
+                if this.HoverIcon = "" then this.HoverText else sprintf "%s %s" this.HoverIcon this.HoverText
+            elif this.Icon = "" then
+                label_func()
+            else
+                sprintf "%s %s" this.Icon (label_func())
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             text,
             this.Bounds.Shrink(10.0f, 5.0f),
-            (if this.Focused then
-                 Colors.text_yellow_2
-             else
-                 this.TextColor),
+            (if this.Focused then Colors.text_yellow_2 else this.TextColor),
             Alignment.CENTER
         )
 

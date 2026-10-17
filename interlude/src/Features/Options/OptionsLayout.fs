@@ -41,31 +41,32 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
         { Position.DEFAULT with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        FlowContainer.LeftToRight(200.0f)
+        FlowContainer
+            .LeftToRight(200.0f)
             .Spacing(Style.PADDING * 2.0f)
             .Position(scaled_margins.SliceY(SearchBox.HEIGHT))
             .With(
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
-                    (fun () -> current_tab.Set OptionsTab.Gameplay),
+                    (fun () -> current_tab.Set(OptionsTab.Gameplay)),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Gameplay),
                     Keybind = Bind.mk Keys.D1
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.AIRPLAY (%"system"),
-                    (fun () -> current_tab.Set OptionsTab.System),
+                    (fun () -> current_tab.Set(OptionsTab.System)),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.System),
                     Keybind = Bind.mk Keys.D2
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.IMAGE (%"skins"),
-                    (fun () -> current_tab.Set OptionsTab.Noteskins),
+                    (fun () -> current_tab.Set(OptionsTab.Noteskins)),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Noteskins),
                     Keybind = Bind.mk Keys.D3
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.ARCHIVE (%"library"),
-                    (fun () -> current_tab.Set OptionsTab.Library),
+                    (fun () -> current_tab.Set(OptionsTab.Library)),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Library),
                     Keybind = Bind.mk Keys.D4
                 )
@@ -73,8 +74,10 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
 
     let search_box =
         SearchBox(fun query ->
-            if query = "" then current_tab.Set State.recent_tab
-            else current_tab.Set (OptionsTab.SearchResults <| SearchResults.get query)
+            if query = "" then
+                current_tab.Set(State.recent_tab)
+            else
+                current_tab.Set(OptionsTab.SearchResults(SearchResults.get query))
         )
             .Fill(Colors.cyan.O3)
             .Border(Colors.cyan_accent)
@@ -92,26 +95,30 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
 
     member private this.Buttons = tab_buttons
 
-    override this.Init(parent: Widget) =
-        this
-            .Position(Position.SliceT(HEIGHT))
-            .Add(search_box, tab_buttons)
+    override this.Init(parent: Widget) : unit =
+        this.Position(Position.SliceT(HEIGHT)).Add(search_box, tab_buttons)
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
+
         match transition with
         | Transition.In ->
-            if transition_timer.Complete then transition <- Transition.Shown
-            transition_timer.Update elapsed_ms
+            if transition_timer.Complete then
+                transition <- Transition.Shown
+
+            transition_timer.Update(elapsed_ms)
         | Transition.Out ->
-            if transition_timer.Complete then transition <- Transition.Hidden
-            transition_timer.Update elapsed_ms
+            if transition_timer.Complete then
+                transition <- Transition.Hidden
+
+            transition_timer.Update(elapsed_ms)
         | _ -> ()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let before_alpha = Render.alpha_multiplier_begin 1.0f
+
         match transition with
         | Transition.In ->
             Render.stencil_create false
@@ -121,7 +128,7 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
 
             Render.stencil_begin_draw()
             Render.rect this.Bounds Colors.shadow_2.O1
-            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan
+            Render.rect (this.Bounds.BorderB(Style.PADDING)) Colors.cyan
             base.Draw()
             StripeWipe.draw_left_to_right (pc2 - 0.05f) pc this.Bounds Colors.cyan
 
@@ -135,7 +142,7 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
 
             Render.stencil_begin_draw()
             Render.rect this.Bounds Colors.shadow_2.O1
-            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan
+            Render.rect (this.Bounds.BorderB(Style.PADDING)) Colors.cyan
             base.Draw()
             StripeWipe.draw_left_to_right (pc - 0.05f) pc2 this.Bounds Colors.cyan
 
@@ -143,17 +150,18 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
 
         | Transition.Shown ->
             Render.rect this.Bounds Colors.shadow_2.O1
-            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan
+            Render.rect (this.Bounds.BorderB(Style.PADDING)) Colors.cyan
             base.Draw()
 
         | Transition.Hidden -> ()
+
         Render.alpha_multiplier_restore before_alpha
 
-    member this.Hide() =
+    member this.Hide() : unit =
         transition_timer.Reset()
         transition <- Transition.Out
 
-    member this.Show() =
+    member this.Show() : unit =
         transition_timer.Reset()
         transition <- Transition.In
 
@@ -163,19 +171,18 @@ type private OptionsPageFooter() as this =
     let HEIGHT = 70.0f
 
     let presets =
-        NavigationContainer.Row(WrapNavigation = false)
+        NavigationContainer
+            .Row(WrapNavigation = false)
             .With(
-                PresetControls.Create(1, options.Preset1)
-                    .Position(Position.GridX(1, 3, 20.0f)),
-                PresetControls.Create(2, options.Preset2)
-                    .Position(Position.GridX(2, 3, 20.0f)),
-                PresetControls.Create(3, options.Preset3)
-                    .Position(Position.GridX(3, 3, 20.0f))
+                PresetControls.Create(1, options.Preset1).Position(Position.GridX(1, 3, 20.0f)),
+                PresetControls.Create(2, options.Preset2).Position(Position.GridX(2, 3, 20.0f)),
+                PresetControls.Create(3, options.Preset3).Position(Position.GridX(3, 3, 20.0f))
             )
             .Position(Position.SlicePercentR(0.5f).SliceB(15.0f, HEIGHT).ShrinkX(25.0f))
 
     let content =
-        NavigationContainer.Row()
+        NavigationContainer
+            .Row()
             .With(
                 InlaidButton(%"menu.back", Menu.Back)
                     .Icon(Icons.ARROW_LEFT_CIRCLE)
@@ -192,9 +199,7 @@ type private OptionsPageFooter() as this =
                             .GridX(1, 2, 20.0f)
                     ),
 
-                InlaidButton(%"hud.edit", fun () ->
-                    SkinActions.edit_hud ignore
-                )
+                InlaidButton(%"hud.edit", fun () -> SkinActions.edit_hud ignore)
                     .Icon(Icons.ZAP)
                     .Position(
                         Position
@@ -210,11 +215,11 @@ type private OptionsPageFooter() as this =
 
     member this.Items = content
 
-    override this.Init(parent: Widget) =
-        this.With(content).Position <- Position.SliceB HEIGHT
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        this.With(content).Position <- Position.SliceB(HEIGHT)
+        base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_2.O1
-        Render.rect (this.Bounds.BorderT Style.PADDING) Colors.cyan
+        Render.rect (this.Bounds.BorderT(Style.PADDING)) Colors.cyan
         base.Draw()

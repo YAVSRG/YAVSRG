@@ -21,18 +21,18 @@ type private PlayerButton(username: string, color: int) =
 
     static member HEIGHT = 55.0f
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(username)
-                .Color(Color.FromArgb color, Colors.shadow_2)
+                .Color(Color.FromArgb(color), Colors.shadow_2)
                 .Align(Alignment.LEFT)
                 .Position(Position.Shrink(20.0f, 5.0f)),
             MouseListener().Button(this)
         )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Focused then
             Render.rect this.Bounds Colors.yellow_accent.O1
         else

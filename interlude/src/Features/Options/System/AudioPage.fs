@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.SystemSettings
+namespace Interlude.Features.OptionsMenu.SystemSettings
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
@@ -13,54 +13,46 @@ type AudioPage() =
     static member AudioVolume() : PageSetting =
         PageSetting(
             %"system.audiovolume",
-            Slider.Percent(
-                options.AudioVolume
-                |> Setting.trigger (fun v -> Audio.change_volume (v, v))
-                |> Setting.f32
-            )
+            Slider.Percent(options.AudioVolume |> Setting.trigger(fun v -> Audio.change_volume(v, v)) |> Setting.f32)
         )
 
     static member AudioDevice() : PageSetting =
         PageSetting(
             %"system.audiodevice",
-            SelectDropdown(Audio.list_devices () |> Array.map (fun d -> d.Index, d.ToString()), Setting.trigger Audio.change_device config.AudioDevice)
+            SelectDropdown(
+                Audio.list_devices() |> Array.map(fun d -> d.Index, d.ToString()),
+                Setting.trigger Audio.change_device config.AudioDevice
+            )
         )
 
     static member RatesChangePitchDown() : PageSetting =
         PageSetting(
             %"system.audio_pitch_rates_down",
-            Checkbox(
-                options.AudioPitchRatesDown
-                |> Setting.trigger (fun v -> Song.DownRatesChangePitch <- v)
-            )
+            Checkbox(options.AudioPitchRatesDown |> Setting.trigger(fun v -> Song.DownRatesChangePitch <- v))
         )
             .Help(Help.Info("system.audio_pitch_rates_down"))
 
     static member RatesChangePitchUp() : PageSetting =
         PageSetting(
             %"system.audio_pitch_rates_up",
-            Checkbox(
-                options.AudioPitchRatesUp
-                |> Setting.trigger (fun v -> Song.UpRatesChangePitch <- v)
-            )
+            Checkbox(options.AudioPitchRatesUp |> Setting.trigger(fun v -> Song.UpRatesChangePitch <- v))
         )
             .Help(Help.Info("system.audio_pitch_rates_up"))
 
     static member MenusMuffleSong() : PageSetting =
-        PageSetting(%"system.menus_muffle_song",
-            Checkbox (
+        PageSetting(
+            %"system.menus_muffle_song",
+            Checkbox(
                 options.MenusMuffleSong
-                |> Setting.trigger (fun b -> if b then Song.ApplyLowPassFilter() else Song.RemoveLowPassFilter())
+                |> Setting.trigger(fun b -> if b then Song.ApplyLowPassFilter() else Song.RemoveLowPassFilter())
             )
         )
             .Help(Help.Info("system.menus_muffle_song"))
 
     static member CrossfadeEnabled() : PageSetting =
-        PageSetting(%"system.audio_enable_crossfade",
-            Checkbox (
-                options.AudioCrossfadeEnabled
-                |> Setting.trigger Song.set_CrossfadeEnabled
-            )
+        PageSetting(
+            %"system.audio_enable_crossfade",
+            Checkbox(options.AudioCrossfadeEnabled |> Setting.trigger Song.set_CrossfadeEnabled)
         )
             .Help(Help.Info("system.audio_enable_crossfade"))
 
@@ -68,8 +60,8 @@ type AudioPage() =
         PageSetting(
             %"system.audiooffset",
             { new Slider(Setting.uom options.AudioOffset, Step = 1f) with
-                override this.OnDeselected(by_mouse: bool) =
-                    base.OnDeselected by_mouse
+                override this.OnDeselected(by_mouse: bool) : unit =
+                    base.OnDeselected(by_mouse)
                     Song.SetGlobalOffset(options.AudioOffset.Value)
             }
         )
@@ -79,7 +71,7 @@ type AudioPage() =
         PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
             .Help(Help.Info("system.automatic_offset"))
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 AudioPage.AudioVolume().Pos(0),

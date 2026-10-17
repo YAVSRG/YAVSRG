@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+namespace Interlude.Features.Import
 
 open System.IO
 open Percyqaz.Common
@@ -17,31 +17,39 @@ type ConfirmUnlinkedImportPage(path: string) =
             .Title(%"unlinkedsongsimport.info.title")
             .Body(%"unlinkedsongsimport.info.body")
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 // todo: go straight to library page
-                PageButton.Once(%"unlinkedsongsimport.link_intended", fun () -> Menu.Back())
-                    .Pos(8),
-                PageButton.Once(%"unlinkedsongsimport.confirm", fun () ->
-                    let task_tracking = TaskTracking.add (Path.GetFileName path)
-                    let task = FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
-                    import_queue.Request(task,
-                        function
-                        | Ok result ->
-                            Notifications.task_feedback (
-                                Icons.CHECK,
-                                %"notification.import_success",
-                                [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
-                            )
-                            Content.TriggerChartAdded()
-                        | Error reason ->
-                            Logging.Error "Error importing %s: %s" path reason
-                            Notifications.error (%"notification.import_failed", reason)
-                    )
+                PageButton.Once(%"unlinkedsongsimport.link_intended", fun () -> Menu.Back()).Pos(8),
+                PageButton
+                    .Once(
+                        %"unlinkedsongsimport.confirm",
+                        fun () ->
+                            let task_tracking = TaskTracking.add(Path.GetFileName(path))
 
-                    Menu.Back()
-                )
+                            let task =
+                                FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
+
+                            import_queue.Request(
+                                task,
+                                function
+                                | Ok result ->
+                                    Notifications.task_feedback(
+                                        Icons.CHECK,
+                                        %"notification.import_success",
+                                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                                        %> "notification.import_success.body"
+                                    )
+
+                                    Content.TriggerChartAdded()
+                                | Error reason ->
+                                    Logging.Error "Error importing %s: %s" path reason
+                                    Notifications.error(%"notification.import_failed", reason)
+                            )
+
+                            Menu.Back()
+                    )
                     .Pos(11),
                 CalloutCard(info).Position(fun (w, h) -> Position.Box(0.0f, 0.0f, 0.0f, -10.0f, w, h))
             )

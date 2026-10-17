@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -12,21 +12,14 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
     let cursor_blink = Animation.Counter(CURSOR_BLINK_INTERVAL_MS)
 
     let toggle () =
-        if this.Selected then
-            this.Focus false
-        else
-            this.Select false
+        if this.Selected then this.Focus(false) else this.Select(false)
 
     member val Clickable = true with get, set
-    member val TextColor : unit -> Color * Color =
-        fun () ->
-            Colors.white,
-            (if this.Selected then
-                 Colors.pink_shadow
-             else
-                 Colors.shadow_1) with get, set
 
-    override this.Init(parent) =
+    member val TextColor: unit -> Color * Color =
+        fun () -> Colors.white, (if this.Selected then Colors.pink_shadow else Colors.shadow_1) with get, set
+
+    override this.Init(parent: Widget) : unit =
         this
             .With(
                 Text(fun () -> setting.Get() + if this.Selected && cursor_blink.Loops % 2 = 0 then "_" else "")
@@ -40,32 +33,32 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
                     .SelectOnClick(this)
                     .OnHover(fun now_focused ->
                         if now_focused && not this.Focused then
-                            this.Focus true
+                            this.Focus(true)
                         elif not now_focused && not focus_trap && this.FocusedByMouse then
                             Selection.up true
                     )
-                    .OnRightClick(fun () -> setting.Set "")
+                    .OnRightClick(fun () -> setting.Set(""))
             )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnSelected(by_mouse: bool) =
-        base.OnSelected by_mouse
+    override this.OnSelected(by_mouse: bool) : unit =
+        base.OnSelected(by_mouse)
         Style.text_open.Play()
 
-        Input.listen_to_text (
-            setting |> Setting.trigger (fun _ -> Style.key.Play()),
+        Input.listen_to_text(
+            setting |> Setting.trigger(fun _ -> Style.key.Play()),
             not by_mouse,
             fun () ->
                 if this.Selected then
-                    this.Focus true
+                    this.Focus(true)
         )
 
-    override this.OnDeselected(by_mouse: bool) =
-        base.OnDeselected by_mouse
+    override this.OnDeselected(by_mouse: bool) : unit =
+        base.OnDeselected(by_mouse)
         Style.text_close.Play()
-        Input.remove_listener ()
+        Input.remove_listener()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         cursor_blink.Update(elapsed_ms)

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Collections
+namespace Interlude.Features.Collections
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -16,13 +16,13 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
                 Style.click.Play()
 
                 if not this.Disabled then
-                    action ()
+                    action()
             )
         )
 
     member val Disabled = false with get, set
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
             .With(
                 Text(sprintf "%s %s" icon name)
@@ -30,18 +30,15 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
                     .Color(if this.Disabled then Colors.text_greyout else Colors.text)
                     .Position(Position.Shrink(20.0f, 15.0f))
             )
-            .AddConditional(
-                not this.Disabled,
-                MouseListener().Button(this)
-            )
+            .AddConditional(not this.Disabled, MouseListener().Button(this))
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let color = if this.Focused then Colors.pink_accent else Colors.shadow_1
         let color = if this.Disabled then color.O3 else color
 
@@ -51,12 +48,16 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
         base.Draw()
 
 type SelectCollectionPage
-    (on_select: string * Collection -> unit, is_disabled: string * Collection -> bool, select_on_create: bool)
-    =
+    (on_select: string * Collection -> unit, is_disabled: string * Collection -> bool, select_on_create: bool) =
     inherit Page()
 
     let grid =
-        GridFlowContainer<CollectionButton>(PAGE_ITEM_HEIGHT + 20.0f, 2, Spacing = (20.0f, 20.0f), WrapNavigation = false)
+        GridFlowContainer<CollectionButton>(
+            PAGE_ITEM_HEIGHT + 20.0f,
+            2,
+            Spacing = (20.0f, 20.0f),
+            WrapNavigation = false
+        )
 
     let refresh () =
         grid.Clear()
@@ -68,8 +69,8 @@ type SelectCollectionPage
                     CollectionButton(
                         f.Icon.Value,
                         name,
-                        (fun () -> on_select (name, collection)),
-                        Disabled = is_disabled (name, collection)
+                        (fun () -> on_select(name, collection)),
+                        Disabled = is_disabled(name, collection)
                     )
                 )
             | Playlist p ->
@@ -77,16 +78,16 @@ type SelectCollectionPage
                     CollectionButton(
                         p.Icon.Value,
                         name,
-                        (fun () -> on_select (name, collection)),
-                        Disabled = is_disabled (name, collection)
+                        (fun () -> on_select(name, collection)),
+                        Disabled = is_disabled(name, collection)
                     )
                 )
 
         if grid.Focused then
-            grid.Focus false
+            grid.Focus(false)
 
-    override this.Content() =
-        refresh ()
+    override this.Content() : Widget =
+        refresh()
 
         page_container()
             .With(
@@ -102,12 +103,11 @@ type SelectCollectionPage
                 )
                     .Help(Help.Info("collections.create_playlist"))
                     .Pos(2),
-                ScrollContainer(grid)
-                    .Pos(5, PAGE_BOTTOM - 5, PageWidth.Full)
+                ScrollContainer(grid).Pos(5, PAGE_BOTTOM - 5, PageWidth.Full)
             )
 
     override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")
-    override this.OnReturnFromNestedPage() = refresh ()
+    override this.OnReturnFromNestedPage() : unit = refresh()
 
 type ManageCollectionsPage() =
     inherit
@@ -124,11 +124,11 @@ type AddToCollectionPage(chart_meta: ChartMeta) =
     inherit
         SelectCollectionPage(
             fun (name, collection) ->
-                if CollectionActions.add_to (name, collection, chart_meta) then
+                if CollectionActions.add_to(name, collection, chart_meta) then
                     Menu.Back()
             , fun (_, collection) ->
                 match collection with
-                | Folder f -> f.Contains chart_meta
+                | Folder f -> f.Contains(chart_meta)
                 | Playlist _ -> false
             , true
         )

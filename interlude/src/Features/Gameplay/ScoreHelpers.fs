@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Gameplay
+namespace Interlude.Features.Gameplay
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -31,7 +31,7 @@ module Gameplay =
     let leaderboard_rank_changed = leaderboard_rank_changed_ev.Publish
 
     let upload_score (score_info: ScoreInfo) : unit =
-        Charts.Scores.Save.post (
+        Charts.Scores.Save.post(
             {
                 ChartId = score_info.ChartMeta.Hash
                 Replay = score_info.Replay.ToBase64String()
@@ -40,17 +40,24 @@ module Gameplay =
                 Timestamp = score_info.TimePlayed
             },
             (function
-                | None -> Logging.Error "Error submitting score (%s on %s)" (score_info.Ruleset.FormatAccuracy score_info.Accuracy) score_info.ChartMeta.Title
-                | Some None -> ()
-                | Some (Some leaderboard_result) ->
-                match leaderboard_result.LeaderboardPosition with
-                | Some new_position ->
-                    Logging.Info "New leaderboard rank! (%s on %s) is #%i"
-                        (score_info.Ruleset.FormatAccuracy score_info.Accuracy) score_info.ChartMeta.Title
-                        new_position
-                    GameThread.defer (fun () -> leaderboard_rank_changed_ev.Trigger score_info)
-                | None -> ()
-            )
+            | None ->
+                Logging.Error
+                    "Error submitting score (%s on %s)"
+                    (score_info.Ruleset.FormatAccuracy(score_info.Accuracy))
+                    score_info.ChartMeta.Title
+            | Some None -> ()
+            | Some(Some leaderboard_result) ->
+
+            match leaderboard_result.LeaderboardPosition with
+            | Some new_position ->
+                Logging.Info
+                    "New leaderboard rank! (%s on %s) is #%i"
+                    (score_info.Ruleset.FormatAccuracy(score_info.Accuracy))
+                    score_info.ChartMeta.Title
+                    new_position
+
+                GameThread.defer(fun () -> leaderboard_rank_changed_ev.Trigger(score_info))
+            | None -> ())
         )
 
     let score_info_from_gameplay
@@ -65,7 +72,7 @@ module Gameplay =
             WithMods = info.WithMods
 
             PlayedBy = ScorePlayedBy.You
-            TimePlayed = Timestamp.now ()
+            TimePlayed = Timestamp.now()
             Rate = SelectedChart.rate.Value
 
             Replay = replay
@@ -80,18 +87,18 @@ module Gameplay =
             IsFailed = failed
         }
 
-    let set_score (quit_out: bool) (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags * SessionXPGain option =
+    let set_score
+        (quit_out: bool)
+        (score_info: ScoreInfo)
+        (save_data: ChartSaveData)
+        : ImprovementFlags * SessionXPGain option =
         let mod_status = score_info.ModStatus
 
-        if
-            mod_status < ModStatus.Unstored
-        then
+        if mod_status < ModStatus.Unstored then
             if mod_status = ModStatus.Ranked then
 
                 let standardised_score =
-                    if Rulesets.current_hash <> SC_J4_HASH then
-                        score_info.WithRuleset SC_J4
-                    else score_info
+                    if Rulesets.current_hash <> SC_J4_HASH then score_info.WithRuleset(SC_J4) else score_info
 
                 if Network.status = Network.Status.LoggedIn && not standardised_score.IsFailed then
                     upload_score standardised_score
@@ -102,10 +109,15 @@ module Gameplay =
                     | None -> Bests.create score_info, ImprovementFlags.New
 
                 let xp_gain =
-                    if quit_out then Content.Stats.HandleQuit()
-                    else Content.Stats.HandleScore(standardised_score, improvement_flags)
+                    if quit_out then
+                        Content.Stats.HandleQuit()
+                    else
+                        Content.Stats.HandleScore(standardised_score, improvement_flags)
 
-                if (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
+                if
+                    (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out)
+                    && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None)
+                then
                     Content.UserData.SaveScore(score_info)
                     score_saved_ev.Trigger(score_info)
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
@@ -115,9 +127,11 @@ module Gameplay =
                             match Map.tryFind SC_J4_HASH save_data.PersonalBests with
                             | Some existing_bests -> Bests.update standardised_score existing_bests |> fst
                             | None -> Bests.create standardised_score
+
                         save_data.PersonalBests <- Map.add SC_J4_HASH new_standard_bests save_data.PersonalBests
 
                     Content.UserData.SaveChanges()
+
                 improvement_flags, Some xp_gain
 
             elif (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) then
@@ -133,7 +147,7 @@ module Gameplay =
     let delete_score (score_info: ScoreInfo) : unit =
         if Content.UserData.DeleteScore(score_info) then
             score_deleted_ev.Trigger(score_info.TimePlayed)
-            Notifications.action_feedback (Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted", "")
+            Notifications.action_feedback(Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted", "")
         else
             Logging.Debug("Couldn't find score matching timestamp to delete")
 

@@ -16,7 +16,7 @@ open Interlude.UI
 module Toolbar =
 
     let HEIGHT = 70.0f
-    let slideout_amount = Animation.Fade 1.0f
+    let slideout_amount = Animation.Fade(1.0f)
     let mutable hidden = false
     let mutable cursor_hidden = false
     let mutable was_hidden = false
@@ -24,26 +24,27 @@ module Toolbar =
     let hide () : unit = hidden <- true
     let show () : unit = hidden <- false
 
-    let hide_cursor() : unit = cursor_hidden <- true
-    let show_cursor() : unit = cursor_hidden <- false
+    let hide_cursor () : unit = cursor_hidden <- true
+    let show_cursor () : unit = cursor_hidden <- false
 
     let moving () : bool =
         was_hidden <> hidden || slideout_amount.Moving
 
     let mutable screenshot_queued = false
+
     let take_screenshot_internal () : unit =
         let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
         let path = Path.Combine(get_game_folder "Screenshots", id)
-        let img = Render.take_screenshot ()
+        let img = Render.take_screenshot()
         ClipboardWin32.set_image img |> ignore
         ImageServices.save_image_jpg.Request((img, path), img.Dispose)
 
-        Notifications.action_feedback_button (
+        Notifications.action_feedback_button(
             Icons.IMAGE,
             %"notification.screenshot",
             id,
             %"notification.screenshot.open_folder",
-            fun () -> open_directory (get_game_folder "Screenshots")
+            fun () -> open_directory(get_game_folder "Screenshots")
         )
 
         screenshot_queued <- false
@@ -51,8 +52,7 @@ module Toolbar =
     /// Called during Update(), but it actually "queues" the screenshot to be taken midway through Draw()
     /// Allows screenshotting to not include certain overlays:
     ///  Screenshot is taken after most of the screen has rendered but before any debug overlays or notifications
-    let take_screenshot() : unit =
-        screenshot_queued <- true
+    let take_screenshot () : unit = screenshot_queued <- true
 
 type ScreenType =
     | SplashScreen = 0
@@ -97,8 +97,8 @@ module Screen =
         override this.Position
             with set _ = failwith "Not permitted"
 
-        override this.Update(elapsed_ms, moved) =
-            let moved = moved || Toolbar.moving ()
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
+            let moved = moved || Toolbar.moving()
 
             if moved then
                 this.Bounds <-
@@ -111,8 +111,8 @@ module Screen =
 
             current.Update(elapsed_ms, moved)
 
-        override this.Init(parent: Widget) =
-            base.Init parent
+        override this.Init(parent: Widget) : unit =
+            base.Init(parent)
 
             this.Bounds <-
                 if Toolbar.hidden then
@@ -121,9 +121,9 @@ module Screen =
                     Render.bounds().Shrink(0.0f, Toolbar.HEIGHT * Toolbar.slideout_amount.Value)
 
             this.VisibleBounds <- Render.bounds()
-            current.Init this
+            current.Init(this)
 
-        override this.Draw() = current.Draw()
+        override this.Draw() : unit = current.Draw()
 
     let private screen_container = ScreenContainer()
 
@@ -133,19 +133,16 @@ module Screen =
         if
             not Song.IsLoading
             && (screen_type <> current_type || screen_type = ScreenType.Play || screen_type = ScreenType.EditHud)
-            && not (Transitions.in_progress())
+            && not(Transitions.in_progress())
         then
-            Transitions.animate (
+            Transitions.animate(
                 (fun () ->
-                    let s = thunk ()
-                    current.OnExit screen_type
+                    let s = thunk()
+                    current.OnExit(screen_type)
 
-                    if not s.Initialised then
-                        s.Init screen_container
-                    else
-                        s.Update(0.0, true)
+                    if not s.Initialised then s.Init(screen_container) else s.Update(0.0, true)
 
-                    s.OnEnter current_type
+                    s.OnEnter(current_type)
                     current_type <- screen_type
                     current <- s
                 ),
@@ -174,7 +171,7 @@ module Screen =
 
         let perf = DebugOverlay()
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             let elapsed_ms = elapsed_ms * timescale
             base.Update(elapsed_ms, moved)
 
@@ -183,30 +180,29 @@ module Screen =
             Background.update elapsed_ms
             HelpOverlay.display.Update(elapsed_ms, moved)
 
-            if current_type <> ScreenType.Play || Dialog.exists () then
+            if current_type <> ScreenType.Play || Dialog.exists() then
                 Notifications.display.Update(elapsed_ms, moved)
 
-            assert(Render.width() > 0.0f)
-            let x, y = Mouse.pos ()
-            Background.set_parallax_pos (x / Render.width(), y / Render.height())
+            assert (Render.width() > 0.0f)
+            let x, y = Mouse.pos()
+            Background.set_parallax_pos(x / Render.width(), y / Render.height())
 
             Dialog.display.Update(elapsed_ms, moved)
 
             toolbar.Update(elapsed_ms, moved)
-            animations.Update elapsed_ms
+            animations.Update(elapsed_ms)
             logo.Update(elapsed_ms, moved)
             screen_container.Update(elapsed_ms, moved)
 
             if (%%"exit").Pressed() then
                 back Transitions.UnderLogo |> ignore
 
-        override this.Draw() =
+        override this.Draw() : unit =
             if enable_background && current_type <> ScreenType.SplashScreen then
-                if
-                    (current_type <> ScreenType.Play || Background.dim_percent.Value < 1.0f)
-                then
-                    Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
-                else Render.rect this.Bounds Color.Black
+                if (current_type <> ScreenType.Play || Background.dim_percent.Value < 1.0f) then
+                    Background.draw_with_dim(this.Bounds, Color.White, 1.0f)
+                else
+                    Render.rect this.Bounds Color.Black
 
             screen_container.Draw()
             logo.Draw()
@@ -223,28 +219,30 @@ module Screen =
             Dialog.display.Draw()
             HelpOverlay.display.Draw()
 
-            if Toolbar.screenshot_queued then Toolbar.take_screenshot_internal()
+            if Toolbar.screenshot_queued then
+                Toolbar.take_screenshot_internal()
 
-            if not Toolbar.cursor_hidden || Dialog.exists () then
+            if not Toolbar.cursor_hidden || Dialog.exists() then
                 Notifications.display.Draw()
+
                 if Mouse.in_bounds() then
-                    let x, y = Mouse.pos ()
+                    let x, y = Mouse.pos()
 
                     Render.sprite
                         (Rect.FromSize(x, y, Content.ThemeConfig.CursorSize, Content.ThemeConfig.CursorSize))
-                        (Palette.color (255, 1.0f, 0.5f))
-                        (Content.Texture "cursor")
+                        (Palette.color(255, 1.0f, 0.5f))
+                        (Content.Texture("cursor"))
 
             perf.Draw()
 
-        override this.Init() =
+        override this.Init() : unit =
             base.Init()
 
-            logo.Init this
-            toolbar.Init this
-            Notifications.display.Init this
-            HelpOverlay.display.Init this
-            Dialog.display.Init this
-            screen_container.Init this
-            perf.Init this
-            current.OnEnter ScreenType.SplashScreen
+            logo.Init(this)
+            toolbar.Init(this)
+            Notifications.display.Init(this)
+            HelpOverlay.display.Init(this)
+            Dialog.display.Init(this)
+            screen_container.Init(this)
+            perf.Init(this)
+            current.OnEnter(ScreenType.SplashScreen)

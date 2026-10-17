@@ -9,7 +9,7 @@ type PlayerListSidebar =
 
     static let selected_tab = Setting.simple 0
 
-    static member Create() =
+    static member Create() : Widget =
         let list_container = SwapContainer()
 
         let tab_options: (Widget * string) array =

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System
 open OpenTK.Mathematics
@@ -26,10 +26,37 @@ type Logo() =
 
     let LOWER_X_THICKNESS = LOWER_Y_THICKNESS / GRADIENT
 
-    let OFFSCREEN_BELOW : Position = { Left = 0.5f %- 300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f }
-    let CENTER : Position = { Left = 0.5f %- 400.0f; Top = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Bottom = 0.5f %+ 400.0f }
-    let OFFSCREEN_LEFT : Position = { Left = 0.0f %- 610.0f; Top = 0.5f %- 300.0f; Right = 0.0f %- 100.0f; Bottom = 0.5f %+ 300.0f }
-    let MENU : Position = { Left = 0.0f %- 0.0f; Top = 0.5f %- 400.0f; Right = 0.0f %+ 800.0f; Bottom = 0.5f %+ 400.0f }
+    let OFFSCREEN_BELOW: Position =
+        {
+            Left = 0.5f %- 300.0f
+            Top = 0.5f %+ 1000.0f
+            Right = 0.5f %+ 300.0f
+            Bottom = 0.5f %+ 1600.0f
+        }
+
+    let CENTER: Position =
+        {
+            Left = 0.5f %- 400.0f
+            Top = 0.5f %- 400.0f
+            Right = 0.5f %+ 400.0f
+            Bottom = 0.5f %+ 400.0f
+        }
+
+    let OFFSCREEN_LEFT: Position =
+        {
+            Left = 0.0f %- 610.0f
+            Top = 0.5f %- 300.0f
+            Right = 0.0f %- 100.0f
+            Bottom = 0.5f %+ 300.0f
+        }
+
+    let MENU: Position =
+        {
+            Left = 0.0f %- 0.0f
+            Top = 0.5f %- 400.0f
+            Right = 0.0f %+ 800.0f
+            Bottom = 0.5f %+ 400.0f
+        }
 
     let WAVE_HEIGHT = 20.0f
     let WAVE_SPEED = 0.002f
@@ -43,9 +70,9 @@ type Logo() =
 
     override this.Init(parent: Widget) : unit =
         this.Position <- OFFSCREEN_BELOW
-        base.Init parent
+        base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Bounds.Right < 0.0f then
             ()
         else
@@ -53,11 +80,10 @@ type Logo() =
             let w = this.Bounds.Width
 
             let breathe_1 =
-                float32 (Math.Sin(counter.Time / 3500.0 * Math.PI)) * BOBBING_INTENSITY * w
+                float32(Math.Sin(counter.Time / 3500.0 * Math.PI)) * BOBBING_INTENSITY * w
 
             let breathe_2 =
-                (float32 (Math.Cos(counter.Time / 8000.0 * Math.PI)) * BREATHING_INTENSITY
-                    + 2.0f * BREATHING_INTENSITY)
+                (float32(Math.Cos(counter.Time / 8000.0 * Math.PI)) * BREATHING_INTENSITY + 2.0f * BREATHING_INTENSITY)
                 * w
 
             let breathe_bounds = this.Bounds.Translate(0.0f, breathe_1)
@@ -119,30 +145,25 @@ type Logo() =
                 Render.stencil_create(true)
 
                 // center triangle
-                Render.quad_vecs
-                    UPPER_TRIANGLE_1
-                    UPPER_TRIANGLE_2
-                    UPPER_TRIANGLE_3
-                    UPPER_TRIANGLE_3
-                    Colors.cyan_accent
+                Render.quad_vecs UPPER_TRIANGLE_1 UPPER_TRIANGLE_2 UPPER_TRIANGLE_3 UPPER_TRIANGLE_3 Colors.cyan_accent
 
                 Render.quad
                     (Quad.from_vectors(LOWER_LEFT_1, LOWER_LEFT_2, LOWER_LEFT_3, LOWER_LEFT_4)
-                        |> Quad.translate (0.0f, breathe_2))
+                     |> Quad.translate(0.0f, breathe_2))
                     Colors.cyan_accent
 
                 Render.quad
                     (Quad.from_vectors(LOWER_RIGHT_1, LOWER_RIGHT_2, LOWER_RIGHT_3, LOWER_RIGHT_4)
-                        |> Quad.translate (0.0f, breathe_2))
+                     |> Quad.translate(0.0f, breathe_2))
                     Colors.cyan_accent
 
-                Render.sprite breathe_bounds Colors.white (Content.Texture "logo")
+                Render.sprite breathe_bounds Colors.white (Content.Texture("logo"))
 
                 // RENDER VISUALISER AND RAIN INSIDE STENCIL
 
                 Render.stencil_begin_draw()
                 Render.rect breathe_bounds Colors.cyan_accent
-                let rain = Content.Texture "rain"
+                let rain = Content.Texture("rain")
                 let RAIN_SCALE = 512.0f
                 let v = float32 counter.Time
 
@@ -168,10 +189,7 @@ type Logo() =
 
                 for i in 0..31 do
                     let level =
-                        (seq { (i * 8) .. (i * 8 + 7) }
-                            |> Seq.map (fun x -> Audio.waveform.[x])
-                            |> Seq.sum)
-                        * 0.125f
+                        (seq { (i * 8) .. (i * 8 + 7) } |> Seq.map(fun x -> Audio.waveform.[x]) |> Seq.sum) * 0.125f
                         + MathF.Sin(v * WAVE_SPEED + float32 i * WAVE_SCALE) * WAVE_HEIGHT
                         + MathF.Sin(v * WAVE_SPEED_2 + float32 i * WAVE_SCALE_2) * WAVE_HEIGHT_2
 
@@ -186,19 +204,17 @@ type Logo() =
 
                     prev <- level
 
-                Render.stencil_finish ()
-                Render.sprite breathe_bounds Colors.white (Content.Texture "logo")
+                Render.stencil_finish()
+                Render.sprite breathe_bounds Colors.white (Content.Texture("logo"))
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        counter.Update elapsed_ms
+        counter.Update(elapsed_ms)
 
-    member this.MoveCenter() : unit =
-        this.Position <- CENTER
+    member this.MoveCenter() : unit = this.Position <- CENTER
 
     member this.MoveOffscreen() : unit =
         this.Position <- OFFSCREEN_LEFT
         this.SnapPosition()
 
-    member this.MoveMenu() : unit =
-        this.Position <- MENU
+    member this.MoveMenu() : unit = this.Position <- MENU

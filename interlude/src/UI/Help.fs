@@ -28,7 +28,7 @@ module HelpOverlay =
 
         let SPACING = 20.0f
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
 
             let screen_bounds = Render.bounds()
@@ -39,18 +39,13 @@ module HelpOverlay =
                 if not _keep_alive then
                     t.Fade.Target <- 0.0f
 
-                if t.Delay > 0.0 then
-                    t.Delay <- t.Delay - elapsed_ms
-                else
-                    t.Fade.Update elapsed_ms
+                if t.Delay > 0.0 then t.Delay <- t.Delay - elapsed_ms else t.Fade.Update(elapsed_ms)
 
                 let outline = t.Target.Bounds.Expand(20.0f).IntersectWith(screen_bounds)
                 let width, height = t.Size
 
                 let x =
-                    outline.CenterX - width * 0.5f
-                    |> min (screen_bounds.Width - width - SPACING)
-                    |> max SPACING
+                    outline.CenterX - width * 0.5f |> min(screen_bounds.Width - width - SPACING) |> max SPACING
 
                 let y =
                     if outline.Top > screen_bounds.CenterY then
@@ -59,11 +54,11 @@ module HelpOverlay =
                         outline.Bottom + SPACING
 
                 let callout_bounds = Rect.FromSize(x, y, width, height)
-                Callout.update (callout_bounds.Left, callout_bounds.Top, width, height, t.Data)
+                Callout.update(callout_bounds.Left, callout_bounds.Top, width, height, t.Data)
 
             _keep_alive <- false
 
-        override this.Draw() =
+        override this.Draw() : unit =
             match current_info with
             | None -> ()
             | Some t ->
@@ -72,37 +67,35 @@ module HelpOverlay =
 
                 let alpha = t.Fade.Alpha
 
-                if alpha = 0 then () else
+                if alpha = 0 then
+                    ()
+                else
 
                 if not t.ByMouse then
 
-                    LoadingAnimation.draw_border_piece outline 0.0f (min 0.99999f t.Fade.Value) (Colors.yellow_accent.O3a alpha)
+                    LoadingAnimation.draw_border_piece
+                        outline
+                        0.0f
+                        (min 0.99999f t.Fade.Value)
+                        (Colors.yellow_accent.O3a(alpha))
 
                     // blackout effect
-                    Render.rect (screen_bounds.SliceL outline.Left) (Colors.shadow_2.O3a alpha)
-                    Render.rect (screen_bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a alpha)
+                    Render.rect (screen_bounds.SliceL(outline.Left)) (Colors.shadow_2.O3a(alpha))
+                    Render.rect (screen_bounds.ShrinkL(outline.Right)) (Colors.shadow_2.O3a(alpha))
 
                     Render.rect
-                        (screen_bounds
-                            .ShrinkL(outline.Left)
-                            .SliceL(outline.Width)
-                            .SliceT(outline.Top))
-                        (Colors.shadow_2.O3a alpha)
+                        (screen_bounds.ShrinkL(outline.Left).SliceL(outline.Width).SliceT(outline.Top))
+                        (Colors.shadow_2.O3a(alpha))
 
                     Render.rect
-                        (screen_bounds
-                            .ShrinkL(outline.Left)
-                            .SliceL(outline.Width)
-                            .ShrinkT(outline.Bottom))
-                        (Colors.shadow_2.O3a alpha)
+                        (screen_bounds.ShrinkL(outline.Left).SliceL(outline.Width).ShrinkT(outline.Bottom))
+                        (Colors.shadow_2.O3a(alpha))
 
                 // draw tooltip
                 let width, height = t.Size
 
                 let x =
-                    outline.CenterX - width * 0.5f
-                    |> min (screen_bounds.Width - width - SPACING)
-                    |> max SPACING
+                    outline.CenterX - width * 0.5f |> min(screen_bounds.Width - width - SPACING) |> max SPACING
 
                 let y =
                     if outline.Top > screen_bounds.CenterY then
@@ -111,19 +104,19 @@ module HelpOverlay =
                         outline.Bottom + SPACING
 
                 let callout_bounds = Rect.FromSize(x, y, width, height)
-                Render.border Style.PADDING callout_bounds (Colors.cyan_accent.O4a alpha)
-                Render.rect callout_bounds (Colors.cyan_shadow.O4a alpha)
+                Render.border Style.PADDING callout_bounds (Colors.cyan_accent.O4a(alpha))
+                Render.rect callout_bounds (Colors.cyan_shadow.O4a(alpha))
 
-                Callout.draw (
+                Callout.draw(
                     callout_bounds.Left,
                     callout_bounds.Top,
                     width,
                     height,
-                    (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha),
+                    (Colors.white.O4a(alpha), Colors.shadow_2.O4a(alpha)),
                     t.Data
                 )
 
-    let display : Widget = Display()
+    let display: Widget = Display()
 
     /// Returns an ID of the newly created help popup
     /// `keep_alive` must be called with the ID each frame, the first frame it is not, the popup will disappear
@@ -137,6 +130,7 @@ module HelpOverlay =
                 Delay = if by_mouse then 700.0 else 0.0
                 Fade = Animation.Fade(0.0f, Target = 1.0f)
             }
+
         _keep_alive <- true
         current_info <- Some t
         current_id <- current_id + 1
@@ -154,51 +148,50 @@ type Help(content: Callout) =
     let mutable by_mouse = false
     let mutable id = -1
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Parent.Focused && (%%"tooltip").Pressed() then
 
-            id <- HelpOverlay.show (false, this, content)
+            id <- HelpOverlay.show(false, this, content)
             by_mouse <- false
 
         elif id >= 0 && not by_mouse then
 
-            if (%%"tooltip").Held() then
-                HelpOverlay.keep_alive id
-            else
-                id <- -1
+            if (%%"tooltip").Held() then HelpOverlay.keep_alive id else id <- -1
 
         let next_hover = Mouse.hover this.Bounds
 
-        if not hover && next_hover && Mouse.moved_recently () then
+        if not hover && next_hover && Mouse.moved_recently() then
 
-            id <- HelpOverlay.show (true, this, content)
+            id <- HelpOverlay.show(true, this, content)
             by_mouse <- true
 
         elif id >= 0 && by_mouse then
 
-            if next_hover && (match Selection.get_focused_element() with Some (:? Dropdown.Item) -> false | _ -> true) then
+            if
+                next_hover
+                && (
+                    match Selection.get_focused_element() with
+                    | Some(:? Dropdown.Item) -> false
+                    | _ -> true
+                )
+            then
                 HelpOverlay.keep_alive id
             else
                 id <- -1
 
         hover <- next_hover
 
-    override this.Draw() = ()
+    override this.Draw() : unit = ()
 
-    static member Info(feature: string) =
-        Callout.Normal
-            .Title(%feature)
-            .Body(%(sprintf "%s.tooltip" feature))
+    static member Info(feature: string) : Callout =
+        Callout.Normal.Title(%feature).Body(%(sprintf "%s.tooltip" feature))
 
-    static member Info(feature: string, hotkey: Hotkey) =
-        Callout.Normal
-            .Title(%feature)
-            .Body(%(sprintf "%s.tooltip" feature))
-            .Hotkey(hotkey)
+    static member Info(feature: string, hotkey: Hotkey) : Callout =
+        Callout.Normal.Title(%feature).Body(%(sprintf "%s.tooltip" feature)).Hotkey(hotkey)
 
 type HelpExtensions =
 
     [<Extension>]
-    static member Help(this: #IContainer<Widget>, content: Callout) = this.With(Help(content))
+    static member Help(this: #IContainer<Widget>, content: Callout) : #IContainer<Widget> = this.With(Help(content))

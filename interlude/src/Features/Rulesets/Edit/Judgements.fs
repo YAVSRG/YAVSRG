@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Rulesets.Edit
+namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -15,25 +15,26 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
     let color = Setting.simple judgement.Color
     let breaks_combo = Setting.simple judgement.BreaksCombo
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         let new_js = ruleset.Value.Judgements |> Array.copy
-        new_js.[id] <- { judgement with Name = name.Value.Trim(); Color = color.Value; BreaksCombo = breaks_combo.Value }
-        ruleset.Set { ruleset.Value with Judgements = new_js }
 
-    override this.Content() =
+        new_js.[id] <-
+            { judgement with Name = name.Value.Trim(); Color = color.Value; BreaksCombo = breaks_combo.Value }
+
+        ruleset.Set({ ruleset.Value with Judgements = new_js })
+
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
             .With(
-                PageTextEntry(%"rulesets.judgement.name", name)
-                    .Pos(0),
-                PageSetting(%"rulesets.judgement.color",
-                    ColorPicker(%"rulesets.judgement.color", color, false)
-                        .Preview(name.get_Value)
+                PageTextEntry(%"rulesets.judgement.name", name).Pos(0),
+                PageSetting(
+                    %"rulesets.judgement.color",
+                    ColorPicker(%"rulesets.judgement.color", color, false).Preview(name.get_Value)
                 )
                     .Pos(2),
-                PageSetting(%"rulesets.judgement.breaks_combo", Checkbox breaks_combo)
-                    .Pos(4)
+                PageSetting(%"rulesets.judgement.breaks_combo", Checkbox breaks_combo).Pos(4)
             )
 
     override this.Title = judgement.Name
@@ -44,46 +45,50 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
     let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let rec judgement_controls (i: int, j: Judgement) =
-        NavigationContainer.Row()
+        NavigationContainer
+            .Row()
             .With(
                 PageButton(j.Name, fun () -> EditJudgementPage(ruleset, i).Show())
                     .TextColor(j.Color)
                     .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f)),
-                Button(Icons.COPY, fun () ->
-                    ConfirmPage(
-                        [j.Name] %> "rulesets.judgement.confirm_duplicate",
-                        fun () -> duplicate_judgement i
-                    ).Show()
+                Button(
+                    Icons.COPY,
+                    fun () ->
+                        ConfirmPage(
+                            [ j.Name ] %> "rulesets.judgement.confirm_duplicate",
+                            fun () -> duplicate_judgement i
+                        )
+                            .Show()
                 )
                     .Position(Position.SliceR(PAGE_ITEM_HEIGHT, PAGE_ITEM_HEIGHT)),
-                Button(Icons.TRASH, fun () ->
-                    ConfirmPage(
-                        [j.Name] %> "rulesets.judgement.confirm_delete",
-                        fun () -> delete_judgement i
-                    ).Show()
+                Button(
+                    Icons.TRASH,
+                    fun () ->
+                        ConfirmPage([ j.Name ] %> "rulesets.judgement.confirm_delete", fun () -> delete_judgement i)
+                            .Show()
                 )
                     .Disabled(fun () -> ruleset.Value.Judgements.Length <= 1)
                     .TextColor(Colors.red_accent)
                     .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
             )
 
-    and refresh() : unit =
+    and refresh () : unit =
         container.Clear()
-        for i, j in ruleset.Value.Judgements |> Array.indexed do
-            container.Add (judgement_controls (i, j))
 
-    and duplicate_judgement(i: int) : unit =
-        ruleset.Set (Ruleset.duplicate_judgement i ruleset.Value)
+        for i, j in ruleset.Value.Judgements |> Array.indexed do
+            container.Add(judgement_controls(i, j))
+
+    and duplicate_judgement (i: int) : unit =
+        ruleset.Set(Ruleset.duplicate_judgement i ruleset.Value)
         GameThread.defer refresh
 
     and delete_judgement (i: int) : unit =
-        ruleset.Set (Ruleset.remove_judgement i ruleset.Value)
+        ruleset.Set(Ruleset.remove_judgement i ruleset.Value)
         refresh()
 
-    override this.Content() =
+    override this.Content() : Widget =
         refresh()
-        ScrollContainer(container)
-            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.judgements"
-    override this.OnReturnFromNestedPage() = refresh()
+    override this.OnReturnFromNestedPage() : unit = refresh()

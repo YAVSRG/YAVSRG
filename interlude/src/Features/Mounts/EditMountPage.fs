@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Mounts
+namespace Interlude.Features.Mounts
 
 open Percyqaz.Common
 open Prelude
@@ -9,32 +9,30 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Import
 
-type private EditMountPage(game: MountedGameType, mount: MountedChartSource, setting: Setting<MountedChartSource option>) =
+type private EditMountPage
+    (game: MountedGameType, mount: MountedChartSource, setting: Setting<MountedChartSource option>) =
     inherit Page()
 
     let copy_assets = Setting.simple mount.CopyAssetFiles
     let import_on_startup = Setting.simple mount.ImportOnStartup
     let mutable queued_import = 0
 
-    let linked_chart_count = Mount.find_linked_charts(mount, Content.Charts) |> Seq.length
+    let linked_chart_count =
+        Mount.find_linked_charts(mount, Content.Charts) |> Seq.length
 
-    let delete() : unit =
+    let delete () : unit =
         setting.Value <- None
         queued_import <- -1
         Mount.delete_linked_charts(mount, Content.Charts)
         Content.TriggerChartAdded()
-        Notifications.action_feedback (Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
+        Notifications.action_feedback(Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
         Menu.Back()
 
-    member this.SaveChangesAndImport() =
+    member this.SaveChangesAndImport() : unit =
 
         if queued_import >= 0 then
             setting.Value <-
-                Some
-                    { mount with
-                        ImportOnStartup = import_on_startup.Value
-                        CopyAssetFiles = copy_assets.Value
-                    }
+                Some { mount with ImportOnStartup = import_on_startup.Value; CopyAssetFiles = copy_assets.Value }
 
         if queued_import > 0 then
 
@@ -49,32 +47,33 @@ type private EditMountPage(game: MountedGameType, mount: MountedChartSource, set
                 else
                     Mount.import_new(setting.Value.Value, Content.Library, task_tracking.set_Progress)
 
-            import_queue.Request(task,
+            import_queue.Request(
+                task,
                 function
                 | Ok result ->
-                    Notifications.task_feedback (
+                    Notifications.task_feedback(
                         Icons.CHECK,
                         %"notification.import_success",
                         [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
                         %> "notification.import_success.body"
                     )
+
                     Content.TriggerChartAdded()
                 | Error reason ->
                     Logging.Error "Error importing %s: %s" setting.Value.Value.SourceFolder reason
-                    Notifications.error (%"notification.import_failed", reason)
+                    Notifications.error(%"notification.import_failed", reason)
             )
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChangesAndImport)
 
         page_container()
             .With(
-                PageSetting(%"mount.importatstartup",
-                    Checkbox(import_on_startup)
-                )
+                PageSetting(%"mount.importatstartup", Checkbox(import_on_startup))
                     .Help(Help.Info("mount.importatstartup"))
                     .Pos(4),
-                PageSetting(%"mount.link_type",
+                PageSetting(
+                    %"mount.link_type",
                     Selector(
                         [|
                             false, %"mount.link_type.link_assets"
@@ -93,7 +92,7 @@ type private EditMountPage(game: MountedGameType, mount: MountedChartSource, set
                         %"mount.import",
                         fun () ->
                             queued_import <- 1
-                            Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
+                            Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.import_queued", "")
                     )
                     .Help(Help.Info("mount.import"))
                     .Pos(9),
@@ -102,16 +101,13 @@ type private EditMountPage(game: MountedGameType, mount: MountedChartSource, set
                         %"mount.importall",
                         fun () ->
                             queued_import <- 2
-                            Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
+                            Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.import_queued", "")
                     )
                     .Help(Help.Info("mount.importall"))
                     .Pos(11),
 
                 PageButton
-                    .Once(
-                        %"mount.import_osu_scores",
-                        fun () -> Mounts.import_osu_scores(mount, true)
-                    )
+                    .Once(%"mount.import_osu_scores", fun () -> Mounts.import_osu_scores(mount, true))
                     .Disabled(fun () -> mount.LastImported.IsNone)
                     .Help(Help.Info("mount.import_osu_scores"))
                     .Conditional(K game.IsOsu)
@@ -124,19 +120,17 @@ type private EditMountPage(game: MountedGameType, mount: MountedChartSource, set
                             delete()
                         else
                             ConfirmPage(
-                                [linked_chart_count.ToString()] %> "mount.confirm_delete",
+                                [ linked_chart_count.ToString() ] %> "mount.confirm_delete",
                                 fun () -> GameThread.defer delete
                             )
                                 .Show()
-                    )
+                )
                     .Disabled(fun () -> queued_import > 0)
                     .TextColor(Colors.red_accent)
                     .Icon(Icons.TRASH)
                     .Pos(21),
 
-                Text([game.ToString()] %> "mount.edit.title")
-                    .Align(Alignment.LEFT)
-                    .TextPos(0),
+                Text([ game.ToString() ] %> "mount.edit.title").Align(Alignment.LEFT).TextPos(0),
                 Text(
                     [
                         match mount.LastImported with
