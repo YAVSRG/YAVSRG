@@ -67,7 +67,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
         for i, g in ruleset.Value.Grades |> Seq.indexed |> Seq.rev do
             container.Add(grade_controls(i, g))
 
-        container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.grade.add", add_grade)
+        container.Add(Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.grade.add", add_grade))
 
     and add_grade () =
         let new_grade = { Name = "???"; Color = Color.White; Accuracy = 0.0 }

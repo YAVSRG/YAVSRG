@@ -77,8 +77,7 @@ module Notifications =
     let display: Widget = Display()
 
     let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
-        GameThread.on_game_thread
-        <| fun () ->
+        GameThread.on_game_thread(fun () ->
             let n: Notification =
                 {
                     Data = body
@@ -90,10 +89,10 @@ module Notifications =
                 }
 
             displayed_notifications.Add(n)
+        )
 
     let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
-        GameThread.on_game_thread
-        <| fun () ->
+        GameThread.on_game_thread(fun () ->
             let n: Notification =
                 {
                     Data = body
@@ -105,6 +104,7 @@ module Notifications =
                 }
 
             displayed_notifications.Add(n)
+        )
 
     let task_feedback (icon: string, title: string, description: string) : unit =
         add(Callout.Small.Icon(icon).Title(title).Body(description), (Colors.pink_accent, Colors.pink), Colors.text)

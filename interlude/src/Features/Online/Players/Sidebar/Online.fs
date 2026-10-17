@@ -12,11 +12,11 @@ type private OnlineList() =
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Players.Online.get(fun response ->
-                        GameThread.defer
-                        <| fun () ->
+                        GameThread.defer(fun () ->
                             match response with
                             | Some result -> this.SetData(result)
                             | None -> this.ServerError()
+                        )
                     )
                 else
                     this.Offline()

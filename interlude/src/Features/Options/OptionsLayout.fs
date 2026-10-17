@@ -77,7 +77,7 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
             if query = "" then
                 current_tab.Set(State.recent_tab)
             else
-                current_tab.Set(OptionsTab.SearchResults <| SearchResults.get query)
+                current_tab.Set(OptionsTab.SearchResults(SearchResults.get query))
         )
             .Fill(Colors.cyan.O3)
             .Border(Colors.cyan_accent)

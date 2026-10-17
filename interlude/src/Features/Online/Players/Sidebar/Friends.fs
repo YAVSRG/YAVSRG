@@ -13,11 +13,11 @@ type private FriendList() =
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Friends.List.get(fun response ->
-                        GameThread.defer
-                        <| fun () ->
+                        GameThread.defer(fun () ->
                             match response with
                             | Some result -> this.SetData(result)
                             | None -> this.ServerError()
+                        )
                     )
                 else
                     this.Offline()

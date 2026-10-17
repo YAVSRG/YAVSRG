@@ -111,7 +111,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
         for i, l in ruleset.Value.Lamps |> Seq.indexed |> Seq.rev do
             container.Add(lamp_controls(i, l))
 
-        container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.lamp.add", add_lamp)
+        container.Add(Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.lamp.add", add_lamp))
 
     and add_lamp () =
         let new_lamp =

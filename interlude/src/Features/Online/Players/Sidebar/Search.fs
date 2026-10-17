@@ -24,11 +24,11 @@ type SearchList =
                             Players.Search.get(
                                 query.Value,
                                 fun response ->
-                                    GameThread.defer
-                                    <| fun () ->
+                                    GameThread.defer(fun () ->
                                         match response with
                                         | Some result -> this.SetData(result)
                                         | None -> this.ServerError()
+                                    )
                             )
                         else
                             this.Offline()
