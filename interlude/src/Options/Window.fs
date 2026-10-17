@@ -21,7 +21,6 @@ type WindowSettings =
         AudioDevice: Setting<int>
         AudioDevicePeriod: Setting<int>
         AudioDeviceBufferLengthMultiplier: Setting<int>
-        InputCPUSaver: Setting<bool>
         MSAASamples: Setting<int>
     }
 
@@ -46,7 +45,6 @@ type WindowSettings =
             AudioDevice = Setting.simple -1
             AudioDevicePeriod = Setting.simple 8
             AudioDeviceBufferLengthMultiplier = Setting.simple 8
-            InputCPUSaver = Setting.simple true
             MSAASamples = Setting.simple 4
         }
 
@@ -64,7 +62,6 @@ type WindowSettings =
             AudioDevice = this.AudioDevice.Value
             AudioDevicePeriod = this.AudioDevicePeriod.Value
             AudioDeviceBufferLengthMultiplier = this.AudioDeviceBufferLengthMultiplier.Value
-            InputCPUSaver = this.InputCPUSaver.Value
             HideCursor = true
             MSAASamples = this.MSAASamples.Value
         }

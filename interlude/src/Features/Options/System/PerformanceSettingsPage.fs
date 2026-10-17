@@ -82,12 +82,6 @@ type PerformanceSettingsPage() =
                     .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Custom),
 
                 PageSetting(
-                    %"system.cpu_saver",
-                    Checkbox(config.InputCPUSaver |> Setting.trigger(ignore >> config.Apply))
-                )
-                    .Help(Help.Info("system.cpu_saver"))
-                    .Pos(4),
-                PageSetting(
                     %"system.msaa",
                     Selector(
                         [|
@@ -99,10 +93,10 @@ type PerformanceSettingsPage() =
                     )
                 )
                     .Help(Help.Info("system.msaa"))
-                    .Pos(6),
+                    .Pos(4),
                 Text(%"generic.restart_warning")
                     .Color(Colors.text_red)
-                    .Position(page_position(8, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+                    .Position(page_position(6, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
                     .Align(Alignment.LEFT)
                     .Conditional(fun () -> msaa_restart)
             )
@@ -112,12 +106,12 @@ type PerformanceSettingsPage() =
                     %"system.performance.frame_multiplier",
                     SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x" |], framerate_multiplier)
                 )
-                    .Pos(10),
-                PageSetting(%"system.performance.screen_tear_alignment", Slider.Percent(screen_tear_alignment)).Pos(12),
+                    .Pos(8),
+                PageSetting(%"system.performance.screen_tear_alignment", Slider.Percent(screen_tear_alignment)).Pos(10),
                 Text(%"system.performance.screen_tear_alignment.hint")
                     .Color(Colors.text)
                     .Align(Alignment.LEFT)
-                    .Position(page_position(14, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+                    .Position(page_position(12, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
             )
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =
