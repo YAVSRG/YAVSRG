@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online
+namespace Interlude.Features.Online
 
 open Percyqaz.Common
 open Prelude
@@ -17,16 +17,16 @@ module DiscordRPC =
     let init () =
         client.OnConnectionFailed.Add(fun _ ->
             Logging.Info("Discord not detected, disabling rich presence")
-            deinit ()
+            deinit()
         )
         //client.RegisterUriScheme(null, null) |> ignore
         client.Initialize() |> ignore
 
     let trim_long_string (string: string) : string =
-        if System.Text.Encoding.UTF8.GetByteCount string <= 64 then
+        if System.Text.Encoding.UTF8.GetByteCount(string) <= 64 then
             string
         else
-            let bytes = System.Text.Encoding.UTF8.GetBytes string
+            let bytes = System.Text.Encoding.UTF8.GetBytes(string)
             System.Text.Encoding.UTF8.GetString(bytes, 0, 64).TrimEnd('�') + "..."
 
     let clear () =

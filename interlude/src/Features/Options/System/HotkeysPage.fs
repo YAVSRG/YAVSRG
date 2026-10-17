@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.SystemSettings
+namespace Interlude.Features.OptionsMenu.SystemSettings
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -15,58 +15,56 @@ type private HotkeyBinder(hotkey: Hotkey) as this =
         match b with
         | Bind.Key(k, (ctrl, _, shift)) ->
             set <| Bind.Key(k, (ctrl, false, shift))
-            this.Focus false
+            this.Focus(false)
             Style.key.Play()
         | _ -> Input.listen_to_next_key input_callback
 
     override this.ToString() = (%%hotkey).ToString()
 
     override this.Init(parent: Widget) : unit =
-        this
-            .Add(
-                Text(fun () -> (%%hotkey).ToString())
-                    .Color(fun () ->
-                        (
-                            if this.Selected then Colors.pink_accent
-                            elif this.Focused then Colors.yellow_accent
-                            else Colors.white
-                        ),
-                        Colors.shadow_1
-                    )
-                    .Align(Alignment.LEFT)
-                    .Position(Position.ShrinkL(20.0f)),
+        this.Add(
+            Text(fun () -> (%%hotkey).ToString())
+                .Color(fun () ->
+                    (if this.Selected then Colors.pink_accent
+                     elif this.Focused then Colors.yellow_accent
+                     else Colors.white),
+                    Colors.shadow_1
+                )
+                .Align(Alignment.LEFT)
+                .Position(Position.ShrinkL(20.0f)),
 
-                MouseListener().Button(this)
-            )
+            MouseListener().Button(this)
+        )
 
-        base.Init parent
+        base.Init(parent)
 
     override this.OnFocus(by_mouse: bool) : unit =
-        base.OnFocus by_mouse
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
     override this.OnSelected(by_mouse: bool) : unit =
-        base.OnSelected by_mouse
+        base.OnSelected(by_mouse)
         Style.click.Play()
         Input.listen_to_next_key input_callback
 
     override this.OnDeselected(by_mouse: bool) : unit =
-        base.OnDeselected by_mouse
-        Input.remove_listener ()
+        base.OnDeselected(by_mouse)
+        Input.remove_listener()
 
 type HotkeySetting(hotkey: string) =
-    inherit PageSetting(
-        %(sprintf "hotkeys.%s" hotkey),
-        NavigationContainer.Row()
-            .With(
-                HotkeyBinder(hotkey)
-                    .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT)),
-                Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey))
-                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
-            )
-    )
+    inherit
+        PageSetting(
+            %(sprintf "hotkeys.%s" hotkey),
+            NavigationContainer
+                .Row()
+                .With(
+                    HotkeyBinder(hotkey).Position(Position.ShrinkR(PAGE_ITEM_HEIGHT)),
+                    Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey))
+                        .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
+                )
+        )
 
-    member val Label : string = %(sprintf "hotkeys.%s" hotkey)
+    member val Label: string = %(sprintf "hotkeys.%s" hotkey)
     member this.AsText = (%%hotkey).ToString()
 
 type HotkeysPage() =
@@ -76,8 +74,7 @@ type HotkeysPage() =
         let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         let scroll_container =
-            ScrollContainer(container)
-                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+            ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
         let search_box =
             SearchBox(fun query ->
@@ -85,12 +82,14 @@ type HotkeysPage() =
                     container.Filter <- K true
                 else
                     let query = query.Trim()
+
                     container.Filter <-
-                    function
-                    | :? HotkeySetting as p ->
-                        (query.Length > 1 && p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase))
-                        || p.AsText.Equals(query, System.StringComparison.InvariantCultureIgnoreCase)
-                    | _ -> false
+                        function
+                        | :? HotkeySetting as p ->
+                            (query.Length > 1
+                             && p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase))
+                            || p.AsText.Equals(query, System.StringComparison.InvariantCultureIgnoreCase)
+                        | _ -> false
             )
                 .Fill(Colors.cyan.O3)
                 .Border(Colors.cyan_accent)
@@ -99,19 +98,17 @@ type HotkeysPage() =
                 .Position(Position.SliceT(40.0f, SearchBox.HEIGHT).Shrink(PAGE_MARGIN_X, 0.0f).SliceR(500.0f))
 
         container.Add(
-            PageButton(%"system.hotkeys.reset", fun () ->
-                ConfirmPage(%"system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()
+            PageButton(
+                %"system.hotkeys.reset",
+                fun () -> ConfirmPage(%"system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()
             )
                 .Icon(Icons.REFRESH_CCW)
         )
 
         for hk in Hotkeys.hotkeys.Keys do
             if hk <> "none" then
-                container.Add(
-                    HotkeySetting(hk).Help(Help.Info(sprintf "hotkeys.%s" hk))
-                )
+                container.Add(HotkeySetting(hk).Help(Help.Info(sprintf "hotkeys.%s" hk)))
 
-        NavigationContainer.Column()
-            .With(scroll_container, search_box)
+        NavigationContainer.Column().With(scroll_container, search_box)
 
     override this.Title = %"system.hotkeys"

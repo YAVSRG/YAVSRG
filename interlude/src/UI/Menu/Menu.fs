@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System
 open Percyqaz.Common
@@ -16,6 +16,7 @@ type PageEasing =
     | Left
     | Right
     | None
+
     member this.Reverse =
         match this with
         | Up -> Down
@@ -35,16 +36,22 @@ type Page() as this =
     let mutable on_close: (unit -> unit) list = []
     let mutable on_destroy: (unit -> unit) list = []
 
-    member val Opacity : Animation.Fade = Animation.Fade(0.0f, Target = 1.0f) with get
+    member val Opacity: Animation.Fade = Animation.Fade(0.0f, Target = 1.0f) with get
 
     member internal this.HandleClose() : unit = List.iter (fun f -> f()) on_close
     member internal this.HandleDestroy() : unit = List.iter (fun f -> f()) on_destroy
 
     member this.OnClose(action: unit -> unit) = on_close <- action :: on_close
-    member this.DisposeOnClose([<ParamArray>] resources: IDisposable array) = on_close <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
-    member this.WithOnClose(action: unit -> unit) = this.OnClose(action); this
 
-    member this.DisposeOnDestroy([<ParamArray>] resources: IDisposable array) = on_destroy <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
+    member this.DisposeOnClose([<ParamArray>] resources: IDisposable array) =
+        on_close <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
+
+    member this.WithOnClose(action: unit -> unit) =
+        this.OnClose(action)
+        this
+
+    member this.DisposeOnDestroy([<ParamArray>] resources: IDisposable array) =
+        on_destroy <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
 
     member private this._content = content
 
@@ -56,12 +63,13 @@ type Page() as this =
     abstract member OnEnterNestedPage: unit -> unit
     default this.OnEnterNestedPage() = ()
 
-    abstract member Content : unit -> Widget
+    abstract member Content: unit -> Widget
 
-    abstract member Header : unit -> Widget
+    abstract member Header: unit -> Widget
     default this.Header() = PageHeaderBase()
 
-    abstract member Footer : unit -> Widget
+    abstract member Footer: unit -> Widget
+
     default this.Footer() =
         Button(Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back", Menu.Back)
             .Position(Position.SliceB(80.0f).SliceY(55.0f).ShrinkL(10.0f).SliceL(180.0f))
@@ -71,7 +79,9 @@ type Page() as this =
     override this.Update(elapsed_ms, moved) =
         if is_current && not content.Focused then
             Menu.Back()
-        this.Opacity.Update elapsed_ms
+
+        this.Opacity.Update(elapsed_ms)
+
         if this.Opacity.Value > 0.01f then
             base.Update(elapsed_ms, moved)
 
@@ -84,40 +94,30 @@ type Page() as this =
             this.Hide(dir.Reverse)
             this.SnapPosition()
             this.Position <- Position.DEFAULT
+
         this.Opacity.Target <- 1.0f
 
         Selection.clamp_to this
 
-        content.Focus false
+        content.Focus(false)
         is_current <- true
 
     member this.Hide(dir: PageEasing) =
         match dir with
         | PageEasing.Up ->
             this.Position <-
-                { Position.DEFAULT with
-                    Top = (0.0f - EASING_SCALE) %+ 0.0f
-                    Bottom = (1.0f - EASING_SCALE) %+ 0.0f
-                }
+                { Position.DEFAULT with Top = (0.0f - EASING_SCALE) %+ 0.0f; Bottom = (1.0f - EASING_SCALE) %+ 0.0f }
         | PageEasing.Down ->
             this.Position <-
-                { Position.DEFAULT with
-                    Top = (0.0f + EASING_SCALE) %+ 0.0f
-                    Bottom = (1.0f + EASING_SCALE) %+ 0.0f
-                }
+                { Position.DEFAULT with Top = (0.0f + EASING_SCALE) %+ 0.0f; Bottom = (1.0f + EASING_SCALE) %+ 0.0f }
         | PageEasing.Left ->
             this.Position <-
-                { Position.DEFAULT with
-                    Left = (0.0f - EASING_SCALE) %+ 0.0f
-                    Right = (1.0f - EASING_SCALE) %+ 0.0f
-                }
+                { Position.DEFAULT with Left = (0.0f - EASING_SCALE) %+ 0.0f; Right = (1.0f - EASING_SCALE) %+ 0.0f }
         | PageEasing.Right ->
             this.Position <-
-                { Position.DEFAULT with
-                    Left = (0.0f + EASING_SCALE) %+ 0.0f
-                    Right = (1.0f + EASING_SCALE) %+ 0.0f
-                }
+                { Position.DEFAULT with Left = (0.0f + EASING_SCALE) %+ 0.0f; Right = (1.0f + EASING_SCALE) %+ 0.0f }
         | PageEasing.None -> ()
+
         this.Opacity.Target <- 0.0f
 
         is_current <- false
@@ -127,10 +127,10 @@ type Page() as this =
         this.Add(content)
 
         this.Hide(this.Direction.Reverse)
-        base.Init parent
+        base.Init(parent)
         this.Show(this.Direction)
 
-    abstract member Direction : PageEasing
+    abstract member Direction: PageEasing
     default this.Direction = PageEasing.Up
 
 and PageHeaderBase() =
@@ -142,19 +142,28 @@ and PageHeaderBase() =
 
     override this.Init parent =
         this.Position <- Position.SliceT(40.0f, 60.0f)
-        base.Init parent
+        base.Init(parent)
 
     override this.Draw() =
         let mutable x = this.Bounds.Left + PAGE_MARGIN_X
         let mutable first = true
+
         for t in titles do
-            let width = Text.measure (Style.font, t) * this.Bounds.Height * 0.6f
+            let width = Text.measure(Style.font, t) * this.Bounds.Height * 0.6f
             let bounds = Rect.FromSize(x, this.Bounds.Top, width, this.Bounds.Height)
             Render.rect (bounds.Expand(Style.PADDING * 2.0f, Style.PADDING)) Colors.shadow_2.O2
-            Text.fill_b (Style.font, t, bounds, Colors.text, Alignment.CENTER)
+            Text.fill_b(Style.font, t, bounds, Colors.text, Alignment.CENTER)
             x <- x + width + GAP_BETWEEN_BOXES
+
             if not first then
-                Text.fill_b (Style.font, Icons.ARROW_RIGHT, bounds.BorderL GAP_BETWEEN_BOXES, Colors.text_greyout, Alignment.CENTER)
+                Text.fill_b(
+                    Style.font,
+                    Icons.ARROW_RIGHT,
+                    bounds.BorderL(GAP_BETWEEN_BOXES),
+                    Colors.text_greyout,
+                    Alignment.CENTER
+                )
+
             first <- false
 
 and Menu(top_level: Page) as this =
@@ -177,16 +186,16 @@ and Menu(top_level: Page) as this =
     static member ShowPage(page: Page) =
         match _instance with
         | None -> Menu(page).Show()
-        | Some instance -> instance.ShowPage page
+        | Some instance -> instance.ShowPage(page)
 
     static member ShowPage(page: unit -> #Page) =
         match _instance with
-        | None -> Menu(page ()).Show()
-        | Some instance -> instance.ShowPage(page ())
+        | None -> Menu(page()).Show()
+        | Some instance -> instance.ShowPage(page())
 
     member private this.ShowPage(page: Page) =
         namestack <- page.Title :: namestack
-        page.Init this
+        page.Init(this)
 
         match stack.[nest_level] with
         | None -> ()
@@ -227,32 +236,38 @@ and Menu(top_level: Page) as this =
             this.Back()
 
     override this.Init(parent) =
-        base.Init parent
-        volume.Init this
-        exit_key.Init this
-        this.ShowPage top_level
-        if options.MenusMuffleSong.Value then Song.ApplyLowPassFilter()
+        base.Init(parent)
+        volume.Init(this)
+        exit_key.Init(this)
+        this.ShowPage(top_level)
+
+        if options.MenusMuffleSong.Value then
+            Song.ApplyLowPassFilter()
 
     override this.Draw() =
         let mutable i = 0
 
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
             let a = stack.[i].Value.Opacity.Alpha
-            if a < 1 then ()
+
+            if a < 1 then
+                ()
             elif a < 255 then
                 let before_alpha = Render.alpha_multiplier_begin stack.[i].Value.Opacity.Value
                 stack.[i].Value.Draw()
                 Render.alpha_multiplier_restore before_alpha
             else
                 stack.[i].Value.Draw()
+
             i <- i + 1
+
         volume.Draw()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
         if (%%"screenshot").Pressed() then
-            Toolbar.take_screenshot ()
+            Toolbar.take_screenshot()
 
         if nest_level > 0 then
             stack.[nest_level - 1].Value.Update(elapsed_ms, moved)
@@ -267,7 +282,9 @@ and Menu(top_level: Page) as this =
             let mutable i = 0
 
             while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-                if i <> nest_level - 1 then stack.[i].Value.Update(elapsed_ms, moved)
+                if i <> nest_level - 1 then
+                    stack.[i].Value.Update(elapsed_ms, moved)
+
                 i <- i + 1
 
         if List.isEmpty namestack then
@@ -281,37 +298,48 @@ and Menu(top_level: Page) as this =
 
     override this.Close() =
         base.Close()
-        Selection.unclamp ()
+        Selection.unclamp()
         _instance <- None
         Song.RemoveLowPassFilter()
 
     member private this.PageTitles() = namestack
+
     static member PageTitles() =
         match _instance with
         | None -> []
         | Some menu -> menu.PageTitles()
 
 type Page with
-    member this.Show() = Menu.ShowPage this
+    member this.Show() = Menu.ShowPage(this)
 
 type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
     inherit Page()
 
-    new(prompt, if_yes) = ConfirmPage(prompt, [|%"confirm.yes", if_yes; %"confirm.no", ignore|])
+    new(prompt, if_yes) = ConfirmPage(prompt, [| %"confirm.yes", if_yes; %"confirm.no", ignore |])
 
     override this.Content() =
         let lines = prompt.Split("\n", StringSplitOptions.TrimEntries)
 
         page_container()
-            .With(seq {
-                for i, (label, action) in Seq.indexed options do
-                    yield PageButton.Once(label, fork action Menu.Back).Pos(lines.Length * 2 + 1 + i * 2)
-            } : Widget seq)
-            .With(seq {
-                for i, line in Seq.indexed lines do
-                    yield Text(line)
-                        .Align(Alignment.LEFT)
-                        .Position(page_position(i * 2, 2, PageWidth.Full).Shrink(if i > 0 then Style.PADDING else 0.0f))
-            } : Widget seq)
+            .With(
+                seq {
+                    for i, (label, action) in Seq.indexed options do
+                        yield PageButton.Once(label, fork action Menu.Back).Pos(lines.Length * 2 + 1 + i * 2)
+                }
+                : Widget seq
+            )
+            .With(
+                seq {
+                    for i, line in Seq.indexed lines do
+                        yield
+                            Text(line)
+                                .Align(Alignment.LEFT)
+                                .Position(
+                                    page_position(i * 2, 2, PageWidth.Full)
+                                        .Shrink(if i > 0 then Style.PADDING else 0.0f)
+                                )
+                }
+                : Widget seq
+            )
 
     override this.Title = %"confirm"

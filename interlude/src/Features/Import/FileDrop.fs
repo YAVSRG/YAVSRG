@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+namespace Interlude.Features.Import
 
 open System.IO
 open System.Text.RegularExpressions
@@ -15,40 +15,36 @@ open Interlude.Features.Import.Etterna
 open Interlude.Features.Import.Osu
 
 module FileDrop =
-    
+
     let import_stepmania_noteskin (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
         let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
 
-        let existing_id = Skins.list_noteskins() |> Seq.map (fun (id, _, _) -> id) |> Seq.tryFind (fun x -> x.StartsWith id)
-        ImportEtternaNoteskinPage(
-            path,
-            id + timestamp,
-            existing_id
-        )
-            .Show()
-            
-    let show_import_osu_skin_dialog(conversion: OsuSkinConversion, id: string) : unit =
-        let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
-        
         let existing_id =
-            Skins.list_noteskins()
-            |> Seq.map (fun (id, _, _) -> id)
-            |> Seq.tryFind _.StartsWith(id)
-            
-        ImportOsuNoteskinPage(conversion, id + timestamp, existing_id)
-            .Show()
-            
+            Skins.list_noteskins() |> Seq.map(fun (id, _, _) -> id) |> Seq.tryFind(fun x -> x.StartsWith(id))
+
+        ImportEtternaNoteskinPage(path, id + timestamp, existing_id).Show()
+
+    let show_import_osu_skin_dialog (conversion: OsuSkinConversion, id: string) : unit =
+        let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
+
+        let existing_id =
+            Skins.list_noteskins() |> Seq.map(fun (id, _, _) -> id) |> Seq.tryFind _.StartsWith(id)
+
+        ImportOsuNoteskinPage(conversion, id + timestamp, existing_id).Show()
+
     let import_osu_skin_folder (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
+
         match OsuSkinConversion.PrepareToConvertFolder(path) with
         | Ok conversion -> show_import_osu_skin_dialog(conversion, id)
         | Error err ->
             Logging.Error "Error while parsing osu! skin.ini: %O" err
             Notifications.error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
-            
+
     let import_osu_skin_zip (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileNameWithoutExtension(path), "")
+
         match OsuSkinConversion.PrepareToConvertZipArchive(path) with
         | Ok conversion -> show_import_osu_skin_dialog(conversion, id)
         | Error err ->
@@ -69,7 +65,7 @@ module FileDrop =
 
         | InterludeSkinArchive ->
             try
-                File.Copy(path, Path.Combine(get_game_folder "Skins", Path.GetFileName path))
+                File.Copy(path, Path.Combine(get_game_folder "Skins", Path.GetFileName(path)))
                 Skins.load()
             with err ->
                 Logging.Error "Error moving/importing dropped skin: %O" err
@@ -95,17 +91,23 @@ module FileDrop =
             else
 
             let task_tracking = TaskTracking.add(Path.GetFileName(path))
-            let task = FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
-            import_queue.Request(task,
+
+            let task =
+                FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
+
+            import_queue.Request(
+                task,
                 function
                 | Ok result ->
-                    Notifications.task_feedback (
+                    Notifications.task_feedback(
                         Icons.CHECK,
                         %"notification.import_success",
-                        [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
+                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                        %> "notification.import_success.body"
                     )
+
                     Content.TriggerChartAdded()
                 | Error reason ->
                     Logging.Error "Error importing %s: %s" path reason
-                    Notifications.error (%"notification.import_failed", reason)
+                    Notifications.error(%"notification.import_failed", reason)
             )

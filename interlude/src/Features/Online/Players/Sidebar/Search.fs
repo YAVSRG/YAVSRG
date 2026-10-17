@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online.Players
+namespace Interlude.Features.Online.Players
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -27,13 +27,13 @@ type SearchList =
                                     GameThread.defer
                                     <| fun () ->
                                         match response with
-                                        | Some result -> this.SetData result
+                                        | Some result -> this.SetData(result)
                                         | None -> this.ServerError()
                             )
                         else
                             this.Offline()
                     else
-                        this.SetData { Matches = [||] }
+                        this.SetData({ Matches = [||] })
                 , fun _ data ->
                     if data.Matches.Length > 0 then
                         FlowContainer

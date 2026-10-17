@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Presets
+namespace Interlude.Features.OptionsMenu.Presets
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -25,7 +25,7 @@ type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
                     options.KeymodePreferredPresets.[keymode - 3] <- Some preset_id
         )
 
-    member private this.Button : Widget = button
+    member private this.Button: Widget = button
 
     override this.Init(parent: Widget) : unit =
         this.Add(button)
@@ -50,16 +50,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
     let mode = Setting.simple preset.Mode
 
     member this.SaveChanges() =
-        if delete then
-            setting.Set None
-        else
-            setting.Set(
-                Some
-                    { preset with
-                        Name = name.Value
-                        Mode = mode.Value
-                    }
-            )
+        if delete then setting.Set(None) else setting.Set(Some { preset with Name = name.Value; Mode = mode.Value })
 
     override this.Content() =
         this.OnClose(this.SaveChanges)
@@ -88,7 +79,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
                     .Pos(2),
                 PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
                     .Help(Help.Info("gameplay.preset.keymode_preference"))
-                    .Pos(4, 2, PageWidth.Custom (PAGE_LABEL_WIDTH + (keymode_preference :> IWidth).Width)),
+                    .Pos(4, 2, PageWidth.Custom(PAGE_LABEL_WIDTH + (keymode_preference :> IWidth).Width)),
                 PageButton(
                     %"gameplay.preset.delete",
                     (fun () ->
@@ -99,10 +90,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
                 )
                     .Pos(7),
 
-                Text(%"gameplay.preset.current_options")
-                    .Color(Colors.text)
-                    .Align(Alignment.LEFT)
-                    .TextPosSmall(10),
+                Text(%"gameplay.preset.current_options").Color(Colors.text).Align(Alignment.LEFT).TextPosSmall(10),
                 Text(sprintf "%s: %.2f" %"gameplay.scrollspeed" preset.ScrollSpeed)
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
@@ -127,7 +115,9 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
                     .TextPosSmall(16),
-                Text(sprintf "%s: %s" %"gameplay.lanecover" (if preset.LaneCover.Enabled then "ON + Settings" else "OFF"))
+                Text(
+                    sprintf "%s: %s" %"gameplay.lanecover" (if preset.LaneCover.Enabled then "ON + Settings" else "OFF")
+                )
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
                     .TextPosSmall(17)

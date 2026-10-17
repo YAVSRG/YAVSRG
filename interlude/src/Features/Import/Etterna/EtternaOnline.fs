@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import.Etterna
+namespace Interlude.Features.Import.Etterna
 
 open Percyqaz.Data
 
@@ -16,8 +16,4 @@ type EtternaOnlinePack =
     }
 
 [<Json.AutoCodec>]
-type EtternaOnlineApiResponse =
-    {
-        data: EtternaOnlinePack array
-        meta: {| current_page: int; last_page: int |}
-    }
+type EtternaOnlineApiResponse = { data: EtternaOnlinePack array; meta: {| current_page: int; last_page: int |} }

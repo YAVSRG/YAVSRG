@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online.Players
+namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.UI
 open Prelude
@@ -16,14 +16,8 @@ type PlayerListPage() =
             .With(
                 PlayerListSidebar
                     .Create()
-                    .Position(
-                        Position
-                            .SlicePercentL(SIDEBAR_PERCENTAGE_SPLIT)
-                            .Shrink(PADDING)
-                            .ExpandR(PADDING)
-                    ),
-                Profile()
-                    .Position(Position.ShrinkPercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING)),
+                    .Position(Position.SlicePercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING).ExpandR(PADDING)),
+                Profile().Position(Position.ShrinkPercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING)),
 
                 HotkeyListener("exit", Menu.Back),
                 HotkeyListener("player_list", Menu.Back)

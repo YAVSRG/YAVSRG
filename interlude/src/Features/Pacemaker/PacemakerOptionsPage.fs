@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Pacemaker
+namespace Interlude.Features.Pacemaker
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -13,17 +13,11 @@ type PacemakerOptionsPage() =
     let ruleset_id = Rulesets.current_hash
 
     let existing =
-        if options.Pacemaker.ContainsKey ruleset_id then
-            options.Pacemaker.[ruleset_id]
-        else
-            PacemakerSettings.Default
+        if options.Pacemaker.ContainsKey(ruleset_id) then options.Pacemaker.[ruleset_id] else PacemakerSettings.Default
 
     let mode = Setting.simple existing.Mode
 
-    let accuracy =
-        existing.Accuracy
-        |> Setting.bounded (0.0, 1.0)
-        |> Setting.round 4
+    let accuracy = existing.Accuracy |> Setting.bounded(0.0, 1.0) |> Setting.round 4
 
     let lamp = Setting.simple existing.Lamp
 
@@ -36,24 +30,26 @@ type PacemakerOptionsPage() =
         let lamps =
             seq {
                 let lamp_count = Rulesets.current.Lamps.Length
+
                 for i in 0 .. lamp_count - 1 do
-                    yield i, Rulesets.current.LampName i
+                    yield i, Rulesets.current.LampName(i)
+
                 if lamp_count = 0 then
-                    yield 0, Rulesets.current.LampName 0
+                    yield 0, Rulesets.current.LampName(0)
             }
             |> Array.ofSeq
 
         page_container()
             .With(
-                PageSetting(%"gameplay.pacemaker.enable", Checkbox options.EnablePacemaker)
-                    .Pos(0),
+                PageSetting(%"gameplay.pacemaker.enable", Checkbox options.EnablePacemaker).Pos(0),
                 PageSetting(%"gameplay.pacemaker.fail_mid_song", Checkbox options.EnablePacemakerFailMidway)
                     .Help(Help.Info("gameplay.pacemaker.fail_mid_song"))
                     .Pos(2),
                 PageSetting(%"gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
                     .Help(Help.Info("gameplay.pacemaker.onlysavenewrecords"))
                     .Pos(4),
-                PageSetting(%"gameplay.pacemaker.type",
+                PageSetting(
+                    %"gameplay.pacemaker.type",
                     SelectDropdown(
                         [|
                             PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"
@@ -69,14 +65,16 @@ type PacemakerOptionsPage() =
                 PageSetting(%"gameplay.pacemaker.target", SelectDropdown(lamps, lamp))
                     .Pos(9)
                     .Conditional(fun () -> mode.Value = PacemakerMode.Lamp),
-                PageSetting(%"gameplay.pacemaker.use_personal_best",
+                PageSetting(
+                    %"gameplay.pacemaker.use_personal_best",
                     SelectDropdown(
                         [|
                             PacemakerPersonalBestMode.Never, %"gameplay.pacemaker.use_personal_best.never"
                             PacemakerPersonalBestMode.IfBetter, %"gameplay.pacemaker.use_personal_best.if_better"
                             PacemakerPersonalBestMode.Always, %"gameplay.pacemaker.use_personal_best.always"
                         |],
-                        use_personal_best)
+                        use_personal_best
+                    )
                 )
                     .Help(Help.Info("gameplay.pacemaker.use_personal_best"))
                     .Pos(11)

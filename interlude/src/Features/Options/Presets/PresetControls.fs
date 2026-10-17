@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Presets
+namespace Interlude.Features.OptionsMenu.Presets
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -24,7 +24,7 @@ module Presets =
         match Presets.load preset_id with
         | Some _ ->
             SkinPreview.RefreshAll()
-            GameThread.defer (EditPresetPage(preset_id, setting).Show)
+            GameThread.defer(EditPresetPage(preset_id, setting).Show)
         | None -> ()
 
     let load (preset_id: int, _: Setting<Preset option>) : unit =
@@ -32,7 +32,7 @@ module Presets =
         | Some name ->
             SelectedChart.recolor()
             SkinPreview.RefreshAll()
-            Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", name)
+            Notifications.action_feedback(Icons.ALERT_OCTAGON, %"notification.preset_loaded", name)
         | None -> ()
 
     let confirm_if_needed (action: int * Setting<Preset option> -> unit) : int * Setting<Preset option> -> unit =
@@ -40,14 +40,11 @@ module Presets =
             if confirm_before_switch preset_id then
                 match setting.Value with
                 | Some s ->
-                    ConfirmPage(
-                        [ s.Name ] %> "gameplay.preset.load.prompt",
-                        fun () -> action (preset_id, setting)
-                    )
+                    ConfirmPage([ s.Name ] %> "gameplay.preset.load.prompt", fun () -> action(preset_id, setting))
                         .Show()
                 | None -> ()
             else
-                action (preset_id, setting)
+                action(preset_id, setting)
 
 type PresetControls =
 
@@ -55,7 +52,11 @@ type PresetControls =
         Button(
             (fun () ->
                 match setting.Value with
-                | None -> sprintf "%s (%s)" ([preset_id.ToString()] %> "gameplay.preset.default_name") %"gameplay.preset.empty"
+                | None ->
+                    sprintf
+                        "%s (%s)"
+                        ([ preset_id.ToString() ] %> "gameplay.preset.default_name")
+                        %"gameplay.preset.empty"
                 | Some s -> Icons.EDIT_2 + " " + s.Name
             ),
             (fun () -> Presets.confirm_if_needed Presets.load_and_edit (preset_id, setting))
@@ -64,10 +65,7 @@ type PresetControls =
             .Disabled(fun () -> setting.Value.IsNone)
 
     static member private LoadPresetButton(preset_id: int, setting: Setting<Preset option>) : Button =
-        Button(
-            %"gameplay.preset.load",
-            (fun () -> Presets.confirm_if_needed Presets.load (preset_id, setting))
-        )
+        Button(%"gameplay.preset.load", (fun () -> Presets.confirm_if_needed Presets.load (preset_id, setting)))
             .Disabled(fun () -> setting.Value.IsNone)
 
     static member private SavePresetButton(preset_id: int, setting: Setting<Preset option>) : Button =
@@ -76,16 +74,16 @@ type PresetControls =
             (fun () ->
                 match setting.Value with
                 | None ->
-                    let name = [preset_id.ToString()] %> "gameplay.preset.default_name"
+                    let name = [ preset_id.ToString() ] %> "gameplay.preset.default_name"
                     setting.Value <- Presets.create name |> Some
-                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
+                    Notifications.action_feedback(Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
                 | Some existing ->
                     ConfirmPage(
                         [ existing.Name ] %> "gameplay.preset.save.prompt",
                         fun () ->
                             setting.Value <- Presets.save existing |> Some
 
-                            Notifications.action_feedback (
+                            Notifications.action_feedback(
                                 Icons.ALERT_OCTAGON,
                                 %"notification.preset_saved",
                                 existing.Name
@@ -101,16 +99,24 @@ type PresetControls =
             )
 
     static member Create(preset_id: int, setting: Setting<Preset option>) : Widget =
-        NavigationContainer.Column()
+        NavigationContainer
+            .Column()
             .WrapNavigation(false)
             .With(
-                NavigationContainer.Row()
+                NavigationContainer
+                    .Row()
                     .WrapNavigation(false)
                     .With(
-                        PresetControls.LoadPresetButton(preset_id, setting)
-                            .Position(Position.SliceB(40.0f).ShrinkX(Style.PADDING * 2.0f).GridX(1, 2, Style.PADDING * 4.0f)),
-                        PresetControls.SavePresetButton(preset_id, setting)
-                            .Position(Position.SliceB(40.0f).ShrinkX(Style.PADDING * 2.0f).GridX(2, 2, Style.PADDING * 4.0f))
+                        PresetControls
+                            .LoadPresetButton(preset_id, setting)
+                            .Position(
+                                Position.SliceB(40.0f).ShrinkX(Style.PADDING * 2.0f).GridX(1, 2, Style.PADDING * 4.0f)
+                            ),
+                        PresetControls
+                            .SavePresetButton(preset_id, setting)
+                            .Position(
+                                Position.SliceB(40.0f).ShrinkX(Style.PADDING * 2.0f).GridX(2, 2, Style.PADDING * 4.0f)
+                            )
                     )
                     .Conditional(fun () ->
                         options.SelectedPreset.Value <> Some preset_id
@@ -119,8 +125,7 @@ type PresetControls =
                            | None -> true
                     ),
 
-                PresetControls.EditPresetButton(preset_id, setting)
-                    .Position(Position.SliceT(40.0f)),
+                PresetControls.EditPresetButton(preset_id, setting).Position(Position.SliceT(40.0f)),
 
                 Text(sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"))
                     .Color(Colors.text_green)
@@ -132,7 +137,5 @@ type PresetControls =
                            | None -> false
                     ),
 
-                Frame()
-                    .Border(Colors.cyan)
-                    .Fill(Colors.cyan_shadow)
+                Frame().Border(Colors.cyan).Fill(Colors.cyan_shadow)
             )

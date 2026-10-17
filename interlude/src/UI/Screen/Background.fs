@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System
 open SixLabors.ImageSharp.Processing
@@ -10,10 +10,10 @@ open Interlude.Content
 
 module Background =
 
-    let private parallaxX = Animation.Fade 0.0f
-    let private parallaxY = Animation.Fade 0.0f
-    let private parallaxZ = Animation.Fade 40.0f
-    let internal dim_percent = Animation.Fade 1.0f
+    let private parallaxX = Animation.Fade(0.0f)
+    let private parallaxY = Animation.Fade(0.0f)
+    let private parallaxZ = Animation.Fade(40.0f)
+    let internal dim_percent = Animation.Fade(1.0f)
 
     let dim (amount: float32) : unit = dim_percent.Target <- amount
 
@@ -34,7 +34,7 @@ module Background =
                     | Some file ->
 
                         try
-                            use stream = IO.File.OpenRead file
+                            use stream = IO.File.OpenRead(file)
 
                             match Bitmap.from_stream true stream with
                             | None -> return (failwith "Unsupported or invalid image format")
@@ -69,11 +69,18 @@ module Background =
                                         else
                                             Content.ThemeConfig.DefaultAccentColor
 
-                            let true_screen_width = fst (Render.framebuffer_size())
+                            let true_screen_width = fst(Render.framebuffer_size())
 
                             if bmp.Width * 3 / 4 > true_screen_width && true_screen_width > 0 then
                                 bmp.Mutate(fun img -> img.Resize(true_screen_width, 0) |> ignore)
-                            let new_bmp = new Bitmap(bmp.Width, bmp.Height, SixLabors.ImageSharp.PixelFormats.Rgba32(0uy, 0uy, 0uy, 255uy))
+
+                            let new_bmp =
+                                new Bitmap(
+                                    bmp.Width,
+                                    bmp.Height,
+                                    SixLabors.ImageSharp.PixelFormats.Rgba32(0uy, 0uy, 0uy, 255uy)
+                                )
+
                             new_bmp.Mutate(fun img -> img.DrawImage(bmp, 1.0f) |> ignore)
 
                             bmp.Dispose()
@@ -87,22 +94,22 @@ module Background =
             member this.Handle(res) =
                 match res with
                 | Some(bmp, col) ->
-                    let sprite = Sprite.upload_one true LinearSampling (SpriteUpload.OfImage("BACKGROUND", bmp))
+                    let sprite =
+                        Sprite.upload_one true LinearSampling (SpriteUpload.OfImage("BACKGROUND", bmp))
 
                     bmp.Dispose()
                     Palette.accent_color.Target <- col
                     background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
                 | None ->
                     background <-
-                        (Content.Texture "background", Animation.Fade(0.0f, Target = 1.0f), true)
-                        :: background
+                        (Content.Texture("background"), Animation.Fade(0.0f, Target = 1.0f), true) :: background
 
                     Palette.accent_color.Target <- Content.ThemeConfig.DefaultAccentColor
         }
 
     let get_current () : Sprite option =
         match List.tryHead background with
-        | Some (sprite, _, false) -> Some sprite
+        | Some(sprite, _, false) -> Some sprite
         | _ -> None
 
     let load (path: string option) : unit =
@@ -113,15 +120,15 @@ module Background =
 
         loader.Join()
 
-        parallaxX.Update elapsed_ms
-        parallaxY.Update elapsed_ms
-        parallaxZ.Update elapsed_ms
-        dim_percent.Update elapsed_ms
+        parallaxX.Update(elapsed_ms)
+        parallaxY.Update(elapsed_ms)
+        parallaxZ.Update(elapsed_ms)
+        dim_percent.Update(elapsed_ms)
 
         background <-
             List.filter
                 (fun (sprite, fade, is_default) ->
-                    fade.Update elapsed_ms
+                    fade.Update(elapsed_ms)
 
                     if fade.Target = 0.0f && fade.Value < 0.01f then
                         if not is_default then
@@ -135,9 +142,10 @@ module Background =
 
     let drawq (q: Quad, color: Color, depth: float32) : unit =
         Render.quad q Color.Black
+
         List.iter
             (fun (bg: Sprite, fade: Animation.Fade, _) ->
-                let color = color.O4a fade.Alpha
+                let color = color.O4a(fade.Alpha)
                 let pwidth = Render.width() + parallaxZ.Value * depth
                 let pheight = Render.height() + parallaxZ.Value * depth
                 let x = -parallaxX.Value * parallaxZ.Value * depth
@@ -162,8 +170,8 @@ module Background =
             )
             background
 
-    let draw (bounds: Rect, color: Color, depth: float32) : unit = drawq (bounds.AsQuad, color, depth)
+    let draw (bounds: Rect, color: Color, depth: float32) : unit = drawq(bounds.AsQuad, color, depth)
 
     let draw_with_dim (bounds: Rect, color: Color, depth: float32) : unit =
-        draw (bounds, color, depth)
-        Render.rect bounds (Color.Black.O4a dim_percent.Alpha)
+        draw(bounds, color, depth)
+        Render.rect bounds (Color.Black.O4a(dim_percent.Alpha))

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System
 open Percyqaz.Flux.Graphics
@@ -17,6 +17,7 @@ module Transitions =
         | EnterGameplayFadeAudio
         | LeaveGameplay
         | Instant
+
         member this.Duration =
             match this with
             | Default
@@ -28,7 +29,7 @@ module Transitions =
 
     let private fancy_transition (inbound: bool) (amount: float32) (bounds: Rect) =
         let amount = if inbound then amount else 2.0f - amount
-        let a = int (255.0f * (1.0f - Math.Abs(amount - 1.0f)))
+        let a = int(255.0f * (1.0f - Math.Abs(amount - 1.0f)))
         Wedge.variant_2 0.0f 1111.0f (Color.FromArgb(a, 0, 160, 255)) 0.0f 1.8f amount
         Wedge.variant_2 0.0f 1111.0f (Color.FromArgb(a, 0, 200, 255)) 0.1f 1.9f amount
         Wedge.variant_2 0.0f 1111.0f (Color.FromArgb(a, 0, 240, 255)) 0.2f 2.0f amount
@@ -40,31 +41,32 @@ module Transitions =
 
     let private draw_internal (t: Transition) (inbound: bool) (amount: float32) (bounds: Rect) =
         Render.stencil_create false
+
         match t with
         | Instant -> ()
         | Default
         | UnderLogo ->
             DiamondsWipe.draw inbound amount bounds
-            Render.stencil_begin_draw ()
-            Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+            Render.stencil_begin_draw()
+            Background.draw(bounds, Palette.color(255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
 
         | EnterGameplayNoFadeAudio
         | EnterGameplayFadeAudio ->
             TriangleWipe.draw_downward inbound amount bounds
-            Render.stencil_begin_draw ()
-            Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
+            Render.stencil_begin_draw()
+            Background.draw(bounds, Palette.color(255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
 
         | LeaveGameplay ->
             TriangleWipe.draw_upward inbound amount bounds
-            Render.stencil_begin_draw ()
-            Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
+            Render.stencil_begin_draw()
+            Background.draw(bounds, Palette.color(255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
 
-        Render.stencil_finish ()
+        Render.stencil_finish()
 
-    let private in_timer = Animation.Delay 500.0
-    let private out_timer = Animation.Delay 500.0
+    let private in_timer = Animation.Delay(500.0)
+    let private out_timer = Animation.Delay(500.0)
 
-    let mutable current : Transition option = None
+    let mutable current: Transition option = None
 
     let in_progress () = current.IsSome
 
@@ -72,22 +74,17 @@ module Transitions =
         let inbound = not in_timer.Complete
 
         let amount =
-            Math.Clamp(
-                (if inbound then in_timer.Progress else 1.0 - out_timer.Progress),
-                0.0,
-                1.0
-            )
+            Math.Clamp((if inbound then in_timer.Progress else 1.0 - out_timer.Progress), 0.0, 1.0)
 
         if transition_type = EnterGameplayFadeAudio then
-            Audio.change_volume (options.AudioVolume.Value * (1.0 - amount), options.AudioVolume.Value * (1.0 - amount))
+            Audio.change_volume(options.AudioVolume.Value * (1.0 - amount), options.AudioVolume.Value * (1.0 - amount))
 
-        draw_internal transition_type inbound (float32 amount) (bounds.Expand 1.0f)
+        draw_internal transition_type inbound (float32 amount) (bounds.Expand(1.0f))
 
     let animate (func: unit -> unit, transition_type: Transition) : Animation =
 
         match current with
-        | Some _ ->
-            failwith "Should not be called while a transition is already in progress"
+        | Some _ -> failwith "Should not be called while a transition is already in progress"
         | None ->
 
         if transition_type = Instant then
@@ -103,7 +100,7 @@ module Transitions =
             [
                 in_timer
                 Animation.Action(fun () ->
-                    func ()
+                    func()
                     out_timer.FrameSkip()
                 )
                 out_timer
@@ -111,6 +108,8 @@ module Transitions =
                     in_timer.Reset()
                     out_timer.Reset()
                     current <- None
-                    if transition_type = EnterGameplayFadeAudio then Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+
+                    if transition_type = EnterGameplayFadeAudio then
+                        Audio.change_volume(options.AudioVolume.Value, options.AudioVolume.Value)
                 )
             ]

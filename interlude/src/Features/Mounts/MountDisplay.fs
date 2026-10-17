@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Mounts
+namespace Interlude.Features.Mounts
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -26,7 +26,8 @@ type MountDisplay =
                 fun () ->
                     match setting.Value with
                     | Some mount -> EditMountPage(game, mount, setting).Show()
-                    | None -> Mounts.detect_or_drop_folder game (fun path -> CreateMountPage(game, path, setting).Show())
+                    | None ->
+                        Mounts.detect_or_drop_folder game (fun path -> CreateMountPage(game, path, setting).Show())
             )
 
         FrameContainer
@@ -34,9 +35,7 @@ type MountDisplay =
             .Fill(fun () -> if setting.Value.IsSome then game.Color.O2 else Colors.shadow_2)
             .Border(fun () -> if setting.Value.IsSome then game.Color else Colors.cyan_accent)
             .With(
-                Text(game.ToString())
-                    .Align(Alignment.CENTER)
-                    .Position(Position.SliceT(0.0f, 60.0f)),
+                Text(game.ToString()).Align(Alignment.CENTER).Position(Position.SliceT(0.0f, 60.0f)),
                 Text(fun () ->
                     match setting.Value with
                     | Some s ->
@@ -54,18 +53,21 @@ type MountDisplay =
             )
 
     static member CreateAll() : NavigationContainer.Column =
-        NavigationContainer.Column()
+        NavigationContainer
+            .Column()
             .WrapNavigation(false)
             .With(
-                MountDisplay.Create(MountedGameType.Osu, options.OsuMount)
+                MountDisplay
+                    .Create(MountedGameType.Osu, options.OsuMount)
                     .Position(Position.ShrinkT(70.0f).GridY(1, 4, Style.PADDING * 4.0f)),
-                MountDisplay.Create(MountedGameType.Quaver, options.QuaverMount)
+                MountDisplay
+                    .Create(MountedGameType.Quaver, options.QuaverMount)
                     .Position(Position.ShrinkT(70.0f).GridY(2, 4, Style.PADDING * 4.0f)),
-                MountDisplay.Create(MountedGameType.Etterna, options.EtternaMount)
+                MountDisplay
+                    .Create(MountedGameType.Etterna, options.EtternaMount)
                     .Position(Position.ShrinkT(70.0f).GridY(3, 4, Style.PADDING * 4.0f)),
-                MountDisplay.Create(MountedGameType.Stepmania, options.StepmaniaMount)
+                MountDisplay
+                    .Create(MountedGameType.Stepmania, options.StepmaniaMount)
                     .Position(Position.ShrinkT(70.0f).GridY(4, 4, Style.PADDING * 4.0f)),
-                Text(%"imports.mount")
-                    .Align(Alignment.CENTER)
-                    .Position(Position.SliceT(0.0f, 60.0f))
+                Text(%"imports.mount").Align(Alignment.CENTER).Position(Position.SliceT(0.0f, 60.0f))
             )

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Rulesets.Edit
+namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -13,34 +13,28 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     let grade = ruleset.Value.Grades.[id]
     let name = Setting.simple grade.Name
     let color = Setting.simple grade.Color
-    let acc_required = grade.Accuracy |> Setting.bounded (0.0, 1.0) |> Setting.round 6
+    let acc_required = grade.Accuracy |> Setting.bounded(0.0, 1.0) |> Setting.round 6
 
     member this.SaveChanges() =
         let new_grades = ruleset.Value.Grades |> Array.copy
-        new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(acc_required.Value, 6) }
-        ruleset.Set
-            { ruleset.Value with
-                Grades =
-                    new_grades
-                    |> Array.sortBy (fun l -> l.Accuracy)
-            }
+
+        new_grades.[id] <-
+            { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(acc_required.Value, 6) }
+
+        ruleset.Set({ ruleset.Value with Grades = new_grades |> Array.sortBy(fun l -> l.Accuracy) })
 
     override this.Content() =
         this.OnClose(this.SaveChanges)
 
         page_container()
             .With(
-                PageTextEntry(%"rulesets.grade.name", name)
-                    .Pos(0),
-                PageSetting(%"rulesets.grade.color",
-                    ColorPicker(%"rulesets.grade.color", color, false)
-                        .Preview(name.get_Value)
+                PageTextEntry(%"rulesets.grade.name", name).Pos(0),
+                PageSetting(
+                    %"rulesets.grade.color",
+                    ColorPicker(%"rulesets.grade.color", color, false).Preview(name.get_Value)
                 )
                     .Pos(2),
-                PageSetting(%"rulesets.grade.accuracy",
-                    NumberEntry.CreatePercent(acc_required)
-                )
-                    .Pos(4)
+                PageSetting(%"rulesets.grade.accuracy", NumberEntry.CreatePercent(acc_required)).Pos(4)
             )
 
     override this.Title = grade.Name
@@ -51,7 +45,8 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
     let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let rec grade_controls (i: int, g: Grade) =
-        NavigationContainer.Row()
+        NavigationContainer
+            .Row()
             .With(
                 PageButton(g.Name, fun () -> EditGradePage(ruleset, i).Show())
                     .TextColor(g.Color)
@@ -59,40 +54,33 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                 Button(
                     Icons.TRASH,
                     (fun () ->
-                        ConfirmPage(
-                            [g.Name] %> "rulesets.grade.confirm_delete",
-                            fun () -> delete_grade i
-                        ).Show()
+                        ConfirmPage([ g.Name ] %> "rulesets.grade.confirm_delete", fun () -> delete_grade i).Show()
                     )
                 )
                     .TextColor(Colors.red_accent)
                     .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
             )
 
-    and refresh() =
+    and refresh () =
         container.Clear()
+
         for i, g in ruleset.Value.Grades |> Seq.indexed |> Seq.rev do
-            container.Add (grade_controls (i, g))
+            container.Add(grade_controls(i, g))
+
         container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.grade.add", add_grade)
 
-    and add_grade() =
-        let new_grade =
-            {
-                Name = "???"
-                Color = Color.White
-                Accuracy = 0.0
-            }
-        ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.append [| new_grade |] }
+    and add_grade () =
+        let new_grade = { Name = "???"; Color = Color.White; Accuracy = 0.0 }
+        ruleset.Set({ ruleset.Value with Grades = ruleset.Value.Grades |> Array.append [| new_grade |] })
         GameThread.defer refresh
 
-    and delete_grade(i: int) : unit =
-        ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.removeAt i }
+    and delete_grade (i: int) : unit =
+        ruleset.Set({ ruleset.Value with Grades = ruleset.Value.Grades |> Array.removeAt i })
         refresh()
 
     override this.Content() =
         refresh()
-        ScrollContainer(container)
-            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.grades"
     override this.OnReturnFromNestedPage() = refresh()

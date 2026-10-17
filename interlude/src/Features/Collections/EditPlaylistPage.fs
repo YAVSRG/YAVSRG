@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Collections
+namespace Interlude.Features.Collections
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -17,8 +17,13 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
             if Content.Collections.RenamePlaylist(name, new_name.Value) then
                 CollectionActions.collection_modified_ev.Trigger()
             else
-                Notifications.action_feedback (Icons.X, %"notification.collection_rename_failed.title", %"notification.collection_rename_failed.body")
-                Logging.Debug "Rename failed, maybe that name already exists?"
+                Notifications.action_feedback(
+                    Icons.X,
+                    %"notification.collection_rename_failed.title",
+                    %"notification.collection_rename_failed.body"
+                )
+
+                Logging.Debug("Rename failed, maybe that name already exists?")
 
     override this.Content() =
 
@@ -26,19 +31,19 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
 
         page_container()
             .With(
-                PageTextEntry(%"collections.edit.playlist_name", new_name)
-                    .Pos(0),
-                PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon))
-                    .Pos(2),
-                PageButton(%"collections.edit.delete", fun () ->
-                    ConfirmPage(
-                        [ name ] %> "misc.confirmdelete",
-                        fun () ->
-                            if Content.Collections.Delete name then
-                                CollectionActions.collection_modified_ev.Trigger()
-                                Menu.Back()
-                    )
-                        .Show()
+                PageTextEntry(%"collections.edit.playlist_name", new_name).Pos(0),
+                PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon)).Pos(2),
+                PageButton(
+                    %"collections.edit.delete",
+                    fun () ->
+                        ConfirmPage(
+                            [ name ] %> "misc.confirmdelete",
+                            fun () ->
+                                if Content.Collections.Delete(name) then
+                                    CollectionActions.collection_modified_ev.Trigger()
+                                    Menu.Back()
+                        )
+                            .Show()
                 )
                     .TextColor(Colors.red_accent)
                     .Icon(Icons.TRASH)

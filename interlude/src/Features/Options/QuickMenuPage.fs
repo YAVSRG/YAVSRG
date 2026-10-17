@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu
+namespace Interlude.Features.OptionsMenu
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
@@ -27,9 +27,7 @@ type QuickMenuPage() =
                     .Hotkey(Bind.mk Keys.H)
                     .Icon(Icons.ZAP)
                     .Pos(5),
-                PageButton(%"system.hotkeys", fun () -> HotkeysPage().Show())
-                    .Hotkey(Bind.mk Keys.K)
-                    .Pos(8)
+                PageButton(%"system.hotkeys", fun () -> HotkeysPage().Show()).Hotkey(Bind.mk Keys.K).Pos(8)
             )
         :> Widget
 
@@ -46,8 +44,10 @@ type QuickMenuPage() =
     override this.Direction = PageEasing.Right
     override this.Title = %"menu.quick"
     override this.OnReturnFromNestedPage() = Menu.Back()
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         release_cooldown <- release_cooldown - elapsed_ms
+
         if release_cooldown < 0.0 && (%%"quick_menu").Released() then
             Menu.Back()

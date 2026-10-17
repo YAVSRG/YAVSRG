@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Mounts
+namespace Interlude.Features.Mounts
 
 open System.IO
 open Percyqaz.Common
@@ -19,12 +19,14 @@ type MountedGameType =
     | Quaver
     | Etterna
     | Stepmania
+
     override this.ToString() =
         match this with
         | Osu -> "osu!mania"
         | Quaver -> "Quaver"
         | Etterna -> "Etterna"
         | Stepmania -> "Stepmania"
+
     member this.Color =
         match this with
         | Osu -> Color.FromArgb(0xFF_FF79B8)
@@ -38,10 +40,7 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
     let info =
         match game with
         | MountedGameType.Osu ->
-            Callout.Normal
-                .Icon(Icons.FOLDER_PLUS)
-                .Title(%"mount.create.osu.prompt")
-                .Body(%"mount.create.folder_hint")
+            Callout.Normal.Icon(Icons.FOLDER_PLUS).Title(%"mount.create.osu.prompt").Body(%"mount.create.folder_hint")
         | MountedGameType.Quaver ->
             Callout.Normal
                 .Icon(Icons.FOLDER_PLUS)
@@ -59,19 +58,21 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
                 .Body(%"mount.create.folder_hint")
 
     override this.Content() =
-        let path_chosen(path: string) : unit =
+        let path_chosen (path: string) : unit =
             match game, path with
             | MountedGameType.Osu, PackFolder
             | MountedGameType.Quaver, PackFolder
             | MountedGameType.Stepmania, FolderOfPacks
-            | MountedGameType.Etterna, FolderOfPacks -> Menu.Back(); callback path;
+            | MountedGameType.Etterna, FolderOfPacks ->
+                Menu.Back()
+                callback path
 
             | MountedGameType.Osu, _ -> Notifications.error(%"mount.create.osu.error", "")
             | MountedGameType.Quaver, _ -> Notifications.error(%"mount.create.quaver.error", "")
             | MountedGameType.Stepmania, _ -> Notifications.error(%"mount.create.stepmania.error", "")
             | MountedGameType.Etterna, _ -> Notifications.error(%"mount.create.etterna.error", "")
-            
-        let choose_path() : unit =
+
+        let choose_path () : unit =
             FileDialog.pick_folder(
                 null,
                 function
@@ -80,11 +81,7 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
                 | FileDialogResult.Error -> Notifications.error(%"notification.file_picker_error", "")
             )
 
-        page_container()
-            .With(
-                PageButton(%"mount.choose_folder", choose_path).Pos(6),
-                CalloutCard(info).Pos(0)
-            )
+        page_container().With(PageButton(%"mount.choose_folder", choose_path).Pos(6), CalloutCard(info).Pos(0))
 
     override this.Title = %"mount.folder_not_detected"
 
@@ -92,10 +89,12 @@ module Mounts =
 
     let init () =
 
-        let import_mount_if_auto_enabled(mount: Setting<MountedChartSource option>, name: string, moved_warning: string) =
+        let import_mount_if_auto_enabled
+            (mount: Setting<MountedChartSource option>, name: string, moved_warning: string)
+            =
             match mount.Value with
             | Some mount ->
-                if Directory.Exists mount.SourceFolder then
+                if Directory.Exists(mount.SourceFolder) then
                     if mount.ImportOnStartup then
                         Logging.Info "Checking for new %s songs to import.." name
                         let task = Mount.import_new(mount, Content.Library, ignore)
@@ -104,6 +103,7 @@ module Mounts =
                     Logging.Warn
                         "%s Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
                         name
+
                     Notifications.error(moved_warning, %"notification.mount_moved.body")
             | None -> ()
 
@@ -122,29 +122,31 @@ module Mounts =
     let detect_or_drop_folder (game: MountedGameType) (callback: string -> unit) =
         let location = auto_detect_location game
 
-        if Directory.Exists location then
-            callback location
-        else
-            MountFolderPickerPage(game, callback).Show()
+        if Directory.Exists(location) then callback location else MountFolderPickerPage(game, callback).Show()
 
     let import_osu_scores (osu_mount: MountedChartSource, notify_start: bool) : unit =
 
         let task_tracking = TaskTracking.add %"mount.import_osu_scores"
+
         let task =
-            let import_task = Scores.import_osu_scores_async(Path.GetDirectoryName osu_mount.SourceFolder, Content.Library, task_tracking.set_Progress)
+            let import_task =
+                Scores.import_osu_scores_async(
+                    Path.GetDirectoryName(osu_mount.SourceFolder),
+                    Content.Library,
+                    task_tracking.set_Progress
+                )
+
             async {
                 let! result = import_task
-                Notifications.task_feedback (
+
+                Notifications.task_feedback(
                     Icons.FOLDER_PLUS,
                     %"notification.score_import_success",
                     [ result.NewScores.ToString(); result.Maps.ToString() ] %> "notification.score_import_success.body"
                 )
             }
+
         general_task_queue.Request(task, ignore)
 
         if notify_start then
-            Notifications.system_feedback (
-                Icons.ALERT_OCTAGON,
-                %"notification.score_import_queued",
-                ""
-            )
+            Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.score_import_queued", "")

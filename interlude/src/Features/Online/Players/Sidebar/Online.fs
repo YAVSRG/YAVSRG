@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online.Players
+namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
@@ -15,7 +15,7 @@ type private OnlineList() =
                         GameThread.defer
                         <| fun () ->
                             match response with
-                            | Some result -> this.SetData result
+                            | Some result -> this.SetData(result)
                             | None -> this.ServerError()
                     )
                 else

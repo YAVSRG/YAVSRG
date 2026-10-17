@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System.Runtime.CompilerServices
 open Percyqaz.Common
@@ -11,15 +11,15 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
     inherit
         Container(
             NodeType.Button(fun _ ->
-                if not (this.Disabled()) then
+                if not(this.Disabled()) then
                     Style.click.Play()
-                    on_click ()
+                    on_click()
             )
         )
 
-    member val Icon : string = "" with get, set
-    member val Hotkey : Bind = Bind.Dummy with get, set
-    member val TextColor : unit -> Color * Color = K Colors.text with get, set
+    member val Icon: string = "" with get, set
+    member val Hotkey: Bind = Bind.Dummy with get, set
+    member val TextColor: unit -> Color * Color = K Colors.text with get, set
     member val Disabled = K false with get, set
 
     override this.Init(parent: Widget) =
@@ -49,16 +49,17 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
                     .Position(Position.Shrink(15.0f, Style.PADDING))
             )
 
-        base.Init parent
+        base.Init(parent)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        if this.Hotkey.Pressed() && not (this.Disabled()) then
+
+        if this.Hotkey.Pressed() && not(this.Disabled()) then
             Style.click.Play()
-            on_click ()
+            on_click()
 
     override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
     override this.Draw() =
@@ -69,6 +70,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
 
     static member Once(localised_text: string, action: unit -> unit) =
         let mutable clicked = false
+
         PageButton(
             localised_text,
             (fun () ->
@@ -80,6 +82,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
 
     static member Once(localised_text: string, action: unit -> unit, disabled: unit -> bool) =
         let mutable clicked = false
+
         PageButton(
             localised_text,
             (fun () ->
@@ -92,51 +95,51 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
 type PageButtonExtensions =
 
     [<Extension>]
-    static member Icon (button: PageButton, icon: string) : PageButton =
+    static member Icon(button: PageButton, icon: string) : PageButton =
         button.Icon <- icon
         button
 
     [<Extension>]
-    static member Hotkey (button: PageButton, hotkey: Hotkey) : PageButton =
+    static member Hotkey(button: PageButton, hotkey: Hotkey) : PageButton =
         button.Hotkey <- %%hotkey
         button
 
     [<Extension>]
-    static member Hotkey (button: PageButton, hotkey: Bind) : PageButton =
+    static member Hotkey(button: PageButton, hotkey: Bind) : PageButton =
         button.Hotkey <- hotkey
         button
 
     [<Extension>]
-    static member Disabled (button: PageButton) : PageButton =
+    static member Disabled(button: PageButton) : PageButton =
         button.Disabled <- K true
         button
 
     [<Extension>]
-    static member Disabled (button: PageButton, d: bool) : PageButton =
+    static member Disabled(button: PageButton, d: bool) : PageButton =
         button.Disabled <- K d
         button
 
     [<Extension>]
-    static member Disabled (button: PageButton, d: unit -> bool) : PageButton =
+    static member Disabled(button: PageButton, d: unit -> bool) : PageButton =
         button.Disabled <- d
         button
 
     [<Extension>]
-    static member TextColor (button: PageButton, color: Color * Color) : PageButton =
+    static member TextColor(button: PageButton, color: Color * Color) : PageButton =
         button.TextColor <- K color
         button
 
     [<Extension>]
-    static member TextColor (button: PageButton, color: Color) : PageButton =
-        button.TextColor <- K (color, Colors.shadow_2)
+    static member TextColor(button: PageButton, color: Color) : PageButton =
+        button.TextColor <- K(color, Colors.shadow_2)
         button
 
     [<Extension>]
-    static member TextColor (button: PageButton, color: unit -> Color * Color) : PageButton =
+    static member TextColor(button: PageButton, color: unit -> Color * Color) : PageButton =
         button.TextColor <- color
         button
 
     [<Extension>]
-    static member TextColor (button: PageButton, color: unit -> Color) : PageButton =
+    static member TextColor(button: PageButton, color: unit -> Color) : PageButton =
         button.TextColor <- fun () -> (color(), Colors.shadow_2)
         button

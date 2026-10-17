@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Rulesets.Edit
+namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -21,7 +21,7 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
         | AccuracyPoints.PointsPerJudgement _ -> 4
         |> Setting.simple
 
-    let points_per_judgement : float array =
+    let points_per_judgement: float array =
         match ruleset.Value.Accuracy with
         | AccuracyPoints.WifeCurve _ -> Array.create ruleset.Value.Judgements.Length 1.0
         | AccuracyPoints.PointsPerJudgement p -> p
@@ -29,15 +29,16 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
     let decimal_places = Setting.simple ruleset.Value.Formatting.DecimalPlaces
 
     member this.SaveChanges() =
-        ruleset.Set
+        ruleset.Set(
             { ruleset.Value with
                 Formatting = { DecimalPlaces = decimal_places.Value }
                 Accuracy =
                     if is_wife_curve.Value then
-                        AccuracyPoints.WifeCurve wife_judge.Value
+                        AccuracyPoints.WifeCurve(wife_judge.Value)
                     else
-                        AccuracyPoints.PointsPerJudgement points_per_judgement
+                        AccuracyPoints.PointsPerJudgement(points_per_judgement)
             }
+        )
 
     override this.Content() =
         this.OnClose(this.SaveChanges)
@@ -46,24 +47,35 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
 
         for i, j in ruleset.Value.Judgements |> Array.indexed do
             let setting =
-                Setting.make
-                    (fun v -> points_per_judgement.[i] <- v)
-                    (fun () -> points_per_judgement.[i])
-                |> Setting.bound (-10.0, 1.0)
-            judgements_container.Add (PageSetting(j.Name, NumberEntry.Create setting))
+                Setting.make (fun v -> points_per_judgement.[i] <- v) (fun () -> points_per_judgement.[i])
+                |> Setting.bound(-10.0, 1.0)
+
+            judgements_container.Add(PageSetting(j.Name, NumberEntry.Create(setting)))
 
         page_container()
             .With(
-                PageSetting(%"rulesets.accuracy.decimal_places",
-                    SelectDropdown([| DecimalPlaces.TWO, "2"; DecimalPlaces.THREE, "3"; DecimalPlaces.FOUR, "4" |], decimal_places)
+                PageSetting(
+                    %"rulesets.accuracy.decimal_places",
+                    SelectDropdown(
+                        [| DecimalPlaces.TWO, "2"; DecimalPlaces.THREE, "3"; DecimalPlaces.FOUR, "4" |],
+                        decimal_places
+                    )
                 )
                     .Pos(0),
-                PageSetting(%"rulesets.accuracy.accuracy_type",
-                    SelectDropdown([| true, "Wife3"; false, %"rulesets.accuracy.accuracy_type.points_per_judgement" |], is_wife_curve)
+                PageSetting(
+                    %"rulesets.accuracy.accuracy_type",
+                    SelectDropdown(
+                        [|
+                            true, "Wife3"
+                            false, %"rulesets.accuracy.accuracy_type.points_per_judgement"
+                        |],
+                        is_wife_curve
+                    )
                 )
                     .Pos(3),
-                PageSetting(%"rulesets.accuracy.wife_judge",
-                    SelectDropdown([| 4, "4"; 5, "5"; 6, "6"; 7, "7"; 8, "8"; 9, "JUSTICE"|], wife_judge)
+                PageSetting(
+                    %"rulesets.accuracy.wife_judge",
+                    SelectDropdown([| 4, "4"; 5, "5"; 6, "6"; 7, "7"; 8, "8"; 9, "JUSTICE" |], wife_judge)
                 )
                     .Conditional(is_wife_curve.Get)
                     .Pos(5),
@@ -72,4 +84,5 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
                     .Conditional(is_wife_curve.Get >> not)
                     .Pos(5, PAGE_BOTTOM - 5)
             )
+
     override this.Title = %"rulesets.edit.accuracy"

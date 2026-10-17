@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online.Players
+namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
@@ -16,7 +16,7 @@ type private FriendList() =
                         GameThread.defer
                         <| fun () ->
                             match response with
-                            | Some result -> this.SetData result
+                            | Some result -> this.SetData(result)
                             | None -> this.ServerError()
                     )
                 else
@@ -50,5 +50,5 @@ type private FriendList() =
         )
 
     override this.Init(parent: Widget) =
-        base.Init parent
+        base.Init(parent)
         Players.friends_changed <- this.Reload

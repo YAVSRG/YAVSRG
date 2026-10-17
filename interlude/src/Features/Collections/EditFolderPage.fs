@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Collections
+namespace Interlude.Features.Collections
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -17,28 +17,33 @@ type EditFolderPage(name: string, folder: Folder) =
             if Content.Collections.RenameCollection(name, new_name.Value) then
                 CollectionActions.collection_modified_ev.Trigger()
             else
-                Notifications.action_feedback (Icons.X, %"notification.collection_rename_failed.title", %"notification.collection_rename_failed.body")
-                Logging.Debug "Rename failed, maybe that name already exists?"
+                Notifications.action_feedback(
+                    Icons.X,
+                    %"notification.collection_rename_failed.title",
+                    %"notification.collection_rename_failed.body"
+                )
+
+                Logging.Debug("Rename failed, maybe that name already exists?")
 
     override this.Content() =
         this.OnClose(this.SaveChanges)
 
         page_container()
             .With(
-                PageTextEntry(%"collections.edit.folder_name", new_name)
-                    .Pos(0),
-                PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
-                    .Pos(2),
-                PageButton(%"collections.edit.delete", fun () ->
-                    ConfirmPage(
-                        [ name ] %> "misc.confirmdelete",
-                        fun () ->
-                            // todo: these operations should live in Actions.fs and collection_modified_ev should be private
-                            if Content.Collections.Delete name then
-                                CollectionActions.collection_modified_ev.Trigger()
-                                Menu.Back()
-                    )
-                        .Show()
+                PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0),
+                PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon)).Pos(2),
+                PageButton(
+                    %"collections.edit.delete",
+                    fun () ->
+                        ConfirmPage(
+                            [ name ] %> "misc.confirmdelete",
+                            fun () ->
+                                // todo: these operations should live in Actions.fs and collection_modified_ev should be private
+                                if Content.Collections.Delete(name) then
+                                    CollectionActions.collection_modified_ev.Trigger()
+                                    Menu.Back()
+                        )
+                            .Show()
                 )
                     .TextColor(Colors.red_accent)
                     .Icon(Icons.TRASH)

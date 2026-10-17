@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -16,24 +16,23 @@ type PageSetting(localised_text, widget: Widget) as this =
             w.Position <- Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING).ShrinkR(Style.PADDING * 2.0f)
 
             if this.Initialised then
-                w.Init this
+                w.Init(this)
 
                 if old_widget.Focused then
-                    w.Focus false
+                    w.Focus(false)
 
     override this.Init(parent: Widget) =
-        this
-            .Add(
-                Text(localised_text + ":")
-                    .Color(fun () -> if widget.Focused then Colors.text_yellow_2 else Colors.text)
-                    .Align(Alignment.LEFT)
-                    .Position(Position.SliceT(PAGE_ITEM_HEIGHT).SliceL(PAGE_LABEL_WIDTH).ShrinkY(Style.PADDING).ShrinkL(15.0f))
-            )
+        this.Add(
+            Text(localised_text + ":")
+                .Color(fun () -> if widget.Focused then Colors.text_yellow_2 else Colors.text)
+                .Align(Alignment.LEFT)
+                .Position(
+                    Position.SliceT(PAGE_ITEM_HEIGHT).SliceL(PAGE_LABEL_WIDTH).ShrinkY(Style.PADDING).ShrinkL(15.0f)
+                )
+        )
 
-        base.Init parent
-        widget
-            .Position(Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING))
-            .Init(this)
+        base.Init(parent)
+        widget.Position(Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING)).Init(this)
 
     override this.Draw() =
         if widget.Selected then

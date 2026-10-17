@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System
 open Percyqaz.Flux.Graphics
@@ -11,13 +11,13 @@ module LoadingIndicator =
         inherit StaticWidget(NodeType.None)
 
         let animation = Animation.Counter(1500.0)
-        let fade = Animation.Fade 0.0f
+        let fade = Animation.Fade(0.0f)
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
-            animation.Update elapsed_ms
-            fade.Target <- if is_loading () then 1.0f else 0.0f
-            fade.Update elapsed_ms
+            animation.Update(elapsed_ms)
+            fade.Target <- if is_loading() then 1.0f else 0.0f
+            fade.Update(elapsed_ms)
 
         override this.Draw() =
             if fade.Alpha = 0 then
@@ -27,27 +27,26 @@ module LoadingIndicator =
                 let tick_width = this.Bounds.Width * 0.2f
 
                 let pos =
-                    -tick_width
-                    + (this.Bounds.Width + tick_width) * float32 animation.Progress
+                    -tick_width + (this.Bounds.Width + tick_width) * float32 animation.Progress
 
                 Render.rect_edges
                     (this.Bounds.Left + max 0.0f pos)
                     this.Bounds.Top
                     (this.Bounds.Left + min this.Bounds.Width (pos + tick_width))
                     this.Bounds.Bottom
-                    (Colors.white.O4a fade.Alpha)
+                    (Colors.white.O4a(fade.Alpha))
 
     type Border(is_loading: unit -> bool) =
         inherit StaticWidget(NodeType.None)
 
         let animation = Animation.Counter(1500.0)
-        let fade = Animation.Fade 0.0f
+        let fade = Animation.Fade(0.0f)
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
-            animation.Update elapsed_ms
-            fade.Target <- if is_loading () then 1.0f else 0.0f
-            fade.Update elapsed_ms
+            animation.Update(elapsed_ms)
+            fade.Target <- if is_loading() then 1.0f else 0.0f
+            fade.Update(elapsed_ms)
 
         override this.Draw() =
             if fade.Alpha = 0 then
@@ -55,7 +54,7 @@ module LoadingIndicator =
             else
 
                 let b = this.Bounds.Expand(Style.PADDING)
-                LoadingAnimation.draw_border b (float32 animation.Progress) (Colors.white.O4a fade.Alpha)
+                LoadingAnimation.draw_border b (float32 animation.Progress) (Colors.white.O4a(fade.Alpha))
 
 type WIP() as this =
     inherit StaticWidget(NodeType.None)
@@ -83,7 +82,7 @@ type WIP() as this =
                 10.0f
                 (if i % 2 = 1 then Color.Yellow else Color.Black)
 
-        Text.fill_b (Style.font, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)
+        Text.fill_b(Style.font, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)
 
 // todo: give empty states an optional action
 type EmptyState(icon: string, text: string) =
@@ -92,9 +91,15 @@ type EmptyState(icon: string, text: string) =
     member val Subtitle = "" with get, set
 
     override this.Draw() =
-        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), Colors.text_greyout, Alignment.CENTER)
+        Text.fill_b(
+            Style.font,
+            icon,
+            this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f),
+            Colors.text_greyout,
+            Alignment.CENTER
+        )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             text,
             this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(175.0f).SliceT(60.0f),
@@ -102,7 +107,7 @@ type EmptyState(icon: string, text: string) =
             Alignment.CENTER
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             this.Subtitle,
             this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(230.0f).SliceT(40.0f),
@@ -129,14 +134,14 @@ type LoadingState() =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        animation.Update elapsed_ms
+        animation.Update(elapsed_ms)
 
     override this.Draw() =
         let color = (!*Palette.LIGHT, !*Palette.DARKER)
         let icon = animation_frames.[animation.Loops % animation_frames.Length]
-        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), color, Alignment.CENTER)
+        Text.fill_b(Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), color, Alignment.CENTER)
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             this.Text,
             this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(175.0f).SliceT(60.0f),
@@ -160,11 +165,6 @@ type NewAndShiny() =
             (x + r * a, y - r * b)
 
         for i = 0 to 29 do
-            Render.quad_points
-                (x, y)
-                (x, y)
-                (vec i)
-                (vec (i + 1))
-                Colors.red_accent
+            Render.quad_points (x, y) (x, y) (vec i) (vec(i + 1)) Colors.red_accent
 
-        Text.fill_b (Style.font, this.Icon, Rect.FromSize(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)
+        Text.fill_b(Style.font, this.Icon, Rect.FromSize(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)

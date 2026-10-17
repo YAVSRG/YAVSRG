@@ -18,18 +18,25 @@ open Interlude.Features.Rulesets
 module LibraryActions =
 
     let recalculate_pbs () : unit =
-        let rulesets = Rulesets.list() |> Seq.map (fun (_, rs) -> Ruleset.hash rs, rs) |> Array.ofSeq
+        let rulesets =
+            Rulesets.list() |> Seq.map(fun (_, rs) -> Ruleset.hash rs, rs) |> Array.ofSeq
+
         let task_tracking = TaskTracking.add %"library.recalculate_personal_bests"
-        let task = PersonalBests.recalculate(rulesets, false, Content.Library, task_tracking.set_Progress)
-        general_task_queue.Request(task, fun () ->
-            Notifications.system_feedback (
-                Icons.ALERT_OCTAGON,
-                %"notification.score_recalculation_complete.title",
-                ""
-            )
+
+        let task =
+            PersonalBests.recalculate(rulesets, false, Content.Library, task_tracking.set_Progress)
+
+        general_task_queue.Request(
+            task,
+            fun () ->
+                Notifications.system_feedback(
+                    Icons.ALERT_OCTAGON,
+                    %"notification.score_recalculation_complete.title",
+                    ""
+                )
         )
 
-        Notifications.system_feedback (
+        Notifications.system_feedback(
             Icons.ALERT_OCTAGON,
             %"notification.score_recalculation_started.title",
             %"notification.score_recalculation_started.body"
@@ -38,15 +45,14 @@ module LibraryActions =
     let recalculate_patterns () : unit =
         let task_tracking = TaskTracking.add %"library.recache_patterns"
         let task = Patterns.recalculate(Content.Charts, task_tracking.set_Progress)
-        general_task_queue.Request(task, fun () ->
-            Notifications.system_feedback (
-                Icons.ALERT_OCTAGON,
-                %"notification.pattern_cache_complete.title",
-                ""
-            )
+
+        general_task_queue.Request(
+            task,
+            fun () ->
+                Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.pattern_cache_complete.title", "")
         )
 
-        Notifications.system_feedback (
+        Notifications.system_feedback(
             Icons.ALERT_OCTAGON,
             %"notification.pattern_cache_started.title",
             %"notification.pattern_cache_started.body"
@@ -55,12 +61,10 @@ module LibraryActions =
     let vacuum () : unit =
         let task_tracking = TaskTracking.add %"library.vacuum"
         let task = Vacuum.vacuum_charts(true, Content.Charts, task_tracking.set_Progress)
-        general_task_queue.Request(task, fun () ->
-            Notifications.system_feedback (
-                Icons.ALERT_OCTAGON,
-                %"notification.vacuum_complete.title",
-                ""
-            )
+
+        general_task_queue.Request(
+            task,
+            fun () -> Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.vacuum_complete.title", "")
         )
 
 type LibraryPage() =
@@ -75,40 +79,32 @@ type LibraryPage() =
             .Help(Help.Info("library.tables"))
 
     static member ManageRulesets() : PageButton =
-        PageButton(%"rulesets", fun () -> SelectRulesetPage().Show())
-            .Help(Help.Info("rulesets"))
+        PageButton(%"rulesets", fun () -> SelectRulesetPage().Show()).Help(Help.Info("rulesets"))
 
     static member RecachePatterns() : PageButton =
         PageButton
-            .Once(
-                %"library.recache_patterns",
-                LibraryActions.recalculate_patterns
-            )
+            .Once(%"library.recache_patterns", LibraryActions.recalculate_patterns)
             .Help(Help.Info("library.recache_patterns"))
 
     static member RecalculateScores() : PageButton =
         PageButton
-            .Once(
-                %"library.recalculate_personal_bests",
-                LibraryActions.recalculate_pbs
-            )
+            .Once(%"library.recalculate_personal_bests", LibraryActions.recalculate_pbs)
             .Help(Help.Info("library.recalculate_personal_bests"))
 
     static member Imports() : PageButton =
-        PageButton(%"menu.import", fun () -> ImportsPage().Show())
-            .Icon(Icons.DOWNLOAD)
+        PageButton(%"menu.import", fun () -> ImportsPage().Show()).Icon(Icons.DOWNLOAD)
 
     static member LevelSelectOptions() : PageButton =
         PageButton(%"levelselect.options", fun () -> LevelSelectOptionsPage().Show())
 
     static member Vacuum() : PageButton =
-        PageButton.Once(%"library.vacuum", LibraryActions.vacuum)
-            .Help(Help.Info("library.vacuum"))
+        PageButton.Once(%"library.vacuum", LibraryActions.vacuum).Help(Help.Info("library.vacuum"))
 
     override this.Content() =
 
         let main_options =
-            NavigationContainer.Column()
+            NavigationContainer
+                .Column()
                 .WrapNavigation(false)
                 .Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })
                 .With(
@@ -120,7 +116,7 @@ type LibraryPage() =
                     LibraryPage.RecachePatterns().Pos(11, 2, PageWidth.Full),
                     LibraryPage.RecalculateScores().Pos(13, 2, PageWidth.Full),
                     LibraryPage.Vacuum().Pos(15, 2, PageWidth.Full),
-                    Text([Content.Library.Charts.Entries.Count.ToString()] %> "library.chart_count")
+                    Text([ Content.Library.Charts.Entries.Count.ToString() ] %> "library.chart_count")
                         .Align(Alignment.LEFT)
                         .TextPos(21),
                     Text(%"library.import_in_progress_hint")
@@ -130,12 +126,13 @@ type LibraryPage() =
                         .TextPosSmall(20)
                 )
 
-        NavigationContainer.Row()
+        NavigationContainer
+            .Row()
             .With(
-                main_options
-                    .Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f }),
+                main_options.Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f }),
 
-                MountDisplay.CreateAll()
+                MountDisplay
+                    .CreateAll()
                     .Position(Position.Shrink(PAGE_MARGIN_X).SliceR(MountDisplay.WIDTH).SliceY(MountDisplay.ALL_HEIGHT))
             )
 

@@ -32,38 +32,43 @@ type ImportsPage() =
         PageButton(%"skins.import_from_osu", fun () -> OsuSkinsListPage(FileDrop.import_osu_skin_folder).Show())
 
     static member ImportFromFile() : PageButton =
-        PageButton(%"imports.from_file", fun () ->
-            FileDialog.pick_file(
-                null,
-                "osz,osu,qp,qua,zip,sm;osk,isk;osr",
-                function
-                | FileDialogResult.Ok path -> FileDrop.handle path
-                | FileDialogResult.Cancelled -> ()
-                | FileDialogResult.Error -> () // error toast
-            )
+        PageButton(
+            %"imports.from_file",
+            fun () ->
+                FileDialog.pick_file(
+                    null,
+                    "osz,osu,qp,qua,zip,sm;osk,isk;osr",
+                    function
+                    | FileDialogResult.Ok path -> FileDrop.handle path
+                    | FileDialogResult.Cancelled -> ()
+                    | FileDialogResult.Error -> () // error toast
+                )
         )
             .Icon(Icons.FILE_PLUS)
 
     static member ImportFromFolder() : PageButton =
-        PageButton(%"imports.from_folder", fun () ->
-            FileDialog.pick_folder(
-                null,
-                function
-                | FileDialogResult.Ok path -> FileDrop.handle path
-                | FileDialogResult.Cancelled -> ()
-                | FileDialogResult.Error -> () // error toast
-            )
+        PageButton(
+            %"imports.from_folder",
+            fun () ->
+                FileDialog.pick_folder(
+                    null,
+                    function
+                    | FileDialogResult.Ok path -> FileDrop.handle path
+                    | FileDialogResult.Cancelled -> ()
+                    | FileDialogResult.Error -> () // error toast
+                )
         )
             .Icon(Icons.FOLDER_PLUS)
 
     override this.Content() =
         let lhs_actions =
-            NavigationContainer.Column()
+            NavigationContainer
+                .Column()
                 .WrapNavigation(false)
                 .With(
                     ImportsPage.ImportFromFile().Pos(0, 2, PageWidth.Full),
                     ImportsPage.ImportFromFolder().Pos(2, 2, PageWidth.Full),
-                    
+
                     ImportsPage.GetOsuSongs().Pos(5, 2, PageWidth.Full),
                     ImportsPage.GetEtternaPacks().Pos(7, 2, PageWidth.Full),
                     ImportsPage.GetSkins().Pos(9, 2, PageWidth.Full),
@@ -74,16 +79,18 @@ type ImportsPage() =
                     PageButton(%"library.tables", fun () -> SelectTablePage(ignore).Show()).Pos(19, 2, PageWidth.Full)
                 )
 
-        NavigationContainer.Row()
+        NavigationContainer
+            .Row()
             .With(
-                lhs_actions
-                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentL(0.5f)),
-                MountDisplay.CreateAll()
+                lhs_actions.Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentL(0.5f)),
+                MountDisplay
+                    .CreateAll()
                     .Position(Position.Shrink(PAGE_MARGIN_X).SliceR(MountDisplay.WIDTH).SliceY(MountDisplay.ALL_HEIGHT))
             )
 
     override this.Footer() =
-        Container.Create(base.Footer())
+        Container
+            .Create(base.Footer())
             .With(
                 Text(Icons.INFO + " " + %"imports.drag_and_drop_hint")
                     .Align(Alignment.RIGHT)
