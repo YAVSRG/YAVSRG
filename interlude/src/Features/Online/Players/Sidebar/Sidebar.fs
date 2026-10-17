@@ -12,17 +12,18 @@ type PlayerListSidebar =
     static member Create() =
         let list_container = SwapContainer()
 
-        let tab_options : (Widget * string) array =
+        let tab_options: (Widget * string) array =
             [|
                 OnlineList(), %"online.players.online"
                 FriendList(), %"online.players.friends"
                 SearchList.Create(), %"online.players.search"
             |]
 
-        NavigationContainer.Column()
+        NavigationContainer
+            .Column()
             .With(
-                TabButtons.CreatePersistent(tab_options, list_container, selected_tab)
+                TabButtons
+                    .CreatePersistent(tab_options, list_container, selected_tab)
                     .Position(Position.SliceT(TabButtons.HEIGHT).TranslateY(Style.PADDING)),
-                list_container
-                    .Position(Position.ShrinkT(TabButtons.HEIGHT + Style.PADDING * 2.0f).ShrinkB(40.0f))
+                list_container.Position(Position.ShrinkT(TabButtons.HEIGHT + Style.PADDING * 2.0f).ShrinkB(40.0f))
             )

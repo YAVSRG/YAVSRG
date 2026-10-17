@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -31,10 +31,10 @@ type Scoreboard(display: Setting<InfoPanelMode>) =
 
     let sorter () : LocalScoreCard -> LocalScoreCard -> int =
         match sort.Value with
-        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Accuracy.CompareTo b.Data.Scoring.Accuracy
-        | Sort.Performance -> fun b a -> a.Data.Performance.CompareTo b.Data.Performance
+        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Accuracy.CompareTo(b.Data.Scoring.Accuracy)
+        | Sort.Performance -> fun b a -> a.Data.Performance.CompareTo(b.Data.Performance)
         | Sort.Time
-        | _ -> fun b a -> a.Data.TimePlayed.CompareTo b.Data.TimePlayed
+        | _ -> fun b a -> a.Data.TimePlayed.CompareTo(b.Data.TimePlayed)
 
     let filterer () : LocalScoreCard -> bool =
         match filter.Value with
@@ -43,15 +43,17 @@ type Scoreboard(display: Setting<InfoPanelMode>) =
         | _ -> K true
 
     let scores_list =
-        FlowContainer.Vertical<LocalScoreCard>(50.0f)
-            .Spacing(Style.PADDING)
+        FlowContainer.Vertical<LocalScoreCard>(50.0f).Spacing(Style.PADDING)
 
     do
-        LocalScores.score_loaded.Add (fun score_info -> score_info |> LocalScoreCard |> scores_list.Add; count <- count + 1)
-        LocalScores.scores_loaded.Add (fun () -> loading <- false)
+        LocalScores.score_loaded.Add(fun score_info ->
+            score_info |> LocalScoreCard |> scores_list.Add
+            count <- count + 1
+        )
 
-    let refresh_filter () =
-        scores_list.Filter <- filterer ()
+        LocalScores.scores_loaded.Add(fun () -> loading <- false)
+
+    let refresh_filter () = scores_list.Filter <- filterer()
 
     let cycle_filter () =
         filter.Value <-
@@ -59,6 +61,7 @@ type Scoreboard(display: Setting<InfoPanelMode>) =
             | Filter.CurrentMods -> Filter.None
             | Filter.CurrentRate -> Filter.CurrentMods
             | _ -> Filter.CurrentRate
+
         refresh_filter()
 
     let cycle_sort () =
@@ -67,88 +70,93 @@ type Scoreboard(display: Setting<InfoPanelMode>) =
             | Sort.Performance -> Sort.Accuracy
             | Sort.Accuracy -> Sort.Time
             | _ -> Sort.Performance
-        scores_list.Sort <- sorter ()
 
-    override this.Init(parent: Widget) =
-        SelectedChart.on_chart_change_started.Add (fun _ -> scores_list.Iter(fun s -> s.FadeOut()); loading <- true)
-        SelectedChart.on_chart_change_finished.Add (fun _ -> scores_list.Clear(); count <- 0)
-        Rulesets.on_changed.Add (fun _ -> GameThread.defer (fun () -> scores_list.Sort <- sorter ()))
-        SelectedChart.on_chart_update_finished.Add (fun _ -> refresh_filter())
-        Gameplay.score_deleted.Add (fun timestamp -> scores_list.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then GameThread.defer (fun () -> scores_list.Remove sc |> ignore)))
-        scores_list.Sort <- sorter ()
+        scores_list.Sort <- sorter()
 
-        this
-            .Add(
-                AngledButton(
-                    %"levelselect.info.scoreboard",
-                    (fun () -> display.Set InfoPanelMode.Online),
-                    Palette.MAIN_100
-                )
-                    .Hotkey("scoreboard_storage")
-                    .LeanLeft(false)
-                    .Position(
-                        Position
-                            .SliceT(AngledButton.HEIGHT)
-                            .GridX(1, 3, AngledButton.LEAN_AMOUNT)
-                    )
-                    .Help(Help.Info("levelselect.info.mode", "scoreboard_storage")),
+    override this.Init(parent: Widget) : unit =
+        SelectedChart.on_chart_change_started.Add(fun _ ->
+            scores_list.Iter(fun s -> s.FadeOut())
+            loading <- true
+        )
 
-                AngledButton(
-                    (fun () ->
-                        Icons.CHEVRONS_UP + " " +
-                        match sort.Value with
-                        | Sort.Accuracy -> %"levelselect.info.scoreboard.sort.accuracy"
-                        | Sort.Performance -> %"levelselect.info.scoreboard.sort.performance"
-                        | _ -> %"levelselect.info.scoreboard.sort.time"
-                    ),
-                    cycle_sort,
-                    Palette.DARK_100
-                )
-                    .Hotkey("scoreboard_sort")
-                    .Position(
-                        Position
-                            .SliceT(AngledButton.HEIGHT)
-                            .GridX(2, 3, AngledButton.LEAN_AMOUNT)
-                    )
-                    .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort")),
+        SelectedChart.on_chart_change_finished.Add(fun _ ->
+            scores_list.Clear()
+            count <- 0
+        )
 
-                AngledButton(
-                    (fun () ->
-                        Icons.FILTER + " " +
-                        match filter.Value with
-                        | Filter.CurrentMods -> %"levelselect.info.scoreboard.filter.currentmods"
-                        | Filter.CurrentRate -> %"levelselect.info.scoreboard.filter.currentrate"
-                        | _ -> %"levelselect.info.scoreboard.filter.none"
-                    ),
-                    cycle_filter,
-                    Palette.MAIN_100
-                )
-                    .Hotkey("scoreboard_filter")
-                    .LeanRight(false)
-                    .Position(
-                        Position
-                            .SliceT(AngledButton.HEIGHT)
-                            .GridX(3, 3, AngledButton.LEAN_AMOUNT)
-                    )
-                    .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter")),
+        Rulesets.on_changed.Add(fun _ -> GameThread.defer(fun () -> scores_list.Sort <- sorter()))
+        SelectedChart.on_chart_update_finished.Add(fun _ -> refresh_filter())
 
-                ScrollContainer(scores_list)
-                    .Position(Position.ShrinkT(AngledButton.HEIGHT)),
-
-                HotkeyListener(
-                    "scoreboard",
-                    fun () ->
-                        if scores_list.Focused then
-                            Selection.clear ()
-                        else
-                            scores_list.Focus false
-                ),
-
-                EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty", Subtitle = %"levelselect.info.scoreboard.empty.subtitle")
-                    .Conditional(fun () -> not loading && count = 0)
+        Gameplay.score_deleted.Add(fun timestamp ->
+            scores_list.Iter(fun sc ->
+                if sc.Data.TimePlayed = timestamp then
+                    GameThread.defer(fun () -> scores_list.Remove(sc) |> ignore)
             )
+        )
+
+        scores_list.Sort <- sorter()
+
+        this.Add(
+            AngledButton(
+                %"levelselect.info.scoreboard",
+                (fun () -> display.Set(InfoPanelMode.Online)),
+                Palette.MAIN_100
+            )
+                .Hotkey("scoreboard_storage")
+                .LeanLeft(false)
+                .Position(Position.SliceT(AngledButton.HEIGHT).GridX(1, 3, AngledButton.LEAN_AMOUNT))
+                .Help(Help.Info("levelselect.info.mode", "scoreboard_storage")),
+
+            AngledButton(
+                (fun () ->
+                    Icons.CHEVRONS_UP
+                    + " "
+                    + match sort.Value with
+                      | Sort.Accuracy -> %"levelselect.info.scoreboard.sort.accuracy"
+                      | Sort.Performance -> %"levelselect.info.scoreboard.sort.performance"
+                      | _ -> %"levelselect.info.scoreboard.sort.time"
+                ),
+                cycle_sort,
+                Palette.DARK_100
+            )
+                .Hotkey("scoreboard_sort")
+                .Position(Position.SliceT(AngledButton.HEIGHT).GridX(2, 3, AngledButton.LEAN_AMOUNT))
+                .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort")),
+
+            AngledButton(
+                (fun () ->
+                    Icons.FILTER
+                    + " "
+                    + match filter.Value with
+                      | Filter.CurrentMods -> %"levelselect.info.scoreboard.filter.currentmods"
+                      | Filter.CurrentRate -> %"levelselect.info.scoreboard.filter.currentrate"
+                      | _ -> %"levelselect.info.scoreboard.filter.none"
+                ),
+                cycle_filter,
+                Palette.MAIN_100
+            )
+                .Hotkey("scoreboard_filter")
+                .LeanRight(false)
+                .Position(Position.SliceT(AngledButton.HEIGHT).GridX(3, 3, AngledButton.LEAN_AMOUNT))
+                .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter")),
+
+            ScrollContainer(scores_list).Position(Position.ShrinkT(AngledButton.HEIGHT)),
+
+            HotkeyListener(
+                "scoreboard",
+                fun () -> if scores_list.Focused then Selection.clear() else scores_list.Focus(false)
+            ),
+
+            EmptyState(
+                Icons.WIND,
+                %"levelselect.info.scoreboard.empty",
+                Subtitle = %"levelselect.info.scoreboard.empty.subtitle"
+            )
+                .Conditional(fun () -> not loading && count = 0)
+        )
+
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         LocalScores.score_loader.Join()

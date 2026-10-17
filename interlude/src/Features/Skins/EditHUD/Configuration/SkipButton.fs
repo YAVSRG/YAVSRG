@@ -15,7 +15,10 @@ type SkipButtonPage() =
     let config = Content.HUD
 
     let use_background = Setting.simple config.SkipButtonBackground.Enable
-    let background_scale = config.SkipButtonBackground.Scale |> Setting.bounded (0.5f, 2.0f)
+
+    let background_scale =
+        config.SkipButtonBackground.Scale |> Setting.bounded(0.5f, 2.0f)
+
     let background_offset_x = Setting.percentf config.SkipButtonBackground.AlignmentX
     let background_offset_y = Setting.percentf config.SkipButtonBackground.AlignmentY
 
@@ -23,11 +26,11 @@ type SkipButtonPage() =
 
     let preview =
         { new ElementPreview(config.SkipButtonPosition) with
-            override this.DrawComponent(bounds) =
-                Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
+            override this.DrawComponent(bounds: Rect) : unit =
+                Text.fill_b(Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 SkipButtonBackground =
@@ -39,7 +42,7 @@ type SkipButtonPage() =
                     }
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -62,7 +65,7 @@ type SkipButtonPage() =
                     .Pos(6)
             )
         |> Container.Create
-        |+ preview
+        |> _.With(preview)
         :> Widget
 
     override this.Title = %"hud.skip_button"

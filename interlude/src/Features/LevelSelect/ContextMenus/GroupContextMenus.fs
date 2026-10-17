@@ -11,25 +11,21 @@ open Interlude.Features.Collections
 type PlaylistContextMenu(name: string, playlist: Playlist) =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
-        |+ PageButton(%"collections.edit", fun () -> EditPlaylistPage(name, playlist).Show())
-            .Icon(Icons.EDIT_2)
-            .Pos(0)
-        |+ PageButton
-            .Once(
-                %"playlist.play",
-                fun () -> LevelSelect.start_playlist (name, playlist)
-        )
-            .Icon(Icons.PLAY)
-            .Pos(3)
-        |+ PageButton
-            .Once(
-                %"playlist.play_shuffled",
-                fun () -> LevelSelect.start_playlist_shuffled (name, playlist)
-        )
-            .Icon(Icons.SHUFFLE)
-            .Pos(5)
+            .With(
+                PageButton(%"collections.edit", fun () -> EditPlaylistPage(name, playlist).Show())
+                    .Icon(Icons.EDIT_2)
+                    .Pos(0),
+                PageButton
+                    .Once(%"playlist.play", fun () -> LevelSelect.start_playlist(name, playlist))
+                    .Icon(Icons.PLAY)
+                    .Pos(3),
+                PageButton
+                    .Once(%"playlist.play_shuffled", fun () -> LevelSelect.start_playlist_shuffled(name, playlist))
+                    .Icon(Icons.SHUFFLE)
+                    .Pos(5)
+            )
         :> Widget
 
     override this.Title = name
@@ -37,35 +33,35 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
 type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroupContext) =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
-        |+ PageButton(%"bulk_actions.delete", fun () ->
-            GroupContextMenu.ConfirmDelete(charts, context, true)
-        )
-            .TextColor(Colors.red_accent)
-            .Icon(Icons.TRASH)
-            .Hotkey("delete")
-            .Pos(0)
+            .With(
+                PageButton(%"bulk_actions.delete", fun () -> GroupContextMenu.ConfirmDelete(charts, context, true))
+                    .TextColor(Colors.red_accent)
+                    .Icon(Icons.TRASH)
+                    .Hotkey("delete")
+                    .Pos(0)
+            )
         :> Widget
 
     override this.Title = name
 
-    static member ConfirmDelete(charts: ChartMeta seq, ctx: LibraryGroupContext, is_submenu: bool) =
+    static member ConfirmDelete(charts: ChartMeta seq, ctx: LibraryGroupContext, is_submenu: bool) : unit =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
                 match ctx with
-                | LibraryGroupContext.Pack pack_name ->
-                    Content.Charts.RemoveFromPack(charts, pack_name)
+                | LibraryGroupContext.Pack pack_name -> Content.Charts.RemoveFromPack(charts, pack_name)
                 | _ -> Content.Charts.Delete(charts)
-                LevelSelect.refresh_all ()
+
+                LevelSelect.refresh_all()
 
                 if is_submenu then
                     Menu.Back()
         )
             .Show()
 
-    static member Show(name: string, charts: ChartMeta seq, context: LibraryGroupContext) =
+    static member Show(name: string, charts: ChartMeta seq, context: LibraryGroupContext) : unit =
         match context with
         | LibraryGroupContext.None
         | LibraryGroupContext.Pack _ -> GroupContextMenu(name, charts, context).Show()

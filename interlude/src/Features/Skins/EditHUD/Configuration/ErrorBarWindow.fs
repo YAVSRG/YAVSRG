@@ -12,18 +12,20 @@ type ErrorBarWindowPage() =
 
     let config = Content.HUD
 
-    let windows_opacity = config.TimingDisplayWindowsOpacity |> Setting.bounded (0.0f, 0.6f)
+    let windows_opacity =
+        config.TimingDisplayWindowsOpacity |> Setting.bounded(0.0f, 0.6f)
 
-    let log_scale_sensitivity = config.TimingDisplayLogSensitivity |> Setting.bounded (0.0f, 1.0f)
+    let log_scale_sensitivity =
+        config.TimingDisplayLogSensitivity |> Setting.bounded(0.0f, 1.0f)
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 TimingDisplayWindowsOpacity = windows_opacity.Value
                 TimingDisplayLogSensitivity = log_scale_sensitivity.Value
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -35,6 +37,6 @@ type ErrorBarWindowPage() =
                     .Help(Help.Info("hud.error_bar.logsensitivity"))
                     .Pos(2)
             )
-    
+
 
     override this.Title = %"hud.error_bar.timing_windows_settings"

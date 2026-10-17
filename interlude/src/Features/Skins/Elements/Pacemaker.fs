@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -38,12 +38,11 @@ type Pacemaker(ctx: HudContext) =
         | PacemakerState.None
         | PacemakerState.Accuracy _
         | PacemakerState.Replay _ -> ()
-        | PacemakerState.Judgement(judgement, _) ->
-            color.Target <- Rulesets.current.Judgements.[judgement].Color
+        | PacemakerState.Judgement(judgement, _) -> color.Target <- Rulesets.current.Judgements.[judgement].Color
         | PacemakerState.ComboBreaks _ ->
             color.Target <- Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         match ctx.State.Pacemaker with
@@ -51,42 +50,40 @@ type Pacemaker(ctx: HudContext) =
         | PacemakerState.Accuracy x ->
             if position_cooldown.Complete then
                 ahead_by <- ctx.State.Scoring.PointsScored - ctx.State.Scoring.MaxPossiblePoints * x
-                update_flag_position ()
+                update_flag_position()
                 position_cooldown.Reset()
 
-            flag_position.Update elapsed_ms
-            position_cooldown.Update elapsed_ms
-        | PacemakerState.Replay (_, opposing_score) ->
+            flag_position.Update(elapsed_ms)
+            position_cooldown.Update(elapsed_ms)
+        | PacemakerState.Replay(_, opposing_score) ->
             if position_cooldown.Complete then
                 opposing_score.Update(time_last_frame)
                 ahead_by <- ctx.State.Scoring.PointsScored - opposing_score.PointsScored
-                update_flag_position ()
+                update_flag_position()
                 position_cooldown.Reset()
+
             time_last_frame <- ctx.State.CurrentChartTime()
 
-            flag_position.Update elapsed_ms
-            position_cooldown.Update elapsed_ms
+            flag_position.Update(elapsed_ms)
+            position_cooldown.Update(elapsed_ms)
         | PacemakerState.Judgement _
         | PacemakerState.ComboBreaks _ -> ()
 
-        color.Update elapsed_ms
+        color.Update(elapsed_ms)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         match ctx.State.Pacemaker with
         | PacemakerState.None ->
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 Icons.FLAG,
-                this.Bounds
-                    .SliceL(0.0f)
-                    .Expand(this.Bounds.Height, 0.0f)
-                    .Translate(this.Bounds.Width * 0.5f, 0.0f),
+                this.Bounds.SliceL(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * 0.5f, 0.0f),
                 (color.Value, Color.Black),
                 Alignment.CENTER
             )
         | PacemakerState.Accuracy _
         | PacemakerState.Replay _ ->
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 Icons.FLAG,
                 this.Bounds
@@ -114,14 +111,11 @@ type Pacemaker(ctx: HudContext) =
             hearts <- _hearts
 
             let display =
-                if hearts > 5 then
-                    sprintf "%s x%i" (String.replicate 5 Icons.HEART_ON) hearts
-                elif hearts > 0 then
-                    (String.replicate hearts Icons.HEART_ON)
-                else
-                    Icons.X
+                if hearts > 5 then sprintf "%s x%i" (String.replicate 5 Icons.HEART_ON) hearts
+                elif hearts > 0 then (String.replicate hearts Icons.HEART_ON)
+                else Icons.X
 
-            Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
+            Text.fill_b(Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
         | PacemakerState.ComboBreaks count ->
             let _hearts = 1 + count - ctx.State.Scoring.ComboBreaks
 
@@ -131,11 +125,8 @@ type Pacemaker(ctx: HudContext) =
             hearts <- _hearts
 
             let display =
-                if hearts > 5 then
-                    sprintf "%s x%i" (String.replicate 5 Icons.HEART_ON) hearts
-                elif hearts > 0 then
-                    (String.replicate hearts Icons.HEART_ON)
-                else
-                    Icons.X
+                if hearts > 5 then sprintf "%s x%i" (String.replicate 5 Icons.HEART_ON) hearts
+                elif hearts > 0 then (String.replicate hearts Icons.HEART_ON)
+                else Icons.X
 
-            Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
+            Text.fill_b(Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)

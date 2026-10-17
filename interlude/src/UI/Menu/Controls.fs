@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -13,19 +13,20 @@ type PageTextEntry(name: string, setting: Setting<string>) =
             let entry =
                 { new TextEntry(setting, "none", false) with
                     override this.OnFocus by_mouse =
-                        base.OnFocus by_mouse
+                        base.OnFocus(by_mouse)
                         Style.hover.Play()
                 }
 
-            entry
-            |+ Frame(
-                Position = Position.DEFAULT.ExpandX(Style.PADDING * 3.0f),
-                Fill = K Color.Transparent,
-                Border =
-                    fun () ->
-                        if entry.Selected then Colors.pink_accent
-                        elif entry.Focused then Colors.yellow_accent
-                        else Colors.grey_2
+            entry.With(
+                Frame(
+                    Position = Position.DEFAULT.ExpandX(Style.PADDING * 3.0f),
+                    Fill = K Color.Transparent,
+                    Border =
+                        fun () ->
+                            if entry.Selected then Colors.pink_accent
+                            elif entry.Focused then Colors.yellow_accent
+                            else Colors.grey_2
+                )
             )
         )
 
@@ -34,27 +35,30 @@ type OptionsMenuButton(label: string, on_click: unit -> unit) =
         Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                on_click ()
+                on_click()
             )
         )
 
     member val IsHighlighted = K false with get, set
     member val Keybind = Bind.Dummy with get, set
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Init(parent) =
-        this |* MouseListener().Button(this)
+    override this.Init(parent: Widget) : unit =
+        this.Add(MouseListener().Button(this))
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        if this.Keybind.Pressed() then on_click()
 
-    override this.Draw() =
+        if this.Keybind.Pressed() then
+            on_click()
+
+    override this.Draw() : unit =
         let is_highlighted = this.IsHighlighted()
+
         let trim_color =
             if is_highlighted then Colors.pink_accent
             elif this.Focused then Colors.black
@@ -71,6 +75,6 @@ type OptionsMenuButton(label: string, on_click: unit -> unit) =
             else Colors.text_subheading
 
         Render.rect this.Bounds color
-        Render.rect (this.Bounds.BorderB Style.PADDING) trim_color
+        Render.rect (this.Bounds.BorderB(Style.PADDING)) trim_color
 
-        Text.fill_b (Style.font, label, this.Bounds.Shrink(Style.PADDING * 2.0f), text_color, Alignment.CENTER)
+        Text.fill_b(Style.font, label, this.Bounds.Shrink(Style.PADDING * 2.0f), text_color, Alignment.CENTER)

@@ -35,8 +35,8 @@ type Toolbar() =
     let load_preset (i: int) : unit =
         match Presets.load i with
         | Some success_name ->
-            SelectedChart.recolor ()
-            Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
+            SelectedChart.recolor()
+            Notifications.action_feedback(Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
         | None -> ()
 
     let draw_waveform (bounds: Rect) : unit =
@@ -48,23 +48,21 @@ type Toolbar() =
 
             Render.rect
                 (Rect.FromSize(bounds.Left + float32 i * s + 2.5f, bounds.Top, s - 5.0f, level))
-                (Palette.color (int level, 1.0f, 0.5f))
+                (Palette.color(int level, 1.0f, 0.5f))
 
             Render.rect
                 (Rect.FromSize(bounds.Right - (float32 i + 1.0f) * s + 2.5f, bounds.Bottom - level, s - 5.0f, level))
-                (Palette.color (int level, 1.0f, 0.5f))
+                (Palette.color(int level, 1.0f, 0.5f))
 
-    let import_status_fade = Animation.Fade 0.0f
+    let import_status_fade = Animation.Fade(0.0f)
+
     let import_button =
         InlaidButton(%"menu.import", fun () -> ImportsPage().Show())
             .Icon(Icons.DOWNLOAD)
             .Hotkey("import")
-            .With(
-                TaskProgressMiniBar()
-                    .Position(Position.BorderB(Style.PADDING))
-            )
+            .With(TaskProgressMiniBar().Position(Position.BorderB(Style.PADDING)))
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         container
             // Bottom right info
             .With(
@@ -84,13 +82,20 @@ type Toolbar() =
             .With(
                 InlaidButton(%"menu.back", fun () -> Screen.back Transitions.UnderLogo |> ignore)
                     .Icon(Icons.ARROW_LEFT_CIRCLE)
-                    .Position(Position.SliceL(Style.PADDING * 2.0f, BUTTON_WIDTH).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT)),
+                    .Position(
+                        Position.SliceL(Style.PADDING * 2.0f, BUTTON_WIDTH).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT)
+                    ),
 
                 Jukebox()
-                    .Position(Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(BUTTON_WIDTH + Style.PADDING * 4.0f).SliceY(InlaidButton.HEIGHT)),
+                    .Position(
+                        Position
+                            .SliceB(HEIGHT)
+                            .SlicePercentL(0.4f)
+                            .ShrinkL(BUTTON_WIDTH + Style.PADDING * 4.0f)
+                            .SliceY(InlaidButton.HEIGHT)
+                    ),
 
-                VolumeSlider()
-                    .Position(Position.ShrinkY(HEIGHT))
+                VolumeSlider().Position(Position.ShrinkY(HEIGHT))
             )
             // Top buttons (quick, options, etc)
             .With(
@@ -98,13 +103,13 @@ type Toolbar() =
                     .Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(10.0f).SliceL(HEIGHT))
                     .Help(Help.Info("menu.quick").Hotkey("quick_menu")),
 
-                FlowContainer.LeftToRight<Widget>(BUTTON_WIDTH)
+                FlowContainer
+                    .LeftToRight<Widget>(BUTTON_WIDTH)
                     .Spacing(Style.PADDING * 2.0f)
                     .DisableNavigation()
                     .Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + Style.PADDING * 4.0f))
                     .With(
-                        InlaidButton(%"menu.options", fun () -> OptionsPage().Show())
-                            .Icon(Icons.SETTINGS),
+                        InlaidButton(%"menu.options", fun () -> OptionsPage().Show()).Icon(Icons.SETTINGS),
 
                         import_button,
 
@@ -118,18 +123,19 @@ type Toolbar() =
                             .Conditional(fun () -> Screen.current_type = ScreenType.MainMenu)
                     ),
 
-                NetworkStatus()
-                    .Position(Position.SliceT(HEIGHT).SliceR(300.0f))
+                NetworkStatus().Position(Position.SliceT(HEIGHT).SliceR(300.0f))
             )
             // Hotkey behaviours when toolbar isn't hidden
             .Add(
-                HotkeyListener("reload_content", fun () ->
-                    if not (Dialog.exists()) then
-                        Themes.reload_current ()
-                        Skins.load()
-                        Rulesets.load()
-                        SelectedChart.recolor ()
-                        Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
+                HotkeyListener(
+                    "reload_content",
+                    fun () ->
+                        if not(Dialog.exists()) then
+                            Themes.reload_current()
+                            Skins.load()
+                            Rulesets.load()
+                            SelectedChart.recolor()
+                            Notifications.action_feedback(Icons.CHECK, %"notification.reload_content", "")
                 ),
 
                 HotkeyListener("preset1", fun () -> load_preset 1),
@@ -146,35 +152,36 @@ type Toolbar() =
                 this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - Toolbar.slideout_amount.Value))
 
         this.VisibleBounds <-
-            if Toolbar.hidden then
-                this.Parent.Bounds
-            else
-                this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
+            if Toolbar.hidden then this.Parent.Bounds else this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
         volume_when_hidden.Init(this)
         container.Init(this)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if Toolbar.hidden then
             volume_when_hidden.Draw()
         else
-            Render.rect (this.Bounds.SliceT HEIGHT) !*Palette.MAIN_100
-            Render.rect (this.Bounds.SliceB HEIGHT) !*Palette.MAIN_100
+            Render.rect (this.Bounds.SliceT(HEIGHT)) !*Palette.MAIN_100
+            Render.rect (this.Bounds.SliceB(HEIGHT)) !*Palette.MAIN_100
 
-            if Toolbar.slideout_amount.Value > 0.01f then draw_waveform this.Bounds
+            if Toolbar.slideout_amount.Value > 0.01f then
+                draw_waveform this.Bounds
 
             container.Draw()
 
             if import_status_fade.Value > 0.005f then
-                TaskTracking.draw (this.Bounds.ShrinkY(HEIGHT).SlicePercentL(0.4f).Shrink(20.0f), import_status_fade.Value)
+                TaskTracking.draw(
+                    this.Bounds.ShrinkY(HEIGHT).SlicePercentL(0.4f).Shrink(20.0f),
+                    import_status_fade.Value
+                )
 
-            Terminal.draw ()
+            Terminal.draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         if Screen.current_type <> ScreenType.SplashScreen then
             Content.Stats.AddGameTime(elapsed_ms)
 
-        Toolbar.slideout_amount.Update elapsed_ms
+        Toolbar.slideout_amount.Update(elapsed_ms)
 
         let moved =
             if Toolbar.was_hidden <> Toolbar.hidden then
@@ -192,6 +199,7 @@ type Toolbar() =
 
         if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"options").Pressed() then
             OptionsPage().Show()
+
         if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"quick_menu").Pressed() then
             QuickMenuPage().Show()
 
@@ -199,9 +207,10 @@ type Toolbar() =
             import_status_fade.Target <- 1.0f
         else
             import_status_fade.Target <- 0.0f
-        import_status_fade.Update elapsed_ms
 
-        Terminal.update ()
+        import_status_fade.Update(elapsed_ms)
+
+        Terminal.update()
 
         if moved then
             this.Bounds <-
@@ -211,15 +220,9 @@ type Toolbar() =
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - Toolbar.slideout_amount.Value))
 
             this.VisibleBounds <-
-                if Toolbar.hidden then
-                    this.Parent.Bounds
-                else
-                    this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
+                if Toolbar.hidden then this.Parent.Bounds else this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
-        if Toolbar.hidden then
-            volume_when_hidden.Update(elapsed_ms, moved)
-        else
-            container.Update(elapsed_ms, moved)
+        if Toolbar.hidden then volume_when_hidden.Update(elapsed_ms, moved) else container.Update(elapsed_ms, moved)
 
     override this.Position
         with set _ = failwith "Position cannot be set for toolbar"

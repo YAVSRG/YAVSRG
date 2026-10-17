@@ -109,17 +109,6 @@ module NavigationContainer =
             assert(GameThread.is_game_thread())
             children.Clear()
 
-        static member (|+)(parent: #Base, child: Widget) =
-            parent.Add child
-            parent
-
-        static member (|+)(parent: #Base, children: Widget seq) =
-            Seq.iter parent.Add children
-            parent
-
-        static member (|*)(parent: #Base, child: Widget) = parent.Add child
-        static member (|*)(parent: #Base, children: Widget seq) = Seq.iter parent.Add children
-
         interface IContainer<Widget> with
 
             member this.Add (child: Widget) : unit =

@@ -13,7 +13,7 @@ open Interlude.Features.Play.HUD
 type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
     inherit Container(NodeType.Leaf)
 
-    let texture = Content.Texture "judgement-counter-judgements"
+    let texture = Content.Texture("judgement-counter-judgements")
 
     let fd () =
         data.[i] <-
@@ -32,17 +32,12 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
 
         Style.click.Play()
 
-    override this.Init(parent: Widget) =
-        this
-            .Add(
-                MouseListener()
-                    .SelectOnClick(this, fd)
-                    .FocusOnHover(this)
-            )
+    override this.Init(parent: Widget) : unit =
+        this.Add(MouseListener().SelectOnClick(this, fd).FocusOnHover(this))
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         if this.Focused then
             Render.rect this.Bounds Colors.yellow_accent.O2
@@ -50,15 +45,15 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
             if this.Selected then
                 Render.rect (this.Bounds.SlicePercentR(0.5f).SliceB(5.0f).Shrink(100.0f, 0.0f)) Colors.yellow_accent
 
-        Text.fill (
+        Text.fill(
             Style.font,
-            ruleset.JudgementName i,
+            ruleset.JudgementName(i),
             this.Bounds.SlicePercentL(0.5f).Shrink(10.0f, 5.0f),
-            ruleset.JudgementColor i,
+            ruleset.JudgementColor(i),
             Alignment.CENTER
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             Icons.ARROW_RIGHT,
             this.Bounds.Shrink(10.0f, 5.0f),
@@ -68,53 +63,59 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
 
         match data.[i] with
         | None ->
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
-                ruleset.JudgementName i,
+                ruleset.JudgementName(i),
                 this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f),
                 (Color.White, Color.Black),
                 Alignment.CENTER
             )
         | Some j ->
             Render.tex_quad
-                (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture)
-                    .AsQuad
+                (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad
                 Color.White.AsQuad
                 (Sprite.pick_texture (0, j) texture)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
             if (%%"left").Pressed() then
-                bk ()
+                bk()
             elif (%%"right").Pressed() then
-                fd ()
+                fd()
             elif (%%"up").Pressed() then
-                fd ()
+                fd()
             elif (%%"down").Pressed() then
-                bk ()
+                bk()
 
 type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: int option array, ruleset: Ruleset) =
     inherit Page()
 
-    override this.Content() =
-        page_container ()
-        |+ PageSetting(%"hud.judgement_counter.show_labels", Checkbox use_texture)
-            .Help(Help.Info("hud.judgement_counter.show_labels"))
-            .Pos(0)
-        |+ Conditional(
-            use_texture.Get,
-            FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
-            |+ seq {
-                for i = 0 to ruleset.Judgements.Length - 1 do
-                    yield DisplayPicker(ruleset, i, display)
-            }
-            |> ScrollContainer).Position(page_position (2, PAGE_BOTTOM - 10, PageWidth.Normal))
+    override this.Content() : Widget =
+        page_container()
+            .With(
+                PageSetting(%"hud.judgement_counter.show_labels", Checkbox use_texture)
+                    .Help(Help.Info("hud.judgement_counter.show_labels"))
+                    .Pos(0),
+                Conditional(
+                    use_texture.Get,
+                    FlowContainer
+                        .Vertical<Widget>(PAGE_ITEM_HEIGHT)
+                        .With(
+                            seq {
+                                for i = 0 to ruleset.Judgements.Length - 1 do
+                                    yield DisplayPicker(ruleset, i, display) :> Widget
+                            }
+                        )
+                    |> ScrollContainer
+                )
+                    .Position(page_position(2, PAGE_BOTTOM - 10, PageWidth.Normal))
+            )
         :> Widget
 
     override this.Title = %"hud.judgement_counter.textures"
@@ -123,16 +124,15 @@ type JudgementCounterPage() =
     inherit Page()
 
     let config = Content.HUD
-    let texture = Content.Texture "judgement-counter-judgements"
-    let font_texture = Content.Texture "judgement-counter-font"
+    let texture = Content.Texture("judgement-counter-judgements")
+    let font_texture = Content.Texture("judgement-counter-font")
 
     let pos = Setting.simple config.JudgementCounterPosition
 
     let animation_time =
-        config.JudgementCounterFadeTime
-        |> Setting.bounded (50.0f<ms / rate>, 1000.0f<ms / rate>)
+        config.JudgementCounterFadeTime |> Setting.bounded(50.0f<ms / rate>, 1000.0f<ms / rate>)
 
-    let pop_amount = config.JudgementCounterPopAmount |> Setting.bounded (-1.0f, 1.0f)
+    let pop_amount = config.JudgementCounterPopAmount |> Setting.bounded(-1.0f, 1.0f)
 
     let opacity = Setting.percentf config.JudgementCounterOpacity
 
@@ -141,13 +141,13 @@ type JudgementCounterPage() =
     let use_font = Setting.simple config.JudgementCounterUseFont
 
     let font_spacing =
-        config.JudgementCounterFontSpacing |> Setting.bounded (-1.0f, 1.0f)
+        config.JudgementCounterFontSpacing |> Setting.bounded(-1.0f, 1.0f)
 
     let font_dot_spacing =
-        config.JudgementCounterDotExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
+        config.JudgementCounterDotExtraSpacing |> Setting.bounded(-1.0f, 1.0f)
 
     let font_colon_spacing =
-        config.JudgementCounterColonExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
+        config.JudgementCounterColonExtraSpacing |> Setting.bounded(-1.0f, 1.0f)
 
     let show_ratio = Setting.simple config.JudgementCounterShowRatio
 
@@ -156,7 +156,7 @@ type JudgementCounterPage() =
     let JUDGEMENT_COUNT = ruleset.Judgements.Length
 
     let display: int option array =
-        match config.JudgementCounterCustomDisplay.TryFind JUDGEMENT_COUNT with
+        match config.JudgementCounterCustomDisplay.TryFind(JUDGEMENT_COUNT) with
         | Some existing -> Array.copy existing
         | None ->
             if texture.Rows = JUDGEMENT_COUNT then
@@ -166,18 +166,14 @@ type JudgementCounterPage() =
 
     let preview =
         { new ElementPreview(pos.Value) with
-            override this.DrawComponent(bounds) =
+            override this.DrawComponent(bounds: Rect) : unit =
                 let opacity = 255f * opacity.Value |> int |> max 0 |> min 255
 
                 let count_alignment =
-                    if show_labels.Value then
-                        Alignment.RIGHT
-                    else
-                        Alignment.CENTER
+                    if show_labels.Value then Alignment.RIGHT else Alignment.CENTER
 
                 let h =
-                    bounds.Height
-                    / float32 (ruleset.Judgements.Length + if show_ratio.Value then 1 else 0)
+                    bounds.Height / float32(ruleset.Judgements.Length + if show_ratio.Value then 1 else 0)
                     |> min bounds.Width
 
                 let mutable r = bounds.SliceT(h).Shrink(10.0f)
@@ -185,9 +181,9 @@ type JudgementCounterPage() =
                 for i = 0 to ruleset.Judgements.Length - 1 do
                     let j = ruleset.Judgements.[i]
 
-                    Render.border 5.0f r (j.Color.O3a opacity)
+                    Render.border 5.0f r (j.Color.O3a(opacity))
                     Render.rect (r.BorderL(5.0f).SlicePercentY(0.45f)) j.Color.O2
-                    Render.rect r (j.Color.O1a opacity)
+                    Render.rect r (j.Color.O1a(opacity))
 
                     if show_labels.Value then
 
@@ -198,7 +194,7 @@ type JudgementCounterPage() =
                                 Color.White.AsQuad
                                 (Sprite.pick_texture (0, texture_index) texture)
                         | None ->
-                            Text.fill_b (
+                            Text.fill_b(
                                 Style.font,
                                 j.Name,
                                 r.SlicePercentY(text_scale.Value / 0.6f).ShrinkX(10.0f),
@@ -207,29 +203,25 @@ type JudgementCounterPage() =
                             )
 
                     if use_font.Value then
-                        JudgementCounter.draw_count_aligned (
+                        JudgementCounter.draw_count_aligned(
                             font_texture,
-                            (
-                                if show_labels.Value then
-                                    r.SlicePercentY(text_scale.Value).ShrinkX(10.0f)
-                                else
-                                    r.SlicePercentY(text_scale.Value).ExpandPercentX(2.0f)
-                            ),
+                            (if show_labels.Value then
+                                 r.SlicePercentY(text_scale.Value).ShrinkX(10.0f)
+                             else
+                                 r.SlicePercentY(text_scale.Value).ExpandPercentX(2.0f)),
                             Color.White,
                             730 - 7 * i,
                             font_spacing.Value,
                             count_alignment
                         )
                     else
-                        Text.fill_b (
+                        Text.fill_b(
                             Style.font,
                             sprintf "%i" (730 - 7 * i),
-                            (
-                                if show_labels.Value then
-                                    r.SlicePercentY(text_scale.Value / 0.6f).ShrinkX(10.0f)
-                                else
-                                    r.SlicePercentY(text_scale.Value / 0.6f).ExpandPercentX(2.0f)
-                            ),
+                            (if show_labels.Value then
+                                 r.SlicePercentY(text_scale.Value / 0.6f).ShrinkX(10.0f)
+                             else
+                                 r.SlicePercentY(text_scale.Value / 0.6f).ExpandPercentX(2.0f)),
                             (Color.White, Color.Black),
                             count_alignment
                         )
@@ -240,7 +232,7 @@ type JudgementCounterPage() =
                     let ratio = 727, 100
 
                     if use_font.Value then
-                        JudgementCounter.draw_ratio_centered (
+                        JudgementCounter.draw_ratio_centered(
                             font_texture,
                             r.SlicePercentT(text_scale.Value).ExpandPercentX(2.0f),
                             Color.White,
@@ -252,19 +244,16 @@ type JudgementCounterPage() =
                     else
                         let mv, pf = ratio
 
-                        Text.fill_b (
+                        Text.fill_b(
                             Style.font,
-                            (if pf = 0 then
-                                 sprintf "%.1f:0" (float mv)
-                             else
-                                 sprintf "%.1f:1" (float mv / float pf)),
+                            (if pf = 0 then sprintf "%.1f:0" (float mv) else sprintf "%.1f:1" (float mv / float pf)),
                             r.SlicePercentT(text_scale.Value / 0.6f).ExpandPercentX(2.0f),
                             (Color.White, Color.Black),
                             Alignment.CENTER
                         )
         }
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 JudgementCounterFadeTime = animation_time.Value
@@ -282,7 +271,7 @@ type JudgementCounterPage() =
                 JudgementCounterCustomDisplay = Content.HUD.JudgementCounterCustomDisplay.Add(JUDGEMENT_COUNT, display)
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -307,9 +296,7 @@ type JudgementCounterPage() =
                     fun () -> JudgementCounterDisplayPage(show_labels, display, ruleset).Show()
                 )
                     .Pos(11),
-                PageSetting(%"hud.generic.use_font", Checkbox use_font)
-                    .Help(Help.Info("hud.generic.use_font"))
-                    .Pos(14)
+                PageSetting(%"hud.generic.use_font", Checkbox use_font).Help(Help.Info("hud.generic.use_font")).Pos(14)
             )
             .WithConditional(
                 use_font.Get,
@@ -325,7 +312,7 @@ type JudgementCounterPage() =
                     .Pos(20)
             )
         |> Container.Create
-        |+ preview
+        |> _.With(preview)
         :> Widget
 
     override this.Title = %"hud.judgement_counter"

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -16,14 +16,14 @@ module Lanecover =
 
             Render.rect_c
                 (bounds.SliceT(amount).SliceB(fade_length))
-                (Quad.gradient_top_to_bottom options.LaneCover.Color.Value (options.LaneCover.Color.Value.O4a 0))
+                (Quad.gradient_top_to_bottom options.LaneCover.Color.Value (options.LaneCover.Color.Value.O4a(0)))
 
         let lower (amount: float32) =
             Render.rect (bounds.SliceB(amount - fade_length)) options.LaneCover.Color.Value
 
             Render.rect_c
                 (bounds.SliceB(amount).SliceT(fade_length))
-                (Quad.gradient_top_to_bottom (options.LaneCover.Color.Value.O4a 0) options.LaneCover.Color.Value)
+                (Quad.gradient_top_to_bottom (options.LaneCover.Color.Value.O4a(0)) options.LaneCover.Color.Value)
 
         let height = bounds.Height
 
@@ -42,6 +42,6 @@ module Lanecover =
 type LanecoverOverReceptors() =
     inherit StaticWidget(NodeType.None)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if options.LaneCover.Enabled.Value && not options.LaneCover.DrawUnderReceptors.Value then
             Lanecover.draw this.Bounds

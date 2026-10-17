@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Flux.UI
 open Prelude
@@ -8,6 +8,6 @@ open Interlude.UI
 type MultiplayerScoresPage() =
     inherit Page()
 
-    override this.Content() = Dummy()
+    override this.Content() : Widget = Dummy()
 
     override this.Title = %"hud.multiplayer_scores"

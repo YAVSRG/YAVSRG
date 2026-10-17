@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Multiplayer
+namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Flux.UI
 open Prelude
@@ -10,29 +10,23 @@ type LobbySelectPage() =
 
     let lobby_list =
         LobbyList(
-            Position =
-                { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with
-                    Right = 0.7f %- (PAGE_MARGIN_X * 0.5f)
-                }
+            Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.7f %- (PAGE_MARGIN_X * 0.5f) }
         )
 
     let invite_list =
         InviteList(
-            Position =
-                { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with
-                    Left = 0.7f %+ (PAGE_MARGIN_X * 0.5f)
-                }
+            Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Left = 0.7f %+ (PAGE_MARGIN_X * 0.5f) }
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
 
         this.DisposeOnClose(
-            NetworkEvents.receive_lobby_list
-                .Subscribe(fun lobbies -> lobby_list.UpdateList lobbies),
-            NetworkEvents.receive_invite
-                .Subscribe(fun _ -> invite_list.UpdateList()),
-            NetworkEvents.join_lobby
-                .Subscribe(fun _ -> Menu.Exit(); Screen.change ScreenType.Lobby Transitions.Default |> ignore)
+            NetworkEvents.receive_lobby_list.Subscribe(fun lobbies -> lobby_list.UpdateList(lobbies)),
+            NetworkEvents.receive_invite.Subscribe(fun _ -> invite_list.UpdateList()),
+            NetworkEvents.join_lobby.Subscribe(fun _ ->
+                Menu.Exit()
+                Screen.change ScreenType.Lobby Transitions.Default |> ignore
+            )
         )
 
         Container(NodeType.Leaf).With(lobby_list, invite_list)

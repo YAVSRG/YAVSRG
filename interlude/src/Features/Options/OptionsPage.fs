@@ -15,12 +15,23 @@ type OptionsPage() =
     let mutable on_destroy_current_tab = ignore
     let mutable on_return_current_tab = ignore
 
-    let content_setting : Setting<OptionsTab> =
+    let content_setting: Setting<OptionsTab> =
         Setting.make
             (fun new_tab ->
-                if current_tab = new_tab && (match page_body.Current with :? Dummy -> false | _ -> true) then () else
+                if
+                    current_tab = new_tab
+                    && (
+                        match page_body.Current with
+                        | :? Dummy -> false
+                        | _ -> true
+                    )
+                then
+                    ()
+                else
+
                 on_destroy_current_tab()
                 current_tab <- new_tab
+
                 match new_tab with
                 | OptionsTab.System ->
                     let p = SystemSettings.SystemPage()
@@ -53,38 +64,46 @@ type OptionsPage() =
             )
             (fun () -> current_tab)
 
-    do content_setting.Set State.recent_tab
+    do content_setting.Set(State.recent_tab)
 
     let header = OptionsPageHeader(content_setting)
 
-    override this.Init(parent: Widget) =
-        this.OnClose(fun () -> on_destroy_current_tab(); header.Hide())
-        base.Init parent
-        header.Focus false
-
-    override this.Header() =
-        header
-        |> OverlayContainer
-        :> Widget
-
-    override this.Footer() =
-        OptionsPageFooter()
-        |+ HotkeyListener("reload_content", fun () ->
-            Menu.Exit()
-            Themes.reload_current ()
-            Skins.load()
-            Rulesets.load()
-            Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
-            OptionsPage().Show()
-            SkinPreview.RefreshAll()
+    override this.Init(parent: Widget) : unit =
+        this.OnClose(fun () ->
+            on_destroy_current_tab()
+            header.Hide()
         )
+
+        base.Init(parent)
+        header.Focus(false)
+
+    override this.Header() : Widget = header |> OverlayContainer :> Widget
+
+    override this.Footer() : Widget =
+        OptionsPageFooter()
+            .With(
+                HotkeyListener(
+                    "reload_content",
+                    fun () ->
+                        Menu.Exit()
+                        Themes.reload_current()
+                        Skins.load()
+                        Rulesets.load()
+                        Notifications.action_feedback(Icons.CHECK, %"notification.reload_content", "")
+                        OptionsPage().Show()
+                        SkinPreview.RefreshAll()
+                )
+            )
         |> OverlayContainer
         :> Widget
 
-    override this.Content() =
-        content_setting.Set State.recent_tab
+    override this.Content() : Widget =
+        content_setting.Set(State.recent_tab)
         page_body
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")
-    override this.OnEnterNestedPage() = header.Hide()
-    override this.OnReturnFromNestedPage() = on_return_current_tab(); header.Show()
+    override this.OnEnterNestedPage() : unit = header.Hide()
+
+    override this.OnReturnFromNestedPage() : unit =
+        on_return_current_tab()
+        header.Show()

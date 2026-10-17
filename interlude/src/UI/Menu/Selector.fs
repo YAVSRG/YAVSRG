@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open System
 open Percyqaz.Common
@@ -10,9 +10,7 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
     inherit Container(NodeType.Leaf)
 
     let mutable index =
-        items
-        |> Array.tryFindIndex (fun (v, _) -> Object.Equals(v, setting.Value))
-        |> Option.defaultValue 0
+        items |> Array.tryFindIndex(fun (v, _) -> Object.Equals(v, setting.Value)) |> Option.defaultValue 0
 
     let fd () =
         index <- (index + 1) % items.Length
@@ -24,24 +22,20 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         setting.Value <- fst items.[index]
         Style.click.Play()
 
-    override this.Init(parent: Widget) =
-        this
-            .Add(
-                Text(fun () -> snd items.[index])
-                    .Align(Alignment.LEFT),
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Text(fun () -> snd items.[index]).Align(Alignment.LEFT),
 
-                MouseListener()
-                    .SelectOnClick(this, fd)
-                    .FocusOnHover(this)
+            MouseListener().SelectOnClick(this, fd).FocusOnHover(this)
         )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
@@ -54,51 +48,55 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
             elif (%%"down").Pressed() then
                 bk()
 
-    static member FromEnum(setting: Setting<'T>) =
+    static member FromEnum(setting: Setting<'T>) : Selector<'T> =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         Selector(Array.zip values names, setting)
 
-type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: Setting<'T>) as this =
+type SelectDropdown<'T when 'T: equality>(items: ('T * string) array, setting: Setting<'T>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
-    let dropdown_wrapper = DropdownWrapper(fun d ->
-        let height = min d.Height (Render.height() - this.Bounds.Bottom - Style.PADDING * 2.0f)
-        Position.BorderB(height + 2.0f * Style.PADDING).Shrink(Style.PADDING)
-    )
+    let dropdown_wrapper =
+        DropdownWrapper(fun d ->
+            let height =
+                min d.Height (Render.height() - this.Bounds.Bottom - Style.PADDING * 2.0f)
+
+            Position.BorderB(height + 2.0f * Style.PADDING).Shrink(Style.PADDING)
+        )
 
     let wrapped_setting =
         let current_value = setting.Value
-        match items |> Array.tryFind (fun (v, _) -> v = current_value) with
+
+        match items |> Array.tryFind(fun (v, _) -> v = current_value) with
         | Some v -> v
         | None -> (if items.Length > 0 then items.[0] else (current_value, "???"))
         |> Setting.simple
-        |> Setting.trigger (fun (v, _) -> setting.Set v)
+        |> Setting.trigger(fun (v, _) -> setting.Set(v))
 
-    override this.Init(parent) =
-        this
-        |+ Text(fun () -> snd wrapped_setting.Value)
-            .Align(Alignment.LEFT)
-        |+ MouseListener().Button(this)
-        |* dropdown_wrapper
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Text(fun () -> snd wrapped_setting.Value).Align(Alignment.LEFT),
+            MouseListener().Button(this),
+            dropdown_wrapper
+        )
 
-        base.Init parent
+        base.Init(parent)
 
-    member this.ToggleDropdown() =
+    member this.ToggleDropdown() : unit =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
-                    Items = items |> Array.map (fun (v, label) -> ((v, label), label))
+                    Items = items |> Array.map(fun (v, label) -> ((v, label), label))
                     ColorFunc = K Colors.text
                     Setting = wrapped_setting
                 }
         )
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    static member FromEnum(setting: Setting<'T>) =
+    static member FromEnum(setting: Setting<'T>) : SelectDropdown<'T> =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         SelectDropdown(Array.zip values names, setting)

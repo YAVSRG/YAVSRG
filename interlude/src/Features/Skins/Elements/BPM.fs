@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open Percyqaz.Flux.UI
 open Prelude
@@ -12,19 +12,19 @@ type BPM(ctx: HudContext) =
     let bpms = ctx.State.WithColors.BPM
     let mutable last_seen_time = -Time.infinity
 
-    override this.Init(parent: Widget) =
-        this
-            .Add(
-                Text(fun () ->
-                    let ms_per_beat = bpms.[i].Data.MsPerBeat / SelectedChart.rate.Value in
-                    sprintf "%.0f BPM" (MS_PER_MINUTE / ms_per_beat)
-                )
-                    .Color(Colors.text_subheading)
-                    .Align(Alignment.CENTER)
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Text(fun () ->
+                let ms_per_beat = bpms.[i].Data.MsPerBeat / SelectedChart.rate.Value in
+                sprintf "%.0f BPM" (MS_PER_MINUTE / ms_per_beat)
             )
+                .Color(Colors.text_subheading)
+                .Align(Alignment.CENTER)
+        )
+
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         let now = ctx.State.CurrentTime()
 
@@ -33,5 +33,5 @@ type BPM(ctx: HudContext) =
 
         last_seen_time <- now
 
-        while i + 1 < bpms.Length && bpms[i + 1].Time < now do
+        while i + 1 < bpms.Length && bpms.[i + 1].Time < now do
             i <- i + 1

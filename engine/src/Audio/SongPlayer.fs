@@ -126,7 +126,7 @@ type SongPlayer() =
         if song.ShouldPlayAt(time) then
             song.PlayFrom(time, delay_callback)
 
-        else if song.Playing then
+        elif song.Playing then
             song.Pause() |> ignore
 
         timer_position <- time

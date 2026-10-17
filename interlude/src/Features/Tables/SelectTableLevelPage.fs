@@ -14,19 +14,14 @@ type SelectTableLevelPage(table: Table, action: int -> unit) =
         container.Clear()
 
         for level in table.Info.LevelDisplayNames.Keys do
-            container
-                .Add(
-                    PageButton(table.Info.LevelName level, fun () -> action level)
-                        .Icon(Icons.FOLDER)
-                )
+            container.Add(PageButton(table.Info.LevelName(level), fun () -> action level).Icon(Icons.FOLDER))
 
         if container.Focused then
-            container.Focus false
+            container.Focus(false)
 
-    override this.Content() =
-        refresh ()
-        ScrollContainer(container)
-            .Position(Position.Shrink(100.0f, 200.0f))
+    override this.Content() : Widget =
+        refresh()
+        ScrollContainer(container).Position(Position.Shrink(100.0f, 200.0f))
 
     override this.Title = %"table"
-    override this.OnReturnFromNestedPage() = refresh ()
+    override this.OnReturnFromNestedPage() : unit = refresh()

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Prelude
@@ -19,7 +19,7 @@ module LevelSelectHistory =
         | None -> ()
 
     let back () =
-        if not (Transitions.in_progress()) then
+        if not(Transitions.in_progress()) then
             match history with
             | (chart_meta, rate) :: xs ->
 
@@ -28,14 +28,14 @@ module LevelSelectHistory =
                 | None -> ()
 
                 history <- xs
-                SelectedChart._rate.Set rate
+                SelectedChart._rate.Set(rate)
                 SelectedChart.change(chart_meta, LibraryContext.None, true)
             | _ -> ()
 
-    let can_go_back() = (List.isEmpty >> not) history
+    let can_go_back () = (List.isEmpty >> not) history
 
     let forward () =
-        if not (Transitions.in_progress()) then
+        if not(Transitions.in_progress()) then
             match forward_history with
             | (chart_meta, rate) :: xs ->
 
@@ -44,8 +44,8 @@ module LevelSelectHistory =
                 | None -> ()
 
                 forward_history <- xs
-                SelectedChart._rate.Set rate
+                SelectedChart._rate.Set(rate)
                 SelectedChart.change(chart_meta, LibraryContext.None, true)
             | _ -> ()
 
-    let can_go_forward() = (List.isEmpty >> not) forward_history
+    let can_go_forward () = (List.isEmpty >> not) forward_history

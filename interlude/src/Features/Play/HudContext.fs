@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open System.Collections.Generic
 open Percyqaz.Flux.UI

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Score
+namespace Interlude.Features.Score
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -14,10 +14,10 @@ module GraphSettings =
 
     let only_releases = Setting.simple false
     let column_filter = Array.create 10 true
-    let scale = 1.0f |> Setting.bounded (1.0f, 6.0f)
+    let scale = 1.0f |> Setting.bounded(1.0f, 6.0f)
     let show_slice = Setting.simple false
-    let slice_size = 0.04f |> Setting.bounded (0.01f, 1.0f)
-    
+    let slice_size = 0.04f |> Setting.bounded(0.01f, 1.0f)
+
     let COLUMN_FILTER_KEYS =
         [|
             Keys.D1
@@ -36,21 +36,32 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
     inherit Page()
 
     let mutable column_filter_changed = false
-    let column_filter_setting k = Setting.make (fun v -> column_filter_changed <- true; GraphSettings.column_filter.[k] <- v) (fun () -> GraphSettings.column_filter.[k])
+
+    let column_filter_setting k =
+        Setting.make
+            (fun v ->
+                column_filter_changed <- true
+                GraphSettings.column_filter.[k] <- v
+            )
+            (fun () -> GraphSettings.column_filter.[k])
+
     let column_filter_ui, _ =
         refreshable_row
             (fun () -> keys)
             (fun k _ ->
-                Checkbox(column_filter_setting k)
-                    .Position(Position.SliceL(50.0f).Translate(float32 k * 80.0f, 0.0f))
+                Checkbox(column_filter_setting k).Position(Position.SliceL(50.0f).Translate(float32 k * 80.0f, 0.0f))
             )
 
-    override this.Content() =
-        this.OnClose(fun () -> if column_filter_changed then apply_column_filter())
+    override this.Content() : Widget =
+        this.OnClose(fun () ->
+            if column_filter_changed then
+                apply_column_filter()
+        )
 
         page_container()
             .With(
-                PageSetting(%"score.graph.settings.line_mode",
+                PageSetting(
+                    %"score.graph.settings.line_mode",
                     SelectDropdown(
                         [|
                             ScoreGraphLineMode.None, %"score.graph.settings.line_mode.none"
@@ -65,7 +76,8 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
                     )
                 )
                     .Pos(0),
-                PageSetting(%"score.graph.settings.line_color",
+                PageSetting(
+                    %"score.graph.settings.line_color",
                     SelectDropdown(
                         [|
                             ScoreGraphLineColor.White, %"score.graph.settings.line_color.white"
@@ -80,15 +92,17 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
                 PageSetting(%"score.graph.settings.line_on_top", Checkbox(options.ScoreGraphLineOnTop))
                     .Conditional(fun () -> options.ScoreGraphLineMode.Value <> ScoreGraphLineMode.None)
                     .Pos(4),
-                PageSetting(%"score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
-                    .Pos(7),
-                PageSetting(%"score.graph.settings.column_filter", column_filter_ui)
-                    .Pos(9, 2, PageWidth.Full),
-                PageSetting(%"score.graph.settings.scale", Slider(GraphSettings.scale, Step = 0.25f, Format = fun x -> sprintf "%.0f%%" (x * 100.0f)))
+                PageSetting(%"score.graph.settings.only_releases", Checkbox GraphSettings.only_releases).Pos(7),
+                PageSetting(%"score.graph.settings.column_filter", column_filter_ui).Pos(9, 2, PageWidth.Full),
+                PageSetting(
+                    %"score.graph.settings.scale",
+                    Slider(GraphSettings.scale, Step = 0.25f, Format = (fun x -> sprintf "%.0f%%" (x * 100.0f)))
+                )
                     .Pos(11),
                 PageSetting(%"score.graph.settings.windows_background", Checkbox(options.ScoreGraphWindowBackground))
                     .Pos(13),
-                PageSetting(%"score.graph.settings.hover_info",
+                PageSetting(
+                    %"score.graph.settings.hover_info",
                     SelectDropdown(
                         [|
                             false, %"score.graph.settings.hover_info.cumulative"
@@ -97,9 +111,13 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
                         GraphSettings.show_slice
                     )
                 )
-                    .Help(Help.Info("score.graph.settings.hover_info").Hotkey(%"score.graph.settings.hover_info_hint", "graph_alt_info"))
+                    .Help(
+                        Help
+                            .Info("score.graph.settings.hover_info")
+                            .Hotkey(%"score.graph.settings.hover_info_hint", "graph_alt_info")
+                    )
                     .Pos(16),
-                PageSetting(%"score.graph.settings.slice_size", Slider.Percent GraphSettings.slice_size)
+                PageSetting(%"score.graph.settings.slice_size", Slider.Percent(GraphSettings.slice_size))
                     .Help(Help.Info("score.graph.settings.slice_size"))
                     .Pos(18)
             )
@@ -137,24 +155,29 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Bottom = 1.0f %- 65.0f
         }
 
-    let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> format_duration_ms
+    let duration =
+        (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> format_duration_ms
 
     let mutable MAX_WINDOW = score_info.Ruleset.LargestWindow
 
     do fbo.Unbind()
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Position <- NORMAL_POSITION
-        base.Init parent
+        base.Init(parent)
 
-    member this.Refresh() = refresh <- true
+    member this.Refresh() : unit = refresh <- true
 
-    member this.ApplyColumnFilter() =
+    member this.ApplyColumnFilter() : unit =
         stats.Value <- ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
 
-    member private this.DrawCumulativeInfo(bounds: Rect, info: GraphPoint) =
+    member private this.DrawCumulativeInfo(bounds: Rect, info: GraphPoint) : unit =
 
-        let black_cutoff_area = this.Bounds.SlicePercentR(1.0f - info.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
+        let black_cutoff_area =
+            this.Bounds.SlicePercentR(
+                1.0f - info.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time
+            )
+
         Render.rect black_cutoff_area Colors.black.O2
 
         let white_line =
@@ -164,6 +187,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 black_cutoff_area.Left + Style.PADDING,
                 this.Bounds.Bottom
             )
+
         Render.rect white_line Colors.white.O1
 
         let outline_bounds = bounds.Expand(Style.PADDING)
@@ -172,13 +196,16 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         let row_height = bounds.Height / 5.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
-        let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
+
+        let text_color =
+            if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
+
         let judgement_count = Array.sum info.Judgements
 
         let ma = JudgementRatio.Format(info.Judgements, 0)
         let pa = JudgementRatio.Format(info.Judgements, 1)
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             sprintf "%.4f%%  •  %ix" (info.Accuracy * 100.0) info.Combo,
             text_b,
@@ -186,7 +213,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             sprintf "M: %.2fms  •  SD: %.2fms" info.Mean info.StandardDeviation,
             text_b.Translate(0.0f, row_height),
@@ -194,7 +221,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             sprintf "G: %i  •  MA: %s  •  PA: %s" info.GhostTaps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
@@ -202,37 +229,45 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
-            (info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ") + "   [" + judgement_count.ToString() + "]",
+            (info.Judgements |> Seq.map(sprintf "%i") |> String.concat "  |  ")
+            + "   ["
+            + judgement_count.ToString()
+            + "]",
             text_b.TranslateY(row_height * 3.0f),
             text_color,
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
-            (
-                if score_info.Rate <> 1.0f<rate> then
-                    sprintf "%s (%s)"
-                        (format_duration_ms (info.Time / score_info.Rate))
-                        (format_duration_ms info.Time)
-                else
-                    sprintf "%s" (format_duration_ms info.Time)
-            ),
+            (if score_info.Rate <> 1.0f<rate> then
+                 sprintf "%s (%s)" (format_duration_ms(info.Time / score_info.Rate)) (format_duration_ms info.Time)
+             else
+                 sprintf "%s" (format_duration_ms info.Time)),
             text_b.Translate(0.0f, row_height * 4.0f),
             Colors.text_subheading,
             Alignment.LEFT
         )
 
-    member private this.DrawSliceInfo(bounds: Rect, index: int, width: int) =
+    member private this.DrawSliceInfo(bounds: Rect, index: int, width: int) : unit =
 
         let pre = stats.Value.GraphPoints.[index - width |> max 0]
-        let post = stats.Value.GraphPoints.[index + width |> min (stats.Value.GraphPoints.Length - 1)]
 
-        let black_cutoff_left = this.Bounds.SlicePercentL(pre.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
+        let post =
+            stats.Value.GraphPoints.[index + width |> min(stats.Value.GraphPoints.Length - 1)]
+
+        let black_cutoff_left =
+            this.Bounds.SlicePercentL(pre.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
+
         Render.rect black_cutoff_left Colors.black.O2
-        let black_cutoff_right = this.Bounds.SlicePercentR(1.0f - post.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
+
+        let black_cutoff_right =
+            this.Bounds.SlicePercentR(
+                1.0f - post.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time
+            )
+
         Render.rect black_cutoff_right Colors.black.O2
 
         let outline_bounds = bounds.Expand(Style.PADDING)
@@ -241,35 +276,39 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         let row_height = bounds.Height / 5.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
-        let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
+
+        let text_color =
+            if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
 
         let combo = stats.Value.GraphPoints.[index].Combo
         let max_points = post.MaxPointsScored - pre.MaxPointsScored
         let points = post.PointsScored - pre.PointsScored
         let accuracy = if max_points = 0.0 then 1.0 else points / max_points
-        let judgement_diff = post.Judgements |> Array.mapi (fun i v -> (v - pre.Judgements.[i]))
+
+        let judgement_diff =
+            post.Judgements |> Array.mapi(fun i v -> (v - pre.Judgements.[i]))
+
         let judgement_count_post = Array.sum post.Judgements
         let judgement_count_pre = Array.sum pre.Judgements
-        let mean = ((post.Mean * float32 judgement_count_post) - (pre.Mean * float32 judgement_count_pre)) / float32 (judgement_count_post - judgement_count_pre)
+
+        let mean =
+            ((post.Mean * float32 judgement_count_post) - (pre.Mean * float32 judgement_count_pre))
+            / float32(judgement_count_post - judgement_count_pre)
+
         let standard_deviation =
             ((post.StandardDeviation * post.StandardDeviation * float32 judgement_count_post)
-            - (pre.StandardDeviation * pre.StandardDeviation * float32 judgement_count_pre))
-            / float32 (judgement_count_post - judgement_count_pre)
+             - (pre.StandardDeviation * pre.StandardDeviation * float32 judgement_count_pre))
+            / float32(judgement_count_post - judgement_count_pre)
             |> sqrt
+
         let ghost_taps = post.GhostTaps - pre.GhostTaps
 
         let ma = JudgementRatio.Format(judgement_diff, 0)
         let pa = JudgementRatio.Format(judgement_diff, 1)
 
-        Text.fill_b (
-            Style.font,
-            sprintf "%.4f%%  •  %ix" (accuracy * 100.0) combo,
-            text_b,
-            text_color,
-            Alignment.LEFT
-        )
+        Text.fill_b(Style.font, sprintf "%.4f%%  •  %ix" (accuracy * 100.0) combo, text_b, text_color, Alignment.LEFT)
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             sprintf "M: %.2fms  •  SD: %.2fms" mean standard_deviation,
             text_b.Translate(0.0f, row_height),
@@ -277,7 +316,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
             sprintf "G: %i  •  MA: %s  •  PA: %s" ghost_taps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
@@ -285,40 +324,42 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
-            (judgement_diff |> Seq.map (sprintf "%i") |> String.concat "  |  ") + "   [" + (judgement_count_post - judgement_count_pre).ToString() + "]",
+            (judgement_diff |> Seq.map(sprintf "%i") |> String.concat "  |  ")
+            + "   ["
+            + (judgement_count_post - judgement_count_pre).ToString()
+            + "]",
             text_b.Translate(0.0f, row_height * 3.0f),
             text_color,
             Alignment.LEFT
         )
 
-        Text.fill_b (
+        Text.fill_b(
             Style.font,
-            (
-                if score_info.Rate <> 1.0f<rate> then
-                    sprintf "%s (%s) - %s (%s)"
-                        (format_duration_ms (pre.Time / score_info.Rate))
-                        (format_duration_ms pre.Time)
-                        (format_duration_ms (post.Time / score_info.Rate))
-                        (format_duration_ms post.Time)
-                else
-                    sprintf "%s - %s"
-                        (format_duration_ms pre.Time)
-                        (format_duration_ms post.Time)
-            ),
+            (if score_info.Rate <> 1.0f<rate> then
+                 sprintf
+                     "%s (%s) - %s (%s)"
+                     (format_duration_ms(pre.Time / score_info.Rate))
+                     (format_duration_ms pre.Time)
+                     (format_duration_ms(post.Time / score_info.Rate))
+                     (format_duration_ms post.Time)
+             else
+                 sprintf "%s - %s" (format_duration_ms pre.Time) (format_duration_ms post.Time)),
             text_b.Translate(0.0f, row_height * 4.0f),
             Colors.text_subheading,
             Alignment.LEFT
         )
 
-    member private this.PlotLine(y_func: GraphPoint -> float32, color_func: GraphPoint -> Color) =
+    member private this.PlotLine(y_func: GraphPoint -> float32, color_func: GraphPoint -> Color) : unit =
 
-        let mutable filler : ((float32 * float32) * (float32 * float32) * Color) voption = ValueNone
+        let mutable filler: ((float32 * float32) * (float32 * float32) * Color) voption =
+            ValueNone
+
         let draw_line (x1, y1) (x2, y2) (color: Color) =
             let theta = System.MathF.Atan2(y2 - y1, x2 - x1)
-            let dy = -HTHICKNESS * System.MathF.Cos theta
-            let dx = HTHICKNESS * System.MathF.Sin theta
+            let dy = -HTHICKNESS * System.MathF.Cos(theta)
+            let dx = HTHICKNESS * System.MathF.Sin(theta)
 
             let p1 = x1 + dx, y1 + dy
             let p2 = x2 + dx, y2 + dy
@@ -326,21 +367,18 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let p4 = x1 - dx, y1 - dy
 
             match filler with
-            | ValueSome (_p2, _p3, _color) ->
-                Render.quad_points p1 _p2 _p3 p4 _color
+            | ValueSome(_p2, _p3, _color) -> Render.quad_points p1 _p2 _p3 p4 _color
             | ValueNone -> ()
 
             Render.quad_points p1 p2 p3 p4 color
 
-            filler <- ValueSome (p2, p3, color)
+            filler <- ValueSome(p2, p3, color)
 
         let snapshots = stats.Value.GraphPoints
         let xscale = (this.Bounds.Width - 10.0f) / snapshots.[snapshots.Length - 1].Time
 
         for i = 1 to snapshots.Length - 1 do
-            let l, r =
-                y_func snapshots.[i - 1],
-                y_func snapshots.[i]
+            let l, r = y_func snapshots.[i - 1], y_func snapshots.[i]
 
             let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
             let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
@@ -349,34 +387,39 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             draw_line (x1, y1) (x2, y2) (color_func snapshots.[i]).O3
 
-    member private this.DrawWindows() =
+    member private this.DrawWindows() : unit =
         let h = 0.5f * this.Bounds.Height
         let c = this.Bounds.CenterY
-        let ms_to_y (time: GameplayTime) = c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
+
+        let ms_to_y (time: GameplayTime) =
+            c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
         let mutable previous_early = 0.0f<ms / rate>
         let mutable previous_late = 0.0f<ms / rate>
 
         for j in score_info.Ruleset.Judgements do
             match j.TimingWindows with
-            | Some (early, late) ->
+            | Some(early, late) ->
                 Render.rect_edges
                     this.Bounds.Left
                     (ms_to_y previous_early)
                     this.Bounds.Right
                     (ms_to_y early)
-                    (j.Color.O4a 100)
+                    (j.Color.O4a(100))
+
                 previous_early <- early
+
                 Render.rect_edges
                     this.Bounds.Left
                     (ms_to_y late)
                     this.Bounds.Right
                     (ms_to_y previous_late)
-                    (j.Color.O4a 100)
+                    (j.Color.O4a(100))
+
                 previous_late <- late
             | None -> ()
 
-    member private this.DrawLabels(translucent: bool) =
+    member private this.DrawLabels(translucent: bool) : unit =
         let color = if translucent then Colors.white.O1, Color.Transparent else Colors.text
 
         if expanded && options.ScoreGraphWindowBackground.Value then
@@ -384,31 +427,37 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let c = this.Bounds.CenterY
             let mutable y1 = c - h - 48.0f
             let mutable y2 = c + h + 24.0f
-            let ms_to_y (time: GameplayTime) = c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
+
+            let ms_to_y (time: GameplayTime) =
+                c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
             for j in score_info.Ruleset.Judgements do
                 match j.TimingWindows with
-                | Some (early, late) ->
+                | Some(early, late) ->
                     let early_y = ms_to_y early - 24.0f
+
                     if early_y - 24.0f > y1 then
                         Text.draw_b(Style.font, sprintf "%gms" early, 15.0f, this.Bounds.Left + 5.0f, early_y, color)
                         y1 <- early_y
+
                     let late_y = ms_to_y late
+
                     if late_y + 24.0f < y2 then
                         Text.draw_b(Style.font, sprintf "+%gms" late, 15.0f, this.Bounds.Left + 5.0f, late_y, color)
                         y2 <- late_y
                 | None -> ()
 
         else
-            Text.draw_b (
-                    Style.font,
-                    sprintf "%s (-%.0fms)" (%"score.graph.early") (MAX_WINDOW / GraphSettings.scale.Value),
-                    24.0f,
-                    this.Bounds.Left + 10.0f,
-                    this.Bounds.Bottom - 40.0f,
-                    color
-                )
-            Text.draw_b (
+            Text.draw_b(
+                Style.font,
+                sprintf "%s (-%.0fms)" (%"score.graph.early") (MAX_WINDOW / GraphSettings.scale.Value),
+                24.0f,
+                this.Bounds.Left + 10.0f,
+                this.Bounds.Bottom - 40.0f,
+                color
+            )
+
+            Text.draw_b(
                 Style.font,
                 sprintf "%s (+%.0fms)" (%"score.graph.late") (MAX_WINDOW / GraphSettings.scale.Value),
                 24.0f,
@@ -416,29 +465,61 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 this.Bounds.Top + 3.0f,
                 color
             )
-        Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, color, Alignment.RIGHT)
+
+        Text.draw_aligned_b(
+            Style.font,
+            duration,
+            24.0f,
+            this.Bounds.Right - 10.0f,
+            this.Bounds.Bottom - 40.0f,
+            color,
+            Alignment.RIGHT
+        )
+
         if score_info.IsFailed then
-            let color = if translucent then Colors.red.O1, Color.Transparent else Colors.text_red
-            Text.draw_aligned_b (Style.font, %"score.graph.failed", 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Top + 3.0f, color, Alignment.RIGHT)
+            let color =
+                if translucent then Colors.red.O1, Color.Transparent else Colors.text_red
+
+            Text.draw_aligned_b(
+                Style.font,
+                %"score.graph.failed",
+                24.0f,
+                this.Bounds.Right - 10.0f,
+                this.Bounds.Top + 3.0f,
+                color,
+                Alignment.RIGHT
+            )
 
         if stats.Value.ColumnFilterApplied then
-            let color = if translucent then Colors.green_accent.O1, Color.Transparent else Colors.text_green
+            let color =
+                if translucent then Colors.green_accent.O1, Color.Transparent else Colors.text_green
+
             let text =
                 GraphSettings.column_filter
                 |> Seq.indexed
-                |> Seq.choose (fun (i, b) -> if b && i < score_info.WithMods.Keys then Some ((i + 1).ToString()) else None)
+                |> Seq.choose(fun (i, b) ->
+                    if b && i < score_info.WithMods.Keys then Some((i + 1).ToString()) else None
+                )
                 |> String.concat " "
-            Text.draw_aligned_b (Style.font, sprintf "%s: %s" %"score.graph.settings.column_filter" text, 24.0f, this.Bounds.CenterX, this.Bounds.Bottom - 40.0f, color, Alignment.CENTER)
 
-    member private this.DrawLineGraph() =
+            Text.draw_aligned_b(
+                Style.font,
+                sprintf "%s: %s" %"score.graph.settings.column_filter" text,
+                24.0f,
+                this.Bounds.CenterX,
+                this.Bounds.Bottom - 40.0f,
+                color,
+                Alignment.CENTER
+            )
+
+    member private this.DrawLineGraph() : unit =
         let line_color =
             match options.ScoreGraphLineColor.Value with
-            | ScoreGraphLineColor.Lamp ->
-                fun (snapshot: GraphPoint) -> score_info.Ruleset.LampColor snapshot.Lamp
+            | ScoreGraphLineColor.Lamp -> fun (snapshot: GraphPoint) -> score_info.Ruleset.LampColor(snapshot.Lamp)
             | ScoreGraphLineColor.Grade ->
                 fun (snapshot: GraphPoint) ->
                     let grade = Grade.calculate score_info.Ruleset.Grades snapshot.Accuracy
-                    score_info.Ruleset.GradeColor grade
+                    score_info.Ruleset.GradeColor(grade)
             | _ -> K Colors.white
 
         match options.ScoreGraphLineMode.Value with
@@ -451,7 +532,10 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         | ScoreGraphLineMode.Mean when stats.Value.GraphPoints.Length > 0 ->
 
             let yscale = 0.5f / 10.0f<ms / rate>
-            let y_func (snapshot: GraphPoint) = 0.5f + snapshot.Mean * yscale |> min 1.0f |> max 0.0f
+
+            let y_func (snapshot: GraphPoint) =
+                0.5f + snapshot.Mean * yscale |> min 1.0f |> max 0.0f
+
             this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.StandardDeviation when stats.Value.GraphPoints.Length > 0 ->
@@ -466,32 +550,42 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let max_acc = accuracies |> Seq.max
             let min_acc = accuracies |> Seq.min
 
-            let y_func (snapshot: GraphPoint) = (snapshot.Accuracy - min_acc) / (max_acc - min_acc) |> float32
+            let y_func (snapshot: GraphPoint) =
+                (snapshot.Accuracy - min_acc) / (max_acc - min_acc) |> float32
+
             this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.MA when stats.Value.GraphPoints.Length > 0 && score_info.Scoring.JudgementCounts.Length > 1 ->
 
-            let ma (ss: GraphPoint) = let r, _ = JudgementRatio.Calculate(ss.Judgements, 0) in r
+            let ma (ss: GraphPoint) =
+                let r, _ = JudgementRatio.Calculate(ss.Judgements, 0) in r
+
             let ratios = stats.Value.GraphPoints |> Seq.map ma
             let max_ratio = ratios |> Seq.max
             let min_ratio = ratios |> Seq.min
 
-            let y_func (snapshot: GraphPoint) = (ma snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
+            let y_func (snapshot: GraphPoint) =
+                (ma snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
+
             this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.PA when stats.Value.GraphPoints.Length > 0 && score_info.Scoring.JudgementCounts.Length > 2 ->
 
-            let pa (ss: GraphPoint) = let r, _ = JudgementRatio.Calculate(ss.Judgements, 1) in r
+            let pa (ss: GraphPoint) =
+                let r, _ = JudgementRatio.Calculate(ss.Judgements, 1) in r
+
             let ratios = stats.Value.GraphPoints |> Seq.map pa
             let max_ratio = ratios |> Seq.max
             let min_ratio = ratios |> Seq.min
 
-            let y_func (snapshot: GraphPoint) = (pa snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
+            let y_func (snapshot: GraphPoint) =
+                (pa snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
+
             this.PlotLine(y_func, line_color)
 
         | _ -> ()
 
-    member private this.DrawHits() =
+    member private this.DrawHits() : unit =
         let events = score_info.Scoring.Events
         assert (events.Count > 0)
 
@@ -501,57 +595,65 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         let dot (x: float32, y: float32) (color: Color) =
             // x is actual x coordinate, y is relative to top edge
-            Render.rect_size
-                (x - HTHICKNESS)
-                (this.Bounds.Top + y - HTHICKNESS)
-                THICKNESS
-                THICKNESS
-                color
+            Render.rect_size (x - HTHICKNESS) (this.Bounds.Top + y - HTHICKNESS) THICKNESS THICKNESS color
 
         // todo: future use as a setting
         let bar (x: float32) (color: Color) =
-            Render.rect_size
-                (x - 1.5f)
-                (this.Bounds.Top + THICKNESS)
-                3.0f
-                (h * 2.0f)
-                color.O1
+            Render.rect_size (x - 1.5f) (this.Bounds.Top + THICKNESS) 3.0f (h * 2.0f) color.O1
 
         for ev in events do
             let x = this.Bounds.Left + 5.0f + ev.Time * xscale
+
             match ev.Inner with
             | Hit e
             | Hold e ->
 
                 match e.Judgement with
-                | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                    let color = score_info.Ruleset.JudgementColor judgement
+                | Some(judgement, _) when
+                    not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column]
+                    ->
+                    let color = score_info.Ruleset.JudgementColor(judgement)
 
                     if e.Missed then
                         //bar x color
                         dot (x, THICKNESS) color
                     else
-                        dot (x, h - System.Math.Clamp(h * e.Delta / MAX_WINDOW * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)) color
+                        dot
+                            (x,
+                             h
+                             - System.Math.Clamp(
+                                 h * e.Delta / MAX_WINDOW * GraphSettings.scale.Value,
+                                 -h + THICKNESS,
+                                 h - THICKNESS
+                             ))
+                            color
                 | _ -> ()
 
             | Release e ->
 
                 match e.Judgement with
-                | Some (judgement, _) when GraphSettings.column_filter.[ev.Column] ->
+                | Some(judgement, _) when GraphSettings.column_filter.[ev.Column] ->
                     // todo: figure something out about half-scale releases
-                    let color = score_info.Ruleset.JudgementColor judgement
+                    let color = score_info.Ruleset.JudgementColor(judgement)
 
                     if e.Missed then
                         //bar x (score_info.Ruleset.JudgementColor judgement)
                         dot (x, THICKNESS) color.O2
                     else
-                        dot (x, h - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)) color.O2
+                        dot
+                            (x,
+                             h
+                             - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f)
+                               * (h - THICKNESS - HTHICKNESS))
+                            color.O2
                 | _ -> ()
 
             | GhostTap e ->
                 match e.Judgement with
-                | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                    let color = score_info.Ruleset.JudgementColor judgement
+                | Some(judgement, _) when
+                    not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column]
+                    ->
+                    let color = score_info.Ruleset.JudgementColor(judgement)
                     //bar x color
                     dot (x, THICKNESS) color
                 | _ -> ()
@@ -559,16 +661,13 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             | DropHold
             | RegrabHold -> ()
 
-    member private this.Redraw() =
+    member private this.Redraw() : unit =
         refresh <- false
         MAX_WINDOW <- score_info.Ruleset.LargestWindow
         let h = 0.5f * this.Bounds.Height
-        fbo.Bind true
+        fbo.Bind(true)
 
-        if options.ScoreGraphWindowBackground.Value then
-            this.DrawWindows()
-        else
-            Render.rect this.Bounds Colors.black.O1
+        if options.ScoreGraphWindowBackground.Value then this.DrawWindows() else Render.rect this.Bounds Colors.black.O1
 
         Render.rect_edges
             this.Bounds.Left
@@ -586,7 +685,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         fbo.Unbind()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if moved then
@@ -594,31 +693,35 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         if Mouse.hover this.Bounds then
             if Mouse.right_clicked() then
-                ScoreGraphSettingsPage(score_info.WithMods.Keys, this.ApplyColumnFilter).WithOnClose(this.Refresh).Show()
+                ScoreGraphSettingsPage(score_info.WithMods.Keys, this.ApplyColumnFilter)
+                    .WithOnClose(this.Refresh)
+                    .Show()
             elif Mouse.left_clicked() then
                 expanded <- not expanded
                 this.Position <- if expanded then EXPANDED_POSITION else NORMAL_POSITION
                 refresh <- true
 
             let s = Mouse.scroll()
+
             if GraphSettings.show_slice.Value <> (%%"graph_alt_info").Held() then
                 show_slice_info <- true
                 GraphSettings.slice_size.Value <- GraphSettings.slice_size.Value + s * 0.005f
             else
                 show_slice_info <- false
+
                 if s <> 0.0f then
                     GraphSettings.scale.Value <- GraphSettings.scale.Value + 0.25f * s
                     refresh <- true
 
         for k = 0 to score_info.WithMods.Keys - 1 do
             match Input.pop_key_any_modifiers(GraphSettings.COLUMN_FILTER_KEYS.[k], InputAction.Press) with
-            | ValueSome (_, _, shift) ->
+            | ValueSome(_, _, shift) ->
                 if shift then
-                    for i = 0 to score_info.WithMods.Keys - 1 do 
+                    for i = 0 to score_info.WithMods.Keys - 1 do
                         GraphSettings.column_filter.[i] <- i = k
                 else
                     GraphSettings.column_filter.[k] <- not GraphSettings.column_filter.[k]
-                    
+
                 this.ApplyColumnFilter()
                 this.Refresh()
             | ValueNone -> ()
@@ -628,7 +731,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             this.Position <- NORMAL_POSITION
             refresh <- true
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if refresh then
             this.Redraw()
 
@@ -637,15 +740,17 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Render.sprite (Render.bounds()) Color.White fbo.Sprite
 
         let snapshots = stats.Value.GraphPoints
-        if this.Bounds.Contains(Mouse.pos ()) && snapshots.Length > 0 then
-            let percent = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
+
+        if this.Bounds.Contains(Mouse.pos()) && snapshots.Length > 0 then
+            let percent = (Mouse.x() - this.Bounds.Left) / this.Bounds.Width
             let time = percent * snapshots.[snapshots.Length - 1].Time
 
             if snapshot_index >= snapshots.Length then
-                snapshot_index <- int (percent * float32 snapshots.Length) |> max 0 |> min (snapshots.Length - 1)
+                snapshot_index <- int(percent * float32 snapshots.Length) |> max 0 |> min(snapshots.Length - 1)
 
             while snapshot_index > 0 && snapshots.[snapshot_index].Time > time do
                 snapshot_index <- snapshot_index - 1
+
             while snapshot_index + 1 < snapshots.Length && snapshots.[snapshot_index + 1].Time <= time do
                 snapshot_index <- snapshot_index + 1
 
@@ -660,15 +765,21 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 )
 
             if show_slice_info then
-                this.DrawSliceInfo(box, snapshot_index, int (GraphSettings.slice_size.Value * 0.5f * float32 ScoreScreenStats.GRAPH_POINT_COUNT))
+                this.DrawSliceInfo(
+                    box,
+                    snapshot_index,
+                    int(GraphSettings.slice_size.Value * 0.5f * float32 ScoreScreenStats.GRAPH_POINT_COUNT)
+                )
             else
                 this.DrawCumulativeInfo(box, current_snapshot)
 
-            this.DrawLabels true
+            this.DrawLabels(true)
         else
-            this.DrawLabels false
+            this.DrawLabels(false)
 
     interface System.IDisposable with
-        override this.Dispose() =
-            for i = 0 to 9 do GraphSettings.column_filter.[i] <- true
+        override this.Dispose() : unit =
+            for i = 0 to 9 do
+                GraphSettings.column_filter.[i] <- true
+
             (fbo :> System.IDisposable).Dispose()

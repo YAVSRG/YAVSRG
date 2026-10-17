@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Toolbar
+namespace Interlude.Features.Toolbar
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -10,54 +10,45 @@ open Interlude.UI
 type UpdateButton() as this =
     inherit Container(NodeType.Button(fun () -> this.Click()))
 
-    do this |* MouseListener().Button(this)
+    do this.Add(MouseListener().Button(this))
 
     let mutable download_progress = 0.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let area = this.Bounds.Shrink(0.0f, 7.5f)
         Render.rect area Colors.shadow_1.O2
 
         if Updates.update_complete then
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 Icons.REFRESH_CCW + " " + %"update.restart",
                 area.Shrink(20.0f, 5.0f),
-                (if this.Focused then
-                     Colors.text_yellow_2
-                 else
-                     Colors.text_green_2),
+                (if this.Focused then Colors.text_yellow_2 else Colors.text_green_2),
                 Alignment.CENTER
             )
 
         elif Updates.update_started then
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 Icons.DOWNLOAD + " " + %"update.installing",
                 area.Shrink(20.0f, 5.0f),
                 Colors.text_yellow_2,
                 Alignment.CENTER
             )
-            Render.rect
-                (area.BorderB(Style.PADDING))
-                Colors.shadow_2
-            Render.rect
-                (area.BorderB(Style.PADDING).SlicePercentL(download_progress))
-                Colors.cyan
+
+            Render.rect (area.BorderB(Style.PADDING)) Colors.shadow_2
+            Render.rect (area.BorderB(Style.PADDING).SlicePercentL(download_progress)) Colors.cyan
 
         else
-            Text.fill_b (
+            Text.fill_b(
                 Style.font,
                 Icons.DOWNLOAD + " " + %"update.install",
                 area.Shrink(20.0f, 5.0f),
-                (if this.Focused then
-                     Colors.text_yellow_2
-                 else
-                     Colors.text_green_2),
+                (if this.Focused then Colors.text_yellow_2 else Colors.text_green_2),
                 Alignment.CENTER
             )
 
-    member this.Click() =
+    member this.Click() : unit =
 
         if Updates.update_complete then
             Updates.restart_on_exit <- true
@@ -65,16 +56,16 @@ type UpdateButton() as this =
 
         elif not Updates.update_started then
 
-            Notifications.system_feedback (
+            Notifications.system_feedback(
                 Icons.ALERT_OCTAGON,
                 %"notification.update_installing.title",
                 %"notification.update_installing.body"
             )
 
-            Updates.apply_update (
+            Updates.apply_update(
                 (fun progress -> download_progress <- progress),
                 (fun () ->
-                    Notifications.system_feedback (
+                    Notifications.system_feedback(
                         Icons.ALERT_OCTAGON,
                         %"notification.update_installed.title",
                         %"notification.update_installed.body"

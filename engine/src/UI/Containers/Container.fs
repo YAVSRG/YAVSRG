@@ -37,17 +37,6 @@ type Container(node_type: NodeType) =
         for c in children do
             c.Init this
 
-    static member (|+)(parent: #Container, child: #Widget) =
-        parent.Add child
-        parent
-
-    static member (|+)(parent: #Container, children: #Widget seq) =
-        Seq.iter parent.Add children
-        parent
-
-    static member (|*)(parent: #Container, child: #Widget) = parent.Add child
-    static member (|*)(parent: #Container, children: #Widget seq) = Seq.iter parent.Add children
-
     static member Create(child: Widget) =
         Container(NodeType.Container(K (Some child))).With(child)
 

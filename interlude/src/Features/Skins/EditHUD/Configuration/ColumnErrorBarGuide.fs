@@ -15,14 +15,14 @@ type ColumnErrorBarsGuidePage() =
     let show_guide = Setting.simple config.ColumnErrorBarsShowGuide
     let guide_thickness = Setting.percentf config.ColumnErrorBarsGuideThickness
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 ColumnErrorBarsShowGuide = show_guide.Value
                 ColumnErrorBarsGuideThickness = guide_thickness.Value
             }
-    
-    override this.Content() =
+
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -35,5 +35,5 @@ type ColumnErrorBarsGuidePage() =
                     .Pos(2)
                     .Conditional(show_guide.Get)
             )
-    
+
     override this.Title = %"hud.column_error_bars.guide_settings"

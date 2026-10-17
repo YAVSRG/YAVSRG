@@ -16,7 +16,6 @@ type IContainer<'T when 'T :> Widget> =
     abstract member Add: 'T -> unit
     abstract member Remove: 'T -> bool
 
-[<Extension>]
 type ContainerExtensions =
 
     [<Extension>]

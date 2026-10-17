@@ -15,7 +15,7 @@ open Interlude.Features.Skins
 type ReceptorColorPicker(color: Setting<int>) =
     inherit Container(NodeType.Leaf)
 
-    let sprite = Content.Texture "receptor"
+    let sprite = Content.Texture("receptor")
     let n = sprite.Rows / 2
 
     let fd () =
@@ -26,24 +26,24 @@ type ReceptorColorPicker(color: Setting<int>) =
         Setting.app (fun x -> (x + n - 1) % n) color
         Style.click.Play()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             MouseListener()
                 .SelectOnClick(this, fd)
                 .FocusOnHover(this)
                 .OnRightClick(fun () ->
-                    this.Select true
+                    this.Select(true)
                     bk()
                 )
         )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         if this.Selected then
@@ -51,25 +51,28 @@ type ReceptorColorPicker(color: Setting<int>) =
         elif this.Focused then
             Render.rect (this.Bounds.Expand(Style.PADDING)) Colors.yellow_accent.O2
 
-        Render.tex_quad (this.Bounds.SliceY(this.Bounds.Width).SlicePercentT(1.0f / sprite.AspectRatio).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, 1 + color.Value * 2) sprite)
+        Render.tex_quad
+            (this.Bounds.SliceY(this.Bounds.Width).SlicePercentT(1.0f / sprite.AspectRatio).AsQuad)
+            Color.White.AsQuad
+            (Sprite.pick_texture (0, 1 + color.Value * 2) sprite)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
             if (%%"up").Pressed() then
-                fd ()
+                fd()
             elif (%%"down").Pressed() then
-                bk ()
+                bk()
             elif (%%"left").Pressed() then
-                bk ()
+                bk()
             elif (%%"right").Pressed() then
-                fd ()
+                fd()
 
 type ColumnLightColorPicker(color: Setting<int>) =
     inherit Container(NodeType.Leaf)
 
-    let sprite = Content.Texture "receptorlighting"
+    let sprite = Content.Texture("receptorlighting")
     let n = sprite.Rows
 
     let fd () =
@@ -80,24 +83,24 @@ type ColumnLightColorPicker(color: Setting<int>) =
         Setting.app (fun x -> (x + n - 1) % n) color
         Style.click.Play()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             MouseListener()
                 .SelectOnClick(this, fd)
                 .FocusOnHover(this)
                 .OnRightClick(fun () ->
-                    this.Select true
+                    this.Select(true)
                     bk()
                 )
         )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         if this.Selected then
@@ -105,20 +108,23 @@ type ColumnLightColorPicker(color: Setting<int>) =
         elif this.Focused then
             Render.rect (this.Bounds.Expand(Style.PADDING)) Colors.yellow_accent.O2
 
-        Render.tex_quad (this.Bounds.SliceY(this.Bounds.Width).ExpandPercentY((1.0f / sprite.AspectRatio |> min 2.0f) - 1.0f).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, color.Value) sprite)
+        Render.tex_quad
+            (this.Bounds.SliceY(this.Bounds.Width).ExpandPercentY((1.0f / sprite.AspectRatio |> min 2.0f) - 1.0f).AsQuad)
+            Color.White.AsQuad
+            (Sprite.pick_texture (0, color.Value) sprite)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
             if (%%"up").Pressed() then
-                fd ()
+                fd()
             elif (%%"down").Pressed() then
-                bk ()
+                bk()
             elif (%%"left").Pressed() then
-                bk ()
+                bk()
             elif (%%"right").Pressed() then
-                fd ()
+                fd()
 
 type AnimationSettingsPage() =
     inherit Page()
@@ -127,24 +133,28 @@ type AnimationSettingsPage() =
 
     (* Preview *)
 
-    let note = Content.Texture "note"
-    let noteexplosion = Content.Texture "noteexplosion"
-    let holdexplosion = Content.Texture "holdexplosion"
-    let releaseexplosion = Content.Texture "releaseexplosion"
-    let receptor = Content.Texture "receptor"
-    let judgementline = Content.Texture "judgementline"
-    let columnlighting = Content.Texture "receptorlighting"
+    let note = Content.Texture("note")
+    let noteexplosion = Content.Texture("noteexplosion")
+    let holdexplosion = Content.Texture("holdexplosion")
+    let releaseexplosion = Content.Texture("releaseexplosion")
+    let receptor = Content.Texture("receptor")
+    let judgementline = Content.Texture("judgementline")
+    let columnlighting = Content.Texture("receptorlighting")
 
     let mutable holding = false
-    let test_events = Animation.Counter 1000.0
+    let test_events = Animation.Counter(1000.0)
     let f_note = Animation.Counter(float data.AnimationFrameTime)
 
     let t_columnlight = Animation.Delay(data.ColumnLightDuration)
 
-    let f_note_ex = Animation.Counter(float data.NoteExplosionSettings.AnimationFrameTime)
+    let f_note_ex =
+        Animation.Counter(float data.NoteExplosionSettings.AnimationFrameTime)
+
     let t_note_ex = Animation.Delay(float data.NoteExplosionSettings.Duration)
 
-    let f_hold_ex = Animation.Counter(float data.HoldExplosionSettings.AnimationFrameTime)
+    let f_hold_ex =
+        Animation.Counter(float data.HoldExplosionSettings.AnimationFrameTime)
+
     let t_hold_ex = Animation.Delay(float data.HoldExplosionSettings.Duration)
 
     let NOTE_SCALE = (PAGE_ITEM_WIDTH - PAGE_LABEL_WIDTH) / 10.0f
@@ -153,7 +163,7 @@ type AnimationSettingsPage() =
 
     let enable_receptors = Setting.simple data.UseReceptors
     let receptor_style = Setting.simple data.ReceptorStyle
-    let receptor_offset = data.ReceptorOffset |> Setting.bounded (-10.0f, 10.0f)
+    let receptor_offset = data.ReceptorOffset |> Setting.bounded(-10.0f, 10.0f)
     let notes_under_receptors = Setting.simple data.NotesUnderReceptors
 
     let hitposition =
@@ -162,9 +172,10 @@ type AnimationSettingsPage() =
 
     let receptors_tab =
 
-        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+        let keymode: Setting<Keymode> = Setting.simple(SelectedChart.keymode())
 
         let receptor_colors = data.ReceptorColors
+
         let color_picker keycount i =
             let k = int keycount - 3
 
@@ -186,16 +197,12 @@ type AnimationSettingsPage() =
                         )
                 )
 
-        NavigationContainer.Column(WrapNavigation = false)
+        NavigationContainer
+            .Column(WrapNavigation = false)
             .With(
                 hitposition.Pos(0),
-                PageSetting(%"noteskin.enable_receptors", Checkbox enable_receptors)
-                    .Pos(2),
-                PageSetting(
-                    %"noteskin.notes_under_receptors",
-                    Checkbox notes_under_receptors
-                )
-                    .Pos(4),
+                PageSetting(%"noteskin.enable_receptors", Checkbox enable_receptors).Pos(2),
+                PageSetting(%"noteskin.notes_under_receptors", Checkbox notes_under_receptors).Pos(4),
                 PageSetting(
                     %"noteskin.receptorstyle",
                     SelectDropdown(
@@ -209,16 +216,13 @@ type AnimationSettingsPage() =
                     .Help(Help.Info("noteskin.receptorstyle"))
                     .Pos(6)
                     .Conditional(enable_receptors.Get),
-                PageSetting(
-                    %"noteskin.receptor_offset",
-                    Slider.Percent(receptor_offset)
-                )
+                PageSetting(%"noteskin.receptor_offset", Slider.Percent(receptor_offset))
                     .Help(Help.Info("noteskin.receptor_offset"))
                     .Pos(8)
                     .Conditional(enable_receptors.Get),
                 PageSetting(
                     %"generic.keymode",
-                    SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
+                    SelectDropdown.FromEnum(keymode |> Setting.trigger(fun _ -> refresh_colors()))
                 )
                     .Pos(11)
                     .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2),
@@ -230,27 +234,18 @@ type AnimationSettingsPage() =
     (* Judgement line *)
 
     let enable_judgement_line = Setting.simple data.UseJudgementLine
-    let judgement_line_scale = data.JudgementLineScale |> Setting.bounded (0.1f, 5f)
+    let judgement_line_scale = data.JudgementLineScale |> Setting.bounded(0.1f, 5f)
     let judgement_line_offset = data.JudgementLineOffset |> Setting.bounded(-1.0f, 1.0f)
 
     let judgement_line_tab =
-        NavigationContainer.Column(WrapNavigation = false)
+        NavigationContainer
+            .Column(WrapNavigation = false)
             .With(
-                PageSetting(
-                    %"noteskin.enable_judgement_line",
-                    Checkbox enable_judgement_line
-                )
-                    .Pos(0),
-                PageSetting(
-                    %"noteskin.judgement_line_scale",
-                    Slider.Percent(judgement_line_scale)
-                )
+                PageSetting(%"noteskin.enable_judgement_line", Checkbox enable_judgement_line).Pos(0),
+                PageSetting(%"noteskin.judgement_line_scale", Slider.Percent(judgement_line_scale))
                     .Pos(2)
                     .Conditional(enable_judgement_line.Get),
-                PageSetting(
-                    %"noteskin.judgement_line_offset",
-                    Slider.Percent(judgement_line_offset)
-                )
+                PageSetting(%"noteskin.judgement_line_offset", Slider.Percent(judgement_line_offset))
                     .Help(Help.Info("noteskin.judgement_line_offset"))
                     .Pos(4)
                     .Conditional(enable_judgement_line.Get)
@@ -259,18 +254,20 @@ type AnimationSettingsPage() =
     (* Column lighting *)
 
     let enable_column_light = Setting.simple data.EnableColumnLight
-    let column_light_offset = data.ColumnLightOffset |> Setting.bounded (-1.0f, 1.0f)
+    let column_light_offset = data.ColumnLightOffset |> Setting.bounded(-1.0f, 1.0f)
+
     let column_light_duration =
         data.ColumnLightDuration
-        |> Setting.bounded (0.0, 1000.0)
+        |> Setting.bounded(0.0, 1000.0)
         |> Setting.round 0
         |> Setting.trigger t_columnlight.set_Interval
 
     let column_light_tab =
 
-        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+        let keymode: Setting<Keymode> = Setting.simple(SelectedChart.keymode())
 
         let column_light_colors = data.ColumnLightColors
+
         let color_picker keycount i =
             let k = int keycount - 3
 
@@ -292,7 +289,8 @@ type AnimationSettingsPage() =
                         )
                 )
 
-        NavigationContainer.Column(WrapNavigation = false)
+        NavigationContainer
+            .Column(WrapNavigation = false)
             .With(
                 PageSetting(%"noteskin.enablecolumnlight", Checkbox enable_column_light)
                     .Help(Help.Info("noteskin.enablecolumnlight"))
@@ -301,16 +299,13 @@ type AnimationSettingsPage() =
                     .Help(Help.Info("noteskin.columnlightoffset"))
                     .Pos(2)
                     .Conditional(enable_column_light.Get),
-                PageSetting(
-                    %"noteskin.columnlighttime",
-                    Slider(column_light_duration |> Setting.f32, Step = 1f)
-                )
+                PageSetting(%"noteskin.columnlighttime", Slider(column_light_duration |> Setting.f32, Step = 1f))
                     .Help(Help.Info("noteskin.columnlighttime"))
                     .Pos(4)
                     .Conditional(enable_column_light.Get),
                 PageSetting(
                     %"generic.keymode",
-                    SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
+                    SelectDropdown.FromEnum(keymode |> Setting.trigger(fun _ -> refresh_colors()))
                 )
                     .Pos(7)
                     .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value),
@@ -325,42 +320,39 @@ type AnimationSettingsPage() =
 
     let explosion_frame_time_note =
         data.NoteExplosionSettings.AnimationFrameTime
-        |> Setting.bounded (10.0f<ms / rate>, 1000.0f<ms / rate>)
+        |> Setting.bounded(10.0f<ms / rate>, 1000.0f<ms / rate>)
         |> Setting.roundf_uom 0
-        |> Setting.trigger (float >> f_note_ex.set_Interval)
+        |> Setting.trigger(float >> f_note_ex.set_Interval)
 
     let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
 
     let explosion_offset_note =
-        data.NoteExplosionSettings.Offset
-        |> Setting.bounded (-1.0f, 1.0f)
+        data.NoteExplosionSettings.Offset |> Setting.bounded(-1.0f, 1.0f)
 
     let explosion_builtin_note =
         Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
 
     let explosion_duration_note =
         data.NoteExplosionSettings.Duration
-        |> Setting.bounded (50.0f<ms / rate>, 1000f<ms / rate>)
+        |> Setting.bounded(50.0f<ms / rate>, 1000f<ms / rate>)
         |> Setting.roundf_uom 0
-        |> Setting.trigger (float >> t_note_ex.set_Interval)
+        |> Setting.trigger(float >> t_note_ex.set_Interval)
 
     let explosion_scale_note =
-        data.NoteExplosionSettings.Scale
-        |> Setting.bounded (0.5f, 10.0f)
+        data.NoteExplosionSettings.Scale |> Setting.bounded(0.5f, 10.0f)
 
     let explosion_expand_note = Setting.percentf data.NoteExplosionSettings.ExpandAmount
 
     let explosion_frame_time_hold =
         data.HoldExplosionSettings.AnimationFrameTime
-        |> Setting.bounded (10.0f<ms / rate>, 1000.0f<ms / rate>)
+        |> Setting.bounded(10.0f<ms / rate>, 1000.0f<ms / rate>)
         |> Setting.roundf_uom 0
-        |> Setting.trigger (float >> f_hold_ex.set_Interval)
+        |> Setting.trigger(float >> f_hold_ex.set_Interval)
 
     let explosion_colors_hold = Setting.simple data.HoldExplosionSettings.Colors
 
     let explosion_offset_hold =
-        data.HoldExplosionSettings.Offset
-        |> Setting.bounded (-4.0f, 4.0f)
+        data.HoldExplosionSettings.Offset |> Setting.bounded(-4.0f, 4.0f)
 
     let explosion_hold_use_release =
         Setting.simple data.HoldExplosionSettings.UseReleaseExplosion
@@ -370,18 +362,18 @@ type AnimationSettingsPage() =
 
     let explosion_duration_hold =
         data.HoldExplosionSettings.Duration
-        |> Setting.bounded (50.0f<ms / rate>, 1000f<ms / rate>)
+        |> Setting.bounded(50.0f<ms / rate>, 1000f<ms / rate>)
         |> Setting.roundf_uom 0
-        |> Setting.trigger (float >> t_hold_ex.set_Interval)
+        |> Setting.trigger(float >> t_hold_ex.set_Interval)
 
     let explosion_scale_hold =
-        data.HoldExplosionSettings.Scale
-        |> Setting.bounded (0.5f, 10.0f)
+        data.HoldExplosionSettings.Scale |> Setting.bounded(0.5f, 10.0f)
 
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 
     let note_explosions_subtab =
-        NavigationContainer.Column(WrapNavigation = false)
+        NavigationContainer
+            .Column(WrapNavigation = false)
             .With(
                 PageSetting(
                     %"noteskin.explosionanimationtime",
@@ -407,10 +399,7 @@ type AnimationSettingsPage() =
                 PageSetting(%"noteskin.usebuiltinanimation", Checkbox explosion_builtin_note)
                     .Help(Help.Info("noteskin.usebuiltinanimation"))
                     .Pos(8),
-                PageSetting(
-                    %"noteskin.explosionduration",
-                    Slider(Setting.uom explosion_duration_note, Step = 1f)
-                )
+                PageSetting(%"noteskin.explosionduration", Slider(Setting.uom explosion_duration_note, Step = 1f))
                     .Help(Help.Info("noteskin.explosionduration"))
                     .Pos(10)
                     .Conditional(explosion_builtin_note.Get),
@@ -421,7 +410,8 @@ type AnimationSettingsPage() =
             )
 
     let hold_explosions_subtab =
-        NavigationContainer.Column(WrapNavigation = false)
+        NavigationContainer
+            .Column(WrapNavigation = false)
             .With(
                 PageSetting(
                     %"noteskin.explosionanimationtime",
@@ -451,10 +441,7 @@ type AnimationSettingsPage() =
                     .Help(Help.Info("noteskin.usebuiltinanimation"))
                     .Pos(10)
                     .Conditional(explosion_hold_use_release.Get),
-                PageSetting(
-                    %"noteskin.explosionduration",
-                    Slider(Setting.uom explosion_duration_hold, Step = 1f)
-                )
+                PageSetting(%"noteskin.explosionduration", Slider(Setting.uom explosion_duration_hold, Step = 1f))
                     .Help(Help.Info("noteskin.explosionduration"))
                     .Pos(12)
                     .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value),
@@ -467,24 +454,24 @@ type AnimationSettingsPage() =
     let explosions_tab =
         let subtab_container = SwapContainer(note_explosions_subtab)
 
-        let subtab_options : (Widget * string) array =
+        let subtab_options: (Widget * string) array =
             [|
                 note_explosions_subtab, %"noteskin.note_explosions"
                 hold_explosions_subtab, %"noteskin.hold_explosions"
             |]
 
-        NavigationContainer.Column()
+        NavigationContainer
+            .Column()
             .With(
                 PageSetting(%"noteskin.enable_explosions", Checkbox enable_explosions).Pos(0),
-                TabButtons.Create(subtab_options, subtab_container)
+                TabButtons
+                    .Create(subtab_options, subtab_container)
                     .Position(page_position(2, 2, PageWidth.Normal).TranslateY(20.0f).SliceT(TabButtons.HEIGHT))
                     .Conditional(enable_explosions.Get),
-                subtab_container
-                    .Position(Position.ShrinkT(150.0f))
-                    .Conditional(enable_explosions.Get)
+                subtab_container.Position(Position.ShrinkT(150.0f)).Conditional(enable_explosions.Get)
             )
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 NotesUnderReceptors = notes_under_receptors.Value
@@ -525,13 +512,15 @@ type AnimationSettingsPage() =
                     }
             }
 
-    override this.Content() =
-        let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
+    override this.Content() : Widget =
+        let preview =
+            new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
+
         this.OnClose(this.SaveChanges)
         this.DisposeOnDestroy(preview)
         let tab_container = SwapContainer(receptors_tab)
 
-        let tab_options : (Widget * string) array =
+        let tab_options: (Widget * string) array =
             [|
                 receptors_tab, %"noteskin.receptors"
                 judgement_line_tab, %"noteskin.judgement_line"
@@ -539,41 +528,62 @@ type AnimationSettingsPage() =
                 explosions_tab, %"noteskin.explosions"
             |]
 
-        NavigationContainer.Column()
+        NavigationContainer
+            .Column()
             .With(
-                TabButtons.Create(tab_options, tab_container)
-                    .Position(page_position(0, 2, PageWidth.Normal).Translate(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceT(TabButtons.HEIGHT)),
-                tab_container
-                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f)),
-                HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some AnimationSettingsPage))
+                TabButtons
+                    .Create(tab_options, tab_container)
+                    .Position(
+                        page_position(0, 2, PageWidth.Normal)
+                            .Translate(PAGE_MARGIN_X, PAGE_MARGIN_Y)
+                            .SliceT(TabButtons.HEIGHT)
+                    ),
+                tab_container.Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f)),
+                HotkeyListener(
+                    "reload_content",
+                    fun () -> SkinHotReload.hot_reload_noteskin(Some AnimationSettingsPage)
+                )
             )
         |> Container.Create
-        |+ preview.Conditional(hitposition.get_Focused)
-        |+ Text(%"noteskin.explosions.hitposition_hint_a")
-            .Color(Colors.text_yellow_2)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceB(PAGE_ITEM_HEIGHT - Style.PADDING * 3.0f, PAGE_ITEM_HEIGHT).Shrink(Style.PADDING, Style.PADDING * 2.0f).ShrinkR(Style.PADDING * 2.0f))
-            .Conditional(hitposition.get_Focused)
-        |+ Text(%"noteskin.explosions.hitposition_hint_b")
-            .Color(Colors.text_yellow_2)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceB(PAGE_ITEM_HEIGHT).Shrink(Style.PADDING, Style.PADDING * 2.0f).ShrinkR(Style.PADDING * 2.0f))
-            .Conditional(hitposition.get_Focused)
+        |> fun container ->
+            container.With(
+                preview.Conditional(hitposition.get_Focused),
+                Text(%"noteskin.explosions.hitposition_hint_a")
+                    .Color(Colors.text_yellow_2)
+                    .Align(Alignment.RIGHT)
+                    .Position(
+                        Position
+                            .SliceB(PAGE_ITEM_HEIGHT - Style.PADDING * 3.0f, PAGE_ITEM_HEIGHT)
+                            .Shrink(Style.PADDING, Style.PADDING * 2.0f)
+                            .ShrinkR(Style.PADDING * 2.0f)
+                    )
+                    .Conditional(hitposition.get_Focused),
+                Text(%"noteskin.explosions.hitposition_hint_b")
+                    .Color(Colors.text_yellow_2)
+                    .Align(Alignment.RIGHT)
+                    .Position(
+                        Position
+                            .SliceB(PAGE_ITEM_HEIGHT)
+                            .Shrink(Style.PADDING, Style.PADDING * 2.0f)
+                            .ShrinkR(Style.PADDING * 2.0f)
+                    )
+                    .Conditional(hitposition.get_Focused)
+            )
         :> Widget
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
-        f_note.Update elapsed_ms
-        f_note_ex.Update elapsed_ms
-        f_hold_ex.Update elapsed_ms
+        f_note.Update(elapsed_ms)
+        f_note_ex.Update(elapsed_ms)
+        f_hold_ex.Update(elapsed_ms)
 
-        t_columnlight.Update elapsed_ms
-        t_note_ex.Update elapsed_ms
-        t_hold_ex.Update elapsed_ms
-        t_columnlight.Update elapsed_ms
+        t_columnlight.Update(elapsed_ms)
+        t_note_ex.Update(elapsed_ms)
+        t_hold_ex.Update(elapsed_ms)
+        t_columnlight.Update(elapsed_ms)
 
-        test_events.Update elapsed_ms
+        test_events.Update(elapsed_ms)
 
         if holding <> (test_events.Loops % 2 = 0) then
             holding <- test_events.Loops % 2 = 0
@@ -587,20 +597,21 @@ type AnimationSettingsPage() =
                 t_hold_ex.Reset()
                 f_hold_ex.Reset()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
+
         if not hitposition.Focused then
             this.RenderPreviews()
 
-    member this.RenderPreviews() =
+    member this.RenderPreviews() : unit =
 
         let COLUMN_WIDTH = 120.0f
-        let preview_width =
-            1.0f
-            + (if enable_column_light.Value then 1.0f else 0.0f)
-            + (if enable_explosions.Value then 2.0f else 0.0f)
 
-        let center = this.Bounds.Right - (this.Bounds.Width - PAGE_ITEM_WIDTH - PAGE_MARGIN_X * 2.0f) * 0.5f
+        let preview_width =
+            1.0f + (if enable_column_light.Value then 1.0f else 0.0f) + (if enable_explosions.Value then 2.0f else 0.0f)
+
+        let center =
+            this.Bounds.Right - (this.Bounds.Width - PAGE_ITEM_WIDTH - PAGE_MARGIN_X * 2.0f) * 0.5f
 
         let mutable left = center - preview_width * COLUMN_WIDTH * 0.5f
         let position = this.Bounds.Top + this.Bounds.Height * 0.6f
@@ -615,7 +626,7 @@ type AnimationSettingsPage() =
                 Color.White.AsQuad
                 (Sprite.pick_texture (f_note.Loops, 0) judgementline)
 
-        let receptor() =
+        let receptor () =
             if enable_receptors.Value then
                 Render.tex_quad
                     (Rect
@@ -629,9 +640,7 @@ type AnimationSettingsPage() =
             receptor()
 
         Render.tex_quad
-            (Rect
-                .FromSize(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                .AsQuad)
+            (Rect.FromSize(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, 0) note)
 
@@ -643,13 +652,7 @@ type AnimationSettingsPage() =
             receptor()
 
             let percent_remaining =
-                if holding then
-                    1.0f
-                else
-                    1.0 - t_columnlight.Progress
-                    |> min 1.0
-                    |> max 0.0
-                    |> float32
+                if holding then 1.0f else 1.0 - t_columnlight.Progress |> min 1.0 |> max 0.0 |> float32
 
             let a = 255.0f * percent_remaining |> int |> min 255 |> max 0
 
@@ -662,7 +665,7 @@ type AnimationSettingsPage() =
                      COLUMN_WIDTH * percent_remaining,
                      1.0f / percent_remaining)
                     columnlighting)
-                (Color.White.O4a a)
+                (Color.White.O4a(a))
                 columnlighting
 
         if enable_explosions.Value then
@@ -671,11 +674,8 @@ type AnimationSettingsPage() =
 
             let percent_remaining =
                 if explosion_builtin_note.Value then
-                    1.0 - (t_note_ex.Time / float explosion_duration_note.Value)
-                    |> min 1.0
-                    |> max 0.0
-                    |> float32
-                else if f_note_ex.Loops > noteexplosion.Columns then
+                    1.0 - (t_note_ex.Time / float explosion_duration_note.Value) |> min 1.0 |> max 0.0 |> float32
+                elif f_note_ex.Loops > noteexplosion.Columns then
                     0.0f
                 else
                     1.0f
@@ -689,7 +689,7 @@ type AnimationSettingsPage() =
                     .Expand(explosion_expand_note.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                     .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_note.Value)
                     .AsQuad)
-                (Color.White.O4a a).AsQuad
+                (Color.White.O4a(a)).AsQuad
                 (Sprite.pick_texture (f_note_ex.Loops, 0) noteexplosion)
 
             left <- left + COLUMN_WIDTH
@@ -701,10 +701,7 @@ type AnimationSettingsPage() =
                     if holding then
                         1.0f
                     else
-                        1.0 - (t_hold_ex.Time / float explosion_duration_hold.Value)
-                        |> min 1.0
-                        |> max 0.0
-                        |> float32
+                        1.0 - (t_hold_ex.Time / float explosion_duration_hold.Value) |> min 1.0 |> max 0.0 |> float32
 
                 let a = 255.0f * percent_remaining |> int
 
@@ -715,18 +712,15 @@ type AnimationSettingsPage() =
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
                         .AsQuad)
-                    (Color.White.O4a a).AsQuad
+                    (Color.White.O4a(a)).AsQuad
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) holdexplosion)
 
             else
 
                 let percent_remaining =
                     if explosion_builtin_release.Value then
-                        1.0 - (t_hold_ex.Time / float explosion_duration_hold.Value)
-                        |> min 1.0
-                        |> max 0.0
-                        |> float32
-                    else if f_hold_ex.Loops > releaseexplosion.Columns then
+                        1.0 - (t_hold_ex.Time / float explosion_duration_hold.Value) |> min 1.0 |> max 0.0 |> float32
+                    elif f_hold_ex.Loops > releaseexplosion.Columns then
                         0.0f
                     else
                         1.0f
@@ -740,7 +734,7 @@ type AnimationSettingsPage() =
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
                         .AsQuad)
-                    (Color.White.O4a a).AsQuad
+                    (Color.White.O4a(a)).AsQuad
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) releaseexplosion)
 
     override this.Title = %"noteskin.animations"

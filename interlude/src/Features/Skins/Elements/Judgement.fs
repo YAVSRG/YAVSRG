@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open System
 open Percyqaz.Flux.Graphics
@@ -15,11 +15,11 @@ type Judgement(ctx: HudContext) =
     let mutable tier = 0
     let mutable time = -Time.infinity
 
-    let texture = Content.Texture "judgements"
-    let display = ctx.Config.GetJudgementMeterDisplay ctx.State.Ruleset
+    let texture = Content.Texture("judgements")
+    let display = ctx.Config.GetJudgementMeterDisplay(ctx.State.Ruleset)
     let duration = ctx.Config.JudgementMeterDuration * SelectedChart.rate.Value
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         ctx.State.Subscribe(fun ev ->
             let judge = ev.Inner.Judgement |> Option.map fst
 
@@ -36,9 +36,10 @@ type Judgement(ctx: HudContext) =
             | _ -> ()
         )
         |> ignore
+
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if time > -Time.infinity then
 
             let time_ago = ctx.State.CurrentChartTime() - time
@@ -46,25 +47,28 @@ type Judgement(ctx: HudContext) =
 
             if percent < 1.0f then
 
-                let pop = max (percent - 5.0f * percent * percent) (- 128f * MathF.Pow(percent - 0.5f, 8.0f))
-                
+                let pop =
+                    max (percent - 5.0f * percent * percent) (-128f * MathF.Pow(percent - 0.5f, 8.0f))
+
                 let alpha =
                     if ctx.Config.JudgementMeterEffect = JudgementEffectType.Fade then
                         255 - int(255.0f * percent)
                     elif ctx.Config.JudgementMeterEffect = JudgementEffectType.Pop then
                         Math.Clamp(255.0f * ((pop * 2.0f) + 1.0f) |> int, 0, 255)
-                    else 255
-                    
+                    else
+                        255
+
                 let bounds =
                     if ctx.Config.JudgementMeterEffect = JudgementEffectType.Pop then
                         this.Bounds.ExpandPercent(pop)
-                    else this.Bounds
+                    else
+                        this.Bounds
 
                 match display.[tier] with
                 | JudgementDisplayType.Name ->
-                    Text.fill (
+                    Text.fill(
                         Style.font,
-                        ctx.State.Ruleset.JudgementName tier,
+                        ctx.State.Ruleset.JudgementName(tier),
                         bounds,
                         ctx.State.Ruleset.JudgementColor(tier).O4a alpha,
                         Alignment.CENTER
@@ -72,5 +76,7 @@ type Judgement(ctx: HudContext) =
                 | JudgementDisplayType.Texture y ->
                     Render.tex_quad
                         (Sprite.fill bounds texture).AsQuad
-                        (Color.White.O4a alpha).AsQuad
-                        (Sprite.pick_texture (time_ago / ctx.Config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y) texture)
+                        (Color.White.O4a(alpha)).AsQuad
+                        (Sprite.pick_texture
+                            (time_ago / ctx.Config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y)
+                            texture)

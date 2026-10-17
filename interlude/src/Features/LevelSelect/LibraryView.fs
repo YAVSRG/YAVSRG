@@ -20,40 +20,30 @@ type private ModeDropdown
     let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
+    let dropdown_wrapper =
+        DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
 
-    override this.Init(parent: Widget) =
-        this
-            .Add(
-                AngledButton(
-                    label + ":",
-                    (fun () -> this.ToggleDropdown()),
-                    Palette.HIGHLIGHT_100
-                )
-                    .Hotkey(bind)
-                    .Position(Position.SlicePercentL(LEFT_PERCENT)),
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            AngledButton(label + ":", (fun () -> this.ToggleDropdown()), Palette.HIGHLIGHT_100)
+                .Hotkey(bind)
+                .Position(Position.SlicePercentL(LEFT_PERCENT)),
 
-                AngledButton(
-                    (fun () ->
-                        sprintf
-                            "%s %s"
-                            display_value
-                            (if reverse.Value then
-                                 Icons.CHEVRONS_DOWN
-                             else
-                                 Icons.CHEVRONS_UP)
-                    ),
-                    (fun () -> reverse.Value <- not reverse.Value),
-                    Palette.DARK_100
-                )
-                    .Position(Position.ShrinkPercentL(LEFT_PERCENT).ShrinkL(AngledButton.LEAN_AMOUNT)),
-
-                dropdown_wrapper
+            AngledButton(
+                (fun () ->
+                    sprintf "%s %s" display_value (if reverse.Value then Icons.CHEVRONS_DOWN else Icons.CHEVRONS_UP)
+                ),
+                (fun () -> reverse.Value <- not reverse.Value),
+                Palette.DARK_100
             )
+                .Position(Position.ShrinkPercentL(LEFT_PERCENT).ShrinkL(AngledButton.LEAN_AMOUNT)),
 
-        base.Init parent
+            dropdown_wrapper
+        )
 
-    member this.ToggleDropdown() =
+        base.Init(parent)
+
+    member this.ToggleDropdown() : unit =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
@@ -61,9 +51,7 @@ type private ModeDropdown
                     ColorFunc = K Colors.text
                     Setting =
                         setting
-                        |> Setting.trigger (fun v ->
-                            display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
-                        )
+                        |> Setting.trigger(fun v -> display_value <- Seq.find (fun (id, _) -> id = v) options |> snd)
                 }
         )
 
@@ -72,59 +60,53 @@ type LibraryViewControls() =
 
     let OPTIONS_BUTTON_WIDTH = 60.0f
 
-    override this.Init(parent) =
-        this
-        |+ AngledButton(
-            Icons.SETTINGS,
-            (fun () -> LevelSelectOptionsPage().Show()),
-            Palette.DARK_100
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            AngledButton(Icons.SETTINGS, (fun () -> LevelSelectOptionsPage().Show()), Palette.DARK_100)
+                .Hotkey("level_select_options")
+                .Position(Position.SliceL(AngledButton.LEAN_AMOUNT, OPTIONS_BUTTON_WIDTH)),
+
+            ModeDropdown(
+                Sorting.modes.Keys |> Seq.map(fun id -> (id, Localisation.localise(sprintf "levelselect.sortby.%s" id))),
+                "Sort",
+                options.ChartSortMode |> Setting.trigger(ignore >> LevelSelect.refresh_all),
+                options.ChartSortReverse |> Setting.map not not |> Setting.trigger(ignore >> LevelSelect.refresh_all),
+                "sort_mode"
+            )
+                .Position(
+                    Position
+                        .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
+                        .GridX(1, 2, AngledButton.LEAN_AMOUNT)
+                )
+                .Help(
+                    Help
+                        .Info("levelselect.sortby", "sort_mode")
+                        .Hotkey(%"levelselect.sortby.reverse_hint", "reverse_sort_mode")
+                ),
+
+            ModeDropdown(
+                Grouping.modes.Keys
+                |> Seq.map(fun id -> (id, Localisation.localise(sprintf "levelselect.groupby.%s" id))),
+                "Group",
+                options.ChartGroupMode |> Setting.trigger(ignore >> LevelSelect.refresh_all),
+                options.ChartGroupReverse |> Setting.trigger(ignore >> LevelSelect.refresh_all),
+                "group_mode"
+            )
+                .Position(
+                    Position
+                        .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
+                        .GridX(2, 2, AngledButton.LEAN_AMOUNT)
+                )
+                .Help(
+                    Help
+                        .Info("levelselect.groupby", "group_mode")
+                        .Hotkey(%"levelselect.groupby.reverse_hint", "reverse_group_mode")
+                )
         )
-            .Hotkey("level_select_options")
-            .Position(Position.SliceL(AngledButton.LEAN_AMOUNT, OPTIONS_BUTTON_WIDTH))
 
-        |+ ModeDropdown(
-            Sorting.modes.Keys
-            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.sortby.%s" id))),
-            "Sort",
-            options.ChartSortMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            options.ChartSortReverse
-            |> Setting.map not not
-            |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            "sort_mode"
-        )
-            .Position(
-                Position
-                    .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
-                    .GridX(1, 2, AngledButton.LEAN_AMOUNT)
-            )
-            .Help(
-                Help
-                    .Info("levelselect.sortby", "sort_mode")
-                    .Hotkey(%"levelselect.sortby.reverse_hint", "reverse_sort_mode")
-            )
+        base.Init(parent)
 
-        |* ModeDropdown(
-            Grouping.modes.Keys
-            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby.%s" id))),
-            "Group",
-            options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            "group_mode"
-        )
-            .Position(
-                Position
-                    .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
-                    .GridX(2, 2, AngledButton.LEAN_AMOUNT)
-            )
-            .Help(
-                Help
-                    .Info("levelselect.groupby", "group_mode")
-                    .Hotkey(%"levelselect.groupby.reverse_hint", "reverse_group_mode")
-            )
-
-        base.Init parent
-
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if SelectedChart.CACHE_DATA.IsSome then
@@ -144,7 +126,7 @@ type LibraryViewControls() =
                 SelectTablePage(LevelSelect.refresh_all).Show()
             elif (%%"reverse_sort_mode").Pressed() then
                 Setting.app not options.ChartSortReverse
-                LevelSelect.refresh_all ()
+                LevelSelect.refresh_all()
             elif (%%"reverse_group_mode").Pressed() then
                 Setting.app not options.ChartGroupReverse
-                LevelSelect.refresh_all ()
+                LevelSelect.refresh_all()

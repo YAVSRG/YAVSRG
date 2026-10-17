@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Gameplay
+namespace Interlude.Features.OptionsMenu.Gameplay
 
 open Percyqaz.Flux.UI
 open Prelude
@@ -9,13 +9,13 @@ open Interlude.Features.Skins
 type LanecoverPage() =
     inherit Page()
 
-    override this.Content() =
-        let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE 0.35f)
+    override this.Content() : Widget =
+        let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f))
         this.DisposeOnDestroy(preview)
+
         page_container()
             .With(
-                PageSetting(%"gameplay.lanecover.enabled", Checkbox options.LaneCover.Enabled)
-                    .Pos(0),
+                PageSetting(%"gameplay.lanecover.enabled", Checkbox options.LaneCover.Enabled).Pos(0),
                 PageSetting(%"gameplay.lanecover.draw_under_receptors", Checkbox options.LaneCover.DrawUnderReceptors)
                     .Pos(2),
                 PageSetting(%"gameplay.lanecover.hidden", Slider.Percent(options.LaneCover.Hidden))
@@ -27,11 +27,14 @@ type LanecoverPage() =
                 PageSetting(%"gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, Step = 5.0f))
                     .Help(Help.Info("gameplay.lanecover.fadelength"))
                     .Pos(9),
-                PageSetting(%"gameplay.lanecover.color", ColorPicker(%"gameplay.lanecover.color", options.LaneCover.Color, true))
+                PageSetting(
+                    %"gameplay.lanecover.color",
+                    ColorPicker(%"gameplay.lanecover.color", options.LaneCover.Color, true)
+                )
                     .Pos(11)
             )
         |> Container.Create
-        |+ preview
+        |> fun container -> container.With(preview)
         :> Widget
 
     override this.Title = %"gameplay.lanecover"

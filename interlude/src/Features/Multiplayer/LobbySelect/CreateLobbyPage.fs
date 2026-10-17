@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Multiplayer
+namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -10,21 +10,26 @@ open Interlude.UI
 type CreateLobbyPage() =
     inherit Page()
 
-    let name = Setting.simple (Network.credentials.Username + "'s lobby") |> Setting.alphanumeric
-    let submit () = Network.client.Send(Upstream.CREATE_LOBBY name.Value)
+    let name =
+        Setting.simple(Network.credentials.Username + "'s lobby") |> Setting.alphanumeric
 
-    override this.Content() =
+    let submit () =
+        Network.client.Send(Upstream.CREATE_LOBBY(name.Value))
+
+    override this.Content() : Widget =
         page_container()
-        |+ PageTextEntry(%"create_lobby.name", name)
-            .Pos(0)
-        |+ PageButton(%"confirm.yes",
-            (fun () ->
-                submit ()
-                Menu.Back()
-            ),
-            Disabled = fun () -> name.Value = ""
-        )
-            .Pos(3)
+            .With(
+                PageTextEntry(%"create_lobby.name", name).Pos(0),
+                PageButton(
+                    %"confirm.yes",
+                    (fun () ->
+                        submit()
+                        Menu.Back()
+                    ),
+                    Disabled = fun () -> name.Value = ""
+                )
+                    .Pos(3)
+            )
         :> Widget
 
     override this.Title = %"create_lobby"

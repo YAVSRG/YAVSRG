@@ -8,6 +8,6 @@ open Interlude.UI
 type BPMPage() =
     inherit Page()
 
-    override this.Content() = Dummy()
+    override this.Content() : Widget = Dummy()
 
     override this.Title = %"hud.bpm"

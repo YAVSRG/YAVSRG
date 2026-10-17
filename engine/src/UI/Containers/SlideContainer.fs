@@ -115,17 +115,6 @@ type SlideContainer(node_type) =
         for c in children do
             c.Init this
 
-    static member (|+)(parent: #SlideContainer, child: #Widget) =
-        parent.Add child
-        parent
-
-    static member (|+)(parent: #SlideContainer, children: #Widget seq) =
-        Seq.iter parent.Add children
-        parent
-
-    static member (|*)(parent: #SlideContainer, child: #Widget) = parent.Add child
-    static member (|*)(parent: #SlideContainer, children: #Widget seq) = Seq.iter parent.Add children
-
     interface IContainer<Widget> with
 
         member this.Add (child: Widget) : unit =

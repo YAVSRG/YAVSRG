@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.Spectate
+namespace Interlude.Features.Play.Spectate
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -14,30 +14,32 @@ open Interlude.Features.Play
 
 type SpectateScreen =
 
-    static member Create(info: LoadedChartInfo, username: string, replay_info: LobbyPlayerReplayInfo, lobby: Lobby) : Screen =
+    static member Create
+        (info: LoadedChartInfo, username: string, replay_info: LobbyPlayerReplayInfo, lobby: Lobby)
+        : Screen =
 
         let mutable currently_spectating = username
         let mutable scoring = replay_info.ScoreProcessor
-        let mutable replay_data : NetworkReplaySource = replay_info.ReplaySource :?> NetworkReplaySource
+
+        let mutable replay_data: NetworkReplaySource =
+            replay_info.ReplaySource :?> NetworkReplaySource
 
         let cycle_spectator (screen: IPlayScreen) =
             let users_available_to_spectate =
-                lobby.Replays.Keys
-                |> Seq.where (fun name -> name <> Network.credentials.Username)
-                |> Array.ofSeq
+                lobby.Replays.Keys |> Seq.where(fun name -> name <> Network.credentials.Username) |> Array.ofSeq
 
             let next_user =
                 match Array.tryFindIndex (fun u -> u = currently_spectating) users_available_to_spectate with
                 | None -> users_available_to_spectate.[0]
                 | Some i -> users_available_to_spectate.[(i + 1) % users_available_to_spectate.Length]
 
-            match lobby.GetReplayInfo next_user with
+            match lobby.GetReplayInfo(next_user) with
             | Some replay_info ->
                 currently_spectating <- next_user
                 scoring <- replay_info.ScoreProcessor
                 replay_data <- replay_info.ReplaySource :?> NetworkReplaySource
                 Song.Seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
-                screen.State.ChangeScoring scoring
+                screen.State.ChangeScoring(scoring)
             | None -> Logging.Warn "Failed to switch to replay data for %s" next_user
 
         let mutable wait_for_load = 1000.0
@@ -45,32 +47,26 @@ type SpectateScreen =
 
         lobby.StartSpectating()
 
-        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Spectate lobby.Replays) with
-            override this.Init(parent: Widget) =
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Spectate(lobby.Replays)) with
+            override this.Init(parent: Widget) : unit =
 
-                this
-                    .Add(
-                        SpectateOverlay(
-                            info,
-                            ignore,
-                            (fun () -> currently_spectating),
-                            fun () -> cycle_spectator this
-                        )
+                this.Add(
+                    SpectateOverlay(info, ignore, (fun () -> currently_spectating), fun () -> cycle_spectator this)
                 )
 
                 base.Init(parent)
 
-            override this.OnEnter(prev) =
+            override this.OnEnter(prev: ScreenType) : unit =
                 base.OnEnter(prev)
-                DiscordRPC.playing (%"discord_status.spectate", info.ChartMeta.Title)
+                DiscordRPC.playing(%"discord_status.spectate", info.ChartMeta.Title)
                 Song.Pause()
 
-            override this.OnExit(next) =
+            override this.OnExit(next: ScreenType) : unit =
                 base.OnExit(next)
                 Song.Resume()
-                Toolbar.show_cursor ()
+                Toolbar.show_cursor()
 
-            override this.Update(elapsed_ms, moved) =
+            override this.Update(elapsed_ms: float, moved: bool) : unit =
                 base.Update(elapsed_ms, moved)
 
                 if wait_for_load > 0.0 then
@@ -85,11 +81,11 @@ type SpectateScreen =
 
                 if replay_data.Time() - chart_time < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
                     if Song.IsPlaying then
-                        Song.Pause ()
+                        Song.Pause()
                 elif not Song.IsPlaying then
-                    Song.Resume ()
+                    Song.Resume()
 
-                scoring.Update chart_time
+                scoring.Update(chart_time)
 
                 if this.State.Scoring.Finished && not exiting then
                     exiting <- true

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.Practice
+namespace Interlude.Features.Play.Practice
 
 open Percyqaz.Common
 open Prelude
@@ -15,6 +15,7 @@ type SyncMode =
     | HIT_POSITION
     | SCROLL_SPEED
     | VISUAL_OFFSET
+
     member this.Audio =
         match this with
         | AUDIO_OFFSET -> 2
@@ -69,10 +70,7 @@ module PracticeState =
         let scroll_speed_suggestion = expected_pixels / desired_lead_time
 
         let visual_offset_suggestion =
-            if options.AudioVolume.Value = 0.0 then
-                options.VisualOffset.Value + mean
-            else
-                options.VisualOffset.Value
+            if options.AudioVolume.Value = 0.0 then options.VisualOffset.Value + mean else options.VisualOffset.Value
 
         let local_audio_offset_suggestion =
             let local_audio_offset = LocalOffset.offset_setting state.SaveData

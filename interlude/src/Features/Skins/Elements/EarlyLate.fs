@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.HUD
+namespace Interlude.Features.Play.HUD
 
 open System
 open Percyqaz.Flux.Graphics
@@ -16,47 +16,57 @@ type EarlyLate(ctx: HudContext) =
     let mutable early = false
     let mutable time = -Time.infinity
 
-    let texture = Content.Texture "early-late"
+    let texture = Content.Texture("early-late")
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         ctx.State.Subscribe(fun ev ->
             let x =
                 match ev.Inner with
-                | Hit e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
-                | Hold e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
-                | Release e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
+                | Hit e when not e.Missed ->
+                    match e.Judgement with
+                    | Some(j, _) -> ValueSome(j, e.Delta)
+                    | None -> ValueNone
+                | Hold e when not e.Missed ->
+                    match e.Judgement with
+                    | Some(j, _) -> ValueSome(j, e.Delta)
+                    | None -> ValueNone
+                | Release e when not e.Missed ->
+                    match e.Judgement with
+                    | Some(j, _) -> ValueSome(j, e.Delta)
+                    | None -> ValueNone
                 | _ -> ValueNone
 
             match x with
-            | ValueSome (judge, delta) when judge > 0 ->
+            | ValueSome(judge, delta) when judge > 0 ->
                 early <- delta < 0.0f<ms / rate>
                 time <- ev.Time
             | _ -> ()
         )
         |> ignore
+
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if time > -Time.infinity then
 
             let time_ago = ctx.State.CurrentChartTime() - time
 
             if time_ago < duration then
-                let opacity = Math.Clamp( int (255.0f - time_ago / duration * 255.0f), 0, 255)
+                let opacity = Math.Clamp(int(255.0f - time_ago / duration * 255.0f), 0, 255)
 
                 if ctx.Config.EarlyLateMeterUseTexture then
                     Render.tex_quad
                         (Sprite.fill this.Bounds texture).AsQuad
                         (Color.White.O4a(opacity).AsQuad)
-                        (Sprite.pick_texture (time_ago / ctx.Config.EarlyLateMeterFrameTime / SelectedChart.rate.Value |> floor |> int, if early then 0 else 1) texture)
+                        (Sprite.pick_texture
+                            (time_ago / ctx.Config.EarlyLateMeterFrameTime / SelectedChart.rate.Value |> floor |> int,
+                             if early then 0 else 1)
+                            texture)
                 else
 
-                    Text.fill (
+                    Text.fill(
                         Style.font,
-                        (if early then
-                             ctx.Config.EarlyLateMeterEarlyText
-                         else
-                             ctx.Config.EarlyLateMeterLateText),
+                        (if early then ctx.Config.EarlyLateMeterEarlyText else ctx.Config.EarlyLateMeterLateText),
                         this.Bounds,
                         (if early then
                              (ctx.Config.EarlyLateMeterEarlyColor.O4a(opacity))

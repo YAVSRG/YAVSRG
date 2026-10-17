@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open System
 open Percyqaz.Flux.Audio
@@ -21,43 +21,51 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     member this.Scoring = scoring
     /// 0.0f<ms> = You are at the start of the audio file
     /// Negative numbers are possible, if needed to give enough time before the first note
-    member this.CurrentTime() = current_time()
+    member this.CurrentTime() : Time = current_time()
     /// 0.0f<ms> = You are at the very first note of the chart
-    member this.CurrentChartTime() = current_time() - first_note
+    member this.CurrentChartTime() : Time = current_time() - first_note
     member this.Pacemaker = pacemaker
 
     member this.Rate = this.Scoring.Rate
     member this.Ruleset = this.Scoring.Ruleset
 
-    member this.ChangeScoring(new_scoring: ScoreProcessor) =
+    member this.ChangeScoring(new_scoring: ScoreProcessor) : unit =
         scoring <- new_scoring
         scoring_changed_ev.Trigger()
 
-    member this.OnScoringChanged(action: unit -> unit) : IDisposable =
-        scoring_changed.Subscribe action
+    member this.OnScoringChanged(action: unit -> unit) : IDisposable = scoring_changed.Subscribe(action)
 
     member this.Subscribe(handler: ScoringEvent -> unit) : IDisposable =
-        let mutable obj: IDisposable = scoring.OnEvent.Subscribe handler
+        let mutable obj: IDisposable = scoring.OnEvent.Subscribe(handler)
 
-        let resubscribe_on_change = scoring_changed.Subscribe(fun () ->
-            obj.Dispose()
-            obj <- scoring.OnEvent.Subscribe handler
-        )
+        let resubscribe_on_change =
+            scoring_changed.Subscribe(fun () ->
+                obj.Dispose()
+                obj <- scoring.OnEvent.Subscribe(handler)
+            )
 
-        { new IDisposable with override this.Dispose() = resubscribe_on_change.Dispose(); obj.Dispose() }
+        { new IDisposable with
+            override this.Dispose() : unit =
+                resubscribe_on_change.Dispose()
+                obj.Dispose()
+        }
 
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
         let replay = Autoplay.CreateReplay(info.WithColors)
         let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
+
+        let scoring =
+            ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
 
         let state = PlayState(info, PacemakerState.None, scoring, Song.get_TimeWithOffset)
 
-        scoring.Update (state.CurrentChartTime())
+        scoring.Update(state.CurrentChartTime())
 
         let reset () =
-            let recreated = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
-            recreated.Update (state.CurrentChartTime())
-            state.ChangeScoring recreated
+            let recreated =
+                ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
+
+            recreated.Update(state.CurrentChartTime())
+            state.ChangeScoring(recreated)
 
         state, reset

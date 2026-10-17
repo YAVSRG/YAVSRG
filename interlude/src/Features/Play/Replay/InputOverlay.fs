@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.Replay
+namespace Interlude.Features.Play.Replay
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
@@ -10,8 +10,7 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield: Playfield)
-    =
+type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield: Playfield) =
     inherit StaticWidget(NodeType.None)
 
     let replay_frames = replay.ToArray()
@@ -33,11 +32,11 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
                         Bottom = bottom - r.Top
                     }
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         state.OnScoringChanged(fun _ -> seek <- 0) |> ignore
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         if show_input_overlay.Value then
             let draw_press (k, now: ChartTime, start: ChartTime, finish: ChartTime) =
@@ -58,8 +57,7 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
                 |> fun a -> Render.rect a Colors.grey_2.O2
 
             let now =
-                state.CurrentChartTime() +
-                (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.Rate
+                state.CurrentChartTime() + (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.Rate
 
             while replay_frames.Length - 1 > seek && replay_frames.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1
@@ -85,21 +83,23 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
                         if not keys_down.[k] then
                             keys_down.[k] <- true
                             keys_times.[k] <- replay_frame.Time
-                    else if keys_down.[k] then
+                    elif keys_down.[k] then
                         keys_down.[k] <- false
-                        draw_press (k, now, keys_times.[k], replay_frame.Time)
+                        draw_press(k, now, keys_times.[k], replay_frame.Time)
 
                 peek <- peek + 1
 
             for k = 0 to keys - 1 do
                 if keys_down.[k] then
-                    draw_press (k, now, keys_times.[k], until_time)
+                    draw_press(k, now, keys_times.[k], until_time)
 
-    override this.Update (elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()
+
         if time < last_time then
             while seek > 0 && replay_frames.[seek].Time > time do
                 seek <- seek - 1
+
         last_time <- state.CurrentChartTime()

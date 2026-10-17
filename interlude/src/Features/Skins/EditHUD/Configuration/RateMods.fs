@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -14,13 +14,10 @@ type RateModsPage() =
 
     let show_mods = Setting.simple config.RateModMeterShowMods
 
-    member this.SaveChanges() =
-        Skins.save_hud_config
-            { Content.HUD with
-                RateModMeterShowMods = show_mods.Value
-            }
+    member this.SaveChanges() : unit =
+        Skins.save_hud_config { Content.HUD with RateModMeterShowMods = show_mods.Value }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()

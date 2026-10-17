@@ -11,7 +11,7 @@ type private OnlineList() =
         WebRequestContainer<Players.Online.Response>(
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
-                    Players.Online.get (fun response ->
+                    Players.Online.get(fun response ->
                         GameThread.defer
                         <| fun () ->
                             match response with
@@ -21,12 +21,15 @@ type private OnlineList() =
                 else
                     this.Offline()
             , fun _ data ->
-                FlowContainer.Vertical<PlayerButton>(PlayerButton.HEIGHT)
+                FlowContainer
+                    .Vertical<PlayerButton>(PlayerButton.HEIGHT)
                     .Spacing(Style.PADDING)
-                    .With(seq{
-                        for player in data.Players do
-                            yield PlayerButton(player.Username, player.Color)
-                    })
+                    .With(
+                        seq {
+                            for player in data.Players do
+                                yield PlayerButton(player.Username, player.Color)
+                        }
+                    )
                 |> ScrollContainer
                 :> Widget
         )

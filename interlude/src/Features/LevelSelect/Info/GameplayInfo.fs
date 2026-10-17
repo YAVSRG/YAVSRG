@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -20,42 +20,49 @@ type GameplayInfo() =
     let mutable mod_string = "--"
     let mutable mod_status = ModStatus.Ranked
 
-    let refresh(info: LoadedChartInfo) =
+    let refresh (info: LoadedChartInfo) =
         rating <- info.Difficulty.Overall
         notecounts <- info.NotecountsString
+
         last_played <-
             let mutable ts = info.SaveData.LastPlayed
+
             let text (ts: int64) =
-                if ts <= 0L then never_played else [ Timestamp.since info.SaveData.LastPlayed |> format_timespan ] %> "levelselect.last_played"
+                if ts <= 0L then
+                    never_played
+                else
+                    [ Timestamp.since info.SaveData.LastPlayed |> format_timespan ] %> "levelselect.last_played"
+
             let mutable t = text ts
+
             fun () ->
                 if info.SaveData.LastPlayed <> ts then
                     ts <- info.SaveData.LastPlayed
                     t <- text ts
+
                 t
-        mod_string <- ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+
+        mod_string <- ModState.format(SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
         mod_status <- info.WithMods.Status
 
     static member HEIGHT = 230.0f
 
-    override this.Init(parent) =
-        SelectedChart.on_chart_change_finished.Add refresh
-        SelectedChart.on_chart_update_finished.Add refresh
+    override this.Init(parent: Widget) : unit =
+        SelectedChart.on_chart_change_finished.Add(refresh)
+        SelectedChart.on_chart_update_finished.Add(refresh)
         SelectedChart.if_loaded refresh
 
-        this.Add(
-            GameplayInfoBoxes()
-                .Position(Position.SliceT(100.0f).Shrink(10.0f))
-        )
+        this.Add(GameplayInfoBoxes().Position(Position.SliceT(100.0f).Shrink(10.0f)))
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         let play_info = this.Bounds.SliceT(90.0f, 40.0f).ShrinkX(15.0f)
         let mod_string_ap = mod_string + (if SelectedChart.autoplay then ", AP" else "")
-        Text.fill_b (Style.font, mod_string_ap, play_info, Colors.text, Alignment.LEFT)
-        Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
+        Text.fill_b(Style.font, mod_string_ap, play_info, Colors.text, Alignment.LEFT)
+        Text.fill_b(Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
+
         if mod_status <> ModStatus.Ranked then
             let text, color =
                 match mod_status with
@@ -63,16 +70,35 @@ type GameplayInfo() =
                 | ModStatus.Offline -> Icons.CLOUD_OFF + " " + %"mods.mod_status.offline", Colors.text_yellow_2
                 | ModStatus.Unranked -> Icons.CLOUD_OFF + " " + %"mods.mod_status.unranked", Colors.text_yellow_2
                 | ModStatus.Ranked -> failwith "impossible"
+
             let x = Text.measure(Style.font, mod_string_ap) * play_info.Height * 0.6f + 10.0f
-            Text.fill_b (Style.font, text, play_info.ShrinkL(x).ShrinkY(2.0f), color, Alignment.LEFT)
+            Text.fill_b(Style.font, text, play_info.ShrinkL(x).ShrinkY(2.0f), color, Alignment.LEFT)
 
         let chart_info = this.Bounds.SliceT(130.0f, 30.0f).ShrinkX(15.0f)
-        Text.fill_b (Style.font, (match SelectedChart.CACHE_DATA with Some chart_meta -> chart_meta.DifficultyName | None -> ""), chart_info.SlicePercentL 0.5f, Colors.text_subheading, Alignment.LEFT)
-        Text.fill_b (Style.font, notecounts, chart_info, Colors.text_subheading, Alignment.RIGHT)
+
+        Text.fill_b(
+            Style.font,
+            (match SelectedChart.CACHE_DATA with
+             | Some chart_meta -> chart_meta.DifficultyName
+             | None -> ""),
+            chart_info.SlicePercentL(0.5f),
+            Colors.text_subheading,
+            Alignment.LEFT
+        )
+
+        Text.fill_b(Style.font, notecounts, chart_info, Colors.text_subheading, Alignment.RIGHT)
 
         let three_icon_infos = this.Bounds.SliceT(155.0f, 70.0f).ShrinkX(15.0f)
-        Text.fill_b (Style.font, sprintf "%s %.2f" Icons.STAR rating, three_icon_infos, (Colors.white, Difficulty.color rating), Alignment.LEFT)
-        Text.fill_b (Style.font, SelectedChart.FMT_BPM, three_icon_infos, Colors.text, Alignment.CENTER)
-        Text.fill_b (Style.font, SelectedChart.FMT_DURATION, three_icon_infos, Colors.text, Alignment.RIGHT)
+
+        Text.fill_b(
+            Style.font,
+            sprintf "%s %.2f" Icons.STAR rating,
+            three_icon_infos,
+            (Colors.white, Difficulty.color rating),
+            Alignment.LEFT
+        )
+
+        Text.fill_b(Style.font, SelectedChart.FMT_BPM, three_icon_infos, Colors.text, Alignment.CENTER)
+        Text.fill_b(Style.font, SelectedChart.FMT_DURATION, three_icon_infos, Colors.text, Alignment.RIGHT)
 
         base.Draw()

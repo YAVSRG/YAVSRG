@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play
+namespace Interlude.Features.Play
 
 open System.Runtime.CompilerServices
 open Percyqaz.Flux.Audio
@@ -19,7 +19,7 @@ open Interlude.Features.Play.HUD
 type HudContextExtensions =
 
     [<Extension>]
-    static member private IsEnabled (ctx: HudContext, element: HudElement) : bool =
+    static member private IsEnabled(ctx: HudContext, element: HudElement) : bool =
         match element with
         | HudElement.Accuracy -> ctx.Config.AccuracyEnabled
         | HudElement.ErrorBar -> ctx.Config.TimingDisplayEnabled
@@ -39,7 +39,7 @@ type HudContextExtensions =
         | HudElement.MultiplayerScores -> ctx.Inner.IsMultiplayer || ctx.Inner.IsSpectate
 
     [<Extension>]
-    static member private Position (ctx: HudContext, element: HudElement) : HudPosition =
+    static member private Position(ctx: HudContext, element: HudElement) : HudPosition =
         match element with
         | HudElement.Accuracy -> ctx.Config.AccuracyPosition
         | HudElement.ErrorBar -> ctx.Config.TimingDisplayPosition
@@ -59,12 +59,20 @@ type HudContextExtensions =
         | HudElement.MultiplayerScores -> ctx.Config.MultiplayerScoresPosition
 
     [<Extension>]
-    static member private Constructor (ctx: HudContext, element: HudElement) : HudContext -> Widget =
+    static member private Constructor(ctx: HudContext, element: HudElement) : HudContext -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
+
         match element with
         | HudElement.Accuracy -> cast Accuracy
-        | HudElement.ErrorBar -> match ctx.Inner with HudContextInner.Replay (_, overlay_shown) -> cast (fun x -> ErrorBar(x).Conditional(not << overlay_shown)) | _ -> cast ErrorBar
-        | HudElement.ColumnErrorBars -> match ctx.Inner with HudContextInner.Replay (_, overlay_shown) -> cast (fun x -> ColumnErrorBars(x).Conditional(not << overlay_shown)) | _ -> cast ColumnErrorBars
+        | HudElement.ErrorBar ->
+            match ctx.Inner with
+            | HudContextInner.Replay(_, overlay_shown) -> cast(fun x -> ErrorBar(x).Conditional(not << overlay_shown))
+            | _ -> cast ErrorBar
+        | HudElement.ColumnErrorBars ->
+            match ctx.Inner with
+            | HudContextInner.Replay(_, overlay_shown) ->
+                cast(fun x -> ColumnErrorBars(x).Conditional(not << overlay_shown))
+            | _ -> cast ColumnErrorBars
         | HudElement.Combo -> cast Combo
         | HudElement.SkipButton -> cast SkipButton
         | HudElement.Judgement -> cast Judgement
@@ -81,7 +89,7 @@ type HudContextExtensions =
 
     /// Adds the element in its configured position, if enabled
     [<Extension>]
-    static member TryAdd (ctx: HudContext, element: HudElement) =
+    static member TryAdd(ctx: HudContext, element: HudElement) : unit =
         if ctx.IsEnabled(element) then
             let position = ctx.Position(element)
 
@@ -95,36 +103,47 @@ type HudContextExtensions =
                     Bottom = position.Bottom
                 }
 
-            if position.RelativeToPlayfield then ctx.Playfield.Add w else ctx.Screen.Add w
+            if position.RelativeToPlayfield then ctx.Playfield.Add(w) else ctx.Screen.Add(w)
 
     [<Extension>]
-    static member Init (ctx: HudContext) =
+    static member Init(ctx: HudContext) : unit =
         match ctx.Inner with
         | HudContextInner.Play -> HudElement.DRAW_ORDER
         | HudContextInner.Practice -> HudElement.DRAW_ORDER_WITHOUT_SKIP
-        | HudContextInner.Replay (true, _) -> HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except HudElement.HIDDEN_DURING_AUTO
-        | HudContextInner.Replay (false, _) -> HudElement.DRAW_ORDER_WITHOUT_SKIP
+        | HudContextInner.Replay(true, _) ->
+            HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except HudElement.HIDDEN_DURING_AUTO
+        | HudContextInner.Replay(false, _) -> HudElement.DRAW_ORDER_WITHOUT_SKIP
         | HudContextInner.Spectate _ -> HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except [| HudElement.SkipButton |]
-        | HudContextInner.Multiplayer _ -> HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except [| HudElement.SkipButton |]
+        | HudContextInner.Multiplayer _ ->
+            HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except [| HudElement.SkipButton |]
         | HudContextInner.Editor -> [||] // Editor adds elements itself, with positioning controls
         |> Array.iter ctx.TryAdd
 
 [<AbstractClass>]
-type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring: ScoreProcessor, hud_ctx_inner: HudContextInner) as this
+type IPlayScreen
+    (info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring: ScoreProcessor, hud_ctx_inner: HudContextInner) as this
     =
     inherit Screen()
 
-    let state: PlayState = PlayState(info, pacemaker_info, scoring, Song.get_TimeWithOffset)
+    let state: PlayState =
+        PlayState(info, pacemaker_info, scoring, Song.get_TimeWithOffset)
 
     let noteskin_config = Content.NoteskinConfig
 
     let playfield =
         Playfield(info.WithColors, state, noteskin_config, options.VanishingNotes.Value)
 
-    let hud_ctx : HudContext = { Screen = this; Playfield = playfield; State = state; Config = Content.HUD; Inner = hud_ctx_inner }
+    let hud_ctx: HudContext =
+        {
+            Screen = this
+            Playfield = playfield
+            State = state
+            Config = Content.HUD
+            Inner = hud_ctx_inner
+        }
 
     do
-        this.Add playfield
+        this.Add(playfield)
         playfield.Add(LanecoverOverReceptors())
         hud_ctx.Init()
 
@@ -132,29 +151,26 @@ type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring:
     member this.State = state
     member this.HudContext = hud_ctx
 
-    override this.OnEnter(_: ScreenType) =
-        Dialog.close ()
-        Background.dim (float32 options.BackgroundDim.Value)
-        Toolbar.hide ()
+    override this.OnEnter(_: ScreenType) : unit =
+        Dialog.close()
+        Background.dim(float32 options.BackgroundDim.Value)
+        Toolbar.hide()
         Song.SetRate(SelectedChart.rate.Value)
         Song.SetGlobalOffset(options.AudioOffset.Value)
         Song.OnFinish(SongFinishAction.Wait)
         Song.PlayLeadin(info.WithColors.FirstNote)
-        Input.remove_listener ()
-        Input.finish_frame_events ()
+        Input.remove_listener()
+        Input.finish_frame_events()
         WindowThread.defer WindowThread.disable_windows_key
 
-    override this.OnExit(next: ScreenType) =
+    override this.OnExit(next: ScreenType) : unit =
         Background.dim 0.7f
 
         if next <> ScreenType.Score then
-            Toolbar.show ()
+            Toolbar.show()
 
         if next <> ScreenType.Play then
             WindowThread.defer WindowThread.enable_windows_key
 
-    override this.OnBack() =
-        if Network.lobby.IsSome then
-            Some ScreenType.Lobby
-        else
-            Some ScreenType.LevelSelect
+    override this.OnBack() : ScreenType option =
+        if Network.lobby.IsSome then Some ScreenType.Lobby else Some ScreenType.LevelSelect

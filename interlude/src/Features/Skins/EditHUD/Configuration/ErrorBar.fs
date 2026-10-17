@@ -14,25 +14,25 @@ type ErrorBarPage() =
 
     let show_non_judgements = Setting.simple config.TimingDisplayShowNonJudgements
 
-    let thickness =
-        config.TimingDisplayThickness |> Setting.bounded (1.0f, 25.0f)
+    let thickness = config.TimingDisplayThickness |> Setting.bounded(1.0f, 25.0f)
 
     let release_thickness =
-        config.TimingDisplayReleasesExtraHeight
-        |> Setting.bounded (-20.0f, 20.0f)
+        config.TimingDisplayReleasesExtraHeight |> Setting.bounded(-20.0f, 20.0f)
 
     let half_scale_releases = Setting.simple config.TimingDisplayHalfScaleReleases
 
     let animation_time =
-        config.TimingDisplayFadeTime
-        |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
+        config.TimingDisplayFadeTime |> Setting.bounded(100.0f<ms / rate>, 2000.0f<ms / rate>)
 
     let moving_average_type = Setting.simple config.TimingDisplayMovingAverageType
-    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity |> Setting.bounded (0.01f, 1.0f)
+
+    let moving_average_sensitivity =
+        config.TimingDisplayMovingAverageSensitivity |> Setting.bounded(0.01f, 1.0f)
+
     let moving_average_color = Setting.simple config.TimingDisplayMovingAverageColor
 
-    
-    member this.SaveChanges() =
+
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 TimingDisplayShowNonJudgements = show_non_judgements.Value
@@ -45,7 +45,7 @@ type ErrorBarPage() =
                 TimingDisplayMovingAverageColor = moving_average_color.Value
             }
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -71,7 +71,8 @@ type ErrorBarPage() =
                 PageButton(%"hud.error_bar.timing_windows_settings", fun () -> ErrorBarWindowPage().Show())
                     .Help(Help.Info("hud.error_bar.timing_windows_settings"))
                     .Pos(12),
-                PageSetting(%"hud.error_bar.moving_average_type",
+                PageSetting(
+                    %"hud.error_bar.moving_average_type",
                     SelectDropdown(
                         [|
                             ErrorBarMovingAverageType.None, %"hud.error_bar.moving_average_type.none"
@@ -87,10 +88,16 @@ type ErrorBarPage() =
             .WithConditional(
                 (fun () -> moving_average_type.Value <> ErrorBarMovingAverageType.None),
 
-                PageSetting(%"hud.error_bar.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.05f))
+                PageSetting(
+                    %"hud.error_bar.moving_average_sensitivity",
+                    Slider.Percent(moving_average_sensitivity, Step = 0.05f)
+                )
                     .Help(Help.Info("hud.error_bar.moving_average_sensitivity"))
                     .Pos(16),
-                PageSetting(%"hud.error_bar.moving_average_color", ColorPicker(%"hud.error_bar.moving_average_color", moving_average_color, true))
+                PageSetting(
+                    %"hud.error_bar.moving_average_color",
+                    ColorPicker(%"hud.error_bar.moving_average_color", moving_average_color, true)
+                )
                     .Help(Help.Info("hud.error_bar.moving_average_color"))
                     .Pos(18)
             )

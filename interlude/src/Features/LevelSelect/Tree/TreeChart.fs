@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -14,17 +14,19 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 
 [<Struct>]
-type PersonalBestCached =
-    {
-        Text: string
-        Color: Color
-        Details: string
-    }
+type PersonalBestCached = { Text: string; Color: Color; Details: string }
 
-type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: LibraryGroupContext, chart_meta: ChartMeta, library_ctx: LibraryContext) =
+type private TreeChart
+    (
+        tree_ctx: TreeContext,
+        group_name: string,
+        group_ctx: LibraryGroupContext,
+        chart_meta: ChartMeta,
+        library_ctx: LibraryContext
+    ) =
     inherit TreeItem(tree_ctx)
 
-    let hover_animation = Animation.Fade 0.0f
+    let hover_animation = Animation.Fade(0.0f)
     let mutable last_cached_flag = -1
     let mutable chart_save_data = None
     let mutable personal_bests: Bests option = None
@@ -45,18 +47,15 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
     let grade_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
         match get_pb bests.Grade rate with
-        | Some (grade, r, timestamp) when r >= rate ->
-            Some {
-                Text = Rulesets.current.GradeName grade
-                Color = Rulesets.current.GradeColor grade
-                Details = details r timestamp
-            }
-        | Some (grade, r, timestamp) ->
-            Some {
-                Text = Rulesets.current.GradeName grade
-                Color = Colors.white.O2
-                Details = details r timestamp
-            }
+        | Some(grade, r, timestamp) when r >= rate ->
+            Some
+                {
+                    Text = Rulesets.current.GradeName(grade)
+                    Color = Rulesets.current.GradeColor(grade)
+                    Details = details r timestamp
+                }
+        | Some(grade, r, timestamp) ->
+            Some { Text = Rulesets.current.GradeName(grade); Color = Colors.white.O2; Details = details r timestamp }
         | None -> None
 
     let acc_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
@@ -65,34 +64,23 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
         | Some d ->
 
         match get_pb bests.Accuracy rate with
-        | Some (accuracy, r, timestamp) when r >= rate ->
-            Some
-                { d with
-                    Text = Rulesets.current.FormatAccuracy accuracy
-                    Details = details r timestamp
-                }
-        | Some (accuracy, r, timestamp) ->
-            Some
-                { d with
-                    Text = Rulesets.current.FormatAccuracy accuracy
-                    Details = details r timestamp
-                }
+        | Some(accuracy, r, timestamp) when r >= rate ->
+            Some { d with Text = Rulesets.current.FormatAccuracy(accuracy); Details = details r timestamp }
+        | Some(accuracy, r, timestamp) ->
+            Some { d with Text = Rulesets.current.FormatAccuracy(accuracy); Details = details r timestamp }
         | None -> None
 
     let lamp_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
         match get_pb bests.Lamp rate with
-        | Some (lamp, r, timestamp) when r >= rate ->
-            Some {
-                Text = Rulesets.current.LampName lamp
-                Color = Rulesets.current.LampColor lamp
-                Details = details r timestamp
-            }
-        | Some (lamp, r, timestamp) ->
-            Some {
-                Text = Rulesets.current.LampName lamp
-                Color = Colors.white.O2
-                Details = details r timestamp
-            }
+        | Some(lamp, r, timestamp) when r >= rate ->
+            Some
+                {
+                    Text = Rulesets.current.LampName(lamp)
+                    Color = Rulesets.current.LampColor(lamp)
+                    Details = details r timestamp
+                }
+        | Some(lamp, r, timestamp) ->
+            Some { Text = Rulesets.current.LampName(lamp); Color = Colors.white.O2; Details = details r timestamp }
         | None -> None
 
     let update_cached_info () : unit =
@@ -102,14 +90,20 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             chart_save_data <- Some(Content.UserData.GetChartData(chart_meta.Hash))
 
         match chart_save_data with
-        | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
+        | Some d when d.PersonalBests.ContainsKey(Rulesets.current_hash) ->
             let rate =
                 match library_ctx with
-                | LibraryContext.Playlist (_, _, d) -> d.Rate.Value
+                | LibraryContext.Playlist(_, _, d) -> d.Rate.Value
                 | _ -> SelectedChart.rate.Value
 
             personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
-            grade_or_accuracy <- if options.TreeShowGradesOnly.Value then grade_pb personal_bests.Value rate else acc_pb personal_bests.Value rate
+
+            grade_or_accuracy <-
+                if options.TreeShowGradesOnly.Value then
+                    grade_pb personal_bests.Value rate
+                else
+                    acc_pb personal_bests.Value rate
+
             lamp <- lamp_pb personal_bests.Value rate
         | _ ->
             personal_bests <- None
@@ -123,24 +117,26 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
     override this.Bounds(top: float32) : Rect =
         Rect.FromEdges(Render.width() * TREE_LEFT_SPLIT + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
-    override this.Spacing : float32 = CHART_SPACING
 
-    member this.Selected : bool = tree_ctx.IsSelected(chart_meta, library_ctx)
-    member this.Chart : ChartMeta = chart_meta
-    member this.Context : LibraryContext = library_ctx
+    override this.Spacing: float32 = CHART_SPACING
 
-    member this.PlaylistDuration : GameplayTime =
+    member this.Selected: bool = tree_ctx.IsSelected(chart_meta, library_ctx)
+    member this.Chart: ChartMeta = chart_meta
+    member this.Context: LibraryContext = library_ctx
+
+    member this.PlaylistDuration: GameplayTime =
         match library_ctx with
         | LibraryContext.Playlist(_, _, data) -> chart_meta.Length / data.Rate.Value
         | _ -> 0.0f<ms / rate>
 
-    member this.Select() : unit = tree_ctx.SelectChart(chart_meta, library_ctx, group_name, group_ctx)
+    member this.Select() : unit =
+        tree_ctx.SelectChart(chart_meta, library_ctx, group_name, group_ctx)
 
     member private this.DrawPersonalBests(bounds: Rect, data: PersonalBestCached, pos: float32, accent: Color) : unit =
         if data.Color.A > 0uy then
             Render.rect (bounds.SliceR(pos - 40.0f, 80.0f)) accent
 
-            Text.draw_aligned_b (
+            Text.draw_aligned_b(
                 Style.font,
                 data.Text,
                 20.0f,
@@ -150,7 +146,7 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
                 0.5f
             )
 
-            Text.draw_aligned_b (
+            Text.draw_aligned_b(
                 Style.font,
                 data.Details,
                 14.0f,
@@ -163,11 +159,14 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
     /// Only called if this chart can be seen on screen
     member private this.DrawCulled(bounds: Rect) : unit =
 
-        let is_multi_selected = match tree_ctx.MultiSelection with Some s -> s.Contains(chart_meta, library_ctx) | None -> false
+        let is_multi_selected =
+            match tree_ctx.MultiSelection with
+            | Some s -> s.Contains(chart_meta, library_ctx)
+            | None -> false
 
         let accent_color =
-            let alpha = 80 + int (hover_animation.Value * 40.0f)
-            if is_multi_selected then Colors.grey_2.O2a alpha else Palette.color (alpha, 1.0f, 0.4f)
+            let alpha = 80 + int(hover_animation.Value * 40.0f)
+            if is_multi_selected then Colors.grey_2.O2a(alpha) else Palette.color(alpha, 1.0f, 0.4f)
 
         let color, left_ribbon_color =
             if is_multi_selected then Colors.grey_2.O2, Colors.white.O2
@@ -175,9 +174,10 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             else Colors.shadow_1.O2, Colors.grey_2.O2
 
         Render.rect bounds color
-        Render.rect (bounds.BorderL Style.PADDING) left_ribbon_color
+        Render.rect (bounds.BorderL(Style.PADDING)) left_ribbon_color
 
         let stripe_length = bounds.Width * (0.4f + 0.6f * hover_animation.Value)
+
         Render.quad_points_c
             (bounds.Left, bounds.Top)
             (bounds.Left + stripe_length, bounds.Top)
@@ -190,31 +190,36 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             this.DrawPersonalBests(bounds, lamp.Value, 165.0f, accent_color)
 
         // draw text
-        Render.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
-        Text.draw_b (
+        Render.rect (bounds.SliceB(25.0f)) Colors.shadow_1.O1
+
+        Text.draw_b(
             Style.font,
-            (
-                if options.TreeShowNativeText.Value then
-                    chart_meta.TitleNative |> Option.defaultValue chart_meta.Title
-                else
-                    chart_meta.Title
-            ),
+            (if options.TreeShowNativeText.Value then
+                 chart_meta.TitleNative |> Option.defaultValue chart_meta.Title
+             else
+                 chart_meta.Title),
             23.0f,
             bounds.Left + 7f,
             bounds.Top,
             if is_multi_selected then Colors.text_yellow_2 else Colors.text
         )
 
-        Text.draw_b (
+        Text.draw_b(
             Style.font,
-            sprintf "%s  •  %s" (if options.TreeShowNativeText.Value then chart_meta.ArtistNative |> Option.defaultValue chart_meta.Artist else chart_meta.Artist) chart_meta.Creator,
+            sprintf
+                "%s  •  %s"
+                (if options.TreeShowNativeText.Value then
+                     chart_meta.ArtistNative |> Option.defaultValue chart_meta.Artist
+                 else
+                     chart_meta.Artist)
+                chart_meta.Creator,
             18.0f,
             bounds.Left + 7f,
             bounds.Top + 34.0f,
             Colors.text_subheading
         )
 
-        Text.draw_b (
+        Text.draw_b(
             Style.font,
             chart_meta.Subtitle |> Option.defaultValue chart_meta.DifficultyName,
             15.0f,
@@ -226,9 +231,18 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
         let icon =
             if tree_ctx.MultiSelection.IsSome then
                 if is_multi_selected then Icons.CHECK_SQUARE else Icons.SQUARE
-            else markers
+            else
+                markers
 
-        Text.draw_aligned_b (Style.font, icon, 25.0f, bounds.Right - 65.0f, bounds.Top + 15.0f, Colors.text, Alignment.CENTER)
+        Text.draw_aligned_b(
+            Style.font,
+            icon,
+            25.0f,
+            bounds.Right - 65.0f,
+            bounds.Top + 15.0f,
+            Colors.text,
+            Alignment.CENTER
+        )
 
     member this.Draw(this_top: float32, tree_top: float32, tree_bottom: float32) : float32 =
         this.IfVisible(this_top, tree_top, tree_bottom, this.DrawCulled)
@@ -237,7 +251,7 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
     member private this.UpdateCulled(tree_top: float32, bounds: Rect, elapsed_ms: float) : unit =
 
         if last_cached_flag < tree_ctx.CacheFlag then
-            update_cached_info ()
+            update_cached_info()
 
         if this.Selected && (%%"multi_select").Pressed() then
             tree_ctx.ToggleMultiSelect(chart_meta, library_ctx)
@@ -249,9 +263,11 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
                 if MULTI_SELECT_KEY.Held() then
                     tree_ctx.ToggleMultiSelect(chart_meta, library_ctx)
                 elif this.Selected then
-                    LevelSelect.choose_this_chart ()
+                    LevelSelect.choose_this_chart()
                 else
-                    if not (Transitions.in_progress()) then LevelSelectHistory.append_current ()
+                    if not(Transitions.in_progress()) then
+                        LevelSelectHistory.append_current()
+
                     this.Select()
 
             elif this.RightClicked(tree_top) then

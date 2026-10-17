@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
@@ -20,22 +20,26 @@ module EditHudScreen =
 
         let replay = WavyAutoplay.CreateReplay(info.WithColors)
         let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
+
+        let scoring =
+            ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
 
         let mutable time = -Time.infinity
 
         let seek_backwards (screen: IPlayScreen) =
-            screen.State.ChangeScoring (screen.State.Scoring.Recreate())
+            screen.State.ChangeScoring(screen.State.Scoring.Recreate())
 
         let mutable ctx: PositionerContext = Unchecked.defaultof<_>
 
-        let hot_reload() =
-            if not (Transitions.in_progress()) then
+        let hot_reload () =
+            if not(Transitions.in_progress()) then
                 Skins.reload_current_hud()
-                Screen.change_new (fun () -> edit_hud_screen (info, on_exit)) ScreenType.EditHud Transitions.Instant |> ignore
+
+                Screen.change_new (fun () -> edit_hud_screen(info, on_exit)) ScreenType.EditHud Transitions.Instant
+                |> ignore
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Editor) with
-            override this.Init(parent: Widget) =
+            override this.Init(parent: Widget) : unit =
 
                 ctx <-
                     {
@@ -57,19 +61,21 @@ module EditHudScreen =
                 base.Init(parent)
 
             override this.OnEnter p =
-                DiscordRPC.in_menus (%"discord_status.edit_hud")
-                Dialog.close ()
-                Background.dim (float32 options.BackgroundDim.Value)
-                Toolbar.hide ()
+                DiscordRPC.in_menus(%"discord_status.edit_hud")
+                Dialog.close()
+                Background.dim(float32 options.BackgroundDim.Value)
+                Toolbar.hide()
                 Song.OnFinish(SongFinishAction.LoopFromBeginning)
                 Song.Resume()
-                Input.remove_listener ()
+                Input.remove_listener()
 
             override this.OnExit s =
-                base.OnExit s
-                if s <> ScreenType.Play && s <> ScreenType.EditHud then on_exit ()
+                base.OnExit(s)
 
-            override this.Update(elapsed_ms, moved) =
+                if s <> ScreenType.Play && s <> ScreenType.EditHud then
+                    on_exit()
+
+            override this.Update(elapsed_ms: float, moved: bool) : unit =
                 let chart_time = this.State.CurrentChartTime()
 
                 if chart_time < time then
@@ -82,5 +88,5 @@ module EditHudScreen =
                 if Mouse.left_clicked() then
                     ctx.ClearSelection()
 
-                this.State.Scoring.Update chart_time
+                this.State.Scoring.Update(chart_time)
         }
