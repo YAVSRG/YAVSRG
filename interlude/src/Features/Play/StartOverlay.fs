@@ -18,7 +18,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker_state: PacemakerState, on_rea
 
     let BG_SCALE = 0.35f
 
-    let timer = Animation.Delay (float Song.LEADIN_TIME * 0.5)
+    let timer = Animation.Delay (float SongPlayer.LEADIN_TIME * 0.5)
     let fade = Animation.Fade 1.0f
 
     let pacemaker_desc = pacemaker_state.Description(Rulesets.current)

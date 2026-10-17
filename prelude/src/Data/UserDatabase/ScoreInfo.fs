@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.User
+﻿namespace Prelude.Data.UserDatabase
 
 open Prelude
 open Prelude.Charts
@@ -7,7 +7,7 @@ open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
-open Prelude.Data.Library
+open Prelude.Data.ChartDatabase
 
 [<RequireQualifiedAccess>]
 type ScorePlayedBy =

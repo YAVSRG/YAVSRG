@@ -31,7 +31,7 @@ type AudioPage() =
             %"system.audio_pitch_rates_down",
             Checkbox(
                 options.AudioPitchRatesDown
-                |> Setting.trigger (fun v -> Song.set_pitch_rate_down_enabled v)
+                |> Setting.trigger (fun v -> Song.DownRatesChangePitch <- v)
             )
         )
             .Help(Help.Info("system.audio_pitch_rates_down"))
@@ -41,7 +41,7 @@ type AudioPage() =
             %"system.audio_pitch_rates_up",
             Checkbox(
                 options.AudioPitchRatesUp
-                |> Setting.trigger (fun v -> Song.set_pitch_rate_up_enabled v)
+                |> Setting.trigger (fun v -> Song.UpRatesChangePitch <- v)
             )
         )
             .Help(Help.Info("system.audio_pitch_rates_up"))
@@ -50,10 +50,19 @@ type AudioPage() =
         PageSetting(%"system.menus_muffle_song",
             Checkbox (
                 options.MenusMuffleSong
-                |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)
+                |> Setting.trigger (fun b -> if b then Song.ApplyLowPassFilter() else Song.RemoveLowPassFilter())
             )
         )
             .Help(Help.Info("system.menus_muffle_song"))
+
+    static member CrossfadeEnabled() : PageSetting =
+        PageSetting(%"system.audio_enable_crossfade",
+            Checkbox (
+                options.AudioCrossfadeEnabled
+                |> Setting.trigger Song.set_CrossfadeEnabled
+            )
+        )
+            .Help(Help.Info("system.audio_enable_crossfade"))
 
     static member AudioOffset() : PageSetting =
         PageSetting(
@@ -61,7 +70,7 @@ type AudioPage() =
             { new Slider(Setting.uom options.AudioOffset, Step = 1f) with
                 override this.OnDeselected(by_mouse: bool) =
                     base.OnDeselected by_mouse
-                    Song.set_global_offset options.AudioOffset.Value
+                    Song.SetGlobalOffset(options.AudioOffset.Value)
             }
         )
             .Help(Help.Info("system.audiooffset"))
@@ -78,8 +87,9 @@ type AudioPage() =
                 AudioPage.RatesChangePitchDown().Pos(5),
                 AudioPage.RatesChangePitchUp().Pos(7),
                 AudioPage.MenusMuffleSong().Pos(9),
-                AudioPage.AudioOffset().Pos(12),
-                AudioPage.AutomaticOffset().Pos(14)
+                AudioPage.CrossfadeEnabled().Pos(11),
+                AudioPage.AudioOffset().Pos(14),
+                AudioPage.AutomaticOffset().Pos(16)
             )
 
     override this.Title = Icons.SPEAKER + " " + %"system.audio"

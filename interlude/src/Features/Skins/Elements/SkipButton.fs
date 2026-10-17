@@ -44,8 +44,8 @@ type SkipButton(ctx: HudContext) =
 
             if ctx.State.CurrentChartTime() < -SKIP_THRESHOLD then
                 if (%%"skip").Pressed() then
-                    Song.pause ()
-                    Song.play_from (ctx.State.WithColors.FirstNote - SKIP_DISTANCE)
+                    Song.Pause()
+                    Song.PlayFrom(ctx.State.WithColors.FirstNote - SKIP_DISTANCE)
                     active <- false
             else
                 active <- false

@@ -13,8 +13,6 @@ type BPM =
         MsPerBeat: float32<ms / beat>
     }
 
-type SV = float32
-
 type [<Struct>] NoteData =
     { Keys: int; Notes: TimeArray<NoteRow> }
     member this.ToNoteData() : NoteData = this
@@ -25,7 +23,7 @@ type Chart =
         Keys: int
         Notes: TimeArray<NoteRow>
         BPM: TimeArray<BPM>
-        SV: TimeArray<SV>
+        SV: TimeArray<float32>
     }
 
     member this.FirstNote : Time = (TimeArray.first this.Notes).Value.Time
@@ -143,7 +141,7 @@ type Chart =
             Error err.Message
 
     member this.WriteToStreamHeadless(bw: BinaryWriter) : unit =
-        TimeArray.write this.Notes bw (fun bw nr -> NoteRow.write bw nr)
+        TimeArray.write this.Notes bw NoteRow.write
 
         TimeArray.write
             this.BPM
@@ -153,9 +151,9 @@ type Chart =
                 bw.Write(float32 bpm.MsPerBeat)
             )
 
-        TimeArray.write this.SV bw (fun bw f -> bw.Write f)
+        TimeArray.write this.SV bw _.Write
 
-    static member ReadFromStreamHeadless (keys: int, br: BinaryReader) : Result<Chart, string> =
+    static member ReadFromStreamHeadless(keys: int, br: BinaryReader) : Result<Chart, string> =
         try
             let notes = TimeArray.read br (NoteRow.read keys)
 
@@ -257,12 +255,12 @@ module Chart =
 
     let find_most_common_bpm (chart: Chart) : float32<ms / beat> =
         (find_bpm_durations chart.BPM chart.LastNote)
-            .OrderByDescending(fun p -> p.Value)
+            .OrderByDescending(_.Value)
             .First()
             .Key
 
     let find_min_max_bpm (chart: Chart) : float32<ms / beat> * float32<ms / beat> =
-        let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(fun p -> p.Key)
+        let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(_.Key)
         (d.First().Key, d.Last().Key)
 
     let pretty_print (notes: TimeArray<NoteRow>) : unit =

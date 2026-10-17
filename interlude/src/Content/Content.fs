@@ -7,9 +7,10 @@ open Prelude.Skins.HudLayouts
 open Prelude.Skins.Noteskins
 open Prelude.Skins.Themes
 open Prelude.Backbeat
+open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
-open Prelude.Data.User
-open Prelude.Data.User.Stats
+open Prelude.Data.UserDatabase
+open Prelude.Data.Stats
 
 type Content =
 

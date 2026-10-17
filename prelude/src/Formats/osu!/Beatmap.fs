@@ -80,7 +80,6 @@ type Beatmap =
                 yield object.ToString()
 
             yield ""
-            // todo: [Colours]
             yield "[HitObjects]"
 
             for object in this.Objects do
@@ -89,9 +88,7 @@ type Beatmap =
             yield ""
         }
 
-    static member FromStream(stream: Stream) : Beatmap =
-        use reader = new StreamReader(stream)
-
+    static member FromLines(lines: string seq) : Beatmap =
         let mutable state = Nothing
         let general = ref Map.empty
         let editor = ref Map.empty
@@ -103,8 +100,8 @@ type Beatmap =
         let timing = ResizeArray<TimingPoint>()
         let events = ResizeArray<StoryboardEvent>()
 
-        while reader.Peek() >= 0 do
-            let line = reader.ReadLine().TrimEnd()
+        for line in lines do
+            let line = line.TrimEnd()
 
             match line with
             | "" -> ()
@@ -137,7 +134,7 @@ type Beatmap =
             | Events -> Option.iter events.Add (StoryboardEvent.TryParse(line))
             | TimingPoints -> timing.Add(TimingPoint.FromString(line))
             | Objects -> objects.Add(HitObject.FromString(line))
-            | Colors -> () // todo: support colors header
+            | Colors -> ()
 
         {
             General = General.FromMap(general.Value)
@@ -145,15 +142,19 @@ type Beatmap =
             Metadata = Metadata.FromMap(metadata.Value)
             Difficulty = Difficulty.FromMap(difficulty.Value)
             Events = List.ofSeq events
-            // The osu! client sorts all hitobjects and timing points by timestamp for when users have put them in the wrong order via notepad
-            // IMPORTANT: If multiple timing points are stacked on the same timestamp,
-            //   osu! will act UNPREDICTABLY and put them in an arbitrary order since it does not use a stable sort
-            // I have ruled to use a stable sort (`Seq.sortBy`)
-            //   This means stacked timing points will stay in the order they are in the .osu file after being sorted
-            // This gives a defined behaviour to my parse and conversion but anyone writing their own should be aware that it's UB
             Objects = objects |> Seq.sortBy _.Time |> List.ofSeq
             Timing = timing |> Seq.sortBy _.Time |> List.ofSeq
         }
+
+    static member FromStream(stream: Stream) : Beatmap =
+        use reader = new StreamReader(stream)
+
+        Beatmap.FromLines(
+            seq {
+                while not reader.EndOfStream do
+                    yield reader.ReadLine()
+            }
+        )
 
     static member TryReadFromFile(path: string) : Result<Beatmap, string> =
         try

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library
+﻿namespace Prelude.Data.ChartDatabase
 
 open System.IO
 open System.Collections.Generic
@@ -93,7 +93,7 @@ type ChartDatabase =
         <| fun () ->
             seq {
                 for import_chart in imported_charts do
-                    let incoming_meta = ChartMeta.CreateFromImport now import_asset import_chart
+                    let incoming_meta = ChartMeta.CreateFromImport(now, import_chart, import_asset)
                     let incoming_chart = import_chart.Chart
 
                     let accepted_chart, accepted_meta =

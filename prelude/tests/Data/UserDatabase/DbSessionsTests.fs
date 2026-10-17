@@ -1,0 +1,81 @@
+namespace Prelude.Tests.Data.UserDatabase
+
+open NUnit.Framework
+open Prelude.Data.UserDatabase
+open Prelude.Tests.Data
+
+module DbSessionsTests =
+
+    [<Test>]
+    let Empty () =
+        let db, conn = InMemoryDatabase.Create()
+
+        let result = DbSessions.get_all db
+        Assert.IsEmpty(result)
+
+        conn.Dispose()
+
+    [<Test>]
+    let RoundTrip () =
+        let db, conn = InMemoryDatabase.Create()
+
+        let session: Session =
+            {
+                Start = 364L
+                End = 365L
+
+                PlayTime = 10.0
+                PracticeTime = 10.0
+                GameTime = 30.0
+                NotesHit = 256
+
+                PlaysStarted = 2
+                PlaysRetried = 1
+                PlaysQuit = 2
+                PlaysCompleted = 1
+
+                XP = 567L
+                KeymodePlaytime = Map.ofSeq [ 4, 3600.0; 7, 1800.0 ]
+            }
+
+        DbSessions.save session db
+        let result = DbSessions.get_all db
+        Assert.IsNotEmpty(result)
+        Assert.AreEqual(session, result.[0])
+        Assert.AreEqual(1, result.Length)
+
+        conn.Dispose()
+
+    [<Test>]
+    let Idempotence () =
+        let db, conn = InMemoryDatabase.Create()
+
+        let session: Session =
+            {
+                Start = 364L
+                End = 365L
+
+                PlayTime = 10.0
+                PracticeTime = 10.0
+                GameTime = 30.0
+                NotesHit = 256
+
+                PlaysStarted = 2
+                PlaysRetried = 1
+                PlaysQuit = 2
+                PlaysCompleted = 1
+
+                XP = 567L
+                KeymodePlaytime = Map.ofSeq [ 4, 3600.0; 7, 1800.0 ]
+            }
+
+        DbSessions.save session db
+        DbSessions.save session db
+        DbSessions.save session db
+
+        let result = DbSessions.get_all db
+        Assert.IsNotEmpty(result)
+        Assert.AreEqual(session, result.[0])
+        Assert.AreEqual(1, result.Length)
+
+        conn.Dispose()

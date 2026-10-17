@@ -1,10 +1,10 @@
-﻿namespace Prelude.Data.User.Stats
+﻿namespace Prelude.Data.Stats
 
 open System
 open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Data.Sqlite
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Prelude.Data.Library
 
 type SessionXPGain =
@@ -227,7 +227,7 @@ type Stats =
     
     member this.TryGetNextSession(date: DateOnly, session: Session) : (DateOnly * Session) option =
         
-        let inline find_session_later_today() : (DateOnly * Session) option =
+        let find_session_later_today() : (DateOnly * Session) option =
             let sessions_today = this.PreviousSessions.[date]
             let index = List.tryFindIndex (fun s -> s = session) sessions_today |> Option.defaultValue -1
             if index + 1 < sessions_today.Length then
@@ -235,7 +235,7 @@ type Stats =
             else
                 None
                 
-        let inline find_next_day_with_sessions() : (DateOnly * Session) option =
+        let find_next_day_with_sessions() : (DateOnly * Session) option =
             let TODAY = this.Clock.Today()
             let mutable date = date
             let rec loop () : (DateOnly * Session) option =
@@ -244,7 +244,7 @@ type Stats =
                 | Some sessions_on_day ->
                     Some(date, sessions_on_day.[0])
                 | None ->
-                    if date = TODAY then None else loop()
+                    if date >= TODAY then None else loop()
             loop()
                 
         find_session_later_today() |> Option.orElseWith find_next_day_with_sessions
@@ -254,15 +254,15 @@ type Stats =
         
     member this.TryGetPreviousSession(date: DateOnly, session: Session) : (DateOnly * Session) option =
         
-        let inline find_session_earlier_today() : (DateOnly * Session) option =
+        let find_session_earlier_today() : (DateOnly * Session) option =
             let sessions_today = this.GetPreviousSessionsForDate(date)
-            let index = List.tryFindIndex (fun s -> s = session) sessions_today |> Option.defaultValue -1
+            let index = List.tryFindIndex (fun s -> s = session) sessions_today |> Option.defaultValue (List.length sessions_today)
             if index > 0 then
                 Some(date, sessions_today.[index - 1])
             else
                 None
                 
-        let inline find_prior_day_with_sessions() : (DateOnly * Session) option =
+        let find_prior_day_with_sessions() : (DateOnly * Session) option =
             let mutable date = date
             let rec loop () : (DateOnly * Session) option =
                 date <- date.AddDays(-1)

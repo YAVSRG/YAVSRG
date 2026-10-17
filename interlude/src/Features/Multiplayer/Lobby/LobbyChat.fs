@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Interlude.Web.Shared
 open Interlude.UI
 open Interlude.Features.Score

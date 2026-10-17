@@ -5,7 +5,7 @@ open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
 open Prelude.Skins.Conversions
 open Prelude.Skins.Conversions.Osu
@@ -95,7 +95,7 @@ module FileDrop =
             else
 
             let task_tracking = TaskTracking.add(Path.GetFileName(path))
-            let task = Imports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
+            let task = FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
             import_queue.Request(task,
                 function
                 | Ok result ->

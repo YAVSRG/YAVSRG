@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
-open Prelude.Data.User.Stats
+open Prelude.Data.Stats
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 open Interlude.Features.Gameplay

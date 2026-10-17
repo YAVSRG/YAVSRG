@@ -64,7 +64,7 @@ type ChartFuzzer =
         end_unterminated_holds(notes)
         notes
 
-    static member GenerateBPMAndSV(seed: int, points_count: int) : TimeArray<BPM> * TimeArray<SV> =
+    static member GenerateBPMAndSV(seed: int, points_count: int) : TimeArray<BPM> * TimeArray<float32> =
         let sv = ResizeArray<TimeItem<float32>>()
         let bpm = ResizeArray<TimeItem<BPM>>()
         let random = PseudoRandom.FromSeed(seed)

@@ -5,8 +5,8 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User
-open Prelude.Data.User.Stats
+open Prelude.Data.UserDatabase
+open Prelude.Data.Stats
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -18,7 +18,7 @@ open Interlude.Features.Online
 type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGain option, played_just_now: bool) =
     inherit Screen()
 
-    let pbs, xp_gain = results
+    let pbs, _xp_gain = results
     let personal_bests = ref pbs
 
     let grade =
@@ -115,7 +115,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
     override this.OnEnter(_: ScreenType) =
         Toolbar.hide()
-        Song.on_finish <- SongFinishAction.Wait
+        Song.OnFinish(SongFinishAction.Wait)
         DiscordRPC.in_menus(%"discord_status.score_screen")
 
     override this.OnExit(_: ScreenType) =

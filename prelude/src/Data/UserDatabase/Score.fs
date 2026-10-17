@@ -1,7 +1,5 @@
-﻿namespace Prelude.Data.User
+﻿namespace Prelude.Data.UserDatabase
 
-open Percyqaz.Common
-open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Mods
 

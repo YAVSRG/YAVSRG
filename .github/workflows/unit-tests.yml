@@ -34,6 +34,9 @@ jobs:
         
     - name: Run formatting checks
       run: dotnet tool restore && dotnet fantomas --check .
+
+    - name: Check localisation
+      run: bash scripts/check_localisation.sh
         
     - name: Approve PRs from Percyqaz if checks pass
       if: github.event.pull_request.user.login == 'percyqaz'

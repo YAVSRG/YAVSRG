@@ -15,6 +15,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     let HEIGHT = 60.0f
     let LAST_NOTE = with_mods.LastNote
     let FIRST_NOTE = with_mods.FirstNote
+    let START_OF_TIMELINE = Song.StartOfTimeline(FIRST_NOTE)
     let bpms = with_mods.BPM
 
     let BOX_HEIGHT = 100.0f
@@ -38,7 +39,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
     override this.Draw() =
         let b = this.Bounds.Shrink(10.0f, 20.0f)
-        let LEADIN_TIME = Song.LEADIN_TIME * rate.Value
+        let LEADIN_TIME = SongPlayer.LEADIN_TIME * rate.Value
         let start = with_mods.FirstNote - LEADIN_TIME
         let offset = b.Width * LEADIN_TIME / LAST_NOTE
 
@@ -84,7 +85,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             (b.Right, b.Bottom)
             Colors.cyan_accent.O1
 
-        let now = Song.time()
+        let now = Song.Time
         let percent = (now - start) / (LAST_NOTE - start) |> min 1.0f
         let x = b.Width * percent
         Render.rect (b.BorderB(10.0f)) Colors.grey_1.O3
@@ -106,9 +107,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
         if this.Bounds.Bottom - Mouse.y () < 100.0f then
 
             let percent = (Mouse.x () - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
-
-            let start = FIRST_NOTE - Song.LEADIN_TIME * rate.Value
-            let hovered_time = start + (LAST_NOTE - start) * percent |> max 0.0f<ms>
+            let hovered_time = START_OF_TIMELINE + (LAST_NOTE - START_OF_TIMELINE) * percent |> max 0.0f<ms>
 
             while bpm_index > 0 && bpms.[bpm_index].Time > hovered_time do
                 bpm_index <- bpm_index - 1
@@ -172,19 +171,18 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
         if this.Bounds.Bottom - Mouse.y () < 100.0f && Mouse.left_clicked() then
             dragging <- true
-            unpause_after_drag <- Song.playing()
+            unpause_after_drag <- Song.IsPlaying
             if unpause_after_drag then
-                Song.pause()
+                Song.Pause()
 
         if dragging then
             let percent =
                 (Mouse.x () - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
 
-            let start = FIRST_NOTE - Song.LEADIN_TIME * rate.Value
-            let new_time = start + (LAST_NOTE - start) * percent
+            let new_time = START_OF_TIMELINE + (LAST_NOTE - START_OF_TIMELINE) * percent
             on_seek new_time
 
             if not (Mouse.held Mouse.LEFT) then
                 dragging <- false
                 if unpause_after_drag then
-                    Song.resume()
+                    Song.Resume()

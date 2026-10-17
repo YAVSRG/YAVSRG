@@ -5,10 +5,10 @@ open System.IO
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Formats.Conversions
 open Prelude.Data.OsuClientInterop
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
@@ -115,11 +115,11 @@ let read_scores () =
             try
                 let beatmap = Beatmap.TryReadFromFile(osu_file) |> expect
 
-                Osu_To_Interlude.convert
+                OsuConverter.convert
                     beatmap
                     {
-                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
-                        Source = osu_file
+                        Options = ConversionOptions.Pack("osu!", None, Link)
+                        OriginalPath = osu_file
                     }
                 |> expect
                 |> Some,

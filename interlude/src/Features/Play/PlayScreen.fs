@@ -77,7 +77,7 @@ type PlayScreen =
             if Gameplay.continue_endless_mode() then stats_exit_reason <- ExitReason.Quit
 
         let give_up () =
-            let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
+            let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.Time - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
 
             if is_giving_up_play then
                 liveplay.Finish()
@@ -166,7 +166,7 @@ type PlayScreen =
                 view_score()
 
         let change_offset (state: PlayState) =
-            Song.pause()
+            Song.Pause()
             liveplay.Finish()
             offset_manually_changed <- true
             LocalOffsetPage(LocalOffset.get_automatic state info.SaveData, offset_setting)
@@ -222,14 +222,14 @@ type PlayScreen =
                     LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
                 Toolbar.show_cursor ()
                 Background.set_parallax_amount 40.0f
-                Song.set_low_pass 0.0f
+                Song.RemoveLowPassFilter()
 
                 base.OnExit(next)
 
             override this.Update(elapsed_ms, moved) =
                 stats_play_time <- stats_play_time + elapsed_ms
                 base.Update(elapsed_ms, moved)
-                let now = Song.time_with_offset ()
+                let now = Song.TimeWithOffset
                 let chart_time = now - first_note
 
                 if not (liveplay :> ReplaySource).Finished && fade_in.Target = 1.0f then
@@ -267,7 +267,7 @@ type PlayScreen =
 
                 if
                     this.State.CurrentChartTime() < 0.0f<ms>
-                    && Song.playing ()
+                    && Song.IsPlaying
                 then
                     Text.draw_b (
                         Style.font,

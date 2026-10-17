@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library
+﻿namespace Prelude.Data.ChartDatabase
 
 open Prelude
 open Prelude.Charts
@@ -70,7 +70,7 @@ type ChartMeta =
             },
             false
 
-    static member CreateFromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetLocation) (import_chart: ImportChart) : ChartMeta =
+    static member CreateFromImport(timestamp: int64, import_chart: ImportChart, handle_asset: ImportAsset -> AssetLocation) : ChartMeta =
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
         let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s

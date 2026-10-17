@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Audio
+namespace Percyqaz.Flux.Audio
 
 open System
 open ManagedBass
@@ -16,11 +16,7 @@ module Waveform =
             mutable High: float32
         }
 
-    type Waveform =
-        {
-            MsPerPoint: Time
-            Points: Point array
-        }
+    type Waveform = { MsPerPoint: Time; Points: Point array }
 
     let private samples_per_second = 1000
     let private points_per_iteration = 1000
@@ -44,9 +40,9 @@ module Waveform =
 
     let intensity (info: ChannelInfo, bins: float32 array, start_frequency: float32, end_frequency: float32) : float32 =
         let start_bin =
-            int <| float32 fft_bins * 2f * start_frequency / float32 info.Frequency
+            float32 fft_bins * 2f * start_frequency / float32 info.Frequency |> int
 
-        let end_bin = int <| float32 fft_bins * 2f * end_frequency / float32 info.Frequency
+        let end_bin = float32 fft_bins * 2f * end_frequency / float32 info.Frequency |> int
 
         let start_bin = Math.Clamp(start_bin, 0, bins.Length)
         let end_bin = Math.Clamp(end_bin, 0, bins.Length)
@@ -70,7 +66,7 @@ module Waveform =
         let point_count = length / int64 bytes_per_point |> int
         let points = Array.zeroCreate<Point> point_count
         let bytes_per_iteration = bytes_per_point * points_per_iteration
-        let sample_buffer = Array.zeroCreate<float32> (bytes_per_iteration / 4)
+        let sample_buffer = Array.zeroCreate<float32>(bytes_per_iteration / 4)
         let mutable point_index = 0
 
         // amplitude analysis
@@ -110,9 +106,9 @@ module Waveform =
             read <- Bass.ChannelGetData(decode_stream, bins, int fft_samples)
             byte_index <- byte_index + read
 
-            let lo = intensity (info, bins, low_min, mid_min)
-            let mid = intensity (info, bins, mid_min, high_min)
-            let hi = intensity (info, bins, high_min, high_max)
+            let lo = intensity(info, bins, low_min, mid_min)
+            let mid = intensity(info, bins, mid_min, high_min)
+            let hi = intensity(info, bins, high_min, high_max)
 
             while point_index < points.Length && point_index * bytes_per_point < byte_index do
                 points.[point_index].Low <- lo
@@ -127,7 +123,4 @@ module Waveform =
 
         let ms_per_point = 1000.0f<ms> / points_per_second
 
-        {
-            Points = points
-            MsPerPoint = ms_per_point
-        }
+        { Points = points; MsPerPoint = ms_per_point }

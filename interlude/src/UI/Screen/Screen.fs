@@ -131,7 +131,7 @@ module Screen =
     /// false if the requested change was rejected (transition already in progress)
     let change_new (thunk: unit -> #Screen) (screen_type: ScreenType) (transition_type: Transitions.Transition) : bool =
         if
-            not Song.loading
+            not Song.IsLoading
             && (screen_type <> current_type || screen_type = ScreenType.Play || screen_type = ScreenType.EditHud)
             && not (Transitions.in_progress())
         then
@@ -172,7 +172,7 @@ module Screen =
     type ScreenRoot(toolbar: Widget) =
         inherit Root()
 
-        let perf = PerformanceMonitor()
+        let perf = DebugOverlay()
 
         override this.Update(elapsed_ms, moved) =
             let elapsed_ms = elapsed_ms * timescale

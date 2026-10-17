@@ -8,7 +8,7 @@ open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Calculator
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 open Interlude.Content
 open Interlude.Web.Shared
 open Interlude.UI
@@ -208,7 +208,7 @@ type LobbyScreen() =
         | Some lobby -> LobbySelectedChart.on_screen_enter lobby
         | None -> ()
 
-        Song.on_finish <- SongFinishAction.LoopFromPreview
+        Song.OnFinish(SongFinishAction.LoopFromPreview)
         DiscordRPC.in_menus (%"discord_status.multiplayer_lobby")
 
     override this.OnExit(_: ScreenType) =

@@ -4,7 +4,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
+open Prelude.Data.Imports
 open Prelude.Data.Maintenance
 open Interlude.Content
 open Interlude.UI

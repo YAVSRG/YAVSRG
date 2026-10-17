@@ -36,7 +36,7 @@ type SpectateScreen =
                 currently_spectating <- next_user
                 scoring <- replay_info.ScoreProcessor
                 replay_data <- replay_info.ReplaySource :?> NetworkReplaySource
-                Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+                Song.Seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
                 screen.State.ChangeScoring scoring
             | None -> Logging.Warn "Failed to switch to replay data for %s" next_user
 
@@ -63,11 +63,11 @@ type SpectateScreen =
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
                 DiscordRPC.playing (%"discord_status.spectate", info.ChartMeta.Title)
-                Song.pause ()
+                Song.Pause()
 
             override this.OnExit(next) =
                 base.OnExit(next)
-                Song.resume ()
+                Song.Resume()
                 Toolbar.show_cursor ()
 
             override this.Update(elapsed_ms, moved) =
@@ -77,17 +77,17 @@ type SpectateScreen =
                     wait_for_load <- wait_for_load - elapsed_ms
 
                     if wait_for_load <= 0 then
-                        Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
-                        Song.resume ()
+                        Song.Seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+                        Song.Resume()
                 else
 
                 let chart_time = this.State.CurrentChartTime()
 
                 if replay_data.Time() - chart_time < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
-                    if Song.playing () then
-                        Song.pause ()
-                elif not (Song.playing ()) then
-                    Song.resume ()
+                    if Song.IsPlaying then
+                        Song.Pause ()
+                elif not Song.IsPlaying then
+                    Song.Resume ()
 
                 scoring.Update chart_time
 

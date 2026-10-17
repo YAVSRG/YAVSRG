@@ -28,7 +28,7 @@ type PracticeScreen =
         let mutable stats_notes_hit = 0
 
         let last_allowed_practice_point =
-            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * SelectedChart.rate.Value
+            info.WithMods.LastNote - 5.0f<ms> - SongPlayer.LEADIN_TIME * SelectedChart.rate.Value
 
         let state: PracticeState =
             {
@@ -65,18 +65,18 @@ type PracticeScreen =
         let restart (screen: IPlayScreen) =
             reset_to_practice_point ()
             screen.State.ChangeScoring scoring
-            Song.play_from state.PracticePoint.Value
-            state.Paused.Set false
+            Song.PlayFrom(state.PracticePoint.Value)
+            state.Paused.Set(false)
 
         let pause (_: IPlayScreen) =
-            Song.pause ()
-            state.Paused.Set true
+            Song.Pause()
+            state.Paused.Set(true)
             PracticeState.update_suggestions scoring state
             resume_from_current_place <- true
 
         let resume (screen: IPlayScreen) =
             if not scoring.Finished && resume_from_current_place then
-                Song.resume ()
+                Song.Resume()
                 state.Paused.Set false
             else
                 restart screen
@@ -87,7 +87,7 @@ type PracticeScreen =
                 info.WithMods,
                 fun t ->
                     state.PracticePoint.Set t
-                    Song.seek t
+                    Song.Seek(t)
                     resume_from_current_place <- false
             )
 
@@ -98,8 +98,8 @@ type PracticeScreen =
 
             override this.OnEnter(p) =
                 base.OnEnter(p)
-                Song.seek state.PracticePoint.Value
-                Song.pause ()
+                Song.Seek(state.PracticePoint.Value)
+                Song.Pause()
                 DiscordRPC.playing (%"discord_status.practice", info.ChartMeta.Title)
                 
             override this.OnExit(next: ScreenType) : unit =
@@ -107,11 +107,11 @@ type PracticeScreen =
                 Content.Stats.AddPracticeTime(stats_practice_time, stats_notes_hit)
 
             override this.OnBack() =
-                Song.resume ()
+                Song.Resume()
                 base.OnBack()
 
             override this.Update(elapsed_ms, moved) =
-                let now = Song.time_with_offset ()
+                let now = Song.TimeWithOffset
                 let chart_time = now - FIRST_NOTE
 
                 if (%%"retry").Pressed() then

@@ -8,7 +8,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Charts
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 
 type OsuReplay = OsuScoreDatabase_Score
 

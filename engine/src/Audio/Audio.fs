@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Audio
+namespace Percyqaz.Flux.Audio
 
 open System
 open ManagedBass
@@ -11,7 +11,13 @@ type Device =
         Type: DeviceType
         IsDefault: bool
     }
-    override this.ToString() = this.Name
+
+    override this.ToString() : string = this.Name
+
+[<AutoOpen>]
+module SongPlayerInstance =
+
+    let Song = SongPlayer()
 
 module Audio =
 
@@ -24,8 +30,8 @@ module Audio =
     let private update_waveform (elapsed_ms: float) : unit =
         let lerp_amount = MathF.Pow(0.988f, float32 elapsed_ms)
 
-        if Song.playing () then
-            Bass.ChannelGetData(Song.now_playing.ID, fft, int DataFlags.FFT2048) |> ignore
+        if Song.Current.Playing then
+            Bass.ChannelGetData(Song.Current.ID, fft, int DataFlags.FFT2048) |> ignore
             //algorithm adapted from here
             //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
             let mutable b0 = 0
@@ -51,11 +57,11 @@ module Audio =
 
     let update (elapsed_ms: float) : unit =
         update_waveform elapsed_ms
-        Song.update elapsed_ms
+        Song.Update(elapsed_ms)
 
     let change_volume (fx_volume: float, song_volume: float) =
-        Bass.GlobalSampleVolume <- int (fx_volume * MAX_VOLUME) |> max 0
-        Bass.GlobalStreamVolume <- int (song_volume * MAX_VOLUME) |> max 0
+        Bass.GlobalSampleVolume <- int(fx_volume * MAX_VOLUME) |> max 0
+        Bass.GlobalStreamVolume <- int(song_volume * MAX_VOLUME) |> max 0
 
     let private current_device_changed_ev = Event<unit>()
     let current_device_changed = current_device_changed_ev.Publish
@@ -66,23 +72,27 @@ module Audio =
     let mutable private initialised_devices = Set.empty
 
     let mutable private detected_devices = [||]
+
     let private detect_devices () =
         detected_devices <-
             seq {
                 for i = FIRST_REAL_DEVICE to Bass.DeviceCount - 1 do
-                    let ok, info = Bass.GetDeviceInfo i
+                    let ok, info = Bass.GetDeviceInfo(i)
+
                     if ok then
                         if info.IsEnabled then
-                            yield {
-                                Index = i
-                                Name = info.Name
-                                Type = info.Type
-                                IsDefault =
-                                    info.IsDefault
-                                    || info.Name.Contains("PulseAudio", StringComparison.OrdinalIgnoreCase)
-                                    || info.Name.Contains("PipeWire", StringComparison.OrdinalIgnoreCase)
-                            }
-                    else Logging.Error "Failed to get info for BASS device %i" i
+                            yield
+                                {
+                                    Index = i
+                                    Name = info.Name
+                                    Type = info.Type
+                                    IsDefault =
+                                        info.IsDefault
+                                        || info.Name.Contains("PulseAudio", StringComparison.OrdinalIgnoreCase)
+                                        || info.Name.Contains("PipeWire", StringComparison.OrdinalIgnoreCase)
+                                }
+                    else
+                        Logging.Error "Failed to get info for BASS device %i" i
             }
             |> Array.ofSeq
 
@@ -91,39 +101,53 @@ module Audio =
     let change_device (index: int) : unit =
         try
             let device_index =
-                match detected_devices |> Array.tryFind (fun x -> x.Index = index) with
+                match detected_devices |> Array.tryFind(fun x -> x.Index = index) with
                 | None ->
-                    if index >= 0 then Logging.Debug "No audio device with index %i, using default" index
-                    match detected_devices |> Array.tryFind (fun x -> x.IsDefault) with
+                    if index >= 0 then
+                        Logging.Debug "No audio device with index %i, using default" index
+
+                    match detected_devices |> Array.tryFind(fun x -> x.IsDefault) with
                     | None ->
-                        Logging.Error "No default audio device! Initialising with no sound :("
+                        Logging.Error("No default audio device! Initialising with no sound :(")
+
                         if detected_devices.Length > 0 then
-                            Logging.Info "Commonly on macOS and Linux, the engine doesn't know which device is default, but this doesn't mean no devices are available"
-                            Logging.Info "There are still %i audio devices detected, switch to one of them in settings" detected_devices.Length
+                            Logging.Info(
+                                "Commonly on macOS and Linux, the engine doesn't know which device is default, but this doesn't mean no devices are available"
+                            )
+
+                            Logging.Info
+                                "There are still %i audio devices detected, switch to one of them in settings"
+                                detected_devices.Length
+
                         NO_AUDIO_DEVICE
                     | Some d -> d.Index
                 | Some d -> d.Index
 
-            if initialised_devices.Contains device_index || Bass.Init(device_index, Flags = DeviceInitFlags.Latency) then
-                initialised_devices <- initialised_devices.Add device_index
+            if
+                initialised_devices.Contains(device_index) || Bass.Init(device_index, Flags = DeviceInitFlags.Latency)
+            then
+                initialised_devices <- initialised_devices.Add(device_index)
                 Bass.CurrentDevice <- device_index
             else
                 Logging.Error "Failed to initialise audio device with index %i: %O" device_index Bass.LastError
-                if device_index <> NO_AUDIO_DEVICE && (initialised_devices.Contains NO_AUDIO_DEVICE || Bass.Init(NO_AUDIO_DEVICE, Flags = DeviceInitFlags.Latency)) then
+
+                if
+                    device_index <> NO_AUDIO_DEVICE
+                    && (initialised_devices.Contains(NO_AUDIO_DEVICE)
+                        || Bass.Init(NO_AUDIO_DEVICE, Flags = DeviceInitFlags.Latency))
+                then
                     Bass.CurrentDevice <- NO_AUDIO_DEVICE
-                    Logging.Debug "Initialised with no sound :("
+                    Logging.Debug("Initialised with no sound :(")
                 else
                     Logging.Critical "Initialising with no sound also failed: %O" Bass.LastError
 
-            if Song.now_playing.ID <> 0 then
-                Bass.ChannelSetDevice(Song.now_playing.ID, device_index) |> display_bass_error
-
+            Song.Current.ChangeToCurrentDevice()
             current_device_changed_ev.Trigger()
 
         with err ->
             Logging.Error "Unhandled exception switching to audio device %i: %O" index err
 
-    let debug_info() : string =
+    let debug_info () : string =
 
         let device_dump (dev: Device) : string =
             sprintf "  %i. %s | %O | DEFAULT: %A" dev.Index dev.Name dev.Type dev.IsDefault
@@ -131,7 +155,11 @@ module Audio =
         let devices = detected_devices |> Seq.map device_dump |> String.concat "\n"
 
         match Bass.GetInfo() with
-        | false, _ -> sprintf "-- AUDIO DEBUG INFO --\nBass Version: %O\nDetected and enabled devices:\n%s\nOther details could not be retrieved" Bass.Version devices
+        | false, _ ->
+            sprintf
+                "-- AUDIO DEBUG INFO --\nBass Version: %O\nDetected and enabled devices:\n%s\nOther details could not be retrieved"
+                Bass.Version
+                devices
         | true, info ->
             sprintf
                 """-- AUDIO DEBUG INFO --
@@ -148,14 +176,14 @@ Detected and enabled devices:
                 devices
 
     let init (device: int, device_period: int, device_buffer_length: int) =
-        detect_devices ()
+        detect_devices()
 
         // https://github.com/ppy/osu/issues/3800
-        Bass.Configure(Configuration.DevNonStop, true) |> display_bass_error
-        Bass.Configure(Configuration.DevicePeriod, device_period) |> display_bass_error
-        Bass.Configure(Configuration.DeviceBufferLength, device_buffer_length) |> display_bass_error
-        Bass.Configure(Configuration.PlaybackBufferLength, 200) |> display_bass_error
-        Bass.Configure(Configuration.UpdatePeriod, 5) |> display_bass_error
+        Bass.Configure(Configuration.DevNonStop, true).LogBassError()
+        Bass.Configure(Configuration.DevicePeriod, device_period).LogBassError()
+        Bass.Configure(Configuration.DeviceBufferLength, device_buffer_length).LogBassError()
+        Bass.Configure(Configuration.PlaybackBufferLength, 200).LogBassError()
+        Bass.Configure(Configuration.UpdatePeriod, 5).LogBassError()
 
         change_device device
         Bass.GlobalStreamVolume <- 0

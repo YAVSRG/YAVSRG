@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library.Endless
+﻿namespace Prelude.Data.Library
 
 open System
 open Percyqaz.Common
@@ -7,7 +7,7 @@ open Prelude.Mods
 open Prelude.Gameplay.Rulesets
 open Prelude.Calculator.Patterns
 open Prelude.Data.Library
-open Prelude.Data.User
+open Prelude.Data.UserDatabase
 
 type SuggestionContext =
     {
