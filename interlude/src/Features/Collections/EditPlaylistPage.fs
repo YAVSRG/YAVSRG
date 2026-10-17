@@ -25,7 +25,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
 
                 Logging.Debug("Rename failed, maybe that name already exists?")
 
-    override this.Content() =
+    override this.Content() : Widget =
 
         this.OnClose(this.SaveChanges)
 

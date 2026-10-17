@@ -60,7 +60,7 @@ type ImportsPage() =
         )
             .Icon(Icons.FOLDER_PLUS)
 
-    override this.Content() =
+    override this.Content() : Widget =
         let lhs_actions =
             NavigationContainer
                 .Column()

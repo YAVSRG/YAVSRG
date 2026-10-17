@@ -100,7 +100,7 @@ type LibraryPage() =
     static member Vacuum() : PageButton =
         PageButton.Once(%"library.vacuum", LibraryActions.vacuum).Help(Help.Info("library.vacuum"))
 
-    override this.Content() =
+    override this.Content() : Widget =
 
         let main_options =
             NavigationContainer

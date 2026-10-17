@@ -16,7 +16,7 @@ type LoginPage() =
 
     let info = Callout.Small.Icon(Icons.GLOBE).Title(%"login.waiting_for_discord")
 
-    override this.Content() =
+    override this.Content() : Widget =
 
         this.DisposeOnClose(
             NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back()),

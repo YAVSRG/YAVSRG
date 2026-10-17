@@ -181,13 +181,13 @@ type TaskProgressMiniBar() =
     let animation = Animation.Counter(1500.0)
     let fade = Animation.Fade(0.0f)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         animation.Update(elapsed_ms)
         fade.Target <- if TaskTracking.in_progress() then 1.0f else 0.0f
         fade.Update(elapsed_ms)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let alpha = fade.Alpha
 
         if alpha > 0 then

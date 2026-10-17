@@ -95,12 +95,12 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
 
     member private this.Buttons = tab_buttons
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Position(Position.SliceT(HEIGHT)).Add(search_box, tab_buttons)
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         match transition with
@@ -116,7 +116,7 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
             transition_timer.Update(elapsed_ms)
         | _ -> ()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let before_alpha = Render.alpha_multiplier_begin 1.0f
 
         match transition with
@@ -215,11 +215,11 @@ type private OptionsPageFooter() as this =
 
     member this.Items = content
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.With(content).Position <- Position.SliceB(HEIGHT)
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds Colors.shadow_2.O1
         Render.rect (this.Bounds.BorderT(Style.PADDING)) Colors.cyan
         base.Draw()

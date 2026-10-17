@@ -23,7 +23,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
 
         ruleset.Set({ ruleset.Value with Grades = new_grades |> Array.sortBy(fun l -> l.Accuracy) })
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -78,7 +78,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
         ruleset.Set({ ruleset.Value with Grades = ruleset.Value.Grades |> Array.removeAt i })
         refresh()
 
-    override this.Content() =
+    override this.Content() : Widget =
         refresh()
         ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 

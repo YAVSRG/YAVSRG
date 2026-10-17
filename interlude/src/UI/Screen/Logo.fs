@@ -72,7 +72,7 @@ type Logo() =
         this.Position <- OFFSCREEN_BELOW
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Bounds.Right < 0.0f then
             ()
         else
@@ -207,7 +207,7 @@ type Logo() =
                 Render.stencil_finish()
                 Render.sprite breathe_bounds Colors.white (Content.Texture("logo"))
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         counter.Update(elapsed_ms)
 

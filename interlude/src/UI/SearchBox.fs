@@ -33,7 +33,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
     member val TextColor: unit -> Color * Color = fun () -> !*Palette.LIGHT, !*Palette.DARKER with get, set
     member val KeyboardAutoSelect: bool = false with get, set
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         text_entry.TextColor <-
             fun () -> if this.TextEntry.Selected then Colors.white, Colors.shadow_2 else this.TextColor()
 
@@ -60,7 +60,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if search_timer.ElapsedMilliseconds > this.DebounceTime then

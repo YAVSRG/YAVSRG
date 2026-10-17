@@ -22,7 +22,7 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
 
     member val Disabled = false with get, set
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
             .With(
                 Text(sprintf "%s %s" icon name)
@@ -38,7 +38,7 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let color = if this.Focused then Colors.pink_accent else Colors.shadow_1
         let color = if this.Disabled then color.O3 else color
 
@@ -86,7 +86,7 @@ type SelectCollectionPage
         if grid.Focused then
             grid.Focus(false)
 
-    override this.Content() =
+    override this.Content() : Widget =
         refresh()
 
         page_container()

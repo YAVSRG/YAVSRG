@@ -13,7 +13,7 @@ type CreatePlaylistPage(starting_name: string, on_create: string * Collection ->
     let new_name = Setting.simple starting_name |> Setting.alphanumeric
     let icon = Setting.simple Icons.HEART
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageTextEntry(%"collections.edit.playlist_name", new_name).Pos(0),

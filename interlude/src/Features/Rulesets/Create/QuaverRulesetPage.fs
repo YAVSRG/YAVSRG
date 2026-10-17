@@ -17,7 +17,7 @@ type QuaverRulesetPage() =
         Menu.Back()
         Menu.Back()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageSetting(

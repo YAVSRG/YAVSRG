@@ -57,7 +57,7 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
                 .Title(%"mount.create.etterna.prompt")
                 .Body(%"mount.create.folder_hint")
 
-    override this.Content() =
+    override this.Content() : Widget =
         let path_chosen (path: string) : unit =
             match game, path with
             | MountedGameType.Osu, PackFolder

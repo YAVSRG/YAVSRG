@@ -26,7 +26,7 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit) =
     member val HoverIcon: string = "" with get, set
     member val TextColor = Colors.text_greyout with get, set
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             MouseListener().Button(this),
             HotkeyListener(
@@ -43,7 +43,7 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit) =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         Render.rect this.Bounds (if this.Focused then Colors.shadow_1.O2 else Colors.shadow_2.O2)
 

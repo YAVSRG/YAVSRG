@@ -1,4 +1,4 @@
-namespace Interlude.Features.Rulesets.Edit
+﻿namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -77,7 +77,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
                 | None -> 0.0f<ms / rate>
             )
 
-    override this.Content() =
+    override this.Content() : Widget =
         let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         let mutable last_entry = None
@@ -140,7 +140,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
 
         page_container().With(ScrollContainer(container).Pos(0, PAGE_BOTTOM))
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if tab.Pressed() then

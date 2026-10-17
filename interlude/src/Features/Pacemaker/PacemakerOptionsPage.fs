@@ -23,7 +23,7 @@ type PacemakerOptionsPage() =
 
     let use_personal_best = Setting.simple existing.PersonalBest
 
-    override this.Content() =
+    override this.Content() : Widget =
 
         this.OnClose(this.SavePacemakerSetting)
 

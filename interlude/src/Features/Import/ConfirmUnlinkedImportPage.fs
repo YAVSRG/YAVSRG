@@ -17,7 +17,7 @@ type ConfirmUnlinkedImportPage(path: string) =
             .Title(%"unlinkedsongsimport.info.title")
             .Body(%"unlinkedsongsimport.info.body")
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 // todo: go straight to library page

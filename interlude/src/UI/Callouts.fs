@@ -222,14 +222,14 @@ type CalloutCard(callout: Callout, border: Color, fill: Color) =
 
     member val ContentColor = Colors.text with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
 
         Render.border Style.PADDING this.Bounds border
         Render.rect this.Bounds fill
 
         Callout.draw(this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, this.ContentColor, callout)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         Callout.update(this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, callout)
 

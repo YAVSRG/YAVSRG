@@ -1,4 +1,4 @@
-namespace Interlude.Features.OptionsMenu
+﻿namespace Interlude.Features.OptionsMenu
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
@@ -12,7 +12,7 @@ type QuickMenuPage() =
 
     let mutable release_cooldown = 800.0
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageButton(%"menu.options", fun () -> OptionsPage().Show())
@@ -45,7 +45,7 @@ type QuickMenuPage() =
     override this.Title = %"menu.quick"
     override this.OnReturnFromNestedPage() = Menu.Back()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         release_cooldown <- release_cooldown - elapsed_ms
 

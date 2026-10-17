@@ -61,7 +61,7 @@ type RulesetSwitcher(setting: Setting<string>) =
             Position.BorderT(min d.Height 500.0f).Shrink(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING)
         )
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             AngledButton((fun () -> Rulesets.current.Name), (fun () -> this.ToggleDropdown()), Palette.MAIN_100)
                 .LeanRight(false)

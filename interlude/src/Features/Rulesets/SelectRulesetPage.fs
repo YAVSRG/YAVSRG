@@ -81,7 +81,7 @@ type SelectRulesetPage() =
         if container.Focused then
             container.Focus(false)
 
-    override this.Content() =
+    override this.Content() : Widget =
         refresh()
         ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 

@@ -1,4 +1,4 @@
-namespace Interlude.Features.Online.Players
+﻿namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -21,7 +21,7 @@ type private PlayerButton(username: string, color: int) =
 
     static member HEIGHT = 55.0f
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(username)
                 .Color(Color.FromArgb(color), Colors.shadow_2)
@@ -32,7 +32,7 @@ type private PlayerButton(username: string, color: int) =
 
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Focused then
             Render.rect this.Bounds Colors.yellow_accent.O1
         else

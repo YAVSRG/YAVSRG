@@ -1,4 +1,4 @@
-namespace Interlude.UI
+﻿namespace Interlude.UI
 
 open System
 open Percyqaz.Common
@@ -76,7 +76,7 @@ type Page() as this =
         |> OverlayContainer
         :> Widget
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         if is_current && not content.Focused then
             Menu.Back()
 
@@ -122,7 +122,7 @@ type Page() as this =
 
         is_current <- false
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         content <- NavigationContainer.Column().With(this.Content(), this.Footer(), this.Header())
         this.Add(content)
 
@@ -140,11 +140,11 @@ and PageHeaderBase() =
 
     let GAP_BETWEEN_BOXES = 70.0f
 
-    override this.Init parent =
+    override this.Init(parent: Widget) : unit =
         this.Position <- Position.SliceT(40.0f, 60.0f)
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let mutable x = this.Bounds.Left + PAGE_MARGIN_X
         let mutable first = true
 
@@ -235,7 +235,7 @@ and Menu(top_level: Page) as this =
         while namestack <> [] do
             this.Back()
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
         volume.Init(this)
         exit_key.Init(this)
@@ -244,7 +244,7 @@ and Menu(top_level: Page) as this =
         if options.MenusMuffleSong.Value then
             Song.ApplyLowPassFilter()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let mutable i = 0
 
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
@@ -263,7 +263,7 @@ and Menu(top_level: Page) as this =
 
         volume.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if (%%"screenshot").Pressed() then
@@ -317,7 +317,7 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
 
     new(prompt, if_yes) = ConfirmPage(prompt, [| %"confirm.yes", if_yes; %"confirm.no", ignore |])
 
-    override this.Content() =
+    override this.Content() : Widget =
         let lines = prompt.Split("\n", StringSplitOptions.TrimEntries)
 
         page_container()

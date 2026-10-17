@@ -85,7 +85,7 @@ type OsuExportOptionsPage(title: string, selected_mods: ModState, on_submit: boo
     let hp = Setting.bounded (0.0f, 10.0f) 8.0f
     let apply_mods = Setting.simple(not selected_mods.IsEmpty)
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageSetting(%"osz_export.od", Slider(od, Step = 0.1f)).Pos(0),

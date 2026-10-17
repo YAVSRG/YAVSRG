@@ -18,7 +18,7 @@ type OsuRulesetPage() =
         Menu.Back()
         Menu.Back()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageSetting(%"ruleset.osu_od", Slider(od, Step = 0.1f)).Pos(0),

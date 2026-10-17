@@ -1,4 +1,4 @@
-namespace Interlude.UI
+﻿namespace Interlude.UI
 
 open System.Runtime.CompilerServices
 open Percyqaz.Flux.Input
@@ -28,7 +28,7 @@ module HelpOverlay =
 
         let SPACING = 20.0f
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
 
             let screen_bounds = Render.bounds()
@@ -58,7 +58,7 @@ module HelpOverlay =
 
             _keep_alive <- false
 
-        override this.Draw() =
+        override this.Draw() : unit =
             match current_info with
             | None -> ()
             | Some t ->
@@ -148,7 +148,7 @@ type Help(content: Callout) =
     let mutable by_mouse = false
     let mutable id = -1
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Parent.Focused && (%%"tooltip").Pressed() then
@@ -183,7 +183,7 @@ type Help(content: Callout) =
 
         hover <- next_hover
 
-    override this.Draw() = ()
+    override this.Draw() : unit = ()
 
     static member Info(feature: string) =
         Callout.Normal.Title(%feature).Body(%(sprintf "%s.tooltip" feature))

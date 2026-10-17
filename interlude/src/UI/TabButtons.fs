@@ -7,7 +7,7 @@ open Percyqaz.Flux.UI
 type private TabButton(label: string, on_click: unit -> unit, is_disabled: unit -> bool, is_chosen: unit -> bool) =
     inherit Button(label, on_click, Disabled = is_disabled)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if is_chosen() then
             Render.rect (this.Bounds.BorderT(Style.PADDING).ShrinkR(Style.PADDING)) Colors.grey_2.O2
         else

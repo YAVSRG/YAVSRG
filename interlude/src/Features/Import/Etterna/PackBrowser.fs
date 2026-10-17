@@ -68,7 +68,7 @@ type EtternaPacksBrowserPage() =
 
     override this.Focusable = items.Focusable
 
-    override this.Content() =
+    override this.Content() : Widget =
         begin_search ""
 
         NavigationContainer
@@ -100,7 +100,7 @@ type EtternaPacksBrowserPage() =
             .Align(Alignment.CENTER)
             .Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         json_downloader.Join()
         base.Update(elapsed_ms, moved)
 

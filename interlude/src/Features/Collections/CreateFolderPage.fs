@@ -13,7 +13,7 @@ type CreateFolderPage(on_create: string * Collection -> unit) =
     let new_name = Setting.simple "" |> Setting.alphanumeric
     let icon = Setting.simple Icons.HEART
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0),

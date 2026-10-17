@@ -56,7 +56,7 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
         if height.Value * 4 / 3 <= width.Value then
             setting.Set(width.Value, height.Value)
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -71,7 +71,7 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
                 PageButton(%"confirm.yes", Menu.Back).Pos(6)
             )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         let selected =
             Selection.get_selected_element() |> Option.map(fun w -> (w :?> Widget).Parent)
 
@@ -93,7 +93,7 @@ type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
     member this.SaveChanges() =
         setting.Set(horizontal.Value, vertical.Value)
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()

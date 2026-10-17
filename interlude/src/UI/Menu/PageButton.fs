@@ -22,7 +22,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
     member val TextColor: unit -> Color * Color = K Colors.text with get, set
     member val Disabled = K false with get, set
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
             .With(
                 Text(
@@ -51,7 +51,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
 
         base.Init(parent)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Hotkey.Pressed() && not(this.Disabled()) then
@@ -62,7 +62,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Focused then
             Render.rect this.Bounds Colors.yellow_accent.O1
 

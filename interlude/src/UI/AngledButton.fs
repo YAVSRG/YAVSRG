@@ -63,7 +63,7 @@ type AngledButton(label_func: unit -> string, on_click: unit -> unit, background
 
         base.Draw()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             MouseListener().Button(this).Floating(this.Floating),
 

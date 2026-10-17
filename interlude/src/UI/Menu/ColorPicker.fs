@@ -190,7 +190,7 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, dr
             }
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageSetting(%"color.hex", NumberEntry.Create(hex_color_setting)).Pos(0),
@@ -212,7 +212,7 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, dr
                 this.ValueSlider().Pos(14)
             )
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let preview_box =
             this.Bounds
                 .Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
@@ -232,7 +232,7 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
 
     member val Preview: Rect -> Color -> unit = Render.rect with get, set
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(MouseListener().Button(this))
         base.Init(parent)
 
@@ -240,7 +240,7 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let preview = this.Bounds.SliceY(PAGE_ITEM_HEIGHT * 0.6f).SliceL(50.0f).Shrink(5.0f)
         Render.rect preview color.Value
         Text.fill_b(Style.font, hex, this.Bounds.ShrinkL(60.0f), (color.Value.O4, Colors.black), Alignment.LEFT)

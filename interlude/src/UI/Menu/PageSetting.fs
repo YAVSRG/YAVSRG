@@ -21,7 +21,7 @@ type PageSetting(localised_text, widget: Widget) as this =
                 if old_widget.Focused then
                     w.Focus(false)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(localised_text + ":")
                 .Color(fun () -> if widget.Focused then Colors.text_yellow_2 else Colors.text)
@@ -34,7 +34,7 @@ type PageSetting(localised_text, widget: Widget) as this =
         base.Init(parent)
         widget.Position(Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING)).Init(this)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if widget.Selected then
             Render.rect (widget.Bounds.Expand(15.0f, Style.PADDING)) Colors.pink_accent.O2
         elif widget.Focused then
@@ -43,6 +43,6 @@ type PageSetting(localised_text, widget: Widget) as this =
         base.Draw()
         widget.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         widget.Update(elapsed_ms, moved)

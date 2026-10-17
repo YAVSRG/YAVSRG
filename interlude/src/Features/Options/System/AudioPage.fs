@@ -71,7 +71,7 @@ type AudioPage() =
         PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
             .Help(Help.Info("system.automatic_offset"))
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 AudioPage.AudioVolume().Pos(0),

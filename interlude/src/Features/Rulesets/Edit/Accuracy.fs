@@ -40,7 +40,7 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
             }
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         let judgements_container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)

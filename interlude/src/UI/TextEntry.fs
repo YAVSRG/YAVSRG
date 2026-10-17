@@ -19,7 +19,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
     member val TextColor: unit -> Color * Color =
         fun () -> Colors.white, (if this.Selected then Colors.pink_shadow else Colors.shadow_1) with get, set
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
             .With(
                 Text(fun () -> setting.Get() + if this.Selected && cursor_blink.Loops % 2 = 0 then "_" else "")
@@ -59,6 +59,6 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
         Style.text_close.Play()
         Input.remove_listener()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         cursor_blink.Update(elapsed_ms)

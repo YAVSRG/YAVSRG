@@ -24,7 +24,7 @@ module Notifications =
     type private Display() =
         inherit Overlay(NodeType.None)
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
 
             let mutable y = this.Bounds.Top + 80.0f
@@ -50,7 +50,7 @@ module Notifications =
                 elif i.Fade.Value < 0.01f then
                     GameThread.defer(fun () -> displayed_notifications.Remove(i) |> ignore)
 
-        override this.Draw() =
+        override this.Draw() : unit =
             let mutable y = this.Bounds.Top + 80.0f
 
             for i in displayed_notifications do

@@ -64,7 +64,7 @@ type private EditMountPage
                     Notifications.error(%"notification.import_failed", reason)
             )
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChangesAndImport)
 
         page_container()

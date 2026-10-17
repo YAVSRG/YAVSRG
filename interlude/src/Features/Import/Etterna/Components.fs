@@ -77,7 +77,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
     static member HEIGHT = 80.0f
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
             .With(
                 Text(data.name).Align(Alignment.LEFT).Position(Position.SliceT(45.0f).ShrinkX(Style.PADDING * 2.0f)),
@@ -163,7 +163,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
         base.OnFocus(by_mouse)
         Style.hover.Play()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         if progress > 0.0f && status = Downloading then

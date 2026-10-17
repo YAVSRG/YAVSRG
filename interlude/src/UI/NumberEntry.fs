@@ -27,7 +27,7 @@ type NumberEntry =
                     base.OnFocus(by_mouse)
                     Style.hover.Play()
 
-                override this.Update(elapsed_ms, moved) =
+                override this.Update(elapsed_ms: float, moved: bool) : unit =
                     if not this.Selected then
                         text_setting.Set(to_string())
 

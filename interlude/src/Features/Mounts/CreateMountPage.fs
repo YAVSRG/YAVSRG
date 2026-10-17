@@ -65,7 +65,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
 
         Menu.Back()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageSetting(

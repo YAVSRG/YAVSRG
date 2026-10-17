@@ -16,7 +16,7 @@ type VolumeSlider() =
     let volume =
         options.AudioVolume |> Setting.trigger(fun v -> Audio.change_volume(v, v))
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         fade.Update(elapsed_ms)
@@ -41,7 +41,7 @@ type VolumeSlider() =
         else
             fade.Target <- 0.0f
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let r = this.Bounds.SliceB(5.0f)
         let a = fade.Alpha
 

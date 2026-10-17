@@ -70,7 +70,7 @@ type HotkeySetting(hotkey: string) =
 type HotkeysPage() =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         let scroll_container =

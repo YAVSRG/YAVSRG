@@ -1,4 +1,4 @@
-namespace Interlude.Features.Rulesets.Edit
+﻿namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -105,7 +105,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             }
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         let ghost_tap_judgement_options: (int option * string) array =

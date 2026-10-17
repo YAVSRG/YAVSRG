@@ -7,7 +7,7 @@ open Interlude.UI
 type AddRulesetsPage() =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(
                 PageButton(%"rulesets.create.sc", fun () -> SCRulesetPage().Show()).Pos(0),

@@ -1,4 +1,4 @@
-namespace Interlude.UI
+﻿namespace Interlude.UI
 
 open System
 open System.IO
@@ -97,7 +97,7 @@ module Screen =
         override this.Position
             with set _ = failwith "Not permitted"
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             let moved = moved || Toolbar.moving()
 
             if moved then
@@ -111,7 +111,7 @@ module Screen =
 
             current.Update(elapsed_ms, moved)
 
-        override this.Init(parent: Widget) =
+        override this.Init(parent: Widget) : unit =
             base.Init(parent)
 
             this.Bounds <-
@@ -123,7 +123,7 @@ module Screen =
             this.VisibleBounds <- Render.bounds()
             current.Init(this)
 
-        override this.Draw() = current.Draw()
+        override this.Draw() : unit = current.Draw()
 
     let private screen_container = ScreenContainer()
 
@@ -171,7 +171,7 @@ module Screen =
 
         let perf = DebugOverlay()
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             let elapsed_ms = elapsed_ms * timescale
             base.Update(elapsed_ms, moved)
 
@@ -197,7 +197,7 @@ module Screen =
             if (%%"exit").Pressed() then
                 back Transitions.UnderLogo |> ignore
 
-        override this.Draw() =
+        override this.Draw() : unit =
             if enable_background && current_type <> ScreenType.SplashScreen then
                 if (current_type <> ScreenType.Play || Background.dim_percent.Value < 1.0f) then
                     Background.draw_with_dim(this.Bounds, Color.White, 1.0f)

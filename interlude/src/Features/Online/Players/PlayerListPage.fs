@@ -1,4 +1,4 @@
-namespace Interlude.Features.Online.Players
+﻿namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.UI
 open Prelude
@@ -10,7 +10,7 @@ type PlayerListPage() =
     let SIDEBAR_PERCENTAGE_SPLIT = 0.35f
     let PADDING = 40.0f
 
-    override this.Content() =
+    override this.Content() : Widget =
         NavigationContainer
             .Row()
             .With(

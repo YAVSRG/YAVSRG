@@ -31,7 +31,7 @@ type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
         this.Add(button)
         base.Init(parent)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.Focused then
             Render.rect (this.Bounds.Shrink(5.0f)) Colors.yellow_accent.O1
 
@@ -52,7 +52,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
     member this.SaveChanges() =
         if delete then setting.Set(None) else setting.Set(Some { preset with Name = name.Value; Mode = mode.Value })
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         let keymode_preference =

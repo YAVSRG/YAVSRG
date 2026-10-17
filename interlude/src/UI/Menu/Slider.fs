@@ -1,4 +1,4 @@
-namespace Interlude.UI
+﻿namespace Interlude.UI
 
 open System
 open Percyqaz.Common
@@ -49,7 +49,7 @@ type Slider(setting: Setting.Bounded<float32>) =
         setting.Value <- MathF.Round(setting.Value + v, decimal_places)
         Style.click.Play()
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(fun () -> if typed_number.Value = "" then this.Format(setting.Value) else typed_number.Value)
                 .Align(Alignment.LEFT)
@@ -106,7 +106,7 @@ type Slider(setting: Setting.Bounded<float32>) =
         Input.remove_listener()
         typed_number.Set("")
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         let bounds = this.Bounds.ShrinkL(TEXTWIDTH)
 
@@ -163,6 +163,6 @@ type Slider(setting: Setting.Bounded<float32>) =
             bounds.Bottom
             (if this.Selected then Colors.pink_accent else Colors.grey_2)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         this.DrawBar(this.Bounds.ShrinkL(TEXTWIDTH).ShrinkY(10.0f), get_percent() |> min 1.0f |> max 0.0f)
         base.Draw()

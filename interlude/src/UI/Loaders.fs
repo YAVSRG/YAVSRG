@@ -13,13 +13,13 @@ module LoadingIndicator =
         let animation = Animation.Counter(1500.0)
         let fade = Animation.Fade(0.0f)
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
             animation.Update(elapsed_ms)
             fade.Target <- if is_loading() then 1.0f else 0.0f
             fade.Update(elapsed_ms)
 
-        override this.Draw() =
+        override this.Draw() : unit =
             if fade.Alpha = 0 then
                 ()
             else
@@ -42,13 +42,13 @@ module LoadingIndicator =
         let animation = Animation.Counter(1500.0)
         let fade = Animation.Fade(0.0f)
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
             animation.Update(elapsed_ms)
             fade.Target <- if is_loading() then 1.0f else 0.0f
             fade.Update(elapsed_ms)
 
-        override this.Draw() =
+        override this.Draw() : unit =
             if fade.Alpha = 0 then
                 ()
             else
@@ -63,7 +63,7 @@ type WIP() as this =
 
     do this.Position <- Position.SliceB(100.0f)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Render.rect this.Bounds (Color.FromArgb(127, Color.Yellow))
         let w = this.Bounds.Width / 20.0f
 
@@ -90,7 +90,7 @@ type EmptyState(icon: string, text: string) =
 
     member val Subtitle = "" with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Text.fill_b(
             Style.font,
             icon,
@@ -132,11 +132,11 @@ type LoadingState() =
 
     member val Text = %"misc.loading" with get, set
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         animation.Update(elapsed_ms)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let color = (!*Palette.LIGHT, !*Palette.DARKER)
         let icon = animation_frames.[animation.Loops % animation_frames.Length]
         Text.fill_b(Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), color, Alignment.CENTER)
@@ -154,7 +154,7 @@ type NewAndShiny() =
 
     member val Icon = Icons.ALERT_CIRCLE with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let x, y = this.Bounds.Right, this.Bounds.Bottom // todo: alignment options
         let r = 18f
         let angle = MathF.PI / 15.0f

@@ -92,7 +92,7 @@ type SystemPage() =
             )
         )
 
-    override this.Content() =
+    override this.Content() : Widget =
         window_mode_changed config.WindowMode.Value
 
         page_container()

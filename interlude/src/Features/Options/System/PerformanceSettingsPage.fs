@@ -45,7 +45,7 @@ type PerformanceSettingsPage() =
 
         closed <- true
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -120,7 +120,7 @@ type PerformanceSettingsPage() =
                     .Position(page_position(14, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
             )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         cycle.Update(elapsed_ms)
 
@@ -128,7 +128,7 @@ type PerformanceSettingsPage() =
             pending_custom_frame_limit <- false
             config.Apply()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         base.Draw()
 
         if closed then

@@ -25,7 +25,7 @@ type EditFolderPage(name: string, folder: Folder) =
 
                 Logging.Debug("Rename failed, maybe that name already exists?")
 
-    override this.Content() =
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()

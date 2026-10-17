@@ -14,7 +14,7 @@ type ImportEtternaNoteskinPage(source_path: string, folder_name: string, existin
     let is_arrows: Setting<bool> = Setting.simple false
     let delete_existing: Setting<bool> = Setting.simple false
 
-    override this.Content() =
+    override this.Content() : Widget =
         page_container()
             .With(PageSetting(%"etterna_skin_import.isarrows", Checkbox is_arrows).Pos(2))
             .WithConditional(

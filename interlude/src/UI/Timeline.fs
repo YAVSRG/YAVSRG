@@ -1,4 +1,4 @@
-namespace Interlude.UI
+﻿namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -34,7 +34,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     let mutable unpause_after_drag = false
     let mutable bpm_index = 0
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let b = this.Bounds.Shrink(10.0f, 20.0f)
         let LEADIN_TIME = SongPlayer.LEADIN_TIME * rate.Value
         let start = with_mods.FirstNote - LEADIN_TIME
@@ -201,7 +201,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             Alignment.LEFT
         )
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if this.Bounds.Bottom - Mouse.y() < 100.0f && Mouse.left_clicked() then

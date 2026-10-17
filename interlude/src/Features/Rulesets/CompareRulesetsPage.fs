@@ -8,7 +8,7 @@ open Interlude.UI
 type CompareRulesetsPage(ruleset_a: Ruleset, ruleset_b: Ruleset) =
     inherit Page()
 
-    override this.Content() =
+    override this.Content() : Widget =
         FlowContainer
             .Vertical<Widget>(PAGE_ITEM_HEIGHT)
             .With(Dummy(NodeType.Leaf))

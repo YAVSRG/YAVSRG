@@ -12,7 +12,7 @@ type Checkbox(setting: Setting<bool>) =
             )
         )
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this.Add(
             Text(fun () -> if setting.Value then Icons.CHECK_CIRCLE else Icons.CIRCLE)
                 .Align(Alignment.LEFT)
