@@ -134,202 +134,201 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
             }
 
     override this.Init(parent: Widget) : unit =
-        this
-            .Position(Position.BorderB(15.0f).SliceX(15.0f).TranslateY(5.0f))
-            .Add(
-                child,
-                SubPositioner(
-                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                        let current = position.Value
+        this.Add(
+            child,
+            SubPositioner(
+                (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                    let current = position.Value
 
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left ^- (new_x - old_x) |> round
-                                    Top = current.Top ^- (new_x - old_x) |> round
-                                    Right = current.Right ^+ (new_x - old_x) |> round
-                                    Bottom = current.Bottom ^+ (new_x - old_x) |> round
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left
-                                    Top = current.Top
-                                    Right = current.Right ^+ (new_x - old_x) |> round
-                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                                }
-                    ),
-                    save_pos
-                )
-                    .Position(Position.BorderCornersB(15.0f).SliceR(15.0f).Translate(5.0f, 5.0f)),
-                SubPositioner(
-                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                        let current = position.Value
-
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left ^+ (new_x - old_x) |> round
-                                    Top = current.Top ^- (new_y - old_y) |> round
-                                    Right = current.Right ^- (new_x - old_x) |> round
-                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left ^+ (new_x - old_x) |> round
-                                    Top = current.Top
-                                    Right = current.Right
-                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                                }
-                    ),
-                    save_pos
-                )
-                    .Position(Position.BorderCornersB(15.0f).SliceL(15.0f).Translate(-5.0f, 5.0f)),
-                SubPositioner(
-                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                        let current = position.Value
-
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left ^- (new_x - old_x) |> round
-                                    Top = current.Top ^+ (new_y - old_y) |> round
-                                    Right = current.Right ^+ (new_x - old_x) |> round
-                                    Bottom = current.Bottom ^- (new_y - old_y) |> round
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left
-                                    Top = current.Top ^+ (new_y - old_y) |> round
-                                    Right = current.Right ^+ (new_x - old_x) |> round
-                                    Bottom = current.Bottom
-                                }
-                    ),
-                    save_pos
-                )
-                    .Position(Position.BorderCornersT(15.0f).SliceR(15.0f).Translate(5.0f, -5.0f)),
-                SubPositioner(
-                    (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
-                        let current = position.Value
-
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left ^+ (new_x - old_x) |> round
-                                    Top = current.Top ^+ (new_y - old_y) |> round
-                                    Right = current.Right ^- (new_x - old_x) |> round
-                                    Bottom = current.Bottom ^- (new_y - old_y) |> round
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left ^+ (new_x - old_x) |> round
-                                    Top = current.Top ^+ (new_y - old_y) |> round
-                                    Right = current.Right
-                                    Bottom = current.Bottom
-                                }
-                    ),
-                    save_pos
-                )
-                    .Position(Position.BorderCornersT(15.0f).SliceL(15.0f).Translate(-5.0f, -5.0f)),
-                SubPositioner(
-                    (fun (preserve_center, (old_x, _), (new_x, _)) ->
-                        let current = position.Value
-
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left ^+ (new_x - old_x) |> round
-                                    Top = current.Top
-                                    Right = current.Right ^- (new_x - old_x) |> round
-                                    Bottom = current.Bottom
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left ^+ (new_x - old_x) |> round
-                                    Top = current.Top
-                                    Right = current.Right
-                                    Bottom = current.Bottom
-                                }
-                    ),
-                    save_pos
-                )
-                    .Position(Position.BorderL(15.0f).SliceY(15.0f).TranslateX(-5.0f)),
-                SubPositioner(
-                    (fun (preserve_center, (_, old_y), (_, new_y)) ->
-                        let current = position.Value
-
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left
-                                    Top = current.Top ^+ (new_y - old_y) |> round
-                                    Right = current.Right
-                                    Bottom = current.Bottom ^- (new_y - old_y) |> round
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left
-                                    Top = current.Top ^+ (new_y - old_y) |> round
-                                    Right = current.Right
-                                    Bottom = current.Bottom
-                                }
-                    ),
-                    save_pos
-                )
-                    .Position(Position.BorderT(15.0f).SliceX(15.0f).TranslateY(-5.0f)),
-                SubPositioner(
-                    (fun (preserve_center, (old_x, _), (new_x, _)) ->
-                        let current = position.Value
-
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left ^- (new_x - old_x) |> round
-                                    Top = current.Top
-                                    Right = current.Right ^+ (new_x - old_x) |> round
-                                    Bottom = current.Bottom
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left
-                                    Top = current.Top
-                                    Right = current.Right ^+ (new_x - old_x) |> round
-                                    Bottom = current.Bottom
-                                }
-                    ),
-                    save_pos
-                )
-                    .Position(Position.BorderR(15.0f).SliceY(15.0f).TranslateX(5.0f)),
-                SubPositioner(
-                    (fun (preserve_center, (_, old_y), (_, new_y)) ->
-                        let current = position.Value
-
-                        if preserve_center then
-                            this.Position <-
-                                {
-                                    Left = current.Left
-                                    Top = current.Top ^- (new_y - old_y) |> round
-                                    Right = current.Right
-                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                                }
-                        else
-                            this.Position <-
-                                {
-                                    Left = current.Left
-                                    Top = current.Top
-                                    Right = current.Right
-                                    Bottom = current.Bottom ^+ (new_y - old_y) |> round
-                                }
-                    ),
-                    save_pos
-                )
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left ^- (new_x - old_x) |> round
+                                Top = current.Top ^- (new_x - old_x) |> round
+                                Right = current.Right ^+ (new_x - old_x) |> round
+                                Bottom = current.Bottom ^+ (new_x - old_x) |> round
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left
+                                Top = current.Top
+                                Right = current.Right ^+ (new_x - old_x) |> round
+                                Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                            }
+                ),
+                save_pos
             )
+                .Position(Position.BorderCornersB(15.0f).SliceR(15.0f).Translate(5.0f, 5.0f)),
+            SubPositioner(
+                (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                    let current = position.Value
+
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left ^+ (new_x - old_x) |> round
+                                Top = current.Top ^- (new_y - old_y) |> round
+                                Right = current.Right ^- (new_x - old_x) |> round
+                                Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left ^+ (new_x - old_x) |> round
+                                Top = current.Top
+                                Right = current.Right
+                                Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                            }
+                ),
+                save_pos
+            )
+                .Position(Position.BorderCornersB(15.0f).SliceL(15.0f).Translate(-5.0f, 5.0f)),
+            SubPositioner(
+                (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                    let current = position.Value
+
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left ^- (new_x - old_x) |> round
+                                Top = current.Top ^+ (new_y - old_y) |> round
+                                Right = current.Right ^+ (new_x - old_x) |> round
+                                Bottom = current.Bottom ^- (new_y - old_y) |> round
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left
+                                Top = current.Top ^+ (new_y - old_y) |> round
+                                Right = current.Right ^+ (new_x - old_x) |> round
+                                Bottom = current.Bottom
+                            }
+                ),
+                save_pos
+            )
+                .Position(Position.BorderCornersT(15.0f).SliceR(15.0f).Translate(5.0f, -5.0f)),
+            SubPositioner(
+                (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
+                    let current = position.Value
+
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left ^+ (new_x - old_x) |> round
+                                Top = current.Top ^+ (new_y - old_y) |> round
+                                Right = current.Right ^- (new_x - old_x) |> round
+                                Bottom = current.Bottom ^- (new_y - old_y) |> round
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left ^+ (new_x - old_x) |> round
+                                Top = current.Top ^+ (new_y - old_y) |> round
+                                Right = current.Right
+                                Bottom = current.Bottom
+                            }
+                ),
+                save_pos
+            )
+                .Position(Position.BorderCornersT(15.0f).SliceL(15.0f).Translate(-5.0f, -5.0f)),
+            SubPositioner(
+                (fun (preserve_center, (old_x, _), (new_x, _)) ->
+                    let current = position.Value
+
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left ^+ (new_x - old_x) |> round
+                                Top = current.Top
+                                Right = current.Right ^- (new_x - old_x) |> round
+                                Bottom = current.Bottom
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left ^+ (new_x - old_x) |> round
+                                Top = current.Top
+                                Right = current.Right
+                                Bottom = current.Bottom
+                            }
+                ),
+                save_pos
+            )
+                .Position(Position.BorderL(15.0f).SliceY(15.0f).TranslateX(-5.0f)),
+            SubPositioner(
+                (fun (preserve_center, (_, old_y), (_, new_y)) ->
+                    let current = position.Value
+
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left
+                                Top = current.Top ^+ (new_y - old_y) |> round
+                                Right = current.Right
+                                Bottom = current.Bottom ^- (new_y - old_y) |> round
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left
+                                Top = current.Top ^+ (new_y - old_y) |> round
+                                Right = current.Right
+                                Bottom = current.Bottom
+                            }
+                ),
+                save_pos
+            )
+                .Position(Position.BorderT(15.0f).SliceX(15.0f).TranslateY(-5.0f)),
+            SubPositioner(
+                (fun (preserve_center, (old_x, _), (new_x, _)) ->
+                    let current = position.Value
+
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left ^- (new_x - old_x) |> round
+                                Top = current.Top
+                                Right = current.Right ^+ (new_x - old_x) |> round
+                                Bottom = current.Bottom
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left
+                                Top = current.Top
+                                Right = current.Right ^+ (new_x - old_x) |> round
+                                Bottom = current.Bottom
+                            }
+                ),
+                save_pos
+            )
+                .Position(Position.BorderR(15.0f).SliceY(15.0f).TranslateX(5.0f)),
+            SubPositioner(
+                (fun (preserve_center, (_, old_y), (_, new_y)) ->
+                    let current = position.Value
+
+                    if preserve_center then
+                        this.Position <-
+                            {
+                                Left = current.Left
+                                Top = current.Top ^- (new_y - old_y) |> round
+                                Right = current.Right
+                                Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                            }
+                    else
+                        this.Position <-
+                            {
+                                Left = current.Left
+                                Top = current.Top
+                                Right = current.Right
+                                Bottom = current.Bottom ^+ (new_y - old_y) |> round
+                            }
+                ),
+                save_pos
+            )
+                .Position(Position.BorderB(15.0f).SliceX(15.0f).TranslateY(5.0f))
+        )
 
         base.Init(parent)
 
