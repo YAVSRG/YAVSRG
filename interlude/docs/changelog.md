@@ -1,7 +1,8 @@
-0.7.28.5
+0.7.28.6
 ====
 
 :o
+There was no 0.7.28.5, due to trying out GitHub's immutable releases there is a tag for it I cannot remove
 
 # Features
 - Added a logarithmic scale option to Error bar/Column error bars by @Muffletruffle
