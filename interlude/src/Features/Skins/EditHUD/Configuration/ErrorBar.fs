@@ -71,7 +71,8 @@ type ErrorBarPage() =
                 PageButton(%"hud.error_bar.timing_windows_settings", fun () -> ErrorBarWindowPage().Show())
                     .Help(Help.Info("hud.error_bar.timing_windows_settings"))
                     .Pos(12),
-                PageSetting(%"hud.error_bar.moving_average_type",
+                PageSetting(
+                    %"hud.error_bar.moving_average_type",
                     SelectDropdown(
                         [|
                             ErrorBarMovingAverageType.None, %"hud.error_bar.moving_average_type.none"
@@ -93,7 +94,10 @@ type ErrorBarPage() =
                 )
                     .Help(Help.Info("hud.error_bar.moving_average_sensitivity"))
                     .Pos(16),
-                PageSetting(%"hud.error_bar.moving_average_color", ColorPicker(%"hud.error_bar.moving_average_color", moving_average_color, true))
+                PageSetting(
+                    %"hud.error_bar.moving_average_color",
+                    ColorPicker(%"hud.error_bar.moving_average_color", moving_average_color, true)
+                )
                     .Help(Help.Info("hud.error_bar.moving_average_color"))
                     .Pos(18)
             )

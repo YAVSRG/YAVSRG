@@ -15,14 +15,14 @@ type ErrorBarGuidePage() =
     let show_guide = Setting.simple config.TimingDisplayShowGuide
     let guide_thickness = Setting.percentf config.TimingDisplayGuideThickness
 
-    member this.SaveChanges() =
+    member this.SaveChanges() : unit =
         Skins.save_hud_config
             { Content.HUD with
                 TimingDisplayShowGuide = show_guide.Value
                 TimingDisplayGuideThickness = guide_thickness.Value
             }
-    
-    override this.Content() =
+
+    override this.Content() : Widget =
         this.OnClose(this.SaveChanges)
 
         page_container()
@@ -35,5 +35,5 @@ type ErrorBarGuidePage() =
                     .Pos(2)
                     .Conditional(show_guide.Get)
             )
-    
+
     override this.Title = %"hud.error_bar.guide_page"

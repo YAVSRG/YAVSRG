@@ -17,8 +17,11 @@ type ColumnErrorBarsPage() =
     let thickness = config.ColumnErrorBarsThickness |> Setting.bounded(1.0f, 25.0f)
     let width = config.ColumnErrorBarsWidth |> Setting.bounded(5.0f, 100.0f)
 
-    let release_y_scale = config.ColumnErrorBarsReleasesYScale |> Setting.bounded (0.0f, 1.0f)
-    let release_x_scale = config.ColumnErrorBarsReleasesXScale |> Setting.bounded (0.0f, 2.0f)
+    let release_y_scale =
+        config.ColumnErrorBarsReleasesYScale |> Setting.bounded(0.0f, 1.0f)
+
+    let release_x_scale =
+        config.ColumnErrorBarsReleasesXScale |> Setting.bounded(0.0f, 2.0f)
 
     let animation_time =
         config.ColumnErrorBarsFadeTime |> Setting.bounded(100.0f<ms / rate>, 2000.0f<ms / rate>)
@@ -70,7 +73,10 @@ type ColumnErrorBarsPage() =
                 PageSetting(%"hud.column_error_bars.animationtime", Slider(Setting.uom animation_time, Step = 5f))
                     .Help(Help.Info("hud.column_error_bars.animationtime"))
                     .Pos(12),
-                PageButton(%"hud.column_error_bars.timing_windows_settings", fun () -> ColumnErrorBarsWindowPage().Show())
+                PageButton(
+                    %"hud.column_error_bars.timing_windows_settings",
+                    fun () -> ColumnErrorBarsWindowPage().Show()
+                )
                     .Help(Help.Info("hud.column_error_bars.timing_windows_settings"))
                     .Pos(14),
                 PageSetting(%"hud.column_error_bars.moving_average", Checkbox(enable_moving_average))
@@ -86,7 +92,10 @@ type ColumnErrorBarsPage() =
                 )
                     .Help(Help.Info("hud.column_error_bars.moving_average_sensitivity"))
                     .Pos(18),
-                PageSetting(%"hud.column_error_bars.moving_average_color", ColorPicker(%"hud.column_error_bars.moving_average_color", moving_average_color, true))
+                PageSetting(
+                    %"hud.column_error_bars.moving_average_color",
+                    ColorPicker(%"hud.column_error_bars.moving_average_color", moving_average_color, true)
+                )
                     .Help(Help.Info("hud.column_error_bars.moving_average_color"))
                     .Pos(20)
             )
