@@ -1,7 +1,7 @@
 # Interlude terms of service
-Last updated 29th January 2025. You can view the full history [here](https://github.com/YAVSRG/YAVSRG/blame/master/site_data/terms_of_service.md).
+Last updated 17th October 2026. You can view the full history [here](https://github.com/YAVSRG/YAVSRG/blame/main/site/templates/terms_of_service.md).
 
-"**Interlude**" refers to this site [https://yavsrg.net](https://yavsrg.net), the Interlude game client as available on [GitHub](https://github.com/YAVSRG/Interlude), and any affiliated services. These services are offered to You, conditioned on your acceptance of these terms and conditions.  
+"**Interlude**" refers to this site [https://yavsrg.net](https://yavsrg.net), the Interlude game client as available on [GitHub](https://github.com/YAVSRG/YAVSRG), and any affiliated services. These services are offered to You, conditioned on your acceptance of these terms and conditions.  
 "You" and "Your" refers to you, the person accessing this website and accepting Interlude's terms and conditions.
 
 By using any of Interlude's online services, or the Interlude game client while connected to the online services, you are acknowledging your full compliance with these terms and conditions, without any modification. If you do not agree with all of these terms and conditions, you are expressly prohibited from using the services and must discontinue use immediately.
@@ -26,7 +26,7 @@ Interlude may change its terms of service from time to time.
 By continuing to use Interlude's online services, you are acknowledging and agreeing to abide by the terms of service and its modifications.
 
 ## Modifications to Interlude's services
-Interlude reserves the rights to modify or discontinue its services with or without notice to you. Interlude shall not be you or any third party should Interlude exercise its right to modify or discontinue its services.
+Interlude reserves the rights to modify or discontinue its services with or without notice to you. Interlude shall not be liable to you or any third party should Interlude exercise its right to modify or discontinue its services.
 
 ## Disclaimer
 YOU EXPRESSLY AGREE THAT YOUR USE OF Interlude IS AT YOUR SOLE RISK.

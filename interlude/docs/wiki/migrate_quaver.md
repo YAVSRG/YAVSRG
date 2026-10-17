@@ -29,7 +29,7 @@ You can also download new osu! Beatmaps or Etterna packs ingame via the Import s
 There is no automatic conversion process for Quaver skins, but on the Noteskins tab of the Import screen, there is a button to detect and import skins from osu!  
 The game will prompt you for which keymode to import, and then try its best to convert the skin to a matching Interlude noteskin.
 
-If you don't have an equivalent osu!mania skin, you could try you hand at porting your skin by renaming files manually - see the [Noteskins guide](noteskins.html).
+If you don't have an equivalent osu!mania skin, you could try you hand at porting your skin by renaming files manually - see the [Noteskins guide](skinning.html).
 
 Alternatively, there are many noteskins available for download from the same screen - If you use a common skin it may already be there!
 

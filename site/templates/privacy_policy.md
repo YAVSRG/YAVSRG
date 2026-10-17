@@ -1,9 +1,9 @@
 # Interlude privacy policy
-Last updated 12th June 2023. You can view the full history [here](https://github.com/YAVSRG/YAVSRG/blame/master/site_data/privacy_policy.md).
+Last updated 17th October 2026. You can view the full history [here](https://github.com/YAVSRG/YAVSRG/blame/main/site/templates/privacy_policy.md).
 
 ## Summary of service
 
-'**Interlude**' refers to [this site](https://yavsrg.net), the Interlude game client as available on [GitHub](https://github.com/YAVSRG/Interlude), and any affiliated services
+'**Interlude**' refers to [this site](https://yavsrg.net), the Interlude game client as available on [GitHub](https://github.com/YAVSRG/YAVSRG), and any affiliated services
 
 Interlude is developed and maintained by [Percyqaz](https://github.com/percyqaz)
 
