@@ -26,7 +26,7 @@ You can also download new Etterna packs ingame via the Import screen.
 
 ## Step 2: Noteskins
 
-With a small bit of knowledge and the [Noteskins guide](noteskins.html), you should have no problem porting the vast majority of StepMania/Etterna noteskins to Interlude by renaming files.  
+With a small bit of knowledge and the [Noteskins guide](skinning.html), you should have no problem porting the vast majority of StepMania/Etterna noteskins to Interlude by renaming files.  
 In the future there may be a tool to automate or partially automate the process.
 
 Alternatively, there are noteskins available for download from the Import screen - If you use a common skin it may already be there!
