@@ -6,7 +6,7 @@ open Prelude.Skins.Noteskins
 
 module Assets =
 
-    let private make_zip (source: string) (target_zip: string) =
+    let private make_zip (source: string,target_zip: string) =
         printfn "Making zip: %s" target_zip
 
         if File.Exists target_zip then
@@ -21,12 +21,14 @@ module Assets =
         | Error err -> raise err
 
     let bundle_assets () =
-        make_zip
-        <| Path.Combine(ASSETS_PATH, "default")
-        <| Path.Combine(BUILD_RESOURCES_PATH, "default.zip")
+        make_zip(
+            Path.Combine(ASSETS_PATH, "default"),
+            Path.Combine(BUILD_RESOURCES_PATH, "default.zip")
+        )
 
         cleanup_noteskin_json "chocolate"
 
-        make_zip
-        <| Path.Combine(ASSETS_PATH, "chocolate")
-        <| Path.Combine(BUILD_RESOURCES_PATH, "chocolate.zip")
+        make_zip(
+            Path.Combine(ASSETS_PATH, "chocolate"),
+            Path.Combine(BUILD_RESOURCES_PATH, "chocolate.zip")
+        )

@@ -55,6 +55,6 @@ module Wiki =
             |> Seq.map parse_wiki_file
             |> Array.ofSeq
 
-        let wiki_toc = wiki_pages |> Array.groupBy (fun p -> p.Folder) |> Map.ofSeq
+        let wiki_toc = wiki_pages |> Array.groupBy _.Folder |> Map.ofSeq
 
         JSON.ToFile (Path.Combine(WIKI_FILES_PATH, "index.json"), true) wiki_toc
