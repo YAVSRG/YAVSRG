@@ -127,6 +127,7 @@ type internal FrameEvents =
         Shift: bool
         TypedText: string
         Time: float
+        Polls: int
     }
 
 module internal InputThread =
@@ -146,6 +147,7 @@ module internal InputThread =
 
     let mutable private typing = false
     let mutable private typing_buffered_input : InputEvent voption = ValueNone
+    let mutable internal glfw_polls_since_fetch = 0
 
     let private LOCK_OBJ = Object()
 
@@ -271,6 +273,7 @@ module internal InputThread =
                             Shift = shift
                             Alt = alt
                             Time = GLFW.GetTime()
+                            Polls = glfw_polls_since_fetch
                         },
                         if typing then
                             match typing_buffered_input with
@@ -285,6 +288,7 @@ module internal InputThread =
 
                     events_buffer <- []
                     typed_text <- ""
+                    glfw_polls_since_fetch <- 0
                     output
                 )
 

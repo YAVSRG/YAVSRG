@@ -222,12 +222,7 @@ module WindowThread =
             )
 
         last_applied_config <- config
-
-        if OperatingSystem.IsWindows() then
-            Thread.CurrentThread.Priority <-
-                if last_applied_config.InputCPUSaver then ThreadPriority.Highest
-                else ThreadPriority.Normal
-
+        
         GameThread.defer
         <| fun () ->
             GameThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
@@ -249,7 +244,6 @@ module WindowThread =
     let private should_disable_windows_key() =
         disabled_windows_key
         && is_focused
-        && not last_applied_config.InputCPUSaver
         && OperatingSystem.IsWindows()
 
     let disable_windows_key() =
@@ -393,13 +387,20 @@ module WindowThread =
         Fonts.init()
         GameThread.defer (fun () -> defer (fun () -> apply_config last_applied_config))
         GameThread.start()
+        
+        let polling_interval = GLFW.GetTimerFrequency() / 2000L
+        let mutable next_poll = GLFW.GetTimerValue()
+        let sw = SpinWait()
 
-        while not (GLFW.WindowShouldClose window) do
+        while not(GLFW.WindowShouldClose(window)) do
             ACTION_QUEUE.RunQueue()
-            if last_applied_config.InputCPUSaver then
-                GLFW.WaitEventsTimeout(5)
-            else
-                GLFW.PollEvents()
+            
+            while GLFW.GetTimerValue() < next_poll do
+                sw.SpinOnce()
+                
+            next_poll <- next_poll + polling_interval
+            InputThread.glfw_polls_since_fetch <- InputThread.glfw_polls_since_fetch + 1
+            GLFW.PollEvents()
 
         WindowsKey.enable()
         GameThread.stop()
@@ -452,8 +453,7 @@ module WindowThread =
 Display: %i
 Current Monitor: %s
 Primary Monitor: %s
-Mode: %O %O | W: %A TL: %f AJ: %A FM: %.0fx
-CPU Saver: %A"""
+Mode: %O %O | W: %A TL: %f AJ: %A FM: %.0fx"""
             last_applied_config.Display
             (monitor_dump monitor)
             (monitor_dump default_monitor)
@@ -463,4 +463,3 @@ CPU Saver: %A"""
             last_applied_config.SmartCapTearlinePosition
             last_applied_config.SmartCapAntiJitter
             last_applied_config.SmartCapFramerateMultiplier
-            last_applied_config.InputCPUSaver

@@ -43,6 +43,9 @@ type DebugOverlay() =
         DebugGraph.Create(Color.Purple.O2, fun () -> float(Song.FrameCompensation) * 4.0).DuringDraw().Enabled()
     |]
     let mutable fps = 0.0
+    let mutable pps = 0.0
+    let mutable pps_count = 0
+    let mutable pps_ts = 0L
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -76,6 +79,13 @@ type DebugOverlay() =
 
             let frames, ticks = GameThread.framecount_tickcount
             fps <- float frames / (float ticks / float Stopwatch.Frequency)
+            
+        pps_count <- pps_count + Input.this_frame.Polls
+        let elapsed = Stopwatch.GetElapsedTime(pps_ts)
+        if elapsed.TotalSeconds >= 1.0 then
+            pps <- float pps_count / elapsed.TotalSeconds
+            pps_count <- 0
+            pps_ts <- Stopwatch.GetTimestamp()
 
     override this.Draw() =
         if enable then
@@ -89,6 +99,7 @@ type DebugOverlay() =
                 offset <- offset + 40.0f
                 
             debug_text(sprintf "FPS: %.3f" fps, Color.DarkRed)
+            debug_text(sprintf "Input polls: %.3f" pps, Color.Black)
             debug_text(sprintf "playfield latency: %.1f - %.1fms" GameThread.visual_latency_lo GameThread.visual_latency_hi, Color.DarkGreen)
             debug_text(sprintf "frame compensation: %.1fms" (GameThread.frame_compensation()), Color.Black)
             debug_text(sprintf "audio comp. (actual): %.1fms" Song.DebugCompensationAtStartOfFrame, Color.Black)

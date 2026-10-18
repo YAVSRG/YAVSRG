@@ -24,7 +24,6 @@ module SearchResults =
                     tokens
                     [|
                         %"system.performance"
-                        %"system.cpu_saver"
                         %"system.msaa"
                         %"system.performance.antijitter"
                         %"search_keywords.performance"
