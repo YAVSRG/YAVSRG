@@ -3,7 +3,7 @@ name: Release Interlude
 on:
   push:
     branches: [ "main" ]
-    paths: "interlude/docs/changelog-latest.md"
+    paths: "docs/changelog-latest.md"
   workflow_dispatch:
   # for debug purposes
   
@@ -39,8 +39,8 @@ jobs:
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "interlude/releases/*.zip"
-        bodyFile: "interlude/docs/changelog-latest.md"
+        artifacts: "releases/*.zip"
+        bodyFile: "docs/changelog-latest.md"
         token: ${{ secrets.GITHUB_TOKEN }}
         owner: YAVSRG
         repo: YAVSRG
@@ -51,7 +51,7 @@ jobs:
       id: read_file
       uses: andstor/file-reader-action@v1
       with:
-        path: "interlude/docs/changelog-latest.md"
+        path: "docs/changelog-latest.md"
 
     - name: Post Changelog via Webhook
       uses: tsickert/discord-webhook@v5.3.0

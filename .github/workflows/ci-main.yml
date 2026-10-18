@@ -30,6 +30,9 @@ jobs:
         
     - name: Run formatting checks
       run: dotnet tool restore && dotnet fantomas --check .
+
+    - name: Check localisation
+      run: bash scripts/check_localisation.sh
         
     - name: Notify of failure in main
       if: failure() && github.repository == 'YAVSRG/YAVSRG'
