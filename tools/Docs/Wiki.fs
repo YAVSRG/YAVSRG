@@ -50,11 +50,11 @@ module Wiki =
 
     let generate_toc () =
         let wiki_pages =
-            Directory.EnumerateFiles(Path.Combine(YAVSRG_PATH, "interlude", "docs", "wiki"))
+            Directory.EnumerateFiles(WIKI_FILES_PATH)
             |> Seq.filter (fun f -> f.EndsWith ".md" && not (f.EndsWith "index.md"))
             |> Seq.map parse_wiki_file
             |> Array.ofSeq
 
-        let wiki_toc = wiki_pages |> Array.groupBy (fun p -> p.Folder) |> Map.ofSeq
+        let wiki_toc = wiki_pages |> Array.groupBy _.Folder |> Map.ofSeq
 
-        JSON.ToFile (Path.Combine(YAVSRG_PATH, "interlude", "docs", "wiki", "index.json"), true) wiki_toc
+        JSON.ToFile (Path.Combine(WIKI_FILES_PATH, "index.json"), true) wiki_toc

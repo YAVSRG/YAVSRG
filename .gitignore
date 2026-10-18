@@ -1,12 +1,11 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
+﻿**/bin
+**/obj
+**/nupkg
 .vs
 .fake
 .fsln
 .vscode
-**/bin
-**/obj
-**/nupkg
+.idea
+interlude/assets
+releases
 GAME

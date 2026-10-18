@@ -15,7 +15,7 @@ module Version =
 
     let create_publish_commit () =
 
-        let changelog = Path.Combine(YAVSRG_PATH, "interlude", "docs", "changelog.md")
+        let changelog = Path.Combine(FULL_CHANGELOG_PATH)
         let logtxt = File.ReadAllText(changelog)
         let latest = logtxt.Split(current_version + "\r\n" + "====", 2).[0]
 
@@ -23,7 +23,7 @@ module Version =
             failwithf "No changelog for new version. Create this first"
 
         let v = latest.Split("====", 2).[0].Trim()
-        File.WriteAllText(Path.Combine(YAVSRG_PATH, "interlude", "docs", "changelog-latest.md"), latest)
+        File.WriteAllText(Path.Combine(LATEST_CHANGELOG_PATH), latest)
 
         printfn "Version: %s -> %s" current_version v
         printfn "%s" latest
@@ -47,8 +47,6 @@ module Version =
         current_version <- v
         Site.generate_index v
 
-        printfn "Creating git commit"
-
-        Shell.Exec("git", sprintf "commit -a -m \"🏷️ Version %s\"" v)
+        Shell.Exec("git", sprintf "commit -a -m \"🏷️ release: Version %s\"" v)
 
     let version () = current_version

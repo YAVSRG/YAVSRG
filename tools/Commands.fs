@@ -10,7 +10,7 @@ module Commands =
     let release_all_in_one () =
         Wiki.generate_toc ()
         Site.generate_site ()
-        Shell.Exec("git", "add interlude/docs")
+        Shell.Exec("git", "add docs")
         Shell.Exec("git", "add site")
         Shell.Exec("git", "commit -m \"chore(site): Update site changelog & wiki\"")
         Version.create_publish_commit ()
