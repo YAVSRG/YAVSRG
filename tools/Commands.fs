@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open Percyqaz.Shell
 open YAVSRG.CLI
@@ -8,24 +8,53 @@ module Commands =
 
     // todo: ensure checked out to a branch
     let release_all_in_one () =
-        Wiki.generate_toc ()
-        Site.generate_site ()
+        Wiki.generate_toc()
+        Site.generate_site()
         Shell.Exec("git", "add docs")
         Shell.Exec("git", "add site")
         Shell.Exec("git", "commit -m \"chore(site): Update site changelog & wiki\"")
-        Version.create_publish_commit ()
+        Version.create_publish_commit()
 
     let register (ctx: ShellContext) =
         ctx
-            .WithCommand("locale_check", "Check locale for mistakes", (fun () -> Localisation.locale_check "en_GB" false))
-            .WithCommand("locale_fix", "Tool to automatically add locale keys", (fun () -> Localisation.locale_check "en_GB" true))
-            .WithCommand("locale_rename", "Tool to rename locale keys/namespaces", "replaced_key", Localisation.locale_rename "en_GB")
+            .WithCommand(
+                "locale_check",
+                "Check locale for mistakes",
+                (fun () -> Localisation.locale_check "en_GB" false)
+            )
+            .WithCommand(
+                "locale_fix",
+                "Tool to automatically add locale keys",
+                (fun () -> Localisation.locale_check "en_GB" true)
+            )
+            .WithCommand(
+                "locale_rename",
+                "Tool to rename locale keys/namespaces",
+                "replaced_key",
+                Localisation.locale_rename "en_GB"
+            )
 
-            .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> Formatting.check_linecounts ()))
-            .WithCommand("check_simple_view", "Experimental tool to see condensed versions of all files", (fun () -> Formatting.simple_view_all ()))
-            .WithCommand("check_filenames", "Check for source files with the same name in different paths", (fun () -> Formatting.check_filenames ()))
-            .WithCommand("check_files", "--", (fun () -> Formatting.browse_formatting_messages(Formatting.check_files())))
-            .WithCommand("format", "Format all source code files with Fantomas", (fun () -> Formatting.run_fantomas ()))
+            .WithCommand(
+                "check_linecounts",
+                "Check for particularly large source code files",
+                (fun () -> Formatting.check_linecounts())
+            )
+            .WithCommand(
+                "check_simple_view",
+                "Experimental tool to see condensed versions of all files",
+                (fun () -> Formatting.simple_view_all())
+            )
+            .WithCommand(
+                "check_filenames",
+                "Check for source files with the same name in different paths",
+                (fun () -> Formatting.check_filenames())
+            )
+            .WithCommand(
+                "check_files",
+                "--",
+                (fun () -> Formatting.browse_formatting_messages(Formatting.check_files()))
+            )
+            .WithCommand("format", "Format all source code files with Fantomas", (fun () -> Formatting.run_fantomas()))
 
             .WithCommand("version", "Displays the current version of Interlude", Version.version)
             .WithCommand("release_aio", "All-in-one release script", release_all_in_one)
@@ -43,7 +72,11 @@ module Commands =
             .WithCommand("server_run_docker", "Runs the game server locally in docker", Server.run_in_docker)
             .WithCommand("server_run_local", "Runs the game server locally", Server.run_local)
             .WithCommand("server_test_domain", "Generate markdown wiki table of contents", Server.run_domain_tests)
-            .WithCommand("server_test_full", "Run entire suite of tests against server while it's running", Server.run_all_tests)
+            .WithCommand(
+                "server_test_full",
+                "Run entire suite of tests against server while it's running",
+                Server.run_all_tests
+            )
             .WithCommand("down_detector", "Ping several services Interlude depends on for status", Server.down_detector)
 
             .WithCommand("skin_add", "Add a local skin to YAVSRG's skin repo", "folder_name", Skins.add_skin)
@@ -52,8 +85,17 @@ module Commands =
             .WithCommand("update", "Update user copy of Interlude to the latest release", Play.update)
             .WithCommand("play", "Play Interlude! Build it if not already built", Play.play)
 
-            .WithCommand("backbeat_bulk_upload", "Upload all packs on master-list YAVSRG's chart network", Backbeat.Upload.bulk_etterna_pack_aio)
-            .WithCommand("backbeat_upload", "Upload a local folder of charts to YAVSRG's chart network", "folder_name", Backbeat.Upload.etterna_pack_aio)
+            .WithCommand(
+                "backbeat_bulk_upload",
+                "Upload all packs on master-list YAVSRG's chart network",
+                Backbeat.Upload.bulk_etterna_pack_aio
+            )
+            .WithCommand(
+                "backbeat_upload",
+                "Upload a local folder of charts to YAVSRG's chart network",
+                "folder_name",
+                Backbeat.Upload.etterna_pack_aio
+            )
             .WithCommand("backbeat_check", "WIP", Backbeat.Check.test)
 
             .WithCommand("exit", "Closes the YAVSRG command line", (fun () -> System.Environment.Exit(0)))

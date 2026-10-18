@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI.Features.Backbeat
+namespace YAVSRG.CLI.Features.Backbeat
 
 open System
 open System.Text.RegularExpressions
@@ -13,9 +13,11 @@ module Metadata =
 
     let prune_tags (tags: string list) : string list =
         tags
-        |> Seq.map (fun s -> s.ToLowerInvariant().Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries))
+        |> Seq.map(fun s ->
+            s.ToLowerInvariant().Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+        )
         |> Seq.concat
-        |> Seq.filter (fun x -> x.Length > 2)
+        |> Seq.filter(fun x -> x.Length > 2)
         |> Seq.distinct
         |> List.ofSeq
 
@@ -95,7 +97,8 @@ module Metadata =
 
     module private Extraction =
 
-        let artists : VerifiedArtists = System.IO.Path.Combine(YAVSRG_PATH, "backbeat", "archive", "artists.json") |> JSON.FromFile |> expect
+        let artists: VerifiedArtists =
+            System.IO.Path.Combine(YAVSRG_PATH, "backbeat", "archive", "artists.json") |> JSON.FromFile |> expect
 
         type ArtistFragment =
             | Verified of string
@@ -106,7 +109,7 @@ module Metadata =
         module ArtistsAndFeatures =
             let artists (a, f) =
                 a
-                |> List.map (
+                |> List.map(
                     function
                     | Verified v -> v
                     | Artist a -> a.Trim()
@@ -114,7 +117,7 @@ module Metadata =
 
             let features (a, f) =
                 Option.defaultValue [] f
-                |> List.map (
+                |> List.map(
                     function
                     | Verified v -> v
                     | Artist a -> a.Trim()
@@ -138,7 +141,7 @@ module Metadata =
 
                 count1 < 2 && count2 < 2
 
-        let private collab_separator : Parser<string, unit> =
+        let private collab_separator: Parser<string, unit> =
             pstringCI " x "
             <|> pstring " + "
             <|> pstring "/"
@@ -154,10 +157,8 @@ module Metadata =
             <|> pstringCI "prod."
             .>> spaces
 
-        let private feature_separator : Parser<string, unit> =
-            pstringCI " feat." .>> spaces <|> pstringCI " ft." .>> spaces
-            <|> pstringCI " featuring."
-            .>> spaces
+        let private feature_separator: Parser<string, unit> =
+            pstringCI " feat." .>> spaces <|> pstringCI " ft." .>> spaces <|> pstringCI " featuring." .>> spaces
             <|> pstringCI " feat"
             .>> spaces
             <|> pstringCI " ft"
@@ -167,7 +168,7 @@ module Metadata =
             let verified =
                 let mapping = artists.ParserMapping()
 
-                match mapping.Keys |> Seq.sortByDescending (fun s -> s.Length) |> List.ofSeq with
+                match mapping.Keys |> Seq.sortByDescending(fun s -> s.Length) |> List.ofSeq with
                 | [] -> pzero
                 | x :: xs ->
                     let mutable parser = stringReturn x (Verified mapping.[x])
@@ -178,18 +179,17 @@ module Metadata =
                     parser
 
             let unverified =
-                many1CharsTill anyChar (followedBy collab_separator <|> followedBy feature_separator <|> eof)
-                |>> Artist
+                many1CharsTill anyChar (followedBy collab_separator <|> followedBy feature_separator <|> eof) |>> Artist
 
             sepBy1 (verified <|> unverified) collab_separator
 
         let private parse_prod_and_features: Parser<ArtistsAndFeatures, unit> =
-            parse_collab .>>. opt (feature_separator >>. parse_collab)
+            parse_collab .>>. opt(feature_separator >>. parse_collab)
 
         let private extract_bracket (text: string) =
             let bracket_regex = Regex("\\((.*?)\\)$")
 
-            let matches = bracket_regex.Matches text
+            let matches = bracket_regex.Matches(text)
 
             if matches.Count = 1 then
                 let bracket_content = matches.[0].Groups.[1].Value
@@ -197,7 +197,9 @@ module Metadata =
             else
                 text, None
 
-        let extract_artists_remixers_from_artist_string (artists: string) : string list * string list * string list * string * bool =
+        let extract_artists_remixers_from_artist_string
+            (artists: string)
+            : string list * string list * string list * string * bool =
             let p = parse_prod_and_features .>>. restOfLine false
 
             let artist, bracket = extract_bracket artists
@@ -229,7 +231,9 @@ module Metadata =
                 || s.ToLower().StartsWith("remixed by ")
                 || s.ToLower().StartsWith("edit by ")
                 ->
-                let remixer = let split = s.Split(" by ", StringSplitOptions.TrimEntries) in split.[split.Length - 1]
+                let remixer =
+                    let split = s.Split(" by ", StringSplitOptions.TrimEntries) in split.[split.Length - 1]
+
                 remixers <- [ remixer ]
                 append_to_title <- "(" + remixer + " Remix)"
             | Some s ->
@@ -242,7 +246,7 @@ module Metadata =
                 artists <- ArtistsAndFeatures.artists res
                 performers <- ArtistsAndFeatures.features res
 
-                if not (ArtistsAndFeatures.confident res) then
+                if not(ArtistsAndFeatures.confident res) then
                     confident <- false
 
                 if leftover <> "" then
@@ -254,8 +258,8 @@ module Metadata =
 
         let extract_artists_remixers_from_title_string (title: string) : string * string list * string list * bool =
             let p =
-                many1CharsTill anyChar (followedBy ((feature_separator |>> ignore) <|> eof))
-                .>>. opt (feature_separator >>. parse_collab)
+                many1CharsTill anyChar (followedBy((feature_separator |>> ignore) <|> eof))
+                .>>. opt(feature_separator >>. parse_collab)
 
             let title, bracket = extract_bracket title
 
@@ -288,9 +292,9 @@ module Metadata =
             | Success((title, features), _, _) ->
                 if features.IsSome then
                     suggested_title <- title
-                    performers <- ArtistsAndFeatures.features ([], features)
+                    performers <- ArtistsAndFeatures.features([], features)
 
-                    if not (ArtistsAndFeatures.confident ([], features)) then
+                    if not(ArtistsAndFeatures.confident([], features)) then
                         confident <- false
             | Failure(reason, _, _) -> ()
 
@@ -307,34 +311,36 @@ module Metadata =
                     Artists = artists
                     OtherArtists = features
                     Remixers = remixers
-                    Title =
-                        if append_to_title <> "" then
-                            song.Title.Trim() + " " + append_to_title
-                        else
-                            song.Title
-                }, confident
-            else song, true
+                    Title = if append_to_title <> "" then song.Title.Trim() + " " + append_to_title else song.Title
+                },
+                confident
+            else
+                song, true
 
-        if suggestion_1_confident && suggestion_1 <> song then suggestion_1 else
+        if suggestion_1_confident && suggestion_1 <> song then
+            suggestion_1
+        else
 
         let suggestion_2, suggestion_2_confident =
             if song.Artists.Length = 1 && song.OtherArtists = [] && song.Remixers = [] then
                 let new_title, features, remixers, confident =
                     Extraction.extract_artists_remixers_from_title_string song.Title
 
-                { song with
-                    OtherArtists = features
-                    Remixers = remixers
-                    Title = new_title
-                }, confident
-            else song, true
+                { song with OtherArtists = features; Remixers = remixers; Title = new_title }, confident
+            else
+                song, true
 
-        if suggestion_2_confident && suggestion_2 <> song then suggestion_2 else
+        if suggestion_2_confident && suggestion_2 <> song then
+            suggestion_2
+        else
 
         song
 
-    let private character_voice_regex = Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
+    let private character_voice_regex =
+        Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
+
     let private fixed_artists = Extraction.artists.FixerMapping()
+
     let correct_artist_typos (song: Song) : Song =
 
         let swap (s: string) =
@@ -345,7 +351,7 @@ module Metadata =
                 s
 
         let fix (artist: string) =
-            let matches = character_voice_regex.Matches artist
+            let matches = character_voice_regex.Matches(artist)
 
             if matches.Count = 1 then
                 let character_voice = matches.[0].Groups.[1].Value

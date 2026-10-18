@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System.IO
 open System.Net.Http
@@ -10,57 +10,66 @@ module Server =
         printfn "Docker should be installed and running on your system for this to work!\n"
 
         let data_path = Path.Combine(YAVSRG_PATH, "online", "data")
-        if not (Directory.Exists(data_path)) then
+
+        if not(Directory.Exists(data_path)) then
             printfn "First time setup: Creating data folder @ %s" data_path
             Directory.CreateDirectory(data_path) |> ignore
 
         let secrets_path = Path.Combine(YAVSRG_PATH, "online", "secrets")
-        if not (Directory.Exists(secrets_path)) then
+
+        if not(Directory.Exists(secrets_path)) then
             printfn "First time setup: Creating secrets folder @ %s" secrets_path
             Directory.CreateDirectory(secrets_path) |> ignore
 
         let cert_path = Path.Combine(secrets_path, "localhost.pfx")
-        if not (File.Exists(cert_path)) then
+
+        if not(File.Exists(cert_path)) then
             printfn "First time setup: Creating and trusting local certificate @ %s" cert_path
-            Shell.At(secrets_path)
-                .Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
+            Shell.At(secrets_path).Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
 
         let secrets_file = Path.Combine(secrets_path, "secrets.json")
-        if not (File.Exists(secrets_file)) then
+
+        if not(File.Exists(secrets_file)) then
             printfn "First time setup: You need to create a secrets.json file @ %s" secrets_file
             printfn "Ask Percyqaz if not sure what to put in this, documentation coming soon"
             printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
 
-        Shell.At(Path.Combine(YAVSRG_PATH, "online"))
-            .Exec("docker", "compose -p interludeweb up --build --detach")
+        Shell.At(Path.Combine(YAVSRG_PATH, "online")).Exec("docker", "compose -p interludeweb up --build --detach")
 
     let run_local () : unit =
         printfn "Running Interlude server locally (not in a docker container)\n"
 
-        let data_path = Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION, "data")
-        if not (Directory.Exists(data_path)) then
+        let data_path =
+            Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION, "data")
+
+        if not(Directory.Exists(data_path)) then
             printfn "First time setup: Creating data folder @ %s" data_path
             Directory.CreateDirectory(data_path) |> ignore
 
-        let secrets_path = Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION, "secrets")
-        if not (Directory.Exists(secrets_path)) then
+        let secrets_path =
+            Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION, "secrets")
+
+        if not(Directory.Exists(secrets_path)) then
             printfn "First time setup: Creating secrets folder @ %s" secrets_path
             Directory.CreateDirectory(secrets_path) |> ignore
 
         let cert_path = Path.Combine(secrets_path, "localhost.pfx")
-        if not (File.Exists(cert_path)) then
+
+        if not(File.Exists(cert_path)) then
             printfn "First time setup: Creating and trusting local certificate @ %s" cert_path
-            Shell.At(secrets_path)
-                .Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
+            Shell.At(secrets_path).Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
 
         let secrets_file = Path.Combine(secrets_path, "secrets.json")
-        if not (File.Exists(secrets_file)) then
+
+        if not(File.Exists(secrets_file)) then
             printfn "First time setup: You need to create a secrets.json file @ %s" secrets_file
             printfn "Ask Percyqaz if not sure what to put in this, documentation coming soon"
             printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
 
         Shell.At(Path.Combine(YAVSRG_PATH, "online", "server")).Exec("dotnet", "build --configuration Debug -v q")
-        Shell.At(Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION))
+
+        Shell
+            .At(Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION))
             .Exec("dotnet", "run --project ../../../Interlude.Web.Server.fsproj --configuration Debug -v q")
 
     let run_domain_tests () : unit =
@@ -77,10 +86,7 @@ module Server =
         let response =
             client.Send(new HttpRequestMessage(HttpMethod.Get, "https://api.yavsrg.net/health"))
 
-        if response.IsSuccessStatusCode then
-            printfn "Server OK"
-        else
-            printfn "!! No reply from the server"
+        if response.IsSuccessStatusCode then printfn "Server OK" else printfn "!! No reply from the server"
 
         let response =
             client.Send(
@@ -90,18 +96,12 @@ module Server =
                 )
             )
 
-        if response.IsSuccessStatusCode then
-            printfn "CDN OK"
-        else
-            printfn "!! Error from CDN"
+        if response.IsSuccessStatusCode then printfn "CDN OK" else printfn "!! Error from CDN"
 
         let response =
             client.Send(new HttpRequestMessage(HttpMethod.Head, "https://catboy.best/d/919633n"))
 
-        if response.IsSuccessStatusCode then
-            printfn "Mino OK"
-        else
-            printfn "!! Error from Mino beatmap mirror"
+        if response.IsSuccessStatusCode then printfn "Mino OK" else printfn "!! Error from Mino beatmap mirror"
 
         let response =
             client.Send(

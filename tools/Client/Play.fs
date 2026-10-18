@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System.IO
 open System.IO.Compression
@@ -9,17 +9,14 @@ module Play =
 
     let GAME_FOLDER = Path.Combine(YAVSRG_PATH, "GAME")
 
-    let detect_build_info() =
+    let detect_build_info () =
         let arch = RuntimeInformation.OSArchitecture
+
         match arch with
-        | Architecture.X64 when System.OperatingSystem.IsWindows() ->
-            Releases.BuildPlatformInfo.WINDOWS_X64
-        | Architecture.X64 when System.OperatingSystem.IsLinux() ->
-            Releases.BuildPlatformInfo.LINUX_X64
-        | Architecture.X64 when System.OperatingSystem.IsMacOS() ->
-            Releases.BuildPlatformInfo.OSX_X64
-        | Architecture.Arm64 when System.OperatingSystem.IsMacOS() ->
-            Releases.BuildPlatformInfo.OSX_ARM64
+        | Architecture.X64 when System.OperatingSystem.IsWindows() -> Releases.BuildPlatformInfo.WINDOWS_X64
+        | Architecture.X64 when System.OperatingSystem.IsLinux() -> Releases.BuildPlatformInfo.LINUX_X64
+        | Architecture.X64 when System.OperatingSystem.IsMacOS() -> Releases.BuildPlatformInfo.OSX_X64
+        | Architecture.Arm64 when System.OperatingSystem.IsMacOS() -> Releases.BuildPlatformInfo.OSX_ARM64
         | _ -> failwithf "Your platform (%O) is not supported! Maybe complain in the discord?" arch
 
     let update () =
@@ -33,18 +30,28 @@ module Play =
         Shell.Exec("git", "submodule update --recursive")
 
         try
-            Directory.CreateDirectory GAME_FOLDER |> ignore
+            Directory.CreateDirectory(GAME_FOLDER) |> ignore
             let build_info = detect_build_info()
             Releases.build_platform build_info
-            ZipFile.ExtractToDirectory(Path.Combine(RELEASES_PATH, sprintf "Interlude-%s.zip" build_info.Name), GAME_FOLDER, true)
-        with err -> printfn "Error creating GAME folder: %O" err
+
+            ZipFile.ExtractToDirectory(
+                Path.Combine(RELEASES_PATH, sprintf "Interlude-%s.zip" build_info.Name),
+                GAME_FOLDER,
+                true
+            )
+        with err ->
+            printfn "Error creating GAME folder: %O" err
 
         Shell.Exec("git", "checkout main")
         Shell.Exec("git", "submodule update --recursive")
 
     let play () =
 
-        if not (Directory.Exists GAME_FOLDER && Directory.EnumerateFileSystemEntries GAME_FOLDER |> Seq.isEmpty |> not) then
+        if
+            not(
+                Directory.Exists(GAME_FOLDER) && Directory.EnumerateFileSystemEntries(GAME_FOLDER) |> Seq.isEmpty |> not
+            )
+        then
             update()
 
         if File.Exists(Path.Combine(GAME_FOLDER, "Interlude.exe")) then
@@ -55,10 +62,14 @@ module Play =
             printfn "Your GAME folder is missing an Interlude executable, run `yavsrg update` to fix it"
 
     let debug_run () =
-        let build_output = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", DOTNET_VERSION)
+        let build_output =
+            Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", DOTNET_VERSION)
+
         try
             let build_info = detect_build_info()
-            if not (Directory.Exists build_output) then Directory.CreateDirectory build_output |> ignore
+
+            if not(Directory.Exists(build_output)) then
+                Directory.CreateDirectory(build_output) |> ignore
 
             File.Copy(
                 Path.Combine(YAVSRG_PATH, "engine", "lib", build_info.RuntimeId, build_info.BassLibraryFile),
@@ -71,5 +82,7 @@ module Play =
                 Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", DOTNET_VERSION, build_info.BassFxLibraryFile),
                 true
             )
-        with err -> printfn "Error detecting platform: %O" err
+        with err ->
+            printfn "Error detecting platform: %O" err
+
         Shell.At(INTERLUDE_SOURCE_PATH).Exec("dotnet", "run --configuration Debug -v q")

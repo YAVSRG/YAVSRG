@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System.IO
 
@@ -6,10 +6,10 @@ module Version =
 
     let mutable private current_version =
         let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
-        let f = File.ReadAllText file
+        let f = File.ReadAllText(file)
 
-        let i = f.IndexOf "<AssemblyVersion>"
-        let j = f.IndexOf "</AssemblyVersion>"
+        let i = f.IndexOf("<AssemblyVersion>")
+        let j = f.IndexOf("</AssemblyVersion>")
 
         f.Substring(i, j - i).Substring("<AssemblyVersion>".Length)
 
@@ -28,17 +28,17 @@ module Version =
         printfn "Version: %s -> %s" current_version v
         printfn "%s" latest
         let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
-        let mutable f = File.ReadAllText file
+        let mutable f = File.ReadAllText(file)
 
         do
-            let i = f.IndexOf "<AssemblyVersion>"
-            let j = f.IndexOf "</AssemblyVersion>"
+            let i = f.IndexOf("<AssemblyVersion>")
+            let j = f.IndexOf("</AssemblyVersion>")
 
             f <- f.Substring(0, i) + "<AssemblyVersion>" + v + f.Substring(j)
 
         do
-            let i = f.IndexOf "<FileVersion>"
-            let j = f.IndexOf "</FileVersion>"
+            let i = f.IndexOf("<FileVersion>")
+            let j = f.IndexOf("</FileVersion>")
 
             f <- f.Substring(0, i) + "<FileVersion>" + v + f.Substring(j)
 
