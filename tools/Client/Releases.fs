@@ -93,7 +93,7 @@ Information, future updates and support available at:
             Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", DOTNET_VERSION, info.RuntimeId)
 
         let clean_dir =
-            Path.Combine(YAVSRG_PATH, "interlude", "releases", $"Interlude-{info.Name}")
+            Path.Combine(RELEASES_PATH, $"Interlude-{info.Name}")
 
         try
             Directory.Delete(build_dir, true)

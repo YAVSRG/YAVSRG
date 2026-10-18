@@ -36,7 +36,7 @@ module Play =
             Directory.CreateDirectory GAME_FOLDER |> ignore
             let build_info = detect_build_info()
             Releases.build_platform build_info
-            ZipFile.ExtractToDirectory(Path.Combine(YAVSRG_PATH, "interlude", "releases", sprintf "Interlude-%s.zip" build_info.Name), GAME_FOLDER, true)
+            ZipFile.ExtractToDirectory(Path.Combine(RELEASES_PATH, sprintf "Interlude-%s.zip" build_info.Name), GAME_FOLDER, true)
         with err -> printfn "Error creating GAME folder: %O" err
 
         Shell.Exec("git", "checkout main")
