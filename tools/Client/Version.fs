@@ -47,8 +47,6 @@ module Version =
         current_version <- v
         Site.generate_index v
 
-        printfn "Creating git commit"
-
-        Shell.Exec("git", sprintf "commit -a -m \"🏷️ Version %s\"" v)
+        Shell.Exec("git", sprintf "commit -a -m \"🏷️ release: Version %s\"" v)
 
     let version () = current_version
