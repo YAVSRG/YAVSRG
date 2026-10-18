@@ -153,7 +153,7 @@ module Site =
         |> build_mpage (Path.Combine(SITE_PATH, "files", "interlude", "changelog.html")) "Changelog"
 
         let wiki_pages =
-            Directory.EnumerateFiles(Path.Combine(YAVSRG_PATH, "interlude", "docs", "wiki"))
+            Directory.EnumerateFiles(WIKI_FILES_PATH)
             |> Seq.filter (fun f -> f.EndsWith ".md" && not (f.EndsWith "index.md"))
             |> Seq.map parse_wiki_file
             |> Array.ofSeq
