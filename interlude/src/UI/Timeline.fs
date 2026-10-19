@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -37,7 +37,6 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     override this.Draw() : unit =
         let b = this.Bounds.Shrink(10.0f, 20.0f)
         let LEADIN_TIME = SongPlayer.LEADIN_TIME * rate.Value
-        let start = with_mods.FirstNote - LEADIN_TIME
         let offset = b.Width * LEADIN_TIME / LAST_NOTE
 
         let w = (b.Width - offset) / float32 note_density.Length
@@ -83,10 +82,13 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             Colors.cyan_accent.O1
 
         let now = Song.Time
-        let percent = (now - start) / (LAST_NOTE - start) |> min 1.0f
+
+        let percent =
+            (now - START_OF_TIMELINE) / (LAST_NOTE - START_OF_TIMELINE) |> min 1.0f
+
         let x = b.Width * percent
         Render.rect (b.BorderB(10.0f)) Colors.grey_1.O3
-        Render.rect (b.BorderB(10.0f).SliceL x) Colors.cyan_accent
+        Render.rect (b.BorderB(10.0f).SliceL(x)) Colors.cyan_accent
 
         let duration = (LAST_NOTE - FIRST_NOTE) / rate.Value |> format_duration_ms
         let now_on_1x = max 0.0f<ms> (now - FIRST_NOTE) |> format_duration_ms
