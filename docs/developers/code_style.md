@@ -2,64 +2,33 @@
 
 ### Commit messages
 
-Use [semantic commit messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)  
+We mostly follow [semantic commit messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)  
 e.g. `feat: added a new button in ...`, `fix: crash when ...`
 
+But since PRs are squashed when merging, you do not need to be strict with this!  
+Use any convention you like, the PR title will be what ends up in `main` and your commits will form the description of that squash commit
+
 ### Code style
-When in doubt follow the [F# coding conventions](https://learn.microsoft.com/en-us/dotnet/fsharp/style-guide/conventions)
 
-Use descriptive variable names  
-One-letter variable names are not descriptive unless they follow specific conventions:  
-- `i` = generic loop counter variable
-- `k` = codebase convention for 'key' as the rhythm game concept, used when looping through keys/columns
+The vast majority of nitpicky things like indentation, spacing, use of brackets are fully automated, here is a list of things that are not:
 
-Prefer `snake_case` variable names over `camelCase`
+Prefer `snake_case` variable names over `camelCase`  
+Reason: I have personal preference for it, new variables should do this to match the existing codebase
 
-Use type annotations on all properties, arguments and return types for new code  
-Bad: `let calculate(rate, chart) = ...`
-Good `let calculate(rate: Rate, chart: Chart) : Difficulty = ...`
+Use type annotations on all properties, arguments and return types for new code (unless it's a small one-liner)  
+Bad: `let calculate(rate, chart) = ...`  
+Good `let calculate(rate: Rate, chart: Chart) : Difficulty = ...`  
+Reason: Aids in reading the code when viewing it somewhere that won't label the types automatically, and catches otherwise quietly changing inferred types
 
 Do not use currying in methods top-level module functions for new code  
-Bad: `let calculate (rate: Rate) (chart: Chart) : Difficulty = ...`
-Good: `let calculate(rate: Rate, chart: Chart) : Difficulty = ...`
+Bad: `let calculate (rate: Rate) (chart: Chart) : Difficulty = ...`  
+Good: `let calculate(rate: Rate, chart: Chart) : Difficulty = ...`  
+Reason: It's not really clear which one to use over the other, so I'm ruling to use as little currying as necessary for new code
 
-Use exceptions for control flow sparingly, they should be for exceptional cases and not hot paths
+Avoid using the `<|` operator  
+Bad: `function <| input`  
+Good: `function(input)`  
+Reason: It adds another way to write things, again making everything consistent is better
 
-Do not use Option<'T> for error handling, use Result<'T, ...> instead  
-The caller has more context on what to log rather than logging at the call site and then returning None
-```fsharp
-// Bad
-let beatmap_from_file (path: string) : Beatmap option =
-	try
-		...
-		Some beatmap
-	with err ->
-		Logging.Error(... err ...)
-		None
-		
-let caller () =
-	match beatmap_from_file "my_file.osu" with
-	| Some beatmap -> ...
-	| None -> Logging.Error("Log twice and without context")
-		
-// OK
-let beatmap_from_file (path: string) : Result<Beatmap, exn> =
-	try
-		...
-		Ok beatmap
-	with
-	| :? RelevantException err -> Error err
-		
-let caller () =
-	match beatmap_from_file "my_file.osu" with
-	| Ok beatmap -> ...
-	| Error exn -> Logging.Error("Error while trying to do ...: ...")
-```
-
-Always use a `.` when subscripting arrays, even where it would parse without  
-This intentionally ignores [the recommendation here](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/arrays#access-elements)  
-Bad: `my_array[i]`, `my_2d_array[i].[j]`  
-Good: `my_array.[i]`, `my_2d_array.[i].[j]`  
-Things that don't parse: `my_2d_array[i][j]`, `my_function()[0]` hence the consistent rule everywhere
-
-Prefer `not (<expression>)` over `expression |> not`
+For all other matters of taste, running `./scripts/yavsrg.sh format` immediately applies mine so you don't have to worry about it  
+Don't forget to run this before submitting PRs!

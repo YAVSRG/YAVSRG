@@ -22,12 +22,9 @@ This is where you can commit whatever changes you like to your own copy of the r
 Once the fork is created, connect the repository on your machine to a branch on the fork with these commands:
 
 ```bash
-# terminal needs to be in the YAVSRG folder
 git remote add personal https://github.com/<*YOUR GITHUB USERNAME*>/YAVSRG.git
 git checkout -b <*BRANCH NAME*>
 git push --set-upstream personal <*BRANCH NAME*>
-# now you can add commits and push them as you please
-# `git commit` and `git push` commands, etc or your IDE integration will work normally from now on
 ```
 
 If you are adding a particular feature you could name your branch something descriptive like `help-mode` or `scoring-bug-fix`, otherwise just naming it `develop` is fine  

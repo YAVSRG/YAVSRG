@@ -16,14 +16,14 @@ Various player guides, including a wiki, are built into the game to help you get
 You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
 
 **On Windows and Linux** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
-**On macOS** - Not officially supported, [there is a guide to try possibly unstable builds](https://github.com/YAVSRG/YAVSRG/tree/main/docs/build_guide_macos.md)
+**On macOS** - Not officially supported, [but you can try building it yourself](https://github.com/YAVSRG/YAVSRG/tree/main/docs/build_guide.md)
 
 Come join [the discord](https://yavsrg.net/discord) -- Send me playtesting feedback, feature requests, bug reports, etc.
 
 <h2 align="center">🤝 Contributing</h2>
 
 Interested in contributing? Please see
-- [Build instructions](https://github.com/YAVSRG/YAVSRG/tree/main/docs/build_guide_developers.md)
+- [Build instructions](https://github.com/YAVSRG/YAVSRG/tree/main/docs/build_guide.md)
 - [Codebase overview](https://github.com/YAVSRG/YAVSRG/tree/main/docs/codebase_overview.md)
 - [Contribution guide](https://github.com/YAVSRG/YAVSRG/tree/main/docs/contributors.md)
 

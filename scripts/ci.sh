@@ -20,7 +20,7 @@ if [[ "$status" -ne 0 || -n "$output" ]]; then
     if [[ -n "$output" ]]; then
         printf '%s\n' "$output"
     fi
-    echo "Localisation check failed! Run './scripts/yavsrg.sh locale_fix' to interactively fix any issues."
+    echo "Localisation check failed! Fix this by running './scripts/yavsrg.sh locale_fix' OR './scripts/pr.sh'"
     exit 1
 fi
 
@@ -35,7 +35,7 @@ if [[ "$status" -ne 0 || -n "$output" ]]; then
     if [[ -n "$output" ]]; then
         printf '%s\n' "$output"
     fi
-    echo "Formatting check failed! Run './scripts/yavsrg.sh format' to reformat files"
+    echo "Formatting check failed! Fix this by running './scripts/yavsrg.sh format' OR './scripts/pr.sh'"
     exit 1
 fi
 
