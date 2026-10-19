@@ -1,5 +1,6 @@
 namespace Interlude.Features.OptionsMenu.Library
 
+open Interlude.Features.Skins
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Prelude
@@ -9,7 +10,6 @@ open Interlude.Features.Import
 open Interlude.Features.Import.Osu
 open Interlude.Features.Import.Etterna
 open Interlude.Features.Tables.Browser
-open Interlude.Features.Skins.Browser
 open Interlude.Features.Rulesets
 open Interlude.Features.Tables
 
@@ -22,11 +22,11 @@ type ImportsPage() =
     static member GetEtternaPacks() : PageButton =
         PageButton(%"etterna_pack_browser", fun () -> EtternaPacksBrowserPage().Show())
 
-    static member GetSkins() : PageButton =
-        PageButton(%"skins.browser", fun () -> SkinsBrowserPage().Show())
-
     static member GetTables() : PageButton =
         PageButton(%"tables.browser", fun () -> TableBrowserPage().Show())
+
+    static member GetMoreSkins() : PageButton =
+        PageButton(%"skins.get_more_skins", SkinActions.get_more_skins)
 
     static member ImportOsuSkins() : PageButton =
         PageButton(%"skins.import_from_osu", fun () -> OsuSkinsListPage(FileDrop.import_osu_skin_folder).Show())
@@ -71,8 +71,8 @@ type ImportsPage() =
 
                     ImportsPage.GetOsuSongs().Pos(5, 2, PageWidth.Full),
                     ImportsPage.GetEtternaPacks().Pos(7, 2, PageWidth.Full),
-                    ImportsPage.GetSkins().Pos(9, 2, PageWidth.Full),
-                    ImportsPage.GetTables().Pos(11, 2, PageWidth.Full),
+                    ImportsPage.GetTables().Pos(9, 2, PageWidth.Full),
+                    ImportsPage.GetMoreSkins().Pos(12, 2, PageWidth.Full),
                     ImportsPage.ImportOsuSkins().Pos(14, 2, PageWidth.Full),
 
                     PageButton(%"rulesets", fun () -> SelectRulesetPage().Show()).Pos(17, 2, PageWidth.Full),
