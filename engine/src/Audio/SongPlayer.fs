@@ -238,9 +238,7 @@ type SongPlayer() =
                 song.FadeIn(SongPlayer.CROSSFADE_DURATION_MS)
 
             if was_paused then this.Seek(song.PreviewPoint) else this.PlayFrom(song.PreviewPoint)
-
         | SongLoadAction.PlayFromBeginning -> if was_paused then this.Seek(0.0f<ms>) else this.PlayFrom(0.0f<ms>)
-
         | SongLoadAction.Wait -> this.Seek(0.0f<ms>)
 
         on_loaded_ev.Trigger()
@@ -299,8 +297,8 @@ type SongPlayer() =
                     this.PlayFrom(0.0f<ms>)
             | SongFinishAction.Wait -> song.Pause() |> ignore
             | SongFinishAction.Custom action ->
-                if song.Playing then
-                    action()
+                song.Playing <- false
+                action()
 
         this.MarkStartOfFrame() // Update time_at_start_of_frame, compensation_at_start_of_frame
         update_low_pass_filter_slide(elapsed_ms)
@@ -309,8 +307,9 @@ type SongPlayer() =
         if state.IsPlayingWithoutAudio && not song.Playing && song.ShouldPlayAt(time_at_start_of_frame) then
             song.PlayFrom(time_at_start_of_frame, delay_callback)
 
-        elif time_at_start_of_frame > song.Duration then
+        elif song.Playing && time_at_start_of_frame > song.Duration then
             on_song_finished()
+
 
     // todo: go through and property identify/label these
     member this.FrameCompensation = this.PositionRealtime() - time_at_start_of_frame
