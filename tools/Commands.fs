@@ -71,7 +71,7 @@ module Commands =
                 "Run entire suite of tests against server while it's running",
                 Server.run_all_tests
             )
-            .WithCommand("down_detector",  "Ping several services Interlude depends on for status", Server.down_detector)
+            .WithCommand("down_detector", "Ping several services Interlude depends on for status", Server.down_detector)
 
             .WithCommand("skin_add", "Add a local skin to YAVSRG's skin repo", "folder_name", Skins.add_skin)
 
