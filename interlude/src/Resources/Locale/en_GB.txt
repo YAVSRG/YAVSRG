@@ -960,6 +960,7 @@ notification.import_success.body=%0 charts imported, %1 skipped
 notification.install_pack=Installed pack!
 notification.install_pack.body=%0 (%1 charts imported, %2 skipped)
 notification.install_pack_failed=Pack import failed!
+notification.install_skin=Installed skin!
 notification.install_song=Installed song!
 notification.install_song.body=%0 (%1 charts, %2 skipped)
 notification.install_song_failed=Song install failed!
