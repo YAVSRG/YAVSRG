@@ -141,10 +141,7 @@ module Upload =
         | AssetLocation.Hash audio_hash, AssetLocation.Hash background_hash ->
             if chart_meta.Length < 30000.0f<ms> then
                 Error "Chart is too short"
-            else if
-
-                chart_meta.Origins |> Set.exists _.SuitableForUpload |> not
-            then
+            elif chart_meta.Origins |> Set.exists _.SuitableForUpload |> not then
                 Error(sprintf "Chart has no valid sources (%A)" chart_meta.Origins)
             else
 

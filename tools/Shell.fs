@@ -25,4 +25,4 @@ type Shell =
 
     static member Eval(cmd: string, args: string) : string = Shell.DefaultLocation.Eval(cmd, args)
 
-    static member At(path: string) = { WorkingDirectory = path }
+    static member At(path: string) : Shell = { WorkingDirectory = path }
