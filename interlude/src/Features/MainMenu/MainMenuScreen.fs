@@ -95,7 +95,7 @@ type MainMenuScreen() =
 
     let choose_splash =
         EmbeddedResource.SplashMessageGenerator("MenuSplashes.txt")
-        >> fun splash_line -> splash_line.Split('¬')
+        >> _.Split('¬')
         >> fun splash_parts ->
             if splash_parts.Length > 1 then splash_parts.[0], splash_parts.[1] else splash_parts.[0], ""
 
