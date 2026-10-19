@@ -115,6 +115,7 @@ Information, future updates and support available at:
                 "dotnet",
                 $"publish --configuration Release -r {info.RuntimeId} -p:PublishSingleFile=True --self-contained true"
             )
+        |> ignore
 
         Directory.CreateDirectory(clean_dir) |> ignore
 

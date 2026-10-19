@@ -10,9 +10,9 @@ module Commands =
     let release_all_in_one () =
         Wiki.generate_toc()
         Site.generate_site()
-        Shell.Exec("git", "add docs")
-        Shell.Exec("git", "add site")
-        Shell.Exec("git", "commit -m \"chore(site): Update site changelog & wiki\"")
+        Shell.Exec("git", "add docs") |> ignore
+        Shell.Exec("git", "add site") |> ignore
+        Shell.Exec("git", "commit -m \"chore(site): Update site changelog & wiki\"") |> ignore
         Version.create_publish_commit()
 
     let register (ctx: ShellContext) =
@@ -49,11 +49,6 @@ module Commands =
                 "Check for source files with the same name in different paths",
                 (fun () -> Formatting.check_filenames())
             )
-            .WithCommand(
-                "check_files",
-                "--",
-                (fun () -> Formatting.browse_formatting_messages(Formatting.check_files()))
-            )
             .WithCommand("format", "Format all source code files with Fantomas", (fun () -> Formatting.run_fantomas()))
 
             .WithCommand("version", "Displays the current version of Interlude", Version.version)
@@ -71,7 +66,6 @@ module Commands =
 
             .WithCommand("server_run_docker", "Runs the game server locally in docker", Server.run_in_docker)
             .WithCommand("server_run_local", "Runs the game server locally", Server.run_local)
-            .WithCommand("server_test_domain", "Generate markdown wiki table of contents", Server.run_domain_tests)
             .WithCommand(
                 "server_test_full",
                 "Run entire suite of tests against server while it's running",
@@ -81,9 +75,8 @@ module Commands =
 
             .WithCommand("skin_add", "Add a local skin to YAVSRG's skin repo", "folder_name", Skins.add_skin)
 
-            .WithCommand("debug_run", "Build and run the game in debug mode", Play.debug_run)
-            .WithCommand("update", "Update user copy of Interlude to the latest release", Play.update)
-            .WithCommand("play", "Play Interlude! Build it if not already built", Play.play)
+            .WithCommand("run", "Build and run the client in debug mode", Play.debug_run)
+            .WithCommand("test", "Build and run all tests", Test.run)
 
             .WithCommand(
                 "backbeat_bulk_upload",

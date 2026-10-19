@@ -25,7 +25,7 @@ module Server =
 
         if not(File.Exists(cert_path)) then
             printfn "First time setup: Creating and trusting local certificate @ %s" cert_path
-            Shell.At(secrets_path).Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
+            Shell.At(secrets_path).Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT") |> ignore
 
         let secrets_file = Path.Combine(secrets_path, "secrets.json")
 
@@ -35,6 +35,7 @@ module Server =
             printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
 
         Shell.At(Path.Combine(YAVSRG_PATH, "online")).Exec("docker", "compose -p interludeweb up --build --detach")
+        |> ignore
 
     let run_local () : unit =
         printfn "Running Interlude server locally (not in a docker container)\n"
@@ -57,7 +58,7 @@ module Server =
 
         if not(File.Exists(cert_path)) then
             printfn "First time setup: Creating and trusting local certificate @ %s" cert_path
-            Shell.At(secrets_path).Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
+            Shell.At(secrets_path).Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT") |> ignore
 
         let secrets_file = Path.Combine(secrets_path, "secrets.json")
 
@@ -67,18 +68,20 @@ module Server =
             printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
 
         Shell.At(Path.Combine(YAVSRG_PATH, "online", "server")).Exec("dotnet", "build --configuration Debug -v q")
+        |> ignore
 
         Shell
             .At(Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION))
             .Exec("dotnet", "run --project ../../../Interlude.Web.Server.fsproj --configuration Debug -v q")
+        |> ignore
 
     let run_domain_tests () : unit =
-        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "domain")).Exec("dotnet", "test")
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "domain")).Exec("dotnet", "test") |> ignore
 
     let run_all_tests () : unit =
-        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "domain")).Exec("dotnet", "test")
-        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "integration")).Exec("dotnet", "test")
-        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "client")).Exec("dotnet", "run")
+        run_domain_tests()
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "integration")).Exec("dotnet", "test") |> ignore
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "client")).Exec("dotnet", "run") |> ignore
 
     let down_detector () : unit =
         use client = new HttpClient()

@@ -20,6 +20,7 @@
     <Compile Include="Docs\Wiki.fs" />
     <Compile Include="Docs\Site.fs" />
     <Compile Include="Codebase\Formatting.fs" />
+    <Compile Include="Codebase\Test.fs" />
     <Compile Include="Client\Localisation.fs" />
     <Compile Include="Client\Version.fs" />
     <Compile Include="Client\Releases.fs" />

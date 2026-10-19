@@ -13,7 +13,7 @@ module Version =
 
         f.Substring(i, j - i).Substring("<AssemblyVersion>".Length)
 
-    let create_publish_commit () =
+    let create_publish_commit () : unit =
 
         let changelog = Path.Combine(FULL_CHANGELOG_PATH)
         let logtxt = File.ReadAllText(changelog)
@@ -47,6 +47,6 @@ module Version =
         current_version <- v
         Site.generate_index v
 
-        Shell.Exec("git", sprintf "commit -a -m \"🏷️ release: Version %s\"" v)
+        Shell.Exec("git", sprintf "commit -a -m \"🏷️ release: Version %s\"" v) |> ignore
 
     let version () = current_version

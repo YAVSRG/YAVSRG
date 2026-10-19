@@ -1,13 +1,9 @@
 namespace YAVSRG.CLI
 
 open System.IO
-open System.IO.Compression
-open System.Diagnostics
 open System.Runtime.InteropServices
 
 module Play =
-
-    let GAME_FOLDER = Path.Combine(YAVSRG_PATH, "GAME")
 
     let detect_build_info () =
         let arch = RuntimeInformation.OSArchitecture
@@ -19,49 +15,7 @@ module Play =
         | Architecture.Arm64 when System.OperatingSystem.IsMacOS() -> Releases.BuildPlatformInfo.OSX_ARM64
         | _ -> failwithf "Your platform (%O) is not supported! Maybe complain in the discord?" arch
 
-    let update () =
-        Shell.Exec("git", "checkout main")
-        Shell.Exec("git", "pull")
-        Shell.Exec("git", "fetch --tags")
-
-        let tag_digest = Shell.Eval("git", "rev-list --tags --max-count=1")
-        let tag_name = Shell.Eval("git", sprintf "describe --tags \"%s\"" tag_digest)
-        Shell.Exec("git", sprintf "checkout %s" tag_name)
-        Shell.Exec("git", "submodule update --recursive")
-
-        try
-            Directory.CreateDirectory(GAME_FOLDER) |> ignore
-            let build_info = detect_build_info()
-            Releases.build_platform build_info
-
-            ZipFile.ExtractToDirectory(
-                Path.Combine(RELEASES_PATH, sprintf "Interlude-%s.zip" build_info.Name),
-                GAME_FOLDER,
-                true
-            )
-        with err ->
-            printfn "Error creating GAME folder: %O" err
-
-        Shell.Exec("git", "checkout main")
-        Shell.Exec("git", "submodule update --recursive")
-
-    let play () =
-
-        if
-            not(
-                Directory.Exists(GAME_FOLDER) && Directory.EnumerateFileSystemEntries(GAME_FOLDER) |> Seq.isEmpty |> not
-            )
-        then
-            update()
-
-        if File.Exists(Path.Combine(GAME_FOLDER, "Interlude.exe")) then
-            Process.Start(Path.Combine(GAME_FOLDER, "Interlude.exe")).WaitForExit()
-        elif File.Exists(Path.Combine(GAME_FOLDER, "Interlude")) then
-            Process.Start(Path.Combine(GAME_FOLDER, "Interlude")).WaitForExit()
-        else
-            printfn "Your GAME folder is missing an Interlude executable, run `yavsrg update` to fix it"
-
-    let debug_run () =
+    let debug_run () : unit =
         let build_output =
             Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", DOTNET_VERSION)
 
@@ -85,4 +39,4 @@ module Play =
         with err ->
             printfn "Error detecting platform: %O" err
 
-        Shell.At(INTERLUDE_SOURCE_PATH).Exec("dotnet", "run --configuration Debug -v q")
+        Shell.At(INTERLUDE_SOURCE_PATH).Exec("dotnet", "run --configuration Debug -v q") |> ignore
