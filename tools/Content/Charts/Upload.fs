@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI.Features.Backbeat
+namespace YAVSRG.CLI.Features.Backbeat
 
 open System.IO
 open System.Net.Http
@@ -34,14 +34,17 @@ module Upload =
             failwith "S3 credentials missing"
 
     let private cdn_httpclient = new HttpClient()
-    let check_cdn_file_exists(file_name: string) =
-        let req = new HttpRequestMessage(HttpMethod.Head, "https://cdn.yavsrg.net/" + file_name)
+
+    let check_cdn_file_exists (file_name: string) =
+        let req =
+            new HttpRequestMessage(HttpMethod.Head, "https://cdn.yavsrg.net/" + file_name)
+
         let reply = cdn_httpclient.Send(req)
         reply.IsSuccessStatusCode
 
     let private upload_chart_to_cdn (chart_meta: ChartMeta) (chart: Chart) : Async<Result<string * int, string>> =
         match chart.CheckForErrors() with
-        | Error msg -> async { return Error (sprintf "Chart is invalid: %s" msg) }
+        | Error msg -> async { return Error(sprintf "Chart is invalid: %s" msg) }
         | Ok chart ->
 
         let chart_hash = chart.Hash()
@@ -50,76 +53,82 @@ module Upload =
         | AssetLocation.Hash background_hash, AssetLocation.Hash audio_hash ->
             let upload_notes =
                 task {
-                        let file_name = chart_hash
+                    let file_name = chart_hash
 
-                        let exists = check_cdn_file_exists file_name
+                    let exists = check_cdn_file_exists file_name
 
-                        if not exists then
-                            use ms = new MemoryStream()
-                            use bw = new BinaryWriter(ms)
+                    if not exists then
+                        use ms = new MemoryStream()
+                        use bw = new BinaryWriter(ms)
 
-                            chart.WriteToStreamHeadless(bw)
-                            bw.Flush()
+                        chart.WriteToStreamHeadless(bw)
+                        bw.Flush()
 
-                            let! response = backblaze_client.UploadAsync(BUCKET_ID, file_name, ms)
+                        let! response = backblaze_client.UploadAsync(BUCKET_ID, file_name, ms)
 
-                            response.EnsureSuccessStatusCode() |> ignore
+                        response.EnsureSuccessStatusCode() |> ignore
 
-                            return 1
-                        else return 0
-                    }
+                        return 1
+                    else
+                        return 0
+                }
+
             let upload_audio =
                 task {
-                        let file_name = "assets/" + audio_hash
+                    let file_name = "assets/" + audio_hash
 
-                        let exists = check_cdn_file_exists file_name
+                    let exists = check_cdn_file_exists file_name
 
-                        if not exists then
-                            let! response =
-                                backblaze_client.UploadAsync(
-                                    BUCKET_ID,
-                                    file_name,
-                                    File.OpenRead(chart_meta.Audio.Path.Value)
-                                )
+                    if not exists then
+                        let! response =
+                            backblaze_client.UploadAsync(
+                                BUCKET_ID,
+                                file_name,
+                                File.OpenRead(chart_meta.Audio.Path.Value)
+                            )
 
-                            response.EnsureSuccessStatusCode() |> ignore
-                            return 1
-                        else return 0
+                        response.EnsureSuccessStatusCode() |> ignore
+                        return 1
+                    else
+                        return 0
 
-                    }
+                }
+
             let upload_bg =
                 task {
-                        let file_name = "assets/" + background_hash
+                    let file_name = "assets/" + background_hash
 
-                        let exists = check_cdn_file_exists file_name
+                    let exists = check_cdn_file_exists file_name
 
-                        if not exists then
-                            let! response =
-                                backblaze_client.UploadAsync(
-                                    BUCKET_ID,
-                                    file_name,
-                                    File.OpenRead(chart_meta.Background.Path.Value)
-                                )
+                    if not exists then
+                        let! response =
+                            backblaze_client.UploadAsync(
+                                BUCKET_ID,
+                                file_name,
+                                File.OpenRead(chart_meta.Background.Path.Value)
+                            )
 
-                            response.EnsureSuccessStatusCode() |> ignore
-                            return 1
-                        else return 0
-                    }
+                        response.EnsureSuccessStatusCode() |> ignore
+                        return 1
+                    else
+                        return 0
+                }
 
             async {
                 match!
-                    Async.Parallel
+                    Async.Parallel(
                         [
                             upload_notes |> Async.AwaitTask
                             upload_audio |> Async.AwaitTask
                             upload_bg |> Async.AwaitTask
                         ]
-                   |> Async.Catch
+                    )
+                    |> Async.Catch
                 with
-                | Choice1Of2 new_files -> return Ok (chart_hash, Array.sum new_files)
+                | Choice1Of2 new_files -> return Ok(chart_hash, Array.sum new_files)
                 | Choice2Of2 exn -> return Error exn.Message
             }
-        | _ ->  async { return Error "Chart is not part of cache/not using hashed assets mode" }
+        | _ -> async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
     let create_backbeat_data (chart_meta: ChartMeta) (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
         if chart_meta.Audio = AssetLocation.Missing then
@@ -132,13 +141,11 @@ module Upload =
         | AssetLocation.Hash audio_hash, AssetLocation.Hash background_hash ->
             if chart_meta.Length < 30000.0f<ms> then
                 Error "Chart is too short"
+            elif chart_meta.Origins |> Set.exists _.SuitableForUpload |> not then
+                Error(sprintf "Chart has no valid sources (%A)" chart_meta.Origins)
             else
 
-            if chart_meta.Origins |> Set.exists _.SuitableForUpload |> not then
-                Error (sprintf "Chart has no valid sources (%A)" chart_meta.Origins)
-            else
-
-            Ok (
+            Ok(
                 {
                     Creators = [ chart_meta.Creator ]
                     Keys = chart_meta.Keys
@@ -155,7 +162,7 @@ module Upload =
                                     count <- count + 1
 
                         count
-                    BPM = (60000.0f<ms/beat> / float32 chart_meta.BPM, 60000.0f<ms/beat> / float32 chart_meta.BPM)
+                    BPM = (60000.0f<ms / beat> / float32 chart_meta.BPM, 60000.0f<ms / beat> / float32 chart_meta.BPM)
                     Origins = chart_meta.Origins |> Set.filter _.SuitableForUpload
                     PreviewTime = chart_meta.PreviewTime
                     BackgroundHash = background_hash
@@ -176,16 +183,21 @@ module Upload =
             )
         | _ -> Error "Chart should be cached/use assets format"
 
-    let private upload_chart_to_backbeat (chart_hash: string, chart: BackbeatChart, song: BackbeatSong) : Async<Result<unit, string>> =
+    let private upload_chart_to_backbeat
+        (chart_hash: string, chart: BackbeatChart, song: BackbeatSong)
+        : Async<Result<unit, string>> =
         async {
             let mutable result = Ok()
-            do! Requests.Charts.Add.post_async(
-                { ChartId = chart_hash; Chart = chart; Song = song },
-                function
-                | Some true -> ()
-                | Some false -> result <- Error "Server replied with error"
-                | None -> result <- Error "No reply from server or unauthenticated"
-            )
+
+            do!
+                Requests.Charts.Add.post_async(
+                    { ChartId = chart_hash; Chart = chart; Song = song },
+                    function
+                    | Some true -> ()
+                    | Some false -> result <- Error "Server replied with error"
+                    | None -> result <- Error "No reply from server or unauthenticated"
+                )
+
             return result
         }
 
@@ -193,34 +205,39 @@ module Upload =
         async {
             match create_backbeat_data chart_meta chart with
             | Error reason -> return Error reason
-            | Ok (bb_chart, bb_song) ->
+            | Ok(bb_chart, bb_song) ->
 
             match! upload_chart_to_cdn chart_meta chart with
             | Error reason -> return Error reason
-            | Ok (hash, files_changed) ->
+            | Ok(hash, files_changed) ->
 
             if files_changed > 0 then
                 Logging.Debug "Uploaded %i new files for '%s'" files_changed chart_meta.Title
 
-            match! upload_chart_to_backbeat (hash, bb_chart, bb_song) with
+            match! upload_chart_to_backbeat(hash, bb_chart, bb_song) with
             | Error reason -> return Error reason
-            | Ok () -> return Ok ()
+            | Ok() -> return Ok()
         }
 
     let has_folder (folder_name: string) =
         interlude_chart_db.Entries
-        |> Seq.where (fun meta -> meta.Packs.Contains folder_name)
-        |> Seq.map (fun meta -> meta.Origins |> Set.exists _.SuitableForUpload && match meta.Audio with AssetLocation.Hash _ -> true | _ -> false)
-        |> fun s -> not (Seq.isEmpty s) && Seq.forall id s
+        |> Seq.where(fun meta -> meta.Packs.Contains(folder_name))
+        |> Seq.map(fun meta ->
+            meta.Origins |> Set.exists _.SuitableForUpload
+            && match meta.Audio with
+               | AssetLocation.Hash _ -> true
+               | _ -> false
+        )
+        |> fun s -> not(Seq.isEmpty s) && Seq.forall id s
 
     let upload_folder (folder_name: string) =
         seq {
-            for chart_meta in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
+            for chart_meta in interlude_chart_db.Entries |> Seq.where(fun meta -> meta.Packs.Contains(folder_name)) do
                 async {
                     match interlude_chart_db.GetChart(chart_meta.Hash) with
                     | Ok chart ->
                         match! upload_chart chart_meta chart with
-                        | Ok () -> Logging.Debug "Uploaded '%s'" chart_meta.Title
+                        | Ok() -> Logging.Debug "Uploaded '%s'" chart_meta.Title
                         | Error reason -> Logging.Warn "Upload of '%s' failed: %s" chart_meta.Title reason
                     | Error reason -> Logging.Error "Loading '%s' from disk failed: %s" chart_meta.Title reason
                 }
@@ -228,10 +245,15 @@ module Upload =
         |> fun upload_tasks -> Async.Parallel(upload_tasks, UPLOAD_POOL_CONCURRENCY)
         |> Async.Ignore
         |> Async.RunSynchronously
+
         Logging.Info "Uploading '%s' complete!" folder_name
 
     let get_etterna_pack (pack_name: string) =
-        OnlineImports.download_by_origin (ChartOrigin.Etterna pack_name, interlude_library, TaskProgress.log_progress_bar pack_name)
+        OnlineImports.download_by_origin(
+            ChartOrigin.Etterna(pack_name),
+            interlude_library,
+            TaskProgress.log_progress_bar pack_name
+        )
         |> Async.RunSynchronously
 
     let etterna_pack_aio (pack_name: string) =
@@ -240,26 +262,35 @@ module Upload =
             upload_folder pack_name
         else
             Logging.Info "'%s' is not installed or needs a re-download" pack_name
+
             match get_etterna_pack pack_name with
-            | Error reason ->
-                Logging.Error "Error installing '%s': %s" pack_name reason
+            | Error reason -> Logging.Error "Error installing '%s': %s" pack_name reason
             | Ok result ->
-                Logging.Info "Installed '%s': %i succeeded and %i skipped" pack_name result.ConvertedCharts result.SkippedCharts.Length
+                Logging.Info
+                    "Installed '%s': %i succeeded and %i skipped"
+                    pack_name
+                    result.ConvertedCharts
+                    result.SkippedCharts.Length
+
                 upload_folder pack_name
 
     let get_etterna_pack_list () =
-        let on_file =
-            File.ReadAllLines PACK_LIST_PATH
-            |> Set.ofSeq
+        let on_file = File.ReadAllLines(PACK_LIST_PATH) |> Set.ofSeq
+
         let top_50 =
-            match WebServices.download_json_async<_> "https://api.etternaonline.com/api/packs?page=1&limit=50&sort=-popularity" |> Async.RunSynchronously with
-            | WebResult.Ok (response: {| data: {| name: string |} array |}) -> response.data |> Array.map _.name
+            match
+                WebServices.download_json_async<_>
+                    "https://api.etternaonline.com/api/packs?page=1&limit=50&sort=-popularity"
+                |> Async.RunSynchronously
+            with
+            | WebResult.Ok(response: {| data: {| name: string |} array |}) -> response.data |> Array.map _.name
             | WebResult.HttpError _ -> [||]
             | WebResult.Exception _ -> [||]
             |> Set.ofArray
+
         let new_list = Set.union on_file top_50
         File.WriteAllLines(PACK_LIST_PATH, new_list)
         new_list
 
     let bulk_etterna_pack_aio () =
-        get_etterna_pack_list () |> Seq.iter etterna_pack_aio
+        get_etterna_pack_list() |> Seq.iter etterna_pack_aio

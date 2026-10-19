@@ -29,12 +29,9 @@ jobs:
     - name: Package Interlude
       id: package
       run: |
-        cd scripts
-        chmod +x ./setup_cli.sh
-        ./setup_cli.sh
-        yavsrg pack_win_x64
-        yavsrg pack_linux_x64
-        echo "VERSION=v$(yavsrg version)" >> $GITHUB_OUTPUT
+        ./scripts/yavsrg.sh pack_win_x64
+        ./scripts/yavsrg.sh pack_linux_x64
+        echo "VERSION=v$(./scripts/yavsrg.sh version)" >> $GITHUB_OUTPUT
         
     - name: Create Release
       uses: ncipollo/release-action@v1

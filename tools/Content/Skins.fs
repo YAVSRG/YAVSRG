@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System
 open System.IO
@@ -16,11 +16,11 @@ module Skins =
 
     let private generate_preview (ns: Noteskin, target_file: string) =
         use img = NoteskinPreview.render ns
-        img.SaveAsPng target_file
+        img.SaveAsPng(target_file)
 
     let private generate_thumbnail (ns: Noteskin, target_file: string) =
         use img = NoteskinPreview.render_thumbnail ns
-        img.SaveAsPng target_file
+        img.SaveAsPng(target_file)
 
     let add_skin (name: string) =
 
@@ -30,12 +30,14 @@ module Skins =
             | Error _ -> SkinRepo.Empty
 
         let skin_folder = Path.Combine(INTERLUDE_SKINS_PATH, name)
-        match Skin.FromPath skin_folder with
+
+        match Skin.FromPath(skin_folder) with
         | Error err -> raise err
         | Ok skin ->
 
         let noteskin_folder = Path.Combine(skin_folder, "Noteskin")
-        match Noteskin.FromPath noteskin_folder with
+
+        match Noteskin.FromPath(noteskin_folder) with
         | Error err -> raise err
         | Ok noteskin ->
 
@@ -46,19 +48,27 @@ module Skins =
                 match msg with
                 | ValidationWarning w ->
                     printfn "Warning: '%s': %s" w.Element w.Message
+
                     match w.SuggestedFix with
-                    | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                    | Some fix ->
+                        printfn "Applying fix '%s'" fix.Description
+                        fix.Action()
                     | None -> ()
                 | ValidationError e ->
                     printfn "Error: '%s': %s" e.Element e.Message
+
                     match e.SuggestedFix with
-                    | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                    | Some fix ->
+                        printfn "Applying fix '%s'" fix.Description
+                        fix.Action()
                     | None -> ()
+
             failwith "Fix validation errors before uploading"
 
         let hud_folder = Path.Combine(skin_folder, "HUD")
-        if Directory.Exists hud_folder then
-            match HudLayout.FromPath hud_folder with
+
+        if Directory.Exists(hud_folder) then
+            match HudLayout.FromPath(hud_folder) with
             | Error err -> raise err
             | Ok hud ->
 
@@ -69,14 +79,21 @@ module Skins =
                         match msg with
                         | ValidationWarning w ->
                             printfn "Warning: '%s': %s" w.Element w.Message
+
                             match w.SuggestedFix with
-                            | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                            | Some fix ->
+                                printfn "Applying fix '%s'" fix.Description
+                                fix.Action()
                             | None -> ()
                         | ValidationError e ->
                             printfn "Error: '%s': %s" e.Element e.Message
+
                             match e.SuggestedFix with
-                            | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                            | Some fix ->
+                                printfn "Applying fix '%s'" fix.Description
+                                fix.Action()
                             | None -> ()
+
                     failwith "Fix validation errors before uploading"
 
         printf "Enter group name for this skin > "
@@ -89,15 +106,9 @@ module Skins =
 
         skin.CompressToZip(Path.Combine(SKINS_ROOT, "files", filename + ".isk")) |> ignore
 
-        generate_preview (
-            noteskin,
-            Path.Combine(SKINS_ROOT, "files", filename + ".png")
-        )
+        generate_preview(noteskin, Path.Combine(SKINS_ROOT, "files", filename + ".png"))
 
-        generate_thumbnail (
-            noteskin,
-            Path.Combine(SKINS_ROOT, "files", (group_name + "__thumbnail.png"))
-        )
+        generate_thumbnail(noteskin, Path.Combine(SKINS_ROOT, "files", (group_name + "__thumbnail.png")))
 
         let updated_repo, new_skin_added =
             SkinRepo.add
@@ -105,9 +116,7 @@ module Skins =
                 group_name
                 version
                 (sprintf "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/%s.isk" filename)
-                (sprintf
-                    "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/%s.png"
-                    filename)
+                (sprintf "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/%s.png" filename)
                 (sprintf
                     "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/%s"
                     (group_name + "__thumbnail.png"))

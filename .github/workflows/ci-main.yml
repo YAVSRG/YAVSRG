@@ -18,21 +18,9 @@ jobs:
       uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 9.0.x
-    
-    - name: Ensure everything builds
-      run: dotnet build
-        
-    - name: Run unit tests
-      run: |
-        cd scripts
-        chmod +x ./run_tests.sh
-        ./run_tests.sh
-        
-    - name: Run formatting checks
-      run: dotnet tool restore && dotnet fantomas --check .
 
-    - name: Check localisation
-      run: bash scripts/check_localisation.sh
+    - name: Perform all CI checks
+      run: bash scripts/ci.sh
         
     - name: Notify of failure in main
       if: failure() && github.repository == 'YAVSRG/YAVSRG'

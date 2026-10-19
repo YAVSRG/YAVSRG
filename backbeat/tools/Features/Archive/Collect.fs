@@ -1,4 +1,4 @@
-﻿namespace Backbeat.Features.Archive
+namespace Backbeat.Features.Archive
 
 open System.Text.RegularExpressions
 

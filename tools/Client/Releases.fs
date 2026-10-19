@@ -1,11 +1,12 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System.IO
 open System.IO.Compression
 
 module Releases =
 
-    let README = """
+    let README =
+        """
 Interlude - Keyboard-based vertically scrolling rhythm game.
 Copyright (C) 2018-2026 Percyqaz
 
@@ -42,6 +43,7 @@ Information, future updates and support available at:
             NfdLibraryFile: string
             ExecutableFile: string
         }
+
         static member WINDOWS_X64 =
             {
                 Name = "win64"
@@ -53,6 +55,7 @@ Information, future updates and support available at:
                 NfdLibraryFile = "nfd.dll"
                 ExecutableFile = "Interlude.exe"
             }
+
         static member LINUX_X64 =
             {
                 Name = "linux-x64"
@@ -64,6 +67,7 @@ Information, future updates and support available at:
                 NfdLibraryFile = "libnfd.so"
                 ExecutableFile = "Interlude"
             }
+
         static member OSX_X64 =
             {
                 Name = "osx-x64"
@@ -75,6 +79,7 @@ Information, future updates and support available at:
                 NfdLibraryFile = "libnfd.dylib"
                 ExecutableFile = "Interlude"
             }
+
         static member OSX_ARM64 =
             {
                 Name = "osx-arm64"
@@ -92,8 +97,7 @@ Information, future updates and support available at:
         let build_dir =
             Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", DOTNET_VERSION, info.RuntimeId)
 
-        let clean_dir =
-            Path.Combine(RELEASES_PATH, $"Interlude-{info.Name}")
+        let clean_dir = Path.Combine(RELEASES_PATH, $"Interlude-{info.Name}")
 
         try
             Directory.Delete(build_dir, true)
@@ -105,13 +109,15 @@ Information, future updates and support available at:
         with _ ->
             ()
 
-        Shell.At(INTERLUDE_SOURCE_PATH)
+        Shell
+            .At(INTERLUDE_SOURCE_PATH)
             .Exec(
                 "dotnet",
                 $"publish --configuration Release -r {info.RuntimeId} -p:PublishSingleFile=True --self-contained true"
             )
+        |> ignore
 
-        Directory.CreateDirectory clean_dir |> ignore
+        Directory.CreateDirectory(clean_dir) |> ignore
 
         File.Copy(
             Path.Combine(YAVSRG_PATH, "engine", "lib", info.RuntimeId, info.BassLibraryFile),
@@ -135,13 +141,11 @@ Information, future updates and support available at:
             Path.Combine(clean_dir, info.SQLiteLibraryFile)
         )
 
-        File.Copy(
-            Path.Combine(build_dir, "publish", info.NfdLibraryFile),
-            Path.Combine(clean_dir, info.NfdLibraryFile)
-        )
+        File.Copy(Path.Combine(build_dir, "publish", info.NfdLibraryFile), Path.Combine(clean_dir, info.NfdLibraryFile))
 
         File.WriteAllText(Path.Combine(clean_dir, "README.txt"), README.Trim() + "\n")
-        if not (info.ExecutableFile.EndsWith "exe") then
+
+        if not(info.ExecutableFile.EndsWith("exe")) then
             File.WriteAllText(Path.Combine(clean_dir, "launch.sh"), "chmod +x ./Interlude\n./Interlude")
 
         printfn "Outputted to: %s" clean_dir
@@ -152,10 +156,14 @@ Information, future updates and support available at:
         ZipFile.CreateFromDirectory(clean_dir, clean_dir + ".zip")
         printfn "Zipped to: %s.zip" clean_dir
 
-    let build_win_x64 () = build_platform BuildPlatformInfo.WINDOWS_X64
+    let build_win_x64 () =
+        build_platform BuildPlatformInfo.WINDOWS_X64
 
-    let build_linux_x64 () = build_platform BuildPlatformInfo.LINUX_X64
+    let build_linux_x64 () =
+        build_platform BuildPlatformInfo.LINUX_X64
 
-    let build_osx_x64 () = build_platform BuildPlatformInfo.OSX_X64
+    let build_osx_x64 () =
+        build_platform BuildPlatformInfo.OSX_X64
 
-    let build_osx_arm64 () = build_platform BuildPlatformInfo.OSX_ARM64
+    let build_osx_arm64 () =
+        build_platform BuildPlatformInfo.OSX_ARM64

@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System.IO
 
@@ -11,12 +11,11 @@ module SourceFiles =
                     yield file
 
             for subdirectory in Directory.GetDirectories(directory) do
-                let subdirectory_name = Path.GetFileName subdirectory
+                let subdirectory_name = Path.GetFileName(subdirectory)
 
                 if subdirectory_name <> "bin" && subdirectory_name <> "obj" then
                     yield! walk_fs_files subdirectory
         }
 
     let walk_fs_file_contents (directory: string) : (string * string) seq =
-        walk_fs_files(directory)
-        |> Seq.map (fun file_path -> file_path, File.ReadAllText(file_path))
+        walk_fs_files(directory) |> Seq.map(fun file_path -> file_path, File.ReadAllText(file_path))

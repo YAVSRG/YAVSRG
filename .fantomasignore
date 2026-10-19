@@ -10,4 +10,3 @@ libraries
 prelude/src
 prelude/playground
 !prelude/src/Formats/osu!
-tools

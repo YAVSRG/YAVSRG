@@ -1,4 +1,4 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System
 open System.IO
@@ -10,7 +10,9 @@ open Prelude.Mods
 module Localisation =
 
     let private load_locale (file: string) : Localisation.LocaleFile =
-        match Localisation.try_load_file(file, Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt")) with
+        match
+            Localisation.try_load_file(file, Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt"))
+        with
         | Ok locale -> locale
         | Error reason -> failwith reason
 
@@ -27,7 +29,7 @@ module Localisation =
         let mutable found = Set.empty<string>
 
         let find x source =
-            if not (found.Contains x) then
+            if not(found.Contains(x)) then
                 found <- Set.add x found
                 sources <- Map.add x source sources
 
@@ -91,8 +93,8 @@ module Localisation =
                 find (sprintf "levelselect.sortby.%s" m) "Level select sorting"
 
         for m in found |> Seq.sort do
-            if unused_check.ContainsKey m then
-                unused_check.Remove m |> ignore
+            if unused_check.ContainsKey(m) then
+                unused_check.Remove(m) |> ignore
             else
                 printfn "'%s' is missing!\nFound in %s" m sources.[m]
 
@@ -120,9 +122,7 @@ module Localisation =
         let locale = load_locale file
 
         let to_rename =
-            locale.Entries.Keys
-            |> Seq.where (fun key -> key.StartsWith before)
-            |> Array.ofSeq
+            locale.Entries.Keys |> Seq.where(fun key -> key.StartsWith(before)) |> Array.ofSeq
 
         printfn "This will rename %i keys:" to_rename.Length
 

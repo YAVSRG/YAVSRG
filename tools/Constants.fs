@@ -1,10 +1,11 @@
-﻿namespace YAVSRG.CLI
+namespace YAVSRG.CLI
 
 open System.IO
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 
-module [<AutoOpen>] Constants =
+[<AutoOpen>]
+module Constants =
 
     type private PathHelper() =
         static member Path([<CallerFilePath; Optional; DefaultParameterValue("")>] path: string) : string =
@@ -20,5 +21,8 @@ module [<AutoOpen>] Constants =
     let DOTNET_VERSION = "net9.0"
 
     let INTERLUDE_ASSETS_PATH = Path.Combine(YAVSRG_PATH, "interlude", "assets")
-    let INTERLUDE_BUILD_RESOURCES_PATH = Path.Combine(YAVSRG_PATH, "interlude", "src", "Resources")
+
+    let INTERLUDE_BUILD_RESOURCES_PATH =
+        Path.Combine(YAVSRG_PATH, "interlude", "src", "Resources")
+
     let INTERLUDE_SOURCE_PATH = Path.Combine(YAVSRG_PATH, "interlude", "src")
