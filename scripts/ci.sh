@@ -25,7 +25,7 @@ if [[ "$status" -ne 0 || -n "$output" ]]; then
 fi
 
 # Formatting
-if output="$(dotnet fantomas --check . 2>&1)"; then
+if output="$(dotnet tool restore && dotnet fantomas --check . 2>&1)"; then
     status=0
 else
     status=$?
