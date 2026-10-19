@@ -37,7 +37,7 @@ Are commands to be executed in a terminal
 	./scripts/yavsrg.sh debug_run
 	```
 	
-	If the game opens, you're all set!
+	If the game opens, you're all set! See the [contributor guide](CONTRIBUTING.md) for the process of submitting fixes or features
 	
     After this, usual `dotnet run` and `dotnet build` commands will work correctly, and your IDE of choice should be able to build and run the game  
     If you don't have a preferred IDE, I would recommend [JetBrains Rider](https://www.jetbrains.com/rider/) for its good F# support

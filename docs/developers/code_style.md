@@ -30,5 +30,4 @@ Bad: `function <| input`
 Good: `function(input)`  
 Reason: It adds another way to write things, again making everything consistent is better
 
-For all other matters of taste, running `./scripts/yavsrg.sh format` immediately applies mine so you don't have to worry about it  
-Don't forget to run this before submitting PRs!
+For all other matters of taste, running `./scripts/yavsrg.sh format` immediately applies mine so you don't have to worry about it
