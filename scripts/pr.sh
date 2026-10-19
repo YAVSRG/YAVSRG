@@ -26,7 +26,7 @@ if [[ "$status" -ne 0 || -n "$output" ]]; then
     exit 1
 fi
 
-./scripts.yavsrg.sh format && git commit -a -m "chore: automatic formatting"
+./scripts/yavsrg.sh format && git commit -a -m "chore: automatic formatting"
 ./scripts/yavsrg.sh locale_fix
 
 echo ""
