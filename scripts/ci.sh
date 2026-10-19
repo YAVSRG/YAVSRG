@@ -6,6 +6,8 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$REPO_ROOT"
 
+chmod +x ./scripts/yavsrg.sh
+
 # Build and test
 dotnet build && dotnet test prelude/tests/Prelude.Tests.fsproj -- NUnit.ConsoleOut=0 && dotnet test online/tests/domain/Interlude.Web.Tests.Domain.fsproj -- NUnit.ConsoleOut=0 || (echo "Everything must build, all tests must pass" || exit 1)
 
