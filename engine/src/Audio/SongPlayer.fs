@@ -184,7 +184,7 @@ type SongPlayer() =
         else enable_pitch_rate_down
 
     member private this.ApplyRateChange() : unit =
-        let time = song.Pause()
+        let time = if song.Playing then song.Pause() else this.PositionRealtime()
         song.ChangeRate(rate, this.RateChangesPitch(rate))
         this.Seek(time)
 

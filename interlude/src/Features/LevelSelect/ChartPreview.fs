@@ -103,9 +103,9 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         elif (%%"difficulty_overlay").Pressed() then
             show_difficulty_overlay <- not show_difficulty_overlay
         elif (%%"pause").Pressed() || (%%"pause_music").Pressed() then
-            if Song.IsPlaying && Song.Time > 0.0f<ms> then
+            if Song.IsPlaying then
                 Song.Pause()
-            elif not Song.IsPlaying && not(Mouse.held Mouse.LEFT) then
+            elif not(Mouse.held Mouse.LEFT) then
                 Song.Resume()
         else
             SelectedChart.change_rate_hotkeys change_rate
@@ -114,7 +114,12 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             let scroll = Mouse.scroll()
 
             if scroll <> 0.0f then
-                Song.Seek(Song.Time - scroll * 40.0f<ms / rate> * Song.Rate)
+                let new_time = Song.Time - scroll * 40.0f<ms / rate> * Song.Rate
+
+                let clamped_time =
+                    new_time |> max(Song.StartOfTimeline(info.WithMods.FirstNote)) |> min info.WithMods.LastNote
+
+                Song.Seek(clamped_time)
 
     override this.Close() : unit =
         change_chart_listener.Dispose()
