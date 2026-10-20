@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library
+namespace Prelude.Data.Library
 
 open System.Collections.Generic
 open Prelude.Data.UserDatabase
@@ -18,25 +18,30 @@ module Sorting =
                 "creator", fun (x, _) -> x.Creator.ToLowerInvariant(), 0.0f, x.Rating
                 "length", fun (x, _) -> "", float32 x.Length, x.Rating
                 "date_installed", fun (x, _) -> "", float32 x.DateAdded, x.Rating
-                "date_played", fun (x, ctx) ->
+                "date_played",
+                fun (x, ctx) ->
                     let date_played =
-                         match ctx.Library.UserData.TryGetCachedChartData(x.Hash) with
-                         | Some d -> d.LastPlayed |> float32
-                         | None -> 0.0f
+                        match ctx.Library.UserData.TryGetCachedChartData(x.Hash) with
+                        | Some d -> d.LastPlayed |> float32
+                        | None -> 0.0f
+
                     "", date_played, x.Rating
-                "accuracy", fun (x, ctx) ->
+                "accuracy",
+                fun (x, ctx) ->
                     match
                         ctx.Library.UserData.GetChartData(x.Hash).PersonalBests
                         |> Bests.ruleset_best_above ctx.RulesetId _.Accuracy ctx.Rate
                     with
-                    | Some (acc, _, _) -> "", float32 acc, x.Rating
+                    | Some(acc, _, _) -> "", float32 acc, x.Rating
                     | None -> "", -2.0f, x.Rating
-                "lamp", fun (x, ctx) ->
+                "lamp",
+                fun (x, ctx) ->
                     let pbs = ctx.Library.UserData.GetChartData(x.Hash).PersonalBests
+
                     match Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate pbs with
-                    | Some (i, _, _) ->
+                    | Some(i, _, _) ->
                         match Bests.ruleset_best_above ctx.RulesetId _.Accuracy ctx.Rate pbs with
-                        | Some (acc, _, _) -> "", float32 i, float32 acc
+                        | Some(acc, _, _) -> "", float32 i, float32 acc
                         | None -> "", float32 i, 0.0f
                     | None -> "", -2.0f, x.Rating
             ]

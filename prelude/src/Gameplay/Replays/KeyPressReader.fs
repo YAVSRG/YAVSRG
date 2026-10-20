@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Replays
+namespace Prelude.Gameplay.Replays
 
 open Prelude
 
@@ -16,10 +16,10 @@ type KeyPressReader(keys: int, replay: ReplaySource) =
     member private this.HandleReplayFrame(time: ChartTime, new_pressed_keys: Bitmask) : unit =
         for k = 0 to keys - 1 do
 
-            if current_pressed_keys.Contains(k) && not (new_pressed_keys.Contains(k)) then
+            if current_pressed_keys.Contains(k) && not(new_pressed_keys.Contains(k)) then
                 this.HandleKeyUp(time, k)
 
-            elif new_pressed_keys.Contains(k) && not (current_pressed_keys.Contains(k)) then
+            elif new_pressed_keys.Contains(k) && not(current_pressed_keys.Contains(k)) then
                 this.HandleKeyDown(time, k)
 
         current_pressed_keys <- new_pressed_keys

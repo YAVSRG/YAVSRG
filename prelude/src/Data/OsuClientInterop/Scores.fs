@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.OsuClientInterop
+namespace Prelude.Data.OsuClientInterop
 
 open System.IO
 open System.Text
@@ -11,30 +11,21 @@ open Prelude.Data.Library
 
 module Scores =
 
-    type ScoreImportResult =
-        {
-            mutable Scores: int
-            mutable NewScores: int
-            mutable Maps: int
-        }
+    type ScoreImportResult = { mutable Scores: int; mutable NewScores: int; mutable Maps: int }
 
     let private import_map_scores
         (result: ScoreImportResult)
         (osu_root_folder: string)
         (beatmap_score_data: OsuScoreDatabase_Beatmap, original_osu_file_first_note: Time, original_osu_file_rate: Rate)
         (chart: Chart, chart_hash: string)
-        (user_db: UserDatabase) : unit =
+        (user_db: UserDatabase)
+        : unit =
 
         for score in beatmap_score_data.Scores do
             let replay_file =
-                Path.Combine(
-                    osu_root_folder,
-                    "Data",
-                    "r",
-                    sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp
-                )
+                Path.Combine(osu_root_folder, "Data", "r", sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp)
 
-            match OsuReplay.TryReadFile replay_file with
+            match OsuReplay.TryReadFile(replay_file) with
             | None -> ()
             | Some replay ->
                 match OsuReplay.to_score replay chart original_osu_file_first_note original_osu_file_rate with
@@ -44,23 +35,21 @@ module Scores =
                     user_db.SaveScore(chart_hash, score)
 
                     result.Scores <- result.Scores + 1
+
                     if not existing_score_replaced then
                         result.NewScores <- result.NewScores + 1
 
-    let private import_osu_scores (osu_root_folder: string, library: Library, progress: ProgressCallback) : ScoreImportResult =
+    let private import_osu_scores
+        (osu_root_folder: string, library: Library, progress: ProgressCallback)
+        : ScoreImportResult =
 
-        let result =
-            {
-                Scores = 0
-                NewScores = 0
-                Maps = 0
-            }
+        let result = { Scores = 0; NewScores = 0; Maps = 0 }
 
-        progress (Generic "Reading osu! database")
+        progress(Generic "Reading osu! database")
 
         let scores =
             use file = Path.Combine(osu_root_folder, "scores.db") |> File.OpenRead
-            Logging.Info "Reading scores database .."
+            Logging.Info("Reading scores database ..")
             use reader = new BinaryReader(file, Encoding.UTF8)
             OsuScoreDatabase.Read(reader)
 
@@ -68,7 +57,7 @@ module Scores =
 
         let main_db =
             use file = Path.Combine(osu_root_folder, "osu!.db") |> File.OpenRead
-            Logging.Info "Reading osu! database .."
+            Logging.Info("Reading osu! database ..")
             use reader = new BinaryReader(file, Encoding.UTF8)
             OsuDatabase.Read(reader)
 
@@ -79,10 +68,7 @@ module Scores =
 
         // MD5 -> osu! beatmap data
         let osu_db_map =
-            main_db.Beatmaps
-            |> Seq.filter (fun b -> b.Mode = 3uy)
-            |> Seq.map (fun b -> b.Hash, b)
-            |> Map.ofSeq
+            main_db.Beatmaps |> Seq.filter(fun b -> b.Mode = 3uy) |> Seq.map(fun b -> b.Hash, b) |> Map.ofSeq
 
         // MD5 -> Imported Interlude data
         let interlude_db_map =
@@ -100,7 +86,7 @@ module Scores =
             if beatmap_score_data.Scores.Length > 0 && beatmap_score_data.Scores.[0].Mode = 3uy then
 
                 match Map.tryFind beatmap_score_data.Hash interlude_db_map with
-                | Some (interlude_hash, original_osu_file_first_note, original_osu_file_rate) ->
+                | Some(interlude_hash, original_osu_file_first_note, original_osu_file_rate) ->
 
                     match library.Charts.GetChart(interlude_hash) with
                     | Error reason -> Logging.Error "Error loading chart '%s': %s" interlude_hash reason
@@ -115,31 +101,40 @@ module Scores =
 
                 | None ->
                     match Map.tryFind beatmap_score_data.Hash osu_db_map with
-                    | None -> Logging.Error "Beatmap %s not imported into Interlude (or known in osu! database?), skipping" beatmap_score_data.Hash
+                    | None ->
+                        Logging.Error
+                            "Beatmap %s not imported into Interlude (or known in osu! database?), skipping"
+                            beatmap_score_data.Hash
                     | Some beatmap_data ->
-                        Logging.Error "Beatmap %s (%s) not imported into Interlude, skipping" beatmap_score_data.Hash beatmap_data.Filename
+                        Logging.Error
+                            "Beatmap %s (%s) not imported into Interlude, skipping"
+                            beatmap_score_data.Hash
+                            beatmap_data.Filename
 
-                    // todo: consider importing song folder here and now
+                // todo: consider importing song folder here and now
 
                 result.Maps <- result.Maps + 1
 
-            progress (Processing (i + 1, scores.Beatmaps.Length))
+            progress(Processing(i + 1, scores.Beatmaps.Length))
 
-        Logging.Info "Finished importing osu! scores: %i scores found from %i maps, +%i new scores imported" result.Scores result.Maps result.NewScores
+        Logging.Info
+            "Finished importing osu! scores: %i scores found from %i maps, +%i new scores imported"
+            result.Scores
+            result.Maps
+            result.NewScores
+
         progress Complete
         result
 
-    let import_osu_scores_async (osu_root_folder: string, library: Library, progress: ProgressCallback) : Async<ScoreImportResult> =
+    let import_osu_scores_async
+        (osu_root_folder: string, library: Library, progress: ProgressCallback)
+        : Async<ScoreImportResult> =
         // todo: make the IO operations actually benefit from async
         async {
             try
-                return import_osu_scores (osu_root_folder, library, progress)
+                return import_osu_scores(osu_root_folder, library, progress)
             with err ->
                 Logging.Error "Unhandled exception while importing osu! scores: %O" err
                 progress Faulted
-                return {
-                    Scores = 0
-                    NewScores = 0
-                    Maps = 0
-                }
+                return { Scores = 0; NewScores = 0; Maps = 0 }
         }

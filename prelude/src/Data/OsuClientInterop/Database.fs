@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.OsuClientInterop
+namespace Prelude.Data.OsuClientInterop
 
 open System
 open System.IO
@@ -121,7 +121,7 @@ module internal OsuDbHelpers =
             bw.Write(0x00uy)
         else
             bw.Write(0x0buy)
-            bw.Write s
+            bw.Write(s)
 
     let read_timing_point (br: BinaryReader) = br.ReadBytes(17) |> ignore
 
@@ -185,6 +185,7 @@ type OsuDatabase_Beatmap =
         LastModified2: int
         ManiaScrollSpeed: byte
     }
+
     static member Read (db_version: int) (br: BinaryReader) =
         try
             {
@@ -245,7 +246,7 @@ type OsuDatabase_Beatmap =
             }
         with err ->
             Logging.Error "Exception occured at position %i" br.BaseStream.Position
-            reraise ()
+            reraise()
 
 type OsuDatabase =
     {
@@ -257,6 +258,7 @@ type OsuDatabase =
         Beatmaps: OsuDatabase_Beatmap array
         UserPermissions: int
     }
+
     static member Read(br: BinaryReader) =
         let version = read_int br
 
@@ -297,8 +299,9 @@ type OsuScoreDatabase_Score =
         Timestamp: int64
         CompressedReplayBytes: byte array option
         OnlineScoreID: int64
-        // Incomplete / may crash if you have target practice scores in your database
+    // Incomplete / may crash if you have target practice scores in your database
     }
+
     member this.IsReplayFile = this.FilePath.IsSome
 
     static member Read(file_path: string option, br: BinaryReader) =
@@ -323,13 +326,13 @@ type OsuScoreDatabase_Score =
             Timestamp = read_long br |> timestamp_0001_to_1601
             CompressedReplayBytes =
                 let length = read_int br
-                if length < 0 then None else Some <| br.ReadBytes length
+                if length < 0 then None else Some <| br.ReadBytes(length)
             OnlineScoreID = read_long br
         }
 
     static member TryReadFile(file_path: string) =
         try
-            use file = File.OpenRead file_path
+            use file = File.OpenRead(file_path)
             use br = new BinaryReader(file)
             Some(OsuScoreDatabase_Score.Read(Some file_path, br))
         with err ->
@@ -337,50 +340,46 @@ type OsuScoreDatabase_Score =
             None
 
     member this.Write(bw: BinaryWriter) =
-        bw.Write this.Mode
-        bw.Write this.Version
+        bw.Write(this.Mode)
+        bw.Write(this.Version)
         write_string bw this.BeatmapHash
         write_string bw this.Player
         write_string bw this.ReplayHash
-        bw.Write this.Count300
-        bw.Write this.Count100
-        bw.Write this.Count50
-        bw.Write this.CountGeki
-        bw.Write this.CountKatu
-        bw.Write this.CountMiss
-        bw.Write this.Score
-        bw.Write this.MaxCombo
-        bw.Write this.PerfectCombo
+        bw.Write(this.Count300)
+        bw.Write(this.Count100)
+        bw.Write(this.Count50)
+        bw.Write(this.CountGeki)
+        bw.Write(this.CountKatu)
+        bw.Write(this.CountMiss)
+        bw.Write(this.Score)
+        bw.Write(this.MaxCombo)
+        bw.Write(this.PerfectCombo)
         bw.Write(int this.ModsUsed)
         write_string bw this.LifeBarGraph
         bw.Write(DateTime.FromFileTimeUtc(this.Timestamp).Ticks)
 
         match this.CompressedReplayBytes with
         | Some b ->
-            bw.Write b.Length
-            bw.Write b
-        | None -> bw.Write -1
+            bw.Write(b.Length)
+            bw.Write(b)
+        | None -> bw.Write(-1)
 
-        bw.Write this.OnlineScoreID
+        bw.Write(this.OnlineScoreID)
 
 type OsuScoreDatabase_Beatmap =
     {
         Hash: string
         Scores: OsuScoreDatabase_Score array
     }
+
     static member Read(br: BinaryReader) =
-        {
-            Hash = read_string br
-            Scores = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Score.Read(None, br))
-        }
+        { Hash = read_string br; Scores = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Score.Read(None, br)) }
 
 type OsuScoreDatabase =
     {
         Version: int
         Beatmaps: OsuScoreDatabase_Beatmap array
     }
+
     static member Read(br: BinaryReader) =
-        {
-            Version = read_int br
-            Beatmaps = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Beatmap.Read br)
-        }
+        { Version = read_int br; Beatmaps = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Beatmap.Read(br)) }

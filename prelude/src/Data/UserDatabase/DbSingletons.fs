@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -7,7 +7,7 @@ open Prelude
 module DbSingletons =
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE singletons (
@@ -19,18 +19,14 @@ module DbSingletons =
 
     let private GET: Query<string, 'T> =
         {
-            SQL =
-                """SELECT Data FROM singletons WHERE Id = @Id;"""
+            SQL = """SELECT Data FROM singletons WHERE Id = @Id;"""
             Parameters = [ "@Id", SqliteType.Text, -1 ]
-            FillParameters = fun p id -> p.String id
-            Read = fun r -> r.Json JSON
+            FillParameters = fun p id -> p.String(id)
+            Read = fun r -> r.Json(JSON)
         }
 
     let get_or_default (id: string) (default_value: 'T) (db: Database) : 'T =
-        GET.Execute id db
-        |> expect
-        |> Array.tryExactlyOne
-        |> Option.defaultValue default_value
+        GET.Execute id db |> expect |> Array.tryExactlyOne |> Option.defaultValue default_value
 
     let private SAVE: NonQuery<string * 'T> =
         {
@@ -40,9 +36,10 @@ module DbSingletons =
                 VALUES (@Id, json(@Data));
             """
             Parameters = [ "@Id", SqliteType.Text, -1; "@Data", SqliteType.Text, -1 ]
-            FillParameters = fun p (id, data: 'T) ->
-                p.String id
-                p.Json JSON data
+            FillParameters =
+                fun p (id, data: 'T) ->
+                    p.String(id)
+                    p.Json JSON data
         }
 
     [<RequiresExplicitTypeArguments>]

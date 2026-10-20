@@ -1,4 +1,4 @@
-﻿namespace Prelude.Backbeat
+namespace Prelude.Backbeat
 
 open System
 open System.IO
@@ -31,19 +31,15 @@ type TableInfo =
         Sections: TableSectionInfo list
         LevelDisplayNames: Map<int, string>
     }
+
     member this.LevelName(level: int) =
-        Map.tryFind level this.LevelDisplayNames
-        |> Option.defaultValue (level.ToString())
+        Map.tryFind level this.LevelDisplayNames |> Option.defaultValue(level.ToString())
 
 [<Json.AutoCodec>]
 type TableChart = { Hash: string; Level: int }
 
 [<Json.AutoCodec>]
-type TableClientFile =
-    {
-        Info: TableInfo
-        Charts: TableChart list
-    }
+type TableClientFile = { Info: TableInfo; Charts: TableChart list }
 
 type Table =
     {
@@ -58,12 +54,12 @@ module Table =
     let load (id: string) : Table option =
         let path = Path.Combine(get_game_folder "Data", "Tables", id + ".table")
 
-        match JSON.FromFile path with
+        match JSON.FromFile(path) with
         | Ok(file: TableClientFile) ->
             Some
                 {
                     Id = id
-                    LastUpdated = DateTimeOffset.op_Implicit(File.GetLastWriteTime path).ToUnixTimeMilliseconds()
+                    LastUpdated = DateTimeOffset.op_Implicit(File.GetLastWriteTime(path)).ToUnixTimeMilliseconds()
                     Info = file.Info
                     Charts = file.Charts
                 }
@@ -72,12 +68,7 @@ module Table =
     let save (table: Table) =
         let path = Path.Combine(get_game_folder "Data", "Tables", table.Id + ".table")
 
-        JSON.ToFile
-            (path, true)
-            {
-                Info = table.Info
-                Charts = table.Charts
-            }
+        JSON.ToFile (path, true) { Info = table.Info; Charts = table.Charts }
 
     let points (info: TableInfo) (level: int, grade: int) =
         // currently hard-coded for SCJ4

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 open System.Collections.Generic
 open Percyqaz.Common
@@ -10,6 +10,7 @@ type internal ChangeTracker<'T> =
     {
         Changes: Dictionary<string, 'T>
     }
+
     static member Empty = { Changes = Dictionary<string, 'T>() }
 
     member this.Add(chart_id: string, value: 'T) : unit =
@@ -82,6 +83,7 @@ and UserDatabase =
             ChangedPersonalBests: ChangeTracker<Map<string, Bests>>
             FastLoaded: bool
         }
+
     member this.TryGetCachedChartData(chart_id: string) : ChartSaveData option =
         lock this.LockObject
         <| fun () ->

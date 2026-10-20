@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Maintenance
+namespace Prelude.Data.Maintenance
 
 open Percyqaz.Common
 open Prelude
@@ -11,22 +11,25 @@ module Patterns =
 
     let recalculate (chart_db: ChartDatabase, progress: ProgressCallback) : Async<unit> =
         chart_db.RecalculationNeeded <- false
+
         async {
             seq {
                 let charts = chart_db.Entries |> Seq.toArray
+
                 for i, entry in Seq.indexed charts do
                     match chart_db.GetChart(entry.Hash) with
                     | Ok chart ->
                         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
-                        yield entry.Hash, difficulty.Overall, PatternReport.from_chart (difficulty, chart)
+                        yield entry.Hash, difficulty.Overall, PatternReport.from_chart(difficulty, chart)
                     | Error reason -> Logging.Warn "Error recalculating patterns for %s: %s" entry.Hash reason
-                    progress (Processing (i + 1, charts.Length))
+
+                    progress(Processing(i + 1, charts.Length))
             }
             |> Seq.chunkBySize 1000
-            |> Seq.iter (fun chunk ->
-                lock chart_db.LockObject <| fun () ->
-                DbCharts.update_calculated_data chunk chart_db.Database
+            |> Seq.iter(fun chunk ->
+                lock chart_db.LockObject <| fun () -> DbCharts.update_calculated_data chunk chart_db.Database
             )
+
             progress Complete
         }
 

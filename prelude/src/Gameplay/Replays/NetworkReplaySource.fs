@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Replays
+namespace Prelude.Gameplay.Replays
 
 open System.IO
 open Percyqaz.Common
@@ -15,10 +15,7 @@ type NetworkReplaySource() =
         member this.Finished = finished
 
         member this.HasNext(time: ChartTime) : bool =
-            if i >= buffer.Count then
-                false
-            else
-                buffer.[i].Time <= time
+            if i >= buffer.Count then false else buffer.[i].Time <= time
 
         member this.GetNext() : ReplayFrame =
             i <- i + 1
@@ -33,6 +30,7 @@ type NetworkReplaySource() =
         member this.EnumerateRecentFrames() : ReplayFrame seq =
             seq {
                 let mutable j = i - 1
+
                 while j >= 0 do
                     yield buffer.[j]
                     j <- j - 1
@@ -45,8 +43,9 @@ type NetworkReplaySource() =
             failwithf "Timestamp for replay data went backwards: %f, %f" timestamp current_chart_time
         else
             current_chart_time <- timestamp
+
             try
-                while not (br.BaseStream.Position = br.BaseStream.Length) do
+                while not(br.BaseStream.Position = br.BaseStream.Length) do
                     buffer.Add(ReplayFrame.ReadFromStream(br))
             with err ->
                 Logging.Error "Error while receiving online replay data: %O" err

@@ -21,6 +21,7 @@ type ThemeConfig =
         AlwaysUseDefaultBackground: bool
         CursorSize: float32
     }
+
     static member Default: ThemeConfig =
         {
             Name = "Unnamed Theme"
@@ -38,8 +39,7 @@ type Theme(storage) as this =
 
     let mutable config: ThemeConfig = ThemeConfig.Default
 
-    do
-        this.ReloadFromDisk()
+    do this.ReloadFromDisk()
 
     member this.Config
         with set conf =
@@ -49,6 +49,7 @@ type Theme(storage) as this =
 
     override this.ReloadFromDisk() =
         base.ReloadFromDisk()
+
         config <-
             match this.TryGetJson<ThemeConfig>(true, "theme.json") with
             | Some data -> data.Validate
@@ -65,11 +66,7 @@ type Theme(storage) as this =
                 name
 
         let rules =
-            {
-                IsRequired = true
-                MustBeSquare = name <> "background"
-                MaxGridSize = (1, 1)
-            }
+            { IsRequired = true; MustBeSquare = name <> "background"; MaxGridSize = (1, 1) }
 
         this.LoadTexture(name, rules, "Textures")
 
@@ -78,7 +75,7 @@ type Theme(storage) as this =
 
     member this.GetFonts() : Stream seq =
         seq {
-            for file in this.GetFiles "Fonts" do
+            for file in this.GetFiles("Fonts") do
                 match Path.GetExtension(file).ToLower() with
                 | ".otf"
                 | ".ttf" ->
@@ -86,7 +83,7 @@ type Theme(storage) as this =
                     | Some s ->
                         // Font loading requires seek
                         use ms = new MemoryStream()
-                        s.CopyTo ms
+                        s.CopyTo(ms)
                         ms.Position <- 0
                         yield ms
                         s.Dispose()
@@ -100,7 +97,7 @@ type Theme(storage) as this =
     static member FromPath(path: string) = new Theme(Folder path)
 
     static member FromFolderName(name: string) =
-        Theme.FromPath(get_game_folder (Path.Combine("Themes", name)))
+        Theme.FromPath(get_game_folder(Path.Combine("Themes", name)))
 
 module Theme =
 

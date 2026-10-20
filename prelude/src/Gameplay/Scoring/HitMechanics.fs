@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Scoring
+namespace Prelude.Gameplay.Scoring
 
 open Prelude
 open Prelude.Charts
@@ -15,13 +15,13 @@ type HitFlags =
     | RELEASE_REQUIRED = 4
     | RELEASE_ACCEPTED = 5
 
-type HitFlagData = TimeArray<struct(GameplayTime array * HitFlags array)>
+type HitFlagData = TimeArray<struct (GameplayTime array * HitFlags array)>
 
 module HitFlagData =
 
     let create_gameplay (note_window: GameplayTime) (release_window: GameplayTime) (note_data: NoteData) : HitFlagData =
         note_data.Notes
-        |> TimeArray.map (fun nr ->
+        |> TimeArray.map(fun nr ->
             let deltas = Array.create note_data.Keys note_window
             let statuses = Array.create note_data.Keys HitFlags.NOTHING
 
@@ -47,7 +47,10 @@ type private HitDetection =
 
 module private HitMechanics =
 
-    let interlude (hit_data: HitFlagData, early_window: Time, late_window: Time, cbrush_window_raw: GameplayTime, rate: Rate) (k: int, start_index: int, now: Time) : HitDetection =
+    let interlude
+        (hit_data: HitFlagData, early_window: Time, late_window: Time, cbrush_window_raw: GameplayTime, rate: Rate)
+        (k: int, start_index: int, now: Time)
+        : HitDetection =
         let mutable i = start_index
         let mutable closest_bad_note_delta = late_window
         let mutable closest_note_index = -1
@@ -56,8 +59,8 @@ module private HitMechanics =
         let end_of_window = now - early_window
         let cbrush_window = cbrush_window_raw * rate
 
-        assert(cbrush_window >= 0.0f<ms>)
-        assert(early_window <= 0.0f<ms>)
+        assert (cbrush_window >= 0.0f<ms>)
+        assert (early_window <= 0.0f<ms>)
         //assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
         //assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
@@ -76,10 +79,7 @@ module private HitMechanics =
                 if abs closest_note_delta < cbrush_window then
                     i <- hit_data.Length
             // Find hit note that got hit earlier than the cbrush window, and track how close it is
-            elif
-                status.[k] = HitFlags.HIT_ACCEPTED
-                && deltas.[k] <= -cbrush_window_raw
-            then
+            elif status.[k] = HitFlags.HIT_ACCEPTED && deltas.[k] <= -cbrush_window_raw then
                 if abs closest_bad_note_delta > abs delta then
                     closest_bad_note_delta <- delta
 
@@ -89,18 +89,21 @@ module private HitMechanics =
             if abs closest_bad_note_delta < abs closest_note_delta then
                 BLOCKED
             else
-                FOUND (closest_note_index, closest_note_delta)
+                FOUND(closest_note_index, closest_note_delta)
         else
             NOTFOUND
 
-    let etterna (hit_data: HitFlagData, early_window: Time, late_window: Time) (k: int, start_index: int, now: Time) : HitDetection =
+    let etterna
+        (hit_data: HitFlagData, early_window: Time, late_window: Time)
+        (k: int, start_index: int, now: Time)
+        : HitDetection =
         let mutable i = start_index
         let mutable closest_note_index = -1
         let mutable closest_note_delta = 0.0f<ms>
         let start_of_window = now - late_window
         let end_of_window = now - early_window
 
-        assert(early_window <= 0.0f<ms>)
+        assert (early_window <= 0.0f<ms>)
         //assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
         //assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
@@ -116,12 +119,12 @@ module private HitMechanics =
 
             i <- i + 1
 
-        if closest_note_index >= 0 then
-            FOUND (closest_note_index, closest_note_delta)
-        else
-            NOTFOUND
+        if closest_note_index >= 0 then FOUND(closest_note_index, closest_note_delta) else NOTFOUND
 
-    let osu_mania (hit_data: HitFlagData, early_window: Time, late_window: Time) (k: int, start_index: int, now: Time) : HitDetection =
+    let osu_mania
+        (hit_data: HitFlagData, early_window: Time, late_window: Time)
+        (k: int, start_index: int, now: Time)
+        : HitDetection =
         let mutable i = start_index
         let mutable candidate_note_index = -1
         let mutable candidate_note_delta = 0.0f<ms>
@@ -129,7 +132,7 @@ module private HitMechanics =
         let start_of_window = now - late_window
         let end_of_window = now - early_window
 
-        assert(early_window <= 0.0f<ms>)
+        assert (early_window <= 0.0f<ms>)
         //assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
         //assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
@@ -149,9 +152,6 @@ module private HitMechanics =
 
             i <- i + 1
 
-        if blocked then
-            BLOCKED
-        elif candidate_note_index >= 0 then
-            FOUND (candidate_note_index, candidate_note_delta)
-        else
-            NOTFOUND
+        if blocked then BLOCKED
+        elif candidate_note_index >= 0 then FOUND(candidate_note_index, candidate_note_delta)
+        else NOTFOUND

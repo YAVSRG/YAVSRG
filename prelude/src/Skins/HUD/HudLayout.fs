@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.HudLayouts
+namespace Prelude.Skins.HudLayouts
 
 open System.IO
 open System.IO.Compression
@@ -9,8 +9,7 @@ type HudLayout(storage) as this =
 
     let mutable config: HudConfig = HudConfig.Default
 
-    do
-        this.ReloadFromDisk()
+    do this.ReloadFromDisk()
 
     member this.Config
         with set conf =
@@ -20,6 +19,7 @@ type HudLayout(storage) as this =
 
     override this.ReloadFromDisk() =
         base.ReloadFromDisk()
+
         config <-
             match this.TryGetJson<HudConfig>(true, "hud.json") with
             | Some data -> data // todo: data.Validate method
@@ -29,12 +29,11 @@ type HudLayout(storage) as this =
         this.LoadTexture(name, HudTextureRules.get this.Config name)
 
     member this.RequiredTextures =
-        HudTextureRules.list ()
-        |> Seq.filter (HudTextureRules.get this.Config >> _.IsRequired)
+        HudTextureRules.list() |> Seq.filter(HudTextureRules.get this.Config >> _.IsRequired)
 
     member this.Validate() : ValidationMessage seq =
         seq {
-            for texture_id in HudTextureRules.list () do
+            for texture_id in HudTextureRules.list() do
                 yield! this.ValidateTexture(texture_id, HudTextureRules.get this.Config texture_id)
         }
 
@@ -43,9 +42,9 @@ type HudLayout(storage) as this =
 
     static member FromPath(path: string) =
         try
-            new HudLayout(Folder path)
-            |> Ok
-        with err -> Error err
+            new HudLayout(Folder path) |> Ok
+        with err ->
+            Error err
 
     static member Exists(path: string) =
-        Directory.Exists path && File.Exists (Path.Combine(path, "hud.json"))
+        Directory.Exists(path) && File.Exists(Path.Combine(path, "hud.json"))

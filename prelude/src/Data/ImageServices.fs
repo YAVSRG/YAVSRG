@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data
+namespace Prelude.Data
 
 open System
 open System.IO
@@ -28,7 +28,7 @@ module ImageServices =
                 async {
                     let cached_file_name =
                         let uri = Uri(url)
-                        let name = Uri.UnescapeDataString(uri.Segments[uri.Segments.Length - 1])
+                        let name = Uri.UnescapeDataString(uri.Segments.[uri.Segments.Length - 1])
                         Path.Combine(get_game_folder("Downloads"), name)
 
                     if File.Exists(cached_file_name) then

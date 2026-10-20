@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Scoring
+namespace Prelude.Gameplay.Scoring
 
 open Prelude
 open Prelude.Charts
@@ -35,6 +35,7 @@ type private HoldStateInternal =
     | H_REGRABBED
     | H_MISSED_HEAD_DROPPED
     | H_MISSED_HEAD_REGRABBED
+
     member this.IsDropped =
         match this with
         | H_DROPPED
@@ -42,6 +43,7 @@ type private HoldStateInternal =
         | H_MISSED_HEAD_DROPPED
         | H_MISSED_HEAD_REGRABBED -> true
         | _ -> false
+
     member this.MissedHead =
         match this with
         | H_MISSED_HEAD_DROPPED
@@ -56,6 +58,7 @@ type HoldState =
     | Dropped
     | MissedHead
     | InTheFuture
+
     member this.ShowInReceptor = this = Holding || this = Dropped || this = Released
 
 /// This processor takes notes, replay data and a ruleset and outputs internal gameplay event markers for how the inputs map to certain actions like hitting a note
@@ -70,24 +73,26 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
     let early_note_window_raw, late_note_window_raw = ruleset.NoteWindows
     let early_release_window_raw, late_release_window_raw = ruleset.ReleaseWindows
 
-    let early_note_window_scaled, late_note_window_scaled = early_note_window_raw * rate, late_note_window_raw * rate
-    let early_release_window_scaled, late_release_window_scaled = early_release_window_raw * rate, late_release_window_raw * rate
+    let early_note_window_scaled, late_note_window_scaled =
+        early_note_window_raw * rate, late_note_window_raw * rate
+
+    let early_release_window_scaled, late_release_window_scaled =
+        early_release_window_raw * rate, late_release_window_raw * rate
 
     let early_window_scaled = min early_release_window_scaled early_note_window_scaled
     let late_window_scaled = max late_release_window_scaled late_note_window_scaled
 
     let hold_states = Array.create note_data.Keys (H_NOTHING, -1)
 
-    let hit_data = HitFlagData.create_gameplay late_note_window_raw late_release_window_raw note_data
+    let hit_data =
+        HitFlagData.create_gameplay late_note_window_raw late_release_window_raw note_data
 
     let hit_mechanics =
         match ruleset.HitMechanics.NotePriority with
         | NotePriority.Interlude cbrush_window ->
-            HitMechanics.interlude (hit_data, early_note_window_scaled, late_note_window_scaled, cbrush_window, rate)
-        | NotePriority.OsuMania ->
-            HitMechanics.osu_mania (hit_data, early_note_window_scaled, late_note_window_scaled)
-        | NotePriority.Etterna ->
-            HitMechanics.etterna (hit_data, early_note_window_scaled, late_note_window_scaled)
+            HitMechanics.interlude(hit_data, early_note_window_scaled, late_note_window_scaled, cbrush_window, rate)
+        | NotePriority.OsuMania -> HitMechanics.osu_mania(hit_data, early_note_window_scaled, late_note_window_scaled)
+        | NotePriority.Etterna -> HitMechanics.etterna(hit_data, early_note_window_scaled, late_note_window_scaled)
 
     let mutable expired_notes_index = 0
 
@@ -111,7 +116,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
                     let { Data = struct (head_deltas, _) } = hit_data.[head_index]
 
-                    this.HandleEvent
+                    this.HandleEvent(
                         {
                             Index = tail_search_index
                             Time = chart_time
@@ -126,6 +131,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                                     hold_state.MissedHead
                                 )
                         }
+                    )
 
                     tail_search_index <- hit_data.Length
 
@@ -148,10 +154,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
         elif i > index then
             let { Data = struct (_, flags) } = hit_data.[index]
 
-            if flags.[k] <> HitFlags.HIT_HOLD_REQUIRED then
-                HoldState.Released
-            else
-                HoldState.MissedHead
+            if flags.[k] <> HitFlags.HIT_HOLD_REQUIRED then HoldState.Released else HoldState.MissedHead
         else
             HoldState.InTheFuture
 
@@ -159,7 +162,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
         let { Data = struct (_, flags) } = hit_data.[index]
         flags.[k] = HitFlags.HIT_ACCEPTED
 
-    member this.Finished : bool = expired_notes_index = hit_data.Length
+    member this.Finished: bool = expired_notes_index = hit_data.Length
 
     /// Result of calling this:
     ///  notes.[expired_notes_index - 1].Time < now - LATE WINDOW
@@ -170,32 +173,35 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
         let now = first_note + chart_time
         let end_of_search = now - late_window_scaled
 
-        while expired_notes_index < hit_data.Length
-              && hit_data.[expired_notes_index].Time < end_of_search do
-            let { Time = t; Data = struct(deltas, status) } = hit_data.[expired_notes_index]
+        while expired_notes_index < hit_data.Length && hit_data.[expired_notes_index].Time < end_of_search do
+            let { Time = t; Data = struct (deltas, status) } = hit_data.[expired_notes_index]
 
             for k = 0 to note_data.Keys - 1 do
 
                 if status.[k] = HitFlags.HIT_REQUIRED then
-                    this.HandleEvent
+                    this.HandleEvent(
                         {
                             Index = expired_notes_index
                             Time = t - first_note + late_window_scaled
                             Column = k
                             Inner = HIT(deltas.[k], true)
                         }
+                    )
+
                     status.[k] <- HitFlags.HIT_ACCEPTED
 
                 elif status.[k] = HitFlags.HIT_HOLD_REQUIRED then
                     hold_states.[k] <- H_MISSED_HEAD_DROPPED, expired_notes_index
 
-                    this.HandleEvent
+                    this.HandleEvent(
                         {
                             Index = expired_notes_index
                             Time = t - first_note + late_window_scaled
                             Column = k
                             Inner = HOLD(deltas.[k], true)
                         }
+                    )
+
                     status.[k] <- HitFlags.HIT_ACCEPTED
 
                 elif status.[k] = HitFlags.RELEASE_REQUIRED then
@@ -212,13 +218,15 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
                     let { Data = struct (head_deltas, _) } = hit_data.[snd hold_states.[k]]
 
-                    this.HandleEvent
+                    this.HandleEvent(
                         {
                             Index = expired_notes_index
                             Time = t - first_note + late_window_scaled
                             Column = k
                             Inner = RELEASE(deltas.[k], true, overhold, dropped, head_deltas.[k], missed_head)
                         }
+                    )
+
                     status.[k] <- HitFlags.RELEASE_ACCEPTED
 
                     match hold_states.[k] with
@@ -228,7 +236,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
             expired_notes_index <- expired_notes_index + 1
 
     override this.HandleKeyDown(chart_time: ChartTime, k: int) : unit =
-        this.MissUnhitExpiredNotes chart_time
+        this.MissUnhitExpiredNotes(chart_time)
         let now = first_note + chart_time
 
         let mutable start_of_search_index = expired_notes_index
@@ -237,22 +245,23 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
               && hit_data.[start_of_search_index].Time < now - late_note_window_scaled do
             start_of_search_index <- start_of_search_index + 1
 
-        match hit_mechanics (k, start_of_search_index, now) with
+        match hit_mechanics(k, start_of_search_index, now) with
         | BLOCKED -> ()
-        | FOUND (index, delta) ->
+        | FOUND(index, delta) ->
             this.KillExistingHold(chart_time, k)
             let { Data = struct (deltas, status) } = hit_data.[index]
             let is_hold_head = status.[k] <> HitFlags.HIT_REQUIRED
             status.[k] <- HitFlags.HIT_ACCEPTED
             deltas.[k] <- delta / rate
 
-            this.HandleEvent
+            this.HandleEvent(
                 {
                     Index = index
                     Time = chart_time
                     Column = k
                     Inner = if is_hold_head then HOLD(deltas.[k], false) else HIT(deltas.[k], false)
                 }
+            )
             // Begin tracking if it's a hold note
             if is_hold_head then
                 hold_states.[k] <- H_HOLDING, index
@@ -261,34 +270,39 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
             match hold_states.[k] with
             | H_MISSED_HEAD_DROPPED, i ->
                 hold_states.[k] <- H_MISSED_HEAD_REGRABBED, i
-                this.HandleEvent
+
+                this.HandleEvent(
                     {
                         Index = i
                         Time = chart_time
                         Column = k
                         Inner = REGRAB_HOLD
                     }
+                )
             | H_DROPPED, i ->
                 hold_states.[k] <- H_REGRABBED, i
-                this.HandleEvent
+
+                this.HandleEvent(
                     {
                         Index = i
                         Time = chart_time
                         Column = k
                         Inner = REGRAB_HOLD
                     }
+                )
             | H_NOTHING, _ when chart_time > 0.0f<ms> ->
-                this.HandleEvent
+                this.HandleEvent(
                     {
                         Index = expired_notes_index
                         Time = chart_time
                         Column = k
                         Inner = GHOST_TAP
                     }
+                )
             | _ -> ()
 
     override this.HandleKeyUp(chart_time: ChartTime, k: int) : unit =
-        this.MissUnhitExpiredNotes chart_time
+        this.MissUnhitExpiredNotes(chart_time)
         let now = first_note + chart_time
 
         match hold_states.[k] with
@@ -330,7 +344,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
                 let hold_state = fst hold_states.[k]
 
-                this.HandleEvent
+                this.HandleEvent(
                     {
                         Index = found
                         Time = chart_time
@@ -345,6 +359,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                                 hold_state.MissedHead
                             )
                     }
+                )
 
                 hold_states.[k] <- H_NOTHING, head_index
             else
@@ -353,35 +368,38 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                 | H_HOLDING, i
                 | H_REGRABBED, i ->
                     hold_states.[k] <- H_DROPPED, i
-                    this.HandleEvent
+
+                    this.HandleEvent(
                         {
                             Index = i
                             Time = chart_time
                             Column = k
                             Inner = DROP_HOLD
                         }
+                    )
                 | H_MISSED_HEAD_REGRABBED, i ->
                     hold_states.[k] <- H_MISSED_HEAD_DROPPED, i
-                    this.HandleEvent
+
+                    this.HandleEvent(
                         {
                             Index = i
                             Time = chart_time
                             Column = k
                             Inner = DROP_HOLD
                         }
+                    )
                 | _ -> ()
         | _ -> ()
 
     /// Result of calling this with a particular `chart_time`:
     /// - All replay inputs up to `chart_time` have been processed into hits by finding which notes/releases they correspond to with what timing
     /// - Notes where the time has passed to hit them, with no input mapping to them, have been processed as misses
-
     /// Expected to be called with monotonically increasing values of `chart_time` during gameplay for live scoring
     /// For processing an entire score instantly pass in Time.infinity or any time higher than the duration of the chart + late window
 
     member this.Update(chart_time: ChartTime) : unit =
-        this.PollReplay chart_time // Process all key presses and releases up until now
-        this.MissUnhitExpiredNotes chart_time // Then process any missed notes up until now if needed
+        this.PollReplay(chart_time) // Process all key presses and releases up until now
+        this.MissUnhitExpiredNotes(chart_time) // Then process any missed notes up until now if needed
 
     abstract member HandleEvent: GameplayEvent -> unit
 
@@ -404,6 +422,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                 elif flags.[k] = HitFlags.RELEASE_REQUIRED then
                     flags.[k] <- HitFlags.RELEASE_ACCEPTED
                     hold_tails_remaining <- hold_tails_remaining.Remove(k)
+
                 deltas.[k] <- -infinityf * 1.0f<ms / rate>
 
             i <- i + 1
@@ -418,7 +437,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                     deltas.[k] <- -infinityf * 1.0f<ms / rate>
 
             i <- i + 1
-        
+
     member this.ProcessEntireReplay() : unit =
         // todo: assert that replay has full data
         this.Update(Time.infinity)

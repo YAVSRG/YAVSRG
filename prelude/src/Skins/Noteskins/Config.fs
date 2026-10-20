@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Noteskins
+namespace Prelude.Skins.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -23,6 +23,7 @@ type NoteExplosionConfig =
         Duration: float32<ms / rate>
         ExpandAmount: float32
     }
+
     static member Default =
         {
             Scale = 1.0f
@@ -49,6 +50,7 @@ type HoldExplosionConfig =
         Duration: float32<ms / rate>
         ExpandAmount: float32
     }
+
     member this.UseBuiltInAnimation =
         not this.UseReleaseExplosion || this.ReleaseUseBuiltInAnimation
 
@@ -147,6 +149,7 @@ type NoteskinConfig =
         /// Should be false for skins with crisp pixel art edges, and true for skins with smooth edges that should stay smooth at high resolution
         LinearSampling: bool
     }
+
     static member Default =
         {
             FlipHoldTail = true
@@ -160,17 +163,7 @@ type NoteskinConfig =
             PlayfieldAlignment = 0.5f, 0.5f
             ColumnWidth = 150.0f
             UseKeymodeSpecificColumnWidth = false
-            KeymodeSpecificColumnWidth =
-                [|
-                    150.0f
-                    150.0f
-                    150.0f
-                    150.0f
-                    150.0f
-                    150.0f
-                    150.0f
-                    150.0f
-                |]
+            KeymodeSpecificColumnWidth = [| 150.0f; 150.0f; 150.0f; 150.0f; 150.0f; 150.0f; 150.0f; 150.0f |]
             ColumnSpacing = 0.0f
             UseAdvancedColumnSpacing = false
             AdvancedColumnSpacing =
@@ -252,7 +245,7 @@ type NoteskinConfig =
             Rotations =
                 if
                     this.Rotations.Length = 8
-                    && Array.indexed this.Rotations |> Array.forall (fun (i, a) -> a.Length = 3 + i)
+                    && Array.indexed this.Rotations |> Array.forall(fun (i, a) -> a.Length = 3 + i)
                 then
                     this.Rotations
                 else
@@ -264,8 +257,7 @@ type NoteskinConfig =
             AdvancedColumnSpacing =
                 if
                     this.AdvancedColumnSpacing.Length = 8
-                    && Array.indexed this.AdvancedColumnSpacing
-                       |> Array.forall (fun (i, a) -> a.Length = 2 + i)
+                    && Array.indexed this.AdvancedColumnSpacing |> Array.forall(fun (i, a) -> a.Length = 2 + i)
                 then
                     this.AdvancedColumnSpacing
                 else
@@ -277,7 +269,7 @@ type NoteskinConfig =
             ColumnLightColors =
                 if
                     this.ColumnLightColors.Length = 8
-                    && Array.indexed this.ColumnLightColors |> Array.forall (fun (i, a) -> a.Length = 3 + i)
+                    && Array.indexed this.ColumnLightColors |> Array.forall(fun (i, a) -> a.Length = 3 + i)
                 then
                     this.ColumnLightColors
                 else
@@ -289,7 +281,7 @@ type NoteskinConfig =
             ReceptorColors =
                 if
                     this.ReceptorColors.Length = 8
-                    && Array.indexed this.ReceptorColors |> Array.forall (fun (i, a) -> a.Length = 3 + i)
+                    && Array.indexed this.ReceptorColors |> Array.forall(fun (i, a) -> a.Length = 3 + i)
                 then
                     this.ReceptorColors
                 else
@@ -307,12 +299,9 @@ type NoteskinConfig =
             Array.create (keymode - 1) this.ColumnSpacing
 
     member this.KeymodeColumnWidth(keymode: int) : float32 =
-        if this.UseKeymodeSpecificColumnWidth then
-            this.KeymodeSpecificColumnWidth.[keymode - 3]
-        else
-            this.ColumnWidth
+        if this.UseKeymodeSpecificColumnWidth then this.KeymodeSpecificColumnWidth.[keymode - 3] else this.ColumnWidth
 
-    member this.DefaultColumnWidth = this.KeymodeColumnWidth 4
+    member this.DefaultColumnWidth = this.KeymodeColumnWidth(4)
 
 type NoteskinTextureRules =
     {
@@ -320,21 +309,18 @@ type NoteskinTextureRules =
         MustBeSquare: NoteskinConfig -> bool
         MaxGridSize: NoteskinConfig -> int * int
     }
+
     member this.Evaluate(config: NoteskinConfig) : TextureRules =
         {
-            IsRequired = this.IsRequired config
-            MustBeSquare = this.MustBeSquare config
-            MaxGridSize = this.MaxGridSize config
+            IsRequired = this.IsRequired(config)
+            MustBeSquare = this.MustBeSquare(config)
+            MaxGridSize = this.MaxGridSize(config)
         }
 
 module NoteskinTextureRules =
 
     let DEFAULT =
-        {
-            IsRequired = K true
-            MustBeSquare = K true
-            MaxGridSize = K(16, 32)
-        }
+        { IsRequired = K true; MustBeSquare = K true; MaxGridSize = K(16, 32) }
 
     let TEXTURES: Map<string, NoteskinTextureRules> =
         Map.ofList
@@ -342,51 +328,30 @@ module NoteskinTextureRules =
                 "note", DEFAULT
                 "holdhead", DEFAULT
                 "holdbody", DEFAULT
-                "holdtail",
-                { DEFAULT with
-                    IsRequired = _.UseHoldTailTexture
-                }
+                "holdtail", { DEFAULT with IsRequired = _.UseHoldTailTexture }
                 "receptor",
                 {
                     IsRequired = _.UseReceptors
                     MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Receptors
                     MaxGridSize = K(20, 32)
                 }
-                "judgementline",
-                {
-                    IsRequired = _.UseJudgementLine
-                    MustBeSquare = K false
-                    MaxGridSize = K(1, 1)
-                }
-                "noteexplosion",
-                { DEFAULT with
-                    IsRequired = _.UseExplosions
-                }
-                "holdexplosion",
-                { DEFAULT with
-                    IsRequired = _.UseExplosions
-                }
+                "judgementline", { IsRequired = _.UseJudgementLine; MustBeSquare = K false; MaxGridSize = K(1, 1) }
+                "noteexplosion", { DEFAULT with IsRequired = _.UseExplosions }
+                "holdexplosion", { DEFAULT with IsRequired = _.UseExplosions }
                 "releaseexplosion",
                 { DEFAULT with
                     IsRequired = fun config -> config.UseExplosions && config.HoldExplosionSettings.UseReleaseExplosion
                 }
                 "receptorlighting",
-                {
-                    IsRequired = _.EnableColumnLight
-                    MustBeSquare = K false
-                    MaxGridSize = K(10, 32)
-                }
-                "stageleft",
-                {
-                    IsRequired = _.EnableStageTextures
-                    MustBeSquare = K false
-                    MaxGridSize = K(1, 1)
-                }
+                { IsRequired = _.EnableColumnLight; MustBeSquare = K false; MaxGridSize = K(10, 32) }
+                "stageleft", { IsRequired = _.EnableStageTextures; MustBeSquare = K false; MaxGridSize = K(1, 1) }
                 "stageright",
                 {
-                    IsRequired = fun config -> config.EnableStageTextures
-                    MustBeSquare = K false
-                    MaxGridSize = K(1, 1)
+                    IsRequired =
+                        fun config ->
+                            config.EnableStageTextures
+                            MustBeSquare = K false
+                            MaxGridSize = K(1, 1)
                 }
             ]
 

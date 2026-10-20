@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.StepMania
+namespace Prelude.Formats.StepMania
 
 open System.IO
 open FParsec
@@ -15,27 +15,26 @@ module StepmaniaParser =
     let private token =
         let normal_char = noneOf ":;"
         let escaped_char = skipChar '\\' >>. anyChar
-        manyChars (notFollowedBy (newline .>> skipChar '#') >>. (escaped_char <|> normal_char)) |>> fun s -> s.Trim()
+        manyChars(notFollowedBy(newline .>> skipChar '#') >>. (escaped_char <|> normal_char)) |>> fun s -> s.Trim()
 
-    let private header_value = (spaces >>. (skipChar '#' >>. token .>> separator) .>>. (sepBy1 token separator) .>> skipRestOfLine true)
+    let private header_value =
+        (spaces >>. (skipChar '#' >>. token .>> separator) .>>. (sepBy1 token separator) .>> skipRestOfLine true)
 
     let private header_value_or_discard_line =
         (header_value |>> Some) <|> (many1CharsTill anyChar (pchar '\n') >>% None)
 
     let private parse_header: Parser<Header, unit> =
-        many header_value_or_discard_line
-        |>> List.choose id
-        .>> eof
+        many header_value_or_discard_line |>> List.choose id .>> eof
 
     // Parse valid note rows
 
-    let private parse_note_row = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
+    let private parse_note_row = many((many1Chars(anyOf "01234MLF")) .>> spaces)
 
-    let private comment = optional (skipString "//" >>. skipRestOfLine true >>. spaces)
+    let private comment = optional(skipString "//" >>. skipRestOfLine true >>. spaces)
 
     let private parse_measures =
-        (optional (spaces >>. comment .>> spaces))
-        >>. (sepBy parse_note_row (pchar ',' .>> spaces .>> (optional (comment .>> spaces))))
+        (optional(spaces >>. comment .>> spaces))
+        >>. (sepBy parse_note_row (pchar ',' .>> spaces .>> (optional(comment .>> spaces))))
         .>> eof
 
     // Parse BPMs and STOPs
@@ -63,7 +62,7 @@ module StepmaniaParser =
     let private read_stepmania_data header =
         let f s (key, values) =
             match key, values with
-            | "TITLE", t :: _  when t <> "" -> { s with TITLE = t }
+            | "TITLE", t :: _ when t <> "" -> { s with TITLE = t }
             | "SUBTITLE", t :: _ when t <> "" -> { s with SUBTITLE = t }
             | "ARTIST", t :: _ when t <> "" -> { s with ARTIST = t }
             | "TITLETRANSLIT", t :: _ when t <> "" -> { s with TITLETRANSLIT = t }
@@ -81,31 +80,21 @@ module StepmaniaParser =
                 | Success(result, _, _) ->
                     { s with
                         BPMS =
-                            result
-                            |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b * 1.0f<beat / minute>))
+                            result |> List.map(fun (a, b) -> (float32 a * 1.0f<beat>, float32 b * 1.0f<beat / minute>))
                     }
                 | Failure(error, _, _) -> failwith error
             | "STOPS", ss :: _ ->
                 match run parse_pairs (ss.ReplaceLineEndings("").Trim ',') with
                 | Success(result, _, _) ->
-                    { s with
-                        STOPS = result |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b))
-                    }
+                    { s with STOPS = result |> List.map(fun (a, b) -> (float32 a * 1.0f<beat>, float32 b)) }
                 | Failure _ -> s
             | "SAMPLESTART", v :: _ when v <> "" -> { s with SAMPLESTART = float32 v }
             | "SAMPLELENGTH", v :: _ when v <> "" -> { s with SAMPLELENGTH = float32 v }
-            | "DISPLAYBPM", "*" :: _ ->
-                { s with
-                    DISPLAYBPM = (0.0f<beat / minute>, 999.0f<beat / minute>)
-                }
+            | "DISPLAYBPM", "*" :: _ -> { s with DISPLAYBPM = (0.0f<beat / minute>, 999.0f<beat / minute>) }
             | "DISPLAYBPM", v1 :: v2 :: _ when v2 <> "" ->
-                { s with
-                    DISPLAYBPM = (float32 v1 * 1.0f<beat / minute>, float32 v2 * 1.0f<beat / minute>)
-                }
+                { s with DISPLAYBPM = (float32 v1 * 1.0f<beat / minute>, float32 v2 * 1.0f<beat / minute>) }
             | "DISPLAYBPM", v :: _ when v <> "" ->
-                { s with
-                    DISPLAYBPM = float32 v |> fun x -> (x * 1.0f<beat / minute>, x * 1.0f<beat / minute>)
-                }
+                { s with DISPLAYBPM = float32 v |> fun x -> (x * 1.0f<beat / minute>, x * 1.0f<beat / minute>) }
             | "SELECTABLE", "YES" :: _ -> { s with SELECTABLE = true }
             | "SELECTABLE", "NO" :: _ -> { s with SELECTABLE = false }
             | "NOTES", steps_type :: author :: difficulty_type :: foot_meter :: _groove :: notes :: _ ->
@@ -138,10 +127,10 @@ module StepmaniaParser =
     let parse_file path : Result<StepManiaFile, string> =
         try
             match runParserOnFile parse_stepmania_file () path System.Text.Encoding.UTF8 with
-            | Success(result, _, _) -> Result.Ok result
-            | Failure(error_message, _, _) -> Result.Error error_message
-        with
-        | :? IOException as exn -> Result.Error exn.Message
+            | Success(result, _, _) -> Result.Ok(result)
+            | Failure(error_message, _, _) -> Result.Error(error_message)
+        with :? IOException as exn ->
+            Result.Error(exn.Message)
 
 type StepMania() =
     static member FromFile(path: string) : Result<StepManiaFile, string> = StepmaniaParser.parse_file path

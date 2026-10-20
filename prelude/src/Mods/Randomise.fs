@@ -1,4 +1,4 @@
-﻿namespace Prelude.Mods
+namespace Prelude.Mods
 
 open Prelude
 open Prelude.Charts
@@ -8,12 +8,14 @@ module Randomise =
     let shuffle (seed: int) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
         let random = PseudoRandom.FromSeed(seed)
         let shuffled_columns = Array.init chart.Keys id
-        random.Shuffle shuffled_columns
+        random.Shuffle(shuffled_columns)
 
         let shuffle_notes (nr: NoteRow) : NoteRow =
             let new_nr = NoteRow.create_empty chart.Keys
+
             for i = 0 to chart.Keys - 1 do
                 new_nr.[i] <- nr.[shuffled_columns.[i]]
+
             new_nr
 
         { chart with Notes = TimeArray.map shuffle_notes chart.Notes }, true
@@ -24,15 +26,18 @@ module Randomise =
         let original_chart_column_last_used = Array.create chart.Keys -Time.infinity
 
         let column_last_used = Array.create chart.Keys -Time.infinity
-        let ln_column_map : int array = Array.zeroCreate chart.Keys
+        let ln_column_map: int array = Array.zeroCreate chart.Keys
 
         let get_random_column (now: Time) (gap_size: Time) =
             let suitable_columns =
                 column_last_used
                 |> Seq.indexed
-                |> Seq.filter (fun (_, t) -> let time_ago = (now - t) in gap_size < time_ago * 1.3f && gap_size > time_ago * 0.7f )
+                |> Seq.filter(fun (_, t) ->
+                    let time_ago = (now - t) in gap_size < time_ago * 1.3f && gap_size > time_ago * 0.7f
+                )
                 |> Seq.map fst
                 |> Array.ofSeq
+
             if suitable_columns.Length > 0 then
                 suitable_columns.[random.Next(suitable_columns.Length)]
             else
@@ -40,7 +45,7 @@ module Randomise =
             let fallback_columns =
                 column_last_used
                 |> Seq.indexed
-                |> Seq.filter (fun (_, t) -> t < now )
+                |> Seq.filter(fun (_, t) -> t < now)
                 |> Seq.sortBy snd
                 |> Seq.map fst
                 |> Array.ofSeq
@@ -54,6 +59,7 @@ module Randomise =
 
         let randomise_row (now: Time) (nr: NoteRow) : NoteRow =
             let new_row = NoteRow.create_empty chart.Keys
+
             for k = 0 to chart.Keys - 1 do
                 if nr.[k] = NoteType.HOLDBODY then
                     new_row.[ln_column_map.[k]] <- NoteType.HOLDBODY
@@ -75,10 +81,12 @@ module Randomise =
                     original_chart_column_last_used.[k] <- now
                     column_last_used.[col] <- now
                     new_row.[col] <- NoteType.NORMAL
+
             new_row
 
         { chart with
             Notes =
                 chart.Notes
-                |> Array.map (fun { Time = time; Data = nr } -> { Time = time; Data = randomise_row time nr })
-        }, true
+                |> Array.map(fun { Time = time; Data = nr } -> { Time = time; Data = randomise_row time nr })
+        },
+        true

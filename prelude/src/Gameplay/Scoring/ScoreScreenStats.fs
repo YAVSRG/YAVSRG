@@ -1,29 +1,31 @@
-﻿namespace Prelude.Gameplay.Scoring
+namespace Prelude.Gameplay.Scoring
 
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 
 type JudgementRatio =
-        
+
     static member inline Calculate(judgement_counts: int array, index: int) : float32 * int =
-        let inline judgement_count_or_zero(index: int) : int =
+        let inline judgement_count_or_zero (index: int) : int =
             if judgement_counts.Length > index then judgement_counts.[index] else 0
-            
+
         let judgement_count_a = judgement_count_or_zero(index)
         let judgement_count_b = judgement_count_or_zero(index + 1)
-        
-        if judgement_count_b = 0 then float32 judgement_count_a, 0
-        else float32 judgement_count_a / float32 judgement_count_b, 1
-        
+
+        if judgement_count_b = 0 then
+            float32 judgement_count_a, 0
+        else
+            float32 judgement_count_a / float32 judgement_count_b, 1
+
     static member Format(judgement_counts: int array, index: int) : string =
         let ratio, denominator = JudgementRatio.Calculate(judgement_counts, index)
         sprintf "%.1f:%i" ratio denominator
-        
+
     static member FormatWithSpaces(judgement_counts: int array, index: int) : string =
         let ratio, denominator = JudgementRatio.Calculate(judgement_counts, index)
         sprintf "%.1f : %i" ratio denominator
-        
+
 
 type GraphPoint =
     {
@@ -37,7 +39,9 @@ type GraphPoint =
         Judgements: int array
         GhostTaps: int
     }
-    member this.Accuracy = if this.MaxPointsScored = 0.0 then 1.0 else this.PointsScored / this.MaxPointsScored
+
+    member this.Accuracy =
+        if this.MaxPointsScored = 0.0 then 1.0 else this.PointsScored / this.MaxPointsScored
 
 type ScoreScreenStats =
     {
@@ -108,7 +112,7 @@ module ScoreScreenStats =
         let mutable max_points = 0.0
         let mutable scored_points = 0.0
 
-        let add_action(ev: ScoringEvent) =
+        let add_action (ev: ScoringEvent) =
             match ev.Inner with
             | Hit e ->
                 if not e.Missed then
@@ -122,11 +126,12 @@ module ScoreScreenStats =
                     tap_sumOfSq ++ e.Delta * float32 e.Delta
                     earliest_tap.Value <- min earliest_tap.Value e.Delta
                     latest_tap.Value <- max latest_tap.Value e.Delta
+
                     if e.Delta < 0.0f<ms / rate> then
                         inc early_taps
 
                 match e.Judgement with
-                | Some (j, points) ->
+                | Some(j, points) ->
                     filtered_judgements.[j] <- filtered_judgements.[j] + 1
                     scored_points <- scored_points + points
                     max_points <- max_points + 1.0
@@ -144,11 +149,12 @@ module ScoreScreenStats =
                     tap_sumOfSq ++ e.Delta * float32 e.Delta
                     earliest_tap.Value <- min earliest_tap.Value e.Delta
                     latest_tap.Value <- max latest_tap.Value e.Delta
+
                     if e.Delta < 0.0f<ms / rate> then
                         inc early_taps
 
                 match e.Judgement with
-                | Some (j, points) ->
+                | Some(j, points) ->
                     filtered_judgements.[j] <- filtered_judgements.[j] + 1
                     scored_points <- scored_points + points
                     max_points <- max_points + 1.0
@@ -164,11 +170,12 @@ module ScoreScreenStats =
                     release_sumOfSq ++ e.Delta * float32 e.Delta
                     earliest_release.Value <- min earliest_release.Value e.Delta
                     latest_release.Value <- max latest_release.Value e.Delta
+
                     if e.Delta < 0.0f<ms / rate> then
                         inc early_releases
 
                 match e.Judgement with
-                | Some (j, points) ->
+                | Some(j, points) ->
                     filtered_judgements.[j] <- filtered_judgements.[j] + 1
                     scored_points <- scored_points + points
                     max_points <- max_points + 1.0
@@ -176,8 +183,9 @@ module ScoreScreenStats =
 
             | GhostTap e ->
                 inc ghost_taps
+
                 match e.Judgement with
-                | Some (j, points) ->
+                | Some(j, points) ->
                     filtered_judgements.[j] <- filtered_judgements.[j] + 1
                     scored_points <- scored_points + points
                     max_points <- max_points + 1.0
@@ -189,25 +197,29 @@ module ScoreScreenStats =
             match ev.ComboChange with
             | NoChange -> ()
             | Increase -> combo <- combo + 1
-            | Break _ -> combo <- 0; combo_breaks <- combo_breaks + 1
+            | Break _ ->
+                combo <- 0
+                combo_breaks <- combo_breaks + 1
 
         let add_graph_points (chart_time: ChartTime) (new_graph_points_needed: int) =
-            let last_point_timestamp = if graph_points.Count > 0 then graph_points.[graph_points.Count - 1].Time else 0.0f<ms>
+            let last_point_timestamp =
+                if graph_points.Count > 0 then graph_points.[graph_points.Count - 1].Time else 0.0f<ms>
 
-            let mean = tap_sum.Value / float32 (max 1 taps.Value)
+            let mean = tap_sum.Value / float32(max 1 taps.Value)
+
             let standard_deviation =
-                sqrt(
-                    ((tap_sumOfSq.Value / float32 (max 1 taps.Value) * 1.0f<ms / rate>)
-                        - mean * mean)
-                    |> float32
-                )
+                sqrt(((tap_sumOfSq.Value / float32(max 1 taps.Value) * 1.0f<ms / rate>) - mean * mean) |> float32)
                 * 1.0f<ms / rate>
-            let lamp = Lamp.calculate score_processor.Ruleset.Lamps filtered_judgements combo_breaks
+
+            let lamp =
+                Lamp.calculate score_processor.Ruleset.Lamps filtered_judgements combo_breaks
 
             for i = 1 to new_graph_points_needed do
                 let this_point_timestamp =
-                    last_point_timestamp + (chart_time - last_point_timestamp) * (float32 i / float32 new_graph_points_needed)
-                graph_points.Add
+                    last_point_timestamp
+                    + (chart_time - last_point_timestamp) * (float32 i / float32 new_graph_points_needed)
+
+                graph_points.Add(
                     {
                         Time = this_point_timestamp
                         PointsScored = scored_points
@@ -219,14 +231,20 @@ module ScoreScreenStats =
                         Judgements = filtered_judgements |> Array.copy
                         GhostTaps = ghost_taps.Value
                     }
+                )
 
-        let time_of_last_ev = if score_processor.Events.Count > 0 then score_processor.Events.[score_processor.Events.Count - 1].Time else score_processor.Duration
+        let time_of_last_ev =
+            if score_processor.Events.Count > 0 then
+                score_processor.Events.[score_processor.Events.Count - 1].Time
+            else
+                score_processor.Duration
 
         for ev in score_processor.Events |> Seq.where(fun ev -> column_filter.[ev.Column]) do
             add_action ev
 
             let new_graph_points_needed =
-                if score_processor.Events.Count <= GRAPH_POINT_COUNT then 1
+                if score_processor.Events.Count <= GRAPH_POINT_COUNT then
+                    1
                 else
                     (float32 GRAPH_POINT_COUNT * ev.Time) / time_of_last_ev
                     |> ceil
@@ -239,8 +257,8 @@ module ScoreScreenStats =
 
         add_graph_points time_of_last_ev 1
 
-        let tap_mean = tap_sum.Value / float32 (max 1 taps.Value)
-        let release_mean = release_sum.Value / float32 (max 1 releases.Value)
+        let tap_mean = tap_sum.Value / float32(max 1 taps.Value)
+        let release_mean = release_sum.Value / float32(max 1 releases.Value)
 
         {
             Notes = notes_hit.Value, notes_count.Value
@@ -251,23 +269,21 @@ module ScoreScreenStats =
             TapMean = tap_mean
             TapStandardDeviation =
                 sqrt(
-                    ((tap_sumOfSq.Value / float32 (max 1 taps.Value) * 1.0f<ms / rate>)
-                     - tap_mean * tap_mean)
-                    |> float32
+                    ((tap_sumOfSq.Value / float32(max 1 taps.Value) * 1.0f<ms / rate>) - tap_mean * tap_mean) |> float32
                 )
                 * 1.0f<ms / rate>
-            TapEarlyPercent = float early_taps.Value / float (max 1 taps.Value)
+            TapEarlyPercent = float early_taps.Value / float(max 1 taps.Value)
             TapRange = earliest_tap.Value, latest_tap.Value
 
             ReleaseMean = release_mean
             ReleaseStandardDeviation =
                 sqrt(
-                    ((release_sumOfSq.Value / float32 (max 1 releases.Value) * 1.0f<ms / rate>)
+                    ((release_sumOfSq.Value / float32(max 1 releases.Value) * 1.0f<ms / rate>)
                      - release_mean * release_mean)
                     |> float32
                 )
                 * 1.0f<ms / rate>
-            ReleaseEarlyPercent = float early_releases.Value / float (max 1 releases.Value)
+            ReleaseEarlyPercent = float early_releases.Value / float(max 1 releases.Value)
             ReleaseRange = earliest_release.Value, latest_release.Value
 
             Judgements = filtered_judgements

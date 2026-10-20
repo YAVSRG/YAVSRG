@@ -6,6 +6,5 @@ interlude
 !interlude/src/Features
 !interlude/src/UI
 libraries
-prelude/src
+prelude/src/Calculator
 prelude/playground
-!prelude/src/Formats/osu!

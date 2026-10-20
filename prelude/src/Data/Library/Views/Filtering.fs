@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library
+namespace Prelude.Data.Library
 
 open System
 open FParsec
@@ -18,40 +18,48 @@ type FilterPart =
 
 module FilterParts =
 
-    let private string = " !=<>#~\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLowerInvariant()
+    let private string =
+        " !=<>#~\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLowerInvariant()
 
     let private quoted_string =
         between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy)
 
     let private word = string |>> String
     let private quoted = quoted_string |>> fun s -> String <| s.ToLowerInvariant()
-    let private antiquoted = pchar '!' >>. quoted_string |>> fun s -> NotString <| s.ToLowerInvariant()
+
+    let private antiquoted =
+        pchar '!' >>. quoted_string |>> fun s -> NotString <| s.ToLowerInvariant()
 
     let private equals =
-        string .>>. (pchar '=' >>. (string <|> quoted_string)) |>> (fun (k, v) -> Equals(k.ToLowerInvariant(), v.ToLowerInvariant()))
+        string .>>. (pchar '=' >>. (string <|> quoted_string))
+        |>> (fun (k, v) -> Equals(k.ToLowerInvariant(), v.ToLowerInvariant()))
 
     let private notequals =
         string .>>. (pchar '!' >>. pchar '=' >>. (string <|> quoted_string)) |>> NotEquals
 
     let private pfloat32 = pfloat |>> float32
 
-    let private less = string .>>. (pchar '<' >>. optional (pchar '=') >>. pfloat32) |>> LessThan
-    let private more = string .>>. (pchar '>' >>. optional (pchar '=') >>. pfloat32) |>> MoreThan
+    let private less =
+        string .>>. (pchar '<' >>. optional(pchar '=') >>. pfloat32) |>> LessThan
+
+    let private more =
+        string .>>. (pchar '>' >>. optional(pchar '=') >>. pfloat32) |>> MoreThan
+
     let private clamp = string .>>. (pchar '~' >>. pfloat32) |>> Clamp
     let private tag = pchar '#' >>. string |>> Tag
 
     let private filter =
-        sepBy (
-            attempt equals
-            <|> attempt notequals
-            <|> attempt clamp
-            <|> attempt less
-            <|> attempt more
-            <|> attempt tag
-            <|> attempt antiquoted
-            <|> quoted
-            <|> word
-        ) spaces1
+        sepBy
+            (attempt equals
+             <|> attempt notequals
+             <|> attempt clamp
+             <|> attempt less
+             <|> attempt more
+             <|> attempt tag
+             <|> attempt antiquoted
+             <|> quoted
+             <|> word)
+            spaces1
         .>> spaces
 
     let parse (str: string) =
@@ -95,7 +103,7 @@ type Filter =
             SV = None
         }
 
-    member internal this.Compile : ChartMeta -> bool =
+    member internal this.Compile: ChartMeta -> bool =
         seq {
             match this.Keymode with
             | Some k -> yield fun (chart_meta: ChartMeta) -> chart_meta.Keys = k
@@ -104,6 +112,7 @@ type Filter =
             match this.LengthMin with
             | Some min_length -> yield fun chart_meta -> chart_meta.Length / 1000.0f<ms> >= min_length
             | None -> ()
+
             match this.LengthMax with
             | Some max_length -> yield fun chart_meta -> chart_meta.Length / 1000.0f<ms> <= max_length
             | None -> ()
@@ -111,6 +120,7 @@ type Filter =
             match this.DifficultyMin with
             | Some min_diff -> yield fun chart_meta -> chart_meta.Rating >= min_diff
             | None -> ()
+
             match this.DifficultyMax with
             | Some max_diff -> yield fun chart_meta -> chart_meta.Rating <= max_diff
             | None -> ()
@@ -118,56 +128,58 @@ type Filter =
             match this.LNPercentMin with
             | Some min_pc -> yield fun chart_meta -> chart_meta.Patterns.LNPercent > min_pc
             | None -> ()
+
             match this.LNPercentMax with
             | Some max_pc -> yield fun chart_meta -> chart_meta.Patterns.LNPercent < max_pc
             | None -> ()
 
             match this.SV with
-            | Some false -> yield fun chart_meta -> not (chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD)
+            | Some false -> yield fun chart_meta -> not(chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD)
             | Some true -> yield fun chart_meta -> chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
             | None -> ()
 
             match this.Creator with
-            | Some creator -> yield fun chart_meta -> chart_meta.Creator.Contains(creator, StringComparison.InvariantCultureIgnoreCase)
+            | Some creator ->
+                yield
+                    fun chart_meta -> chart_meta.Creator.Contains(creator, StringComparison.InvariantCultureIgnoreCase)
             | None -> ()
 
             if this.PatternTerms.Length <> 0 || this.PatternAntiTerms.Length <> 0 then
-                yield fun chart_meta ->
-                    let report = chart_meta.Patterns
+                yield
+                    fun chart_meta ->
+                        let report = chart_meta.Patterns
 
-                    let matches (pattern: string) =
-                        report.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-                        || (
-                            report.Clusters
-                            |> Array.exists (fun f ->
-                                f.SpecificTypes
-                                |> List.exists (fun (p, amount) ->
-                                    amount * f.Amount / chart_meta.Length > 0.1f && p.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-                                )
-                            )
-                        )
+                        let matches (pattern: string) =
+                            report.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+                            || (report.Clusters
+                                |> Array.exists(fun f ->
+                                    f.SpecificTypes
+                                    |> List.exists(fun (p, amount) ->
+                                        amount * f.Amount / chart_meta.Length > 0.1f
+                                        && p.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+                                    )
+                                ))
 
-                    Array.forall matches this.PatternTerms
-                    && Array.forall (matches >> not) this.PatternAntiTerms
+                        Array.forall matches this.PatternTerms && Array.forall (matches >> not) this.PatternAntiTerms
         }
         |> Array.ofSeq
         |> fun checks -> (fun (chart_meta: ChartMeta) -> Array.forall (fun f -> f chart_meta) checks)
 
-    member this.Apply (charts: ChartMeta seq) =
-        Seq.filter this.Compile charts
+    member this.Apply(charts: ChartMeta seq) = Seq.filter this.Compile charts
 
-    member this.Apply<'T> (charts: (ChartMeta * 'T) seq) =
-        Seq.filter (fst >> this.Compile) charts
+    member this.Apply<'T>(charts: (ChartMeta * 'T) seq) = Seq.filter (fst >> this.Compile) charts
 
-    static member Build (parts: FilterPart list) : Filter =
+    static member Build(parts: FilterPart list) : Filter =
         let mutable filter = Filter.Empty
 
         for p in parts do
             match p with
             | Equals("p", str)
-            | Equals("pattern", str) -> filter <- { filter with PatternTerms = Array.append filter.PatternTerms [| str |] }
+            | Equals("pattern", str) ->
+                filter <- { filter with PatternTerms = Array.append filter.PatternTerms [| str |] }
             | NotEquals("p", str)
-            | NotEquals("pattern", str) -> filter <- { filter with PatternAntiTerms = Array.append filter.PatternAntiTerms [| str |] }
+            | NotEquals("pattern", str) ->
+                filter <- { filter with PatternAntiTerms = Array.append filter.PatternAntiTerms [| str |] }
 
             | Equals("k", n)
             | Equals("key", n)
@@ -188,10 +200,10 @@ type Filter =
 
             | MoreThan("ln", pc)
             | MoreThan("holds", pc)
-            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMin = Some (if pc > 1f then pc * 0.01f else pc) }
+            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMin = Some(if pc > 1f then pc * 0.01f else pc) }
             | LessThan("ln", pc)
             | LessThan("holds", pc)
-            | LessThan("lns", pc) -> filter <- { filter with LNPercentMax = Some (if pc > 1f then pc * 0.01f else pc) }
+            | LessThan("lns", pc) -> filter <- { filter with LNPercentMax = Some(if pc > 1f then pc * 0.01f else pc) }
 
             | Equals("mapper", creator)
             | Equals("m", creator)
@@ -202,6 +214,7 @@ type Filter =
             | Tag "sv" -> filter <- { filter with SV = Some true }
 
             | _ -> ()
+
         filter
 
 type FilteredSearch =
@@ -213,64 +226,57 @@ type FilteredSearch =
     }
 
     member this.WithoutSearchTerms =
-        {
-            SearchTerms = [||]
-            SearchAntiTerms = [||]
-            Filter = this.Filter
-        }
+        { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = this.Filter }
 
-    static member Empty =
-        {
-            SearchTerms = [||]
-            SearchAntiTerms = [||]
-            Filter = Filter.Empty
-        }
+    static member Empty = { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = Filter.Empty }
 
-    member internal this.Compile : ChartMeta -> bool =
+    member internal this.Compile: ChartMeta -> bool =
         let matches_filter = this.Filter.Compile
 
         if this.SearchTerms.Length <> 0 || this.SearchAntiTerms.Length <> 0 then
 
             fun chart_meta ->
-                if not (matches_filter chart_meta) then false else
+                if not(matches_filter chart_meta) then
+                    false
+                else
 
                 let s =
                     (chart_meta.Title
-                        + " "
-                        + chart_meta.Artist
-                        + " "
-                        + chart_meta.Creator
-                        + " "
-                        + chart_meta.DifficultyName
-                        + " "
-                        + (chart_meta.Subtitle |> Option.defaultValue "")
-                        + " "
-                        + String.concat " " chart_meta.Packs)
+                     + " "
+                     + chart_meta.Artist
+                     + " "
+                     + chart_meta.Creator
+                     + " "
+                     + chart_meta.DifficultyName
+                     + " "
+                     + (chart_meta.Subtitle |> Option.defaultValue "")
+                     + " "
+                     + String.concat " " chart_meta.Packs)
                         .ToLowerInvariant()
-                Array.forall (s.Contains : string -> bool) this.SearchTerms
-                && Array.forall (s.Contains >> not : string -> bool) this.SearchAntiTerms
 
-        else matches_filter
+                Array.forall (s.Contains: string -> bool) this.SearchTerms
+                && Array.forall (s.Contains >> not: string -> bool) this.SearchAntiTerms
 
-    member this.Apply (charts: ChartMeta seq) : ChartMeta seq =
-        Seq.filter this.Compile charts
+        else
+            matches_filter
 
-    member this.Apply<'T> (charts: (ChartMeta * 'T) seq) : (ChartMeta * 'T) seq =
-        Seq.filter (fst >> this.Compile) charts
+    member this.Apply(charts: ChartMeta seq) : ChartMeta seq = Seq.filter this.Compile charts
 
-    static member Build (parts: FilterPart list) : FilteredSearch =
+    member this.Apply<'T>(charts: (ChartMeta * 'T) seq) : (ChartMeta * 'T) seq = Seq.filter (fst >> this.Compile) charts
+
+    static member Build(parts: FilterPart list) : FilteredSearch =
         let mutable filtered_search =
-            {
-                SearchTerms = [||]
-                SearchAntiTerms = [||]
-                Filter = Filter.Build parts
-            }
+            { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = Filter.Build(parts) }
 
         for p in parts do
             match p with
-            | Impossible -> filtered_search <- { filtered_search with SearchAntiTerms = [|""|] }
-            | String str -> filtered_search <- { filtered_search with SearchTerms = Array.append filtered_search.SearchTerms [| str |] }
-            | NotString str -> filtered_search <- { filtered_search with SearchAntiTerms = Array.append filtered_search.SearchAntiTerms [| str |] }
+            | Impossible -> filtered_search <- { filtered_search with SearchAntiTerms = [| "" |] }
+            | String str ->
+                filtered_search <-
+                    { filtered_search with SearchTerms = Array.append filtered_search.SearchTerms [| str |] }
+            | NotString str ->
+                filtered_search <-
+                    { filtered_search with SearchAntiTerms = Array.append filtered_search.SearchAntiTerms [| str |] }
 
             | _ -> ()
 

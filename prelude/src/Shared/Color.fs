@@ -1,11 +1,13 @@
-﻿namespace Prelude
+namespace Prelude
 
 open System
 open System.Drawing
 open Percyqaz.Common
 
 type Color = Drawing.Color
-module [<AutoOpen>] ColorExtensions =
+
+[<AutoOpen>]
+module ColorExtensions =
 
     type Drawing.Color with
 
@@ -62,4 +64,5 @@ module [<AutoOpen>] ColorExtensions =
                     ColorTranslator.FromHtml(s) |> Some
                 else
                     None
-            with _ -> None
+            with _ ->
+                None

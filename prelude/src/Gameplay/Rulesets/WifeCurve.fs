@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Rulesets
+namespace Prelude.Gameplay.Rulesets
 
 open Prelude
 
@@ -22,8 +22,7 @@ module Wife3Curve =
             let x = abs x
             let t = 1.0 / (1.0 + p * x)
 
-            let y =
-                1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x)
+            let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x)
 
             sign * y
 
@@ -42,11 +41,7 @@ module Wife3Curve =
         let zero = 65.0 * (scale ** ts_pow)
         let dev = 22.7 * (scale ** ts_pow)
 
-        if delta <= ridic then
-            1.0
-        elif delta <= zero then
-            erf ((zero - delta) / dev)
-        elif delta <= boo_window then
-            (delta - zero) * miss_weight / (boo_window - zero)
-        else
-            miss_weight
+        if delta <= ridic then 1.0
+        elif delta <= zero then erf((zero - delta) / dev)
+        elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
+        else miss_weight

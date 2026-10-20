@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.ChartDatabase
+namespace Prelude.Data.ChartDatabase
 
 open System.IO
 open System.Collections.Generic
@@ -18,13 +18,14 @@ type ChartDatabase =
             AssetStorage: AssetStorage
             mutable RecalculationNeeded: bool
         }
+
     member this.Entries = this.Cache.Values
 
     member this.GetChart(chart_id: string) : Result<Chart, string> =
         DbCharts.get_chart chart_id this.Database
 
     member this.TryGetCachedChartMeta(chart_id: string) : ChartMeta option =
-        match this.Cache.TryGetValue chart_id with
+        match this.Cache.TryGetValue(chart_id) with
         | true, v -> Some v
         | false, _ -> None
 
@@ -49,12 +50,12 @@ type ChartDatabase =
 
         let inline copy_asset (absolute_path: string) : AssetLocation =
             if already_moved.ContainsKey(absolute_path) then
-                AssetLocation.Hash already_moved.[absolute_path]
+                AssetLocation.Hash(already_moved.[absolute_path])
 
             elif File.Exists(absolute_path) then
                 let hash = this.AssetStorage.Add(absolute_path)
                 already_moved.[absolute_path] <- hash
-                AssetLocation.Hash hash
+                AssetLocation.Hash(hash)
 
             else
                 AssetLocation.Missing
@@ -66,7 +67,7 @@ type ChartDatabase =
             | ImportAsset.Link absolute_path ->
                 if File.Exists(absolute_path) then AssetLocation.Absolute(absolute_path) else AssetLocation.Missing
 
-            | ImportAsset.Download hash -> AssetLocation.Hash hash
+            | ImportAsset.Download hash -> AssetLocation.Hash(hash)
             | ImportAsset.Missing -> AssetLocation.Missing
 
         let inline merge_incoming_chart_with_existing
@@ -116,7 +117,7 @@ type ChartDatabase =
         <| fun () ->
 
             for chart_meta in chart_metas do
-                this.Cache.Remove chart_meta.Hash |> ignore
+                this.Cache.Remove(chart_meta.Hash) |> ignore
 
             DbCharts.delete_batch (Seq.map _.Hash chart_metas) this.Database |> ignore
 

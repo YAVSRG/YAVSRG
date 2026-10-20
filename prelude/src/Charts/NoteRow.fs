@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts
+namespace Prelude.Charts
 
 open System.IO
 open Prelude
@@ -29,7 +29,7 @@ module NoteRow =
         nr
 
     let is_empty: NoteRow -> bool =
-        Array.forall (
+        Array.forall(
             function
             | NoteType.NOTHING
             | NoteType.HOLDBODY -> true
@@ -75,4 +75,4 @@ module NoteRow =
             | NoteType.NOTHING
             | _ -> ' '
 
-        new string (row |> Array.map p)
+        new string(row |> Array.map p)

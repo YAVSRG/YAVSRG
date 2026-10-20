@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library
+namespace Prelude.Data.Library
 
 open System
 open Percyqaz.Common
@@ -10,28 +10,22 @@ open Prelude.Data.Library
 module internal Shared =
 
     let first_character (s: string) : string =
-        if s.Length = 0 then
-            "?"
-        elif Char.IsAsciiLetterOrDigit s.[0] then
-            s.[0].ToString().ToUpper()
-        else
-            "?"
+        if s.Length = 0 then "?"
+        elif Char.IsAsciiLetterOrDigit(s.[0]) then s.[0].ToString().ToUpper()
+        else "?"
 
     // A new day starts at 4am, your machine local time
     let days_ago (timestamp: int64) : int =
-        let local_date_now =
-            DateTime.Now
-                .Subtract(TimeSpan.FromHours(4.0))
-                .Date
+        let local_date_now = DateTime.Now.Subtract(TimeSpan.FromHours(4.0)).Date
+
         let local_date =
-            Timestamp.to_datetime(timestamp)
-                .ToLocalTime()
-                .Subtract(TimeSpan.FromHours(4.0))
-                .Date
+            Timestamp.to_datetime(timestamp).ToLocalTime().Subtract(TimeSpan.FromHours(4.0)).Date
+
         (local_date_now - local_date).TotalDays |> floor |> int
 
     let format_date_last_played (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
-        let days_ago = days_ago (ctx.Library.UserData.GetChartData(chart_meta.Hash)).LastPlayed
+        let days_ago =
+            days_ago (ctx.Library.UserData.GetChartData(chart_meta.Hash)).LastPlayed
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -46,10 +40,7 @@ module internal Shared =
 
     let format_difficulty (chart_meta: ChartMeta, _) : int * string =
         let stars = chart_meta.Rating |> floor |> int
-        if stars >= 15 then
-            15, "15+ Stars"
-        else
-            stars, sprintf "%i Stars" stars
+        if stars >= 15 then 15, "15+ Stars" else stars, sprintf "%i Stars" stars
 
     let format_date_added (c: ChartMeta, _) : int * string =
         let days_ago = days_ago c.DateAdded
@@ -67,21 +58,15 @@ module internal Shared =
     let grade_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
         let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
-        match
-            data.PersonalBests
-            |> Bests.ruleset_best_above ctx.RulesetId _.Grade ctx.Rate
-        with
-        | Some (i, _, _) -> i, ctx.Ruleset.GradeName i
+        match data.PersonalBests |> Bests.ruleset_best_above ctx.RulesetId _.Grade ctx.Rate with
+        | Some(i, _, _) -> i, ctx.Ruleset.GradeName(i)
         | None -> -2, "No grade achieved"
 
-    let lamp_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string  =
+    let lamp_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
         let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
-        match
-            data.PersonalBests
-            |> Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate
-        with
-        | Some (i, _, _) -> i, ctx.Ruleset.LampName i
+        match data.PersonalBests |> Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate with
+        | Some(i, _, _) -> i, ctx.Ruleset.LampName(i)
         | None -> -2, "No lamp achieved"
 
     let below_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
@@ -113,8 +98,9 @@ type LibraryContext =
         | Table _, Table _ -> true
         | Likes, Likes -> true
         | Folder f, Folder f2 when f = f2 -> true
-        | Playlist (i, id, _), Playlist (i2, id2, _) when i = i2 && id = id2 -> true
+        | Playlist(i, id, _), Playlist(i2, id2, _) when i = i2 && id = id2 -> true
         | _ -> false
+
     member this.SoftMatches(other: LibraryContext) : bool =
         match this, other with
         | None, _ -> true
@@ -124,7 +110,7 @@ type LibraryContext =
         | Folder _, Pack _ -> true
         | Likes, None -> true
         | Likes, Pack _ -> true
-        | _ -> this.Matches other
+        | _ -> this.Matches(other)
 
 [<RequireQualifiedAccess>]
 type LibraryGroupContext =

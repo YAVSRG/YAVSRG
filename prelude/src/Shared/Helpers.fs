@@ -1,4 +1,4 @@
-﻿namespace Prelude
+namespace Prelude
 
 open System
 open System.IO
@@ -9,7 +9,6 @@ open Percyqaz.Common
 module Helpers =
 
 #if DEBUG
-    let DEV_MODE = true
 #else
     let DEV_MODE = false
 #endif
@@ -18,25 +17,26 @@ module Helpers =
     /// Used to optimise repeated calls to chart calculations where you are likely to make several for one selected chart before changing to another
     let internal cached (f: 'A -> 'B) : 'A -> 'B =
         let LOCK_OBJ = obj()
-        let mutable previous : ('A * 'B) option = None
+        let mutable previous: ('A * 'B) option = None
+
         fun (x: 'A) ->
             match
-                lock LOCK_OBJ (fun () ->
-                    match previous with
-                    | Some (_x, _y) when x = _x -> Some _y
-                    | _ -> None
-                )
+                lock
+                    LOCK_OBJ
+                    (fun () ->
+                        match previous with
+                        | Some(_x, _y) when x = _x -> Some _y
+                        | _ -> None
+                    )
             with
             | Some cached_calculation -> cached_calculation
             | None ->
                 let res = f x
-                lock LOCK_OBJ (fun () -> previous <- Some (x, res))
+                lock LOCK_OBJ (fun () -> previous <- Some(x, res))
                 res
 
     let open_directory (path: string) : unit =
-        ProcessStartInfo("file://" + Path.GetFullPath path, UseShellExecute = true)
-        |> Process.Start
-        |> ignore
+        ProcessStartInfo("file://" + Path.GetFullPath(path), UseShellExecute = true) |> Process.Start |> ignore
 
     let open_url (url: string) : unit =
         try
@@ -46,11 +46,12 @@ module Helpers =
 
     let get_game_folder (name: string) : string =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)
-        Directory.CreateDirectory p |> ignore
+        Directory.CreateDirectory(p) |> ignore
         p
 
     let inline format_duration_ms (ms: 'T) : string =
         let ms = float32 ms
+
         if ms > 3600_000f then
             sprintf
                 "%i:%02i:%02i"
@@ -62,19 +63,11 @@ module Helpers =
 
     let format_timespan (ts: TimeSpan) : string =
 
-        if ts < TimeSpan.Zero then
-            "IN THE FUTURE?"
-        elif ts.TotalDays > 365.0 then
-            sprintf "%.0fy" (ts.TotalDays / 365.0)
-        elif ts.TotalDays > 30.0 then
-            sprintf "%.0fmo" (ts.TotalDays / 30.0)
-        elif ts.TotalDays > 7.0 then
-            sprintf "%.0fw" (ts.TotalDays / 7.0)
-        elif ts.TotalDays > 1.0 then
-            sprintf "%.0fd" ts.TotalDays
-        elif ts.TotalHours > 1.0 then
-            sprintf "%.0fh" ts.TotalHours
-        elif ts.TotalMinutes > 1.0 then
-            sprintf "%.0fm" ts.TotalMinutes
-        else
-            sprintf "%.0fs" ts.TotalSeconds
+        if ts < TimeSpan.Zero then "IN THE FUTURE?"
+        elif ts.TotalDays > 365.0 then sprintf "%.0fy" (ts.TotalDays / 365.0)
+        elif ts.TotalDays > 30.0 then sprintf "%.0fmo" (ts.TotalDays / 30.0)
+        elif ts.TotalDays > 7.0 then sprintf "%.0fw" (ts.TotalDays / 7.0)
+        elif ts.TotalDays > 1.0 then sprintf "%.0fd" ts.TotalDays
+        elif ts.TotalHours > 1.0 then sprintf "%.0fh" ts.TotalHours
+        elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
+        else sprintf "%.0fs" ts.TotalSeconds

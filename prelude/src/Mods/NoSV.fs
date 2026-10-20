@@ -1,4 +1,4 @@
-﻿namespace Prelude.Mods
+namespace Prelude.Mods
 
 open System
 open Prelude
