@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
@@ -24,24 +24,26 @@ module Startup =
     let mutable private deinit_once = false
 
     let init (instance: int) : Screen.ScreenRoot =
-        Options.init ()
-        Content.Init ()
+        Options.init()
+        Content.Init()
 
         let post_init_thunk () =
 
-            Content.LoadData ()
+            Content.LoadData()
             Printerlude.init instance
-            StatsSync.init ()
-            SelectedChart.init ()
-            Mounts.init ()
-            Network.init ()
-            DiscordRPC.init ()
-            Interlude.Updates.check_for_updates ()
+            StatsSync.init()
+            SelectedChart.init()
+            Mounts.init()
+            Network.init()
+            DiscordRPC.init()
+            Interlude.Updates.check_for_updates()
             // todo: tell the user why multi-drop is not supported
             // todo: look into linux file drop issues
             WindowThread.on_file_drop.Add(fun paths ->
-                if paths.Length <> 1 then Logging.Error "Multiple file drops not supported"
-                else FileDrop.handle paths.[0]
+                if paths.Length <> 1 then
+                    Logging.Error("Multiple file drops not supported")
+                else
+                    FileDrop.handle paths.[0]
             )
 
             deinit_required <- true
@@ -54,7 +56,7 @@ module Startup =
                 LevelSelectScreen()
             |]
 
-        Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+        Audio.change_volume(options.AudioVolume.Value, options.AudioVolume.Value)
         Song.DownRatesChangePitch <- options.AudioPitchRatesDown.Value
         Song.UpRatesChangePitch <- options.AudioPitchRatesUp.Value
 
@@ -78,19 +80,19 @@ module Startup =
             deinit_once <- true
 
             if deinit_required then
-                Content.Deinit ()
-                Options.deinit ()
-                Network.deinit ()
-                Printerlude.deinit ()
-                DiscordRPC.deinit ()
+                Content.Deinit()
+                Options.deinit()
+                Network.deinit()
+                Printerlude.deinit()
+                DiscordRPC.deinit()
 
             match shutdown_type with
-            | Normal -> Logging.Info "Thank you for playing"
+            | Normal -> Logging.Info("Thank you for playing")
             | InternalCrash ->
-                show_crash_splash ()
+                show_crash_splash()
                 Logging.Shutdown()
                 Option.iter open_directory Logging.LogFile
             | ExternalCrash ->
-                show_crash_splash ()
-                Logging.Critical "The game was abnormally force-quit, but was able to shut down correctly"
+                show_crash_splash()
+                Logging.Critical("The game was abnormally force-quit, but was able to shut down correctly")
                 Logging.Shutdown()

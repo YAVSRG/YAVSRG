@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Tables
+namespace Interlude.Web.Server.API.Tables
 
 open NetCoreServer
 open Interlude.Web.Shared
@@ -12,12 +12,8 @@ module Charts =
     open Tables.Charts
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             require_query_parameter query_params "table"
             let _, _ = authorize headers
@@ -25,11 +21,11 @@ module Charts =
             let table_id = query_params.["table"].[0].ToLower()
 
             let section_name =
-                match query_params.TryFind "section" with
+                match query_params.TryFind("section") with
                 | Some ps -> Some(ps.[0].ToLower())
                 | None -> None
 
-            if not (Backbeat.Tables.exists table_id) then
+            if not(Backbeat.Tables.exists table_id) then
                 raise NotFoundException
             else
 
@@ -38,14 +34,14 @@ module Charts =
             let charts =
                 match section_name with
                 | Some name ->
-                    match table.Sections |> Seq.tryFind (fun x -> x.Name.ToLower() = name) with
+                    match table.Sections |> Seq.tryFind(fun x -> x.Name.ToLower() = name) with
                     | Some section -> TableLevel.get_range table_id section.LevelStart section.LevelEnd
                     | None -> raise NotFoundException
                 | None -> TableLevel.get_all table_id
 
             let charts_with_info: ChartInfo array =
                 charts
-                |> Array.choose (fun (chart_id, level) ->
+                |> Array.choose(fun (chart_id, level) ->
                     match Backbeat.Charts.by_hash chart_id with
                     | Some(chart, song) ->
                         Some

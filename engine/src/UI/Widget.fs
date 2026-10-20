@@ -41,20 +41,17 @@ type Widget(node_type: NodeType) =
         _parent <- Some parent
 
     override this.FocusTree: ISelection list =
-        if not this.NodeType._IsNone then
-            this :: this.Parent.FocusTree
-        else
-            this.Parent.FocusTree
+        if not this.NodeType._IsNone then this :: this.Parent.FocusTree else this.Parent.FocusTree
 
-    member this.Focus(by_mouse: bool) =
+    member this.Focus(by_mouse: bool) : unit =
         if this.Focusable then
             Selection.focus by_mouse this
 
-    member this.Select(by_mouse: bool) =
+    member this.Select(by_mouse: bool) : unit =
         if this.Focusable then
             Selection.select by_mouse this
 
-    override this.OnFocus by_mouse =
+    override this.OnFocus(by_mouse: bool) : unit =
         if not focused then
             focused <- true
             focused_by_mouse <- by_mouse
@@ -66,15 +63,12 @@ type Widget(node_type: NodeType) =
     override this.OnSelected _ = selected <- true
     override this.OnDeselected _ = selected <- false
 
-    override this.ToString() =
-        if _parent.IsNone then "*" else _parent.Value.ToString()
-        + " > "
-        + this.GetType().Name
+    override this.ToString() : string =
+        (if _parent.IsNone then "*" else _parent.Value.ToString()) + " > " + this.GetType().Name
 
-[<Extension>]
 type WidgetExtensions =
     [<Extension>]
-    static member Position (w: #Widget, position: Position) : #Widget =
+    static member Position(w: #Widget, position: Position) : #Widget =
         w.Position <- position
         w
 
@@ -85,26 +79,26 @@ type StaticWidget(node_type) =
     let mutable pos = Position.DEFAULT
 
     override this.Position
-        with set (value) =
+        with set (value: Position) =
             pos <- value
 
             if this.Initialised then
                 this.UpdateBounds()
 
-    member private this.UpdateBounds() =
+    member private this.UpdateBounds() : unit =
         this.Bounds <- Position.calculate pos this.Parent.Bounds
-        this.VisibleBounds <- this.Bounds.IntersectWith this.Parent.VisibleBounds
+        this.VisibleBounds <- this.Bounds.IntersectWith(this.Parent.VisibleBounds)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(_elapsed_ms: float, moved: bool) : unit =
         if moved then
             this.UpdateBounds()
 
-    override this.Init(parent: Widget) =
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
         this.UpdateBounds()
 
 [<Sealed>]
 type Dummy(nt) =
     inherit StaticWidget(nt)
     new() = Dummy(NodeType.None)
-    override this.Draw() = ()
+    override this.Draw() : unit = ()

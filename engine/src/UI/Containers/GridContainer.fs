@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System.Linq
 open System.Runtime.CompilerServices
@@ -15,8 +15,8 @@ type private GridFlowItem<'T when 'T :> Widget> =
     }
 
 /// Container that automatically positions its contents packed in a grid arrangement
-type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
-    inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
+type GridFlowContainer<'T when 'T :> Widget>(row_height: float32, columns: int) as this =
+    inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map(fun x -> x :> ISelection)))
 
     let mutable spacing = 0.0f, 0.0f
     let mutable filter: 'T -> bool = K true
@@ -27,8 +27,8 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     let mutable size_change = ignore
     let mutable content_height = 0.0f
 
-    member this.Clear() =
-        assert(GameThread.is_game_thread())
+    member this.Clear() : unit =
+        assert GameThread.is_game_thread()
         children.Clear()
 
     member val Floating = false with get, set
@@ -45,7 +45,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
     member this.Spacing
         with get () = spacing
-        and set (value) =
+        and set (value: float32 * float32) =
             spacing <- value
             refresh <- true
 
@@ -64,7 +64,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
     override this.Focusable = if children.Count = 0 then false else base.Focusable
 
-    member this.PackContent() =
+    member this.PackContent() : unit =
         let spacing_x, spacing_y = this.Spacing
 
         let width =
@@ -97,9 +97,9 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
         if height <> content_height then
             content_height <- height
-            size_change ()
+            size_change()
 
-    member private this.Up() =
+    member private this.Up() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -128,9 +128,9 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> this.WhoShouldFocus.Value.Focus false
+        | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    member private this.Down() =
+    member private this.Down() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -159,9 +159,9 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> this.WhoShouldFocus.Value.Focus false
+        | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    member private this.Left() =
+    member private this.Left() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -189,9 +189,9 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> this.WhoShouldFocus.Value.Focus false
+        | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    member private this.Right() =
+    member private this.Right() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -219,16 +219,16 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> this.WhoShouldFocus.Value.Focus false
+        | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    override this.Init(parent: Widget) =
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
         this.PackContent()
 
         for c in children do
-            c.Widget.Init this
+            c.Widget.Init(this)
 
-    member private this.CanUp() =
+    member private this.CanUp() : bool =
         if this.WrapNavigation then
             true
         else
@@ -242,7 +242,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    member private this.CanDown() =
+    member private this.CanDown() : bool =
         if this.WrapNavigation then
             true
         else
@@ -256,7 +256,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    member private this.CanLeft() =
+    member private this.CanLeft() : bool =
         if this.WrapNavigation then
             true
         else
@@ -270,7 +270,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    member private this.CanRight() =
+    member private this.CanRight() : bool =
         if this.WrapNavigation then
             true
         else
@@ -284,7 +284,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved || refresh)
 
         let moved =
@@ -320,13 +320,13 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                     children.[i].Widget.Select false
                 | None -> ()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         for { Widget = c; Visible = visible } in children do
             if visible && (this.Floating || c.VisibleBounds.Visible) then
                 c.Draw()
 
-    member this.Add(child: 'T) = (this :> IContainer<'T>).Add child
-    member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove child
+    member this.Add(child: 'T) : unit = (this :> IContainer<'T>).Add(child)
+    member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove(child)
 
     interface IHeight with
         member this.Height = content_height
@@ -337,25 +337,26 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
     interface IContainer<'T> with
 
-        member this.Add (child: 'T) : unit =
-            assert(GameThread.is_game_thread())
-            children.Add
+        member this.Add(child: 'T) : unit =
+            assert GameThread.is_game_thread()
+
+            children.Add(
                 {
                     Widget = child
                     Visible = filter child
                     X = -1
                     Y = -1
                 }
+            )
 
             if this.Initialised then
-                child.Init this
+                child.Init(this)
                 refresh <- true
 
-        member this.Remove (child: 'T) : bool =
-            assert(GameThread.is_game_thread())
+        member this.Remove(child: 'T) : bool =
+            assert GameThread.is_game_thread()
             children.RemoveAll(fun x -> System.Object.ReferenceEquals(x.Widget, child)) > 0
 
-[<Extension>]
 type GridFlowContainerExtensions =
 
     [<Extension>]
@@ -369,8 +370,7 @@ type GridFlowContainerExtensions =
         container
 
     [<Extension>]
-    static member Filter(container: #GridFlowContainer<'T>, filter: 'T -> bool) : unit =
-        container.Filter <- filter
+    static member Filter(container: #GridFlowContainer<'T>, filter: 'T -> bool) : unit = container.Filter <- filter
 
     [<Extension>]
     static member WithFilter(container: #GridFlowContainer<'T>, filter: 'T -> bool) : #GridFlowContainer<'T> =

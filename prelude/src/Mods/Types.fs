@@ -1,4 +1,4 @@
-﻿namespace Prelude.Mods
+namespace Prelude.Mods
 
 open Prelude
 open Prelude.Charts
@@ -27,10 +27,14 @@ type ModdedChart =
         ModsApplied: Map<string, int64>
         Status: ModStatus
     }
-    member this.FirstNote : Time = this.Notes.[0].Time
-    member this.LastNote : Time = this.Notes.[this.Notes.Length - 1].Time
-    member this.ToNoteData() : NoteData = { Keys = this.Keys; Notes = this.Notes }
-    member this.AsChart : Chart =
+
+    member this.FirstNote: Time = this.Notes.[0].Time
+    member this.LastNote: Time = this.Notes.[this.Notes.Length - 1].Time
+
+    member this.ToNoteData() : NoteData =
+        { Keys = this.Keys; Notes = this.Notes }
+
+    member this.AsChart: Chart =
         {
             Keys = this.Keys
             Notes = this.Notes
@@ -46,7 +50,8 @@ type ModdedChartInternal =
         BPM: TimeArray<BPM>
         SV: TimeArray<float32>
     }
-    static member OfChart (chart: Chart) =
+
+    static member OfChart(chart: Chart) : ModdedChartInternal =
         {
             Keys = chart.Keys
             Notes = chart.Notes
@@ -74,6 +79,7 @@ type Mod =
         /// Language independent
         Shorthand: int64 -> string
     }
+
     static member internal Default =
         {
             Status = ModStatus.Unstored

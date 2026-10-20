@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts
+namespace Prelude.Charts
 
 open System.IO
 open Percyqaz.Common
@@ -43,6 +43,7 @@ type ChartImportHeader =
 
         mutable Origins: Set<ChartOrigin>
     }
+
     static member Default =
         {
             Title = "Untitled Chart"
@@ -61,8 +62,15 @@ type ChartImportHeader =
 
             Origins = Set.empty
         }
-        
-    member this.InfoString = sprintf "%s - %s (%s) [%s] %s" this.Artist this.Title this.Creator this.DiffName (this.Origins |> Seq.map _.InfoString |> String.concat ", ")
+
+    member this.InfoString =
+        sprintf
+            "%s - %s (%s) [%s] %s"
+            this.Artist
+            this.Title
+            this.Creator
+            this.DiffName
+            (this.Origins |> Seq.map _.InfoString |> String.concat ", ")
 
 type ImportChart =
     {
@@ -91,12 +99,14 @@ module ImportChart =
 
             match Chart.ReadFromStreamHeadless(keys, br) with
             | Ok chart ->
-                Ok {
-                    PackName = pack_name
-                    Header = header
-                    LoadedFromPath = path
-                    Chart = chart
-                }
+                Ok
+                    {
+                        PackName = pack_name
+                        Header = header
+                        LoadedFromPath = path
+                        Chart = chart
+                    }
             | Error reason -> Error reason
 
-        with err -> Error err.Message
+        with err ->
+            Error err.Message

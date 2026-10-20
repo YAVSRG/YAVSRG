@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.HudLayouts
+namespace Prelude.Skins.HudLayouts
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -26,14 +26,7 @@ type HudElement =
     | MultiplayerScores
 
     static member HIDDEN_DURING_AUTO =
-        [|
-            Accuracy
-            ErrorBar
-            ColumnErrorBars
-            Combo
-            Judgement
-            EarlyLate
-        |]
+        [| Accuracy; ErrorBar; ColumnErrorBars; Combo; Judgement; EarlyLate |]
 
     /// Order HUD elements are drawn in, first = back
     static member DRAW_ORDER =
@@ -85,7 +78,7 @@ type HudElement =
 type JudgementDisplayType =
     | Name
     | Texture of int
-    
+
 type JudgementEffectType =
     | None = 0
     | Fade = 1
@@ -110,19 +103,23 @@ type HudPosition =
         Right: float32 * float32
         Bottom: float32 * float32
     }
+
     member this.TextAlignment =
         let lo, la = this.Left
         let ro, _ = this.Right
+
         if la = 0.5f then
             0.5f
         elif la < 0.5f then
             if lo >= 0.0f then 0.0f
             elif ro <= 0.0f then 1.0f
             else 0.5f
+        elif lo >= 0.0f then
+            0.0f
+        elif ro <= 0.0f then
+            1.0f
         else
-            if lo >= 0.0f then 0.0f
-            elif ro <= 0.0f then 1.0f
-            else 0.5f
+            0.5f
 
     member this.Rotate =
         let inline pointwise_add (a, b) (c, d) = (a + c, b + d)
@@ -142,16 +139,10 @@ type HudPosition =
         }
 
     member this.FlipVertical =
-        { this with
-            Top = (-fst this.Bottom, 1.0f - snd this.Bottom)
-            Bottom = (-fst this.Top, 1.0f - snd this.Top)
-        }
+        { this with Top = (-fst this.Bottom, 1.0f - snd this.Bottom); Bottom = (-fst this.Top, 1.0f - snd this.Top) }
 
     member this.FlipHorizontal =
-        { this with
-            Left = (-fst this.Right, 1.0f - snd this.Right)
-            Right = (-fst this.Left, 1.0f - snd this.Left)
-        }
+        { this with Left = (-fst this.Right, 1.0f - snd this.Right); Right = (-fst this.Left, 1.0f - snd this.Left) }
 
 [<Json.AutoCodec(false)>]
 type BackgroundTextureOptions =
@@ -296,6 +287,7 @@ type HudConfig =
         CustomImagePosition: HudPosition
         CustomImageFrameTime: float32<ms / rate>
     }
+
     static member Default =
         {
             AccuracyEnabled = true
@@ -549,13 +541,13 @@ type HudConfig =
         }
 
     member this.GetJudgementCounterDisplay(for_ruleset: Ruleset) : int option array =
-        match this.JudgementCounterCustomDisplay.TryFind for_ruleset.Judgements.Length with
+        match this.JudgementCounterCustomDisplay.TryFind(for_ruleset.Judgements.Length) with
         | Some xs -> xs
         | None -> Array.create for_ruleset.Judgements.Length None
 
     member this.GetJudgementMeterDisplay(for_ruleset: Ruleset) : JudgementDisplayType array =
         if this.JudgementMeterUseTexture then
-            match this.JudgementMeterCustomDisplay.TryFind for_ruleset.Judgements.Length with
+            match this.JudgementMeterCustomDisplay.TryFind(for_ruleset.Judgements.Length) with
             | Some xs -> xs
             | None -> Array.create for_ruleset.Judgements.Length JudgementDisplayType.Name
         else
@@ -570,21 +562,18 @@ type HudTextureRules =
         MustBeSquare: HudConfig -> bool
         MaxGridSize: HudConfig -> int * int
     }
+
     member this.Evaluate(config: HudConfig) : TextureRules =
         {
-            IsRequired = this.IsRequired config
-            MustBeSquare = this.MustBeSquare config
-            MaxGridSize = this.MaxGridSize config
+            IsRequired = this.IsRequired(config)
+            MustBeSquare = this.MustBeSquare(config)
+            MaxGridSize = this.MaxGridSize(config)
         }
 
 module HudTextureRules =
 
     let DEFAULT =
-        {
-            IsRequired = K true
-            MustBeSquare = K true
-            MaxGridSize = K(16, 32)
-        }
+        { IsRequired = K true; MustBeSquare = K true; MaxGridSize = K(16, 32) }
 
     let TEXTURES: Map<string, HudTextureRules> =
         Map.ofList
@@ -609,9 +598,17 @@ module HudTextureRules =
                 }
                 "judgement-counter-judgements",
                 {
-                    IsRequired = fun config ->
-                        config.JudgementCounterShowLabels
-                        && config.JudgementCounterCustomDisplay.Values |> Seq.exists (Seq.exists (function Some _ -> true | _ -> false))
+                    IsRequired =
+                        fun config ->
+                            config.JudgementCounterShowLabels
+                            && config.JudgementCounterCustomDisplay.Values
+                               |> Seq.exists(
+                                   Seq.exists(
+                                       function
+                                       | Some _ -> true
+                                       | _ -> false
+                                   )
+                               )
                     MustBeSquare = K false
                     MaxGridSize = K(16, 1)
                 }
@@ -621,32 +618,13 @@ module HudTextureRules =
                     MustBeSquare = K false
                     MaxGridSize = K(13, 1)
                 }
-                "combo-font",
-                {
-                    IsRequired = fun config -> config.ComboUseFont
-                    MustBeSquare = K false
-                    MaxGridSize = K(13, 1)
-                }
-                "accuracy-font",
-                {
-                    IsRequired = fun config -> config.AccuracyUseFont
-                    MustBeSquare = K false
-                    MaxGridSize = K(13, 1)
-                }
+                "combo-font", { IsRequired = _.ComboUseFont; MustBeSquare = K false; MaxGridSize = K(13, 1) }
+                "accuracy-font", { IsRequired = _.AccuracyUseFont; MustBeSquare = K false; MaxGridSize = K(13, 1) }
                 "progress-meter-font",
-                {
-                    IsRequired = fun config -> config.ProgressMeterUseFont
-                    MustBeSquare = K false
-                    MaxGridSize = K(13, 1)
-                }
-                "custom-image",
-                {
-                    IsRequired = fun config -> config.CustomImageEnabled
-                    MustBeSquare = K false
-                    MaxGridSize = K(16, 32)
-                }
+                { IsRequired = _.ProgressMeterUseFont; MustBeSquare = K false; MaxGridSize = K(13, 1) }
+                "custom-image", { IsRequired = _.CustomImageEnabled; MustBeSquare = K false; MaxGridSize = K(16, 32) }
             ]
 
-    let get (config: HudConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate config
+    let get (config: HudConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate(config)
 
     let list () : string seq = TEXTURES.Keys :> string seq

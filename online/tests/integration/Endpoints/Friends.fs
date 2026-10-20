@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Integration
+namespace Interlude.Web.Tests.Integration
 
 open NUnit.Framework
 open Interlude.Web.Shared.Requests
@@ -10,7 +10,7 @@ module Friends =
     let List () =
         use done_signal = new AutoResetEvent(false)
 
-        Friends.List.get (
+        Friends.List.get(
             Option.get
             >> fun (res: Friends.List.Response) ->
                 printfn "%A" res.Friends
@@ -23,7 +23,7 @@ module Friends =
     let Add () =
         use done_signal = new AutoResetEvent(false)
 
-        Friends.Add.post (
+        Friends.Add.post(
             { User = USERNAME },
             Option.get
             >> fun (res: bool) ->
@@ -37,7 +37,7 @@ module Friends =
     let Remove () =
         use done_signal = new AutoResetEvent(false)
 
-        Friends.Remove.delete (
+        Friends.Remove.delete(
             USERNAME,
             Option.get
             >> fun (res: bool) ->

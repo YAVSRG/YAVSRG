@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Core
+namespace Interlude.Web.Server.Domain.Core
 
 open System
 open System.Security.Cryptography
@@ -59,16 +59,15 @@ module User =
         }
 
     let generate_auth_token () =
-        RandomNumberGenerator.GetBytes(27)
-        |> Convert.ToBase64String
+        RandomNumberGenerator.GetBytes(27) |> Convert.ToBase64String
 
     let create (username, discord_id) =
         {
             Username = username
             DiscordId = discord_id
-            DateSignedUp = Timestamp.now ()
+            DateSignedUp = Timestamp.now()
             LastLogin = 0L
-            AuthToken = generate_auth_token ()
+            AuthToken = generate_auth_token()
             Badges = Set.empty
             Color = Badge.DEFAULT_COLOR
         }
@@ -88,13 +87,13 @@ module User =
                 ]
             FillParameters =
                 (fun p user ->
-                    p.String user.Username
+                    p.String(user.Username)
                     p.String(string user.DiscordId)
-                    p.Int64 user.DateSignedUp
-                    p.Int64 user.LastLogin
-                    p.String user.AuthToken
+                    p.Int64(user.DateSignedUp)
+                    p.Int64(user.LastLogin)
+                    p.String(user.AuthToken)
                     p.Json JSON user.Badges
-                    p.Int32 user.Color
+                    p.Int32(user.Color)
                 )
         }
 
@@ -115,7 +114,7 @@ module User =
                         DateSignedUp = r.Int64
                         LastLogin = r.Int64
                         AuthToken = r.String
-                        Badges = r.Json JSON
+                        Badges = r.Json(JSON)
                         Color = r.Int32
                     }
                 )
@@ -128,7 +127,7 @@ module User =
         {
             SQL = """SELECT * FROM users WHERE Id = @Id;"""
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
-            FillParameters = (fun p id -> p.Int64 id)
+            FillParameters = (fun p id -> p.Int64(id))
             Read =
                 (fun r ->
                     r.Int64 |> ignore
@@ -139,7 +138,7 @@ module User =
                         DateSignedUp = r.Int64
                         LastLogin = r.Int64
                         AuthToken = r.String
-                        Badges = r.Json JSON
+                        Badges = r.Json(JSON)
                         Color = r.Int32
                     }
                 )
@@ -156,7 +155,7 @@ module User =
         let ids_string = String.concat "," (Array.map string ids)
 
         let query: Query<unit, int64 * User> =
-            { Query.without_parameters () with
+            { Query.without_parameters() with
                 SQL = sprintf "SELECT * FROM users WHERE Id IN (%s)" ids_string
                 Read =
                     (fun r ->
@@ -167,7 +166,7 @@ module User =
                             DateSignedUp = r.Int64
                             LastLogin = r.Int64
                             AuthToken = r.String
-                            Badges = r.Json JSON
+                            Badges = r.Json(JSON)
                             Color = r.Int32
                         }
                     )
@@ -179,7 +178,7 @@ module User =
         {
             SQL = """SELECT * FROM users WHERE AuthToken = @AuthToken;"""
             Parameters = [ "@AuthToken", SqliteType.Text, -1 ]
-            FillParameters = (fun p token -> p.String token)
+            FillParameters = (fun p token -> p.String(token))
             Read =
                 (fun r ->
                     r.Int64,
@@ -189,7 +188,7 @@ module User =
                         DateSignedUp = r.Int64
                         LastLogin = r.Int64
                         AuthToken = r.String
-                        Badges = r.Json JSON
+                        Badges = r.Json(JSON)
                         Color = r.Int32
                     }
                 )
@@ -212,7 +211,7 @@ module User =
                         DateSignedUp = r.Int64
                         LastLogin = r.Int64
                         AuthToken = r.String
-                        Badges = r.Json JSON
+                        Badges = r.Json(JSON)
                         Color = r.Int32
                     }
                 )
@@ -235,7 +234,7 @@ module User =
                         DateSignedUp = r.Int64
                         LastLogin = r.Int64
                         AuthToken = r.String
-                        Badges = r.Json JSON
+                        Badges = r.Json(JSON)
                         Color = r.Int32
                     }
                 )
@@ -250,7 +249,7 @@ module User =
             Parameters = [ "@Limit", SqliteType.Integer, 8; "@Offset", SqliteType.Integer, 8 ]
             FillParameters =
                 (fun p page ->
-                    p.Int64 15L
+                    p.Int64(15L)
                     p.Int64(int64 page * 15L)
                 )
             Read =
@@ -262,17 +261,14 @@ module User =
                         DateSignedUp = r.Int64
                         LastLogin = r.Int64
                         AuthToken = r.String
-                        Badges = r.Json JSON
+                        Badges = r.Json(JSON)
                         Color = r.Int32
                     }
                 )
         }
 
     let list (page: int) =
-        if page < 0 then
-            [||]
-        else
-            LIST.Execute page core_db |> expect
+        if page < 0 then [||] else LIST.Execute page core_db |> expect
 
     let private SET_AUTH_TOKEN: NonQuery<int64 * string> =
         {
@@ -280,8 +276,8 @@ module User =
             Parameters = [ "@AuthToken", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
             FillParameters =
                 fun p (id, token) ->
-                    p.String token
-                    p.Int64 id
+                    p.String(token)
+                    p.Int64(id)
         }
 
     let set_auth_token (id: int64, token: string) =
@@ -293,8 +289,8 @@ module User =
             Parameters = [ "@Color", SqliteType.Integer, 4; "@Id", SqliteType.Integer, 8 ]
             FillParameters =
                 fun p (id, color) ->
-                    p.Int32 color
-                    p.Int64 id
+                    p.Int32(color)
+                    p.Int64(id)
         }
 
     let update_color (id: int64, color: int32) =
@@ -307,7 +303,7 @@ module User =
             FillParameters =
                 fun p (id, badges) ->
                     p.Json JSON badges
-                    p.Int64 id
+                    p.Int64(id)
         }
 
     let update_badges (id: int64, badges: Set<Badge>) =
@@ -319,8 +315,8 @@ module User =
             Parameters = [ "@Now", SqliteType.Integer, 8; "@Id", SqliteType.Integer, 8 ]
             FillParameters =
                 fun p id ->
-                    p.Int64(Timestamp.now ())
-                    p.Int64 id
+                    p.Int64(Timestamp.now())
+                    p.Int64(id)
         }
 
     let update_last_seen (id: int64) =
@@ -330,17 +326,14 @@ module User =
         {
             SQL = """DELETE FROM users WHERE Id = @Id;"""
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
-            FillParameters = fun p id -> p.Int64 id
+            FillParameters = fun p id -> p.Int64(id)
         }
 
     let delete (id: int64) =
         DELETE.Execute id core_db |> expect |> ignore
 
     let private COUNT: Query<unit, int64> =
-        { Query.without_parameters() with
-            SQL = """SELECT COUNT(1) FROM users"""
-            Read = fun r -> r.Int64
-        }
+        { Query.without_parameters() with SQL = """SELECT COUNT(1) FROM users"""; Read = fun r -> r.Int64 }
 
     let count () : int64 =
         COUNT.Execute () core_db |> expect |> Array.exactlyOne
@@ -351,8 +344,8 @@ module User =
             Parameters = [ "@Id", SqliteType.Integer, 8; "@Username", SqliteType.Text, -1 ]
             FillParameters =
                 fun p (id, username) ->
-                    p.Int64 id
-                    p.String username
+                    p.Int64(id)
+                    p.String(username)
         }
 
     let rename (id: int64, new_name: string) =
@@ -364,7 +357,7 @@ module User =
             Parameters = [ "@Id", SqliteType.Integer, 8; "@DiscordId", SqliteType.Text, -1 ]
             FillParameters =
                 fun p (id, discord_id) ->
-                    p.Int64 id
+                    p.Int64(id)
                     p.String(string discord_id)
         }
 

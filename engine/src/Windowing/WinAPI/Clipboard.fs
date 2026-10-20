@@ -14,79 +14,82 @@ module ClipboardWin32 =
 
     [<DllImport("User32.dll")>]
     [<return: MarshalAs(UnmanagedType.Bool)>]
-    extern bool private IsClipboardFormatAvailable(uint format);
+    extern bool private IsClipboardFormatAvailable(uint format)
 
     [<DllImport("User32.dll")>]
-    extern IntPtr private GetClipboardData(uint uFormat);
+    extern IntPtr private GetClipboardData(uint uFormat)
 
     [<DllImport("user32.dll")>]
-    extern IntPtr private SetClipboardData(uint uFormat, IntPtr hMem);
+    extern IntPtr private SetClipboardData(uint uFormat, IntPtr hMem)
 
     [<DllImport("User32.dll")>]
     [<return: MarshalAs(UnmanagedType.Bool)>]
-    extern bool private OpenClipboard(IntPtr hWndNewOwner);
+    extern bool private OpenClipboard(IntPtr hWndNewOwner)
 
     [<DllImport("user32.dll")>]
-    extern bool private EmptyClipboard();
+    extern bool private EmptyClipboard()
 
     [<DllImport("User32.dll")>]
     [<return: MarshalAs(UnmanagedType.Bool)>]
-    extern bool private CloseClipboard();
+    extern bool private CloseClipboard()
 
     [<DllImport("Kernel32.dll")>]
-    extern IntPtr private GlobalLock(IntPtr hMem);
+    extern IntPtr private GlobalLock(IntPtr hMem)
 
     [<DllImport("kernel32.dll")>]
-    extern IntPtr private GlobalAlloc(uint uFlags, UIntPtr dwBytes);
+    extern IntPtr private GlobalAlloc(uint uFlags, UIntPtr dwBytes)
 
     [<DllImport("Kernel32.dll")>]
     [<return: MarshalAs(UnmanagedType.Bool)>]
-    extern bool private GlobalUnlock(IntPtr hMem);
+    extern bool private GlobalUnlock(IntPtr hMem)
 
     [<DllImport("Kernel32.dll")>]
-    extern int private GlobalSize(IntPtr hMem);
+    extern int private GlobalSize(IntPtr hMem)
 
     [<DllImport("kernel32.dll")>]
-    extern IntPtr private GlobalFree(IntPtr hMem);
+    extern IntPtr private GlobalFree(IntPtr hMem)
 
     // GLFW manages most clipboard stuff, but as of 3.3.8 doesn't have a cross-platform API for reading/writing images to the clipboard
     // So for now enjoy this windows-only code
 
-    let private set_clipboard(ptr: nativeint, length: int, format: uint32, clear: bool) =
+    let private set_clipboard (ptr: nativeint, length: int, format: uint32, clear: bool) =
         let mutable success = false
+
         try
             try
                 if OpenClipboard(IntPtr.Zero) |> not then
                     failwith "OpenClipboard"
-                else
-
-                if clear && EmptyClipboard() |> not then
+                elif clear && EmptyClipboard() |> not then
                     failwith "EmptyClipboard"
                 else
 
-                let mutable hGlobal = GlobalAlloc(0x02u ||| 0x40u, UIntPtr(uint32 length))
+                let mutable h_global = GlobalAlloc(0x02u ||| 0x40u, UIntPtr(uint32 length))
 
                 try
 
-                    let mutable target = GlobalLock(hGlobal)
+                    let mutable target = GlobalLock(h_global)
+
                     if target = IntPtr.Zero then
                         failwith "GlobalLock"
                     else
 
                     try
-                        NativePtr.copyBlock (NativePtr.ofNativeInt<byte> target) (NativePtr.ofNativeInt<byte> ptr) length
+                        NativePtr.copyBlock
+                            (NativePtr.ofNativeInt<byte> target)
+                            (NativePtr.ofNativeInt<byte> ptr)
+                            length
                     finally
                         if target <> IntPtr.Zero then
                             GlobalUnlock(target) |> ignore
 
                         Marshal.FreeHGlobal(ptr)
 
-                    if SetClipboardData(format, hGlobal) |> int64 <> 0 then
-                        hGlobal <- IntPtr.Zero
+                    if SetClipboardData(format, h_global) |> int64 <> 0 then
+                        h_global <- IntPtr.Zero
                         success <- true
                 finally
-                    if hGlobal <> IntPtr.Zero then
-                        GlobalFree(hGlobal) |> ignore
+                    if h_global <> IntPtr.Zero then
+                        GlobalFree(h_global) |> ignore
             finally
                 CloseClipboard() |> ignore
         with err ->
@@ -106,17 +109,17 @@ module ClipboardWin32 =
         use stream = new MemoryStream()
         image.SaveAsBmp(stream)
 
-        let bytes = int (stream.Length - 14L)
+        let bytes = int(stream.Length - 14L)
         let ptr = Marshal.AllocHGlobal(bytes)
         Marshal.Copy(stream.GetBuffer(), 14, ptr, bytes)
 
-        set_clipboard (ptr, bytes, CF_DIB, true)
+        set_clipboard(ptr, bytes, CF_DIB, true)
 
     let set_image_and_text (image: Image<Rgba32>, text: string) =
         if set_image image then
             let bytes = (text.Length + 1) * 2
             let source = Marshal.StringToHGlobalUni(text)
-            set_clipboard (source, bytes, CF_UNICODETEXT, false) |> ignore
+            set_clipboard(source, bytes, CF_UNICODETEXT, false) |> ignore
             true
-        else 
+        else
             false

@@ -1,4 +1,4 @@
-﻿open System
+open System
 open System.IO
 open System.Threading
 open System.Security.Authentication
@@ -21,11 +21,11 @@ try
     let api_cert_path = Path.Combine("./secrets", SECRETS.ApiCert)
     let socket_cert_path = Path.Combine("./secrets", SECRETS.SocketCert)
 
-    if not (File.Exists api_cert_path) then
+    if not(File.Exists(api_cert_path)) then
         Logging.Error "API Certificate could not be found @ %s" api_cert_path
         Logging.Error "Make sure you're not running the server from the wrong starting directory"
         Logging.Error "For first time setup, run the server with `./scripts/yavsrg.sh run_server_local` or `./scripts/yavsrg.sh run_server_docker`"
-    else if not (File.Exists socket_cert_path) then
+    elif not (File.Exists socket_cert_path) then
         Logging.Error "Socket Certificate could not be found at %s" socket_cert_path
         Logging.Error "Make sure you're not running the server from the wrong starting directory"
         Logging.Error "For first time setup, run the server with `./scripts/yavsrg.sh run_server_local` or `./scripts/yavsrg.sh run_server_docker`"
@@ -37,7 +37,7 @@ try
     let socket_cert =
         X509CertificateLoader.LoadPkcs12FromFile(socket_cert_path, SECRETS.SocketCertPassword)
 
-    Domain.Database.startup ()
+    Domain.Database.startup()
 
     Server.init
         {
@@ -50,28 +50,25 @@ try
         }
 
     let api_root = Endpoints.CreateApiRoot
+
     API.Server.init
-        {
-            Port = HTTPS_PORT
-            SSLContext = SslContext(SslProtocols.Tls12, api_cert)
-            Handle_Request = api_root.Handle
-        }
+        { Port = HTTPS_PORT; SSLContext = SslContext(SslProtocols.Tls12, api_cert); Handle_Request = api_root.Handle }
 
     Logging.Info "Launching game server on port %i ..." SOCKET_PORT
-    Server.start ()
+    Server.start()
     Logging.Info "Launching api on port %i ..." HTTPS_PORT
-    API.Server.start ()
-    Logging.Info "Launching discord bot ..."
-    Bot.start ()
+    API.Server.start()
+    Logging.Info("Launching discord bot ...")
+    Bot.start()
 
 #if DEBUG
     Console.ReadLine() |> ignore
 #else
-    Thread.Sleep Timeout.Infinite
+    Thread.Sleep(Timeout.Infinite)
 #endif
 
 with err ->
     Logging.Critical "%O" err
-    Thread.Sleep 60000
+    Thread.Sleep(60000)
 
 Logging.Shutdown()

@@ -52,6 +52,7 @@ type PacemakerSettings =
         PersonalBest: PacemakerPersonalBestMode
         Mode: PacemakerMode
     }
+
     static member Default =
         {
             Accuracy = 0.95
@@ -96,15 +97,15 @@ type LanecoverOptions =
         Color: Setting<Color>
     }
 
-    member this.LoadPreset(p: LanecoverPresetOptions) =
-        this.Enabled.Set p.Enabled
-        this.DrawUnderReceptors.Set p.DrawUnderReceptors
-        this.Sudden.Set p.Sudden
-        this.Hidden.Set p.Hidden
-        this.FadeLength.Set p.FadeLength
-        this.Color.Set p.Color
+    member this.LoadPreset(p: LanecoverPresetOptions) : unit =
+        this.Enabled.Set(p.Enabled)
+        this.DrawUnderReceptors.Set(p.DrawUnderReceptors)
+        this.Sudden.Set(p.Sudden)
+        this.Hidden.Set(p.Hidden)
+        this.FadeLength.Set(p.FadeLength)
+        this.Color.Set(p.Color)
 
-    member this.ToPreset : LanecoverPresetOptions =
+    member this.ToPreset: LanecoverPresetOptions =
         {
             Enabled = this.Enabled.Value
             DrawUnderReceptors = this.DrawUnderReceptors.Value
@@ -138,7 +139,7 @@ type Preset =
         Mode: PresetMode
 
         VisualOffset: GameplayTime
-        ScrollSpeed: float32<rate/ms>
+        ScrollSpeed: float32<rate / ms>
         HitPosition: float32
         Upscroll: bool
         LaneCover: LanecoverPresetOptions
@@ -160,9 +161,9 @@ type GameOptions =
         AudioPitchRatesUp: Setting<bool>
         MenusMuffleSong: Setting<bool>
         AudioCrossfadeEnabled: Setting<bool>
-        
 
-        ScrollSpeed: Setting.Bounded<float32<rate/ms>>
+
+        ScrollSpeed: Setting.Bounded<float32<rate / ms>>
         HitPosition: Setting.Bounded<float32>
         HitLighting: Setting<bool>
         Upscroll: Setting<bool>
@@ -218,22 +219,25 @@ type GameOptions =
         ScoreGraphWindowBackground: Setting<bool>
         HoldToGiveUp: Setting<bool>
     }
+
     static member Default =
         {
             Language = Setting.simple "en_GB"
             CurrentChart = Setting.simple ""
             Theme = Themes.selected_id
 
-            VisualOffset = 0.0f<ms / rate> |> Setting.bounded  (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
-            AudioOffset =  0.0f<ms / rate> |> Setting.bounded (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
+            VisualOffset =
+                0.0f<ms / rate> |> Setting.bounded(-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
+            AudioOffset =
+                0.0f<ms / rate> |> Setting.bounded(-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
             AudioVolume = Setting.bounded (0.0, 1.0) 0.05
             AudioPitchRatesDown = Setting.simple true
             AudioPitchRatesUp = Setting.simple true
             MenusMuffleSong = Setting.simple true
             AudioCrossfadeEnabled = Setting.simple true
 
-            ScrollSpeed = 2.05f<rate/ms> |> Setting.bounded (0.5f<rate/ms>, 5.0f<rate/ms>) |> Setting.roundf_uom 2
-            HitPosition = 0.0f |> Setting.bounded (-300.0f, 600.0f)
+            ScrollSpeed = 2.05f<rate / ms> |> Setting.bounded(0.5f<rate / ms>, 5.0f<rate / ms>) |> Setting.roundf_uom 2
+            HitPosition = 0.0f |> Setting.bounded(-300.0f, 600.0f)
             HitLighting = Setting.simple false
             Upscroll = Setting.simple false
             BackgroundDim = Setting.percentf 0.5f
@@ -352,55 +356,59 @@ module StaticOptions =
 
 module Options =
 
-    let private CONFIG_PATH = Path.GetFullPath "config.json"
+    let private CONFIG_PATH = Path.GetFullPath("config.json")
 
-    let EMBEDDED_LOCALES : Map<string, string> = Map.ofList ["en_GB", "English"]
+    let EMBEDDED_LOCALES: Map<string, string> = Map.ofList [ "en_GB", "English" ]
     let mutable available_locales = Set.empty<string>
 
     let load_window_config (instance: int) () : WindowOptions =
         // Register decoding rules for Percyqaz.Flux config
-        JSON
-            .WithAutoCodec<FullscreenVideoMode>()
-            .WithAutoCodec<Bind>()
-        |> ignore
+        JSON.WithAutoCodec<FullscreenVideoMode>().WithAutoCodec<Bind>() |> ignore
 
         config <- load_important_json_file "Config" CONFIG_PATH true
 
         if config.WorkingDirectory <> "" then
-            Directory.SetCurrentDirectory config.WorkingDirectory
+            Directory.SetCurrentDirectory(config.WorkingDirectory)
 
         if instance > 0 then
             let new_path = (Directory.GetCurrentDirectory() + "-instance" + instance.ToString())
-            Directory.CreateDirectory new_path |> ignore
-            Directory.SetCurrentDirectory new_path
+            Directory.CreateDirectory(new_path) |> ignore
+            Directory.SetCurrentDirectory(new_path)
             Logging.Info "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory())
 
         config.ToOptions
 
     open System.Diagnostics
 
-    let init() : unit =
+    let init () : unit =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
         options <- { options with Hotkeys = Hotkeys.init options.Hotkeys }
 
-        let detect_locales() =
-            let locale_dir_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
+        let detect_locales () =
+            let locale_dir_path =
+                Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
 
             let locales =
                 try
                     Directory.GetFiles(locale_dir_path)
-                with
-                | :? DirectoryNotFoundException -> [||]
+                with :? DirectoryNotFoundException ->
+                    [||]
                 |> Seq.where(fun x -> Path.GetExtension(x).ToLower() = ".txt")
                 |> Seq.map(fun x -> Path.GetFileNameWithoutExtension(x))
 
             available_locales <- Set.union (Set.ofSeq EMBEDDED_LOCALES.Keys) (Set.ofSeq locales)
             Logging.Debug "%i available locales" available_locales.Count
 
-        let get_locale_file(id: string) =
-            let locale_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", id + ".txt")
-            if EMBEDDED_LOCALES.ContainsKey id then
-                EmbeddedResource.GetLocale id |> Some
+        let get_locale_file (id: string) =
+            let locale_path =
+                Path.Combine(
+                    Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
+                    "Locale",
+                    id + ".txt"
+                )
+
+            if EMBEDDED_LOCALES.ContainsKey(id) then
+                EmbeddedResource.GetLocale(id) |> Some
             elif File.Exists(locale_path) then
                 File.OpenRead(locale_path) :> Stream |> Some
             else

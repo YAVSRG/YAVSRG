@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Tables
+namespace Interlude.Web.Server.API.Tables
 
 open NetCoreServer
 open Prelude.Gameplay.Scoring
@@ -14,12 +14,8 @@ module Records =
     open Tables.Records
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             require_query_parameter query_params "user"
             require_query_parameter query_params "table"
@@ -31,14 +27,13 @@ module Records =
 
             let table_id = query_params.["table"].[0].ToLower()
 
-            if not (Backbeat.Tables.exists table_id) then
+            if not(Backbeat.Tables.exists table_id) then
                 raise NotFoundException
 
             let table = Backbeat.Tables.TABLES.[table_id]
 
             // todo: aggregate grades and scores together
-            let scores =
-                Score.aggregate_user_ranked_scores target_user_id |> Map.ofArray
+            let scores = Score.aggregate_user_ranked_scores target_user_id |> Map.ofArray
 
             let charts = TableLevel.get_all table_id |> Array.map fst
             let ruleset = Backbeat.rulesets.[table.RulesetId]
@@ -47,13 +42,13 @@ module Records =
                 {
                     Scores =
                         charts
-                        |> Seq.choose (fun chart ->
+                        |> Seq.choose(fun chart ->
                             if scores.ContainsKey(chart) then
                                 Some(
                                     {
                                         Hash = chart
                                         Score = scores.[chart]
-                                        Grade =Grade.calculate ruleset.Grades scores.[chart]
+                                        Grade = Grade.calculate ruleset.Grades scores.[chart]
                                     }
                                     : Score
                                 )

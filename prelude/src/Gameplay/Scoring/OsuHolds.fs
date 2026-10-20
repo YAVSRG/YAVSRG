@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Scoring
+namespace Prelude.Gameplay.Scoring
 
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -16,13 +16,13 @@ module OsuHolds =
         let head_delta_abs = abs head_delta
 
         if overheld then
-            
+
             if head_delta_abs < windows.WindowOverhold200 then 2 // 200
             elif head_delta_abs < windows.WindowOverhold100 then 3 // 100
             else 4 // 50
 
         elif dropped then
-            
+
             if release_delta < -windows.Window50 then 5 else 4
 
         else

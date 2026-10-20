@@ -17,7 +17,9 @@ type ConversionOptions =
         PackName: string
     }
 
-    static member EtternaPack(pack_name: string, changed_after: DateTime option, asset_mode: AssetMode) : ConversionOptions =
+    static member EtternaPack
+        (pack_name: string, changed_after: DateTime option, asset_mode: AssetMode)
+        : ConversionOptions =
         {
             AssetMode = asset_mode
             EtternaPackName = Some pack_name
@@ -33,11 +35,7 @@ type ConversionOptions =
             PackName = pack_name
         }
 
-type ConversionContext =
-    {
-        Options: ConversionOptions
-        OriginalPath: string
-    }
+type ConversionContext = { Options: ConversionOptions; OriginalPath: string }
 
 [<Struct>]
 type SkippedConversion =
@@ -45,14 +43,18 @@ type SkippedConversion =
         OriginalPath: string
         Reason: string
     }
-    override this.ToString() = sprintf "%s -> %s" this.OriginalPath this.Reason
-    
+
+    override this.ToString() : string =
+        sprintf "%s -> %s" this.OriginalPath this.Reason
+
 type ConversionResult =
     {
         ConvertedCharts: int
         SkippedCharts: SkippedConversion list
     }
+
     static member Empty = { ConvertedCharts = 0; SkippedCharts = [] }
+
     static member Combine (res1: ConversionResult) (res2: ConversionResult) =
         {
             ConvertedCharts = res1.ConvertedCharts + res2.ConvertedCharts
@@ -68,24 +70,24 @@ exception ConversionSkipException of Reason: string
 [<AutoOpen>]
 module Conversions =
 
-    let inline skip_conversion (msg: string) = raise (ConversionSkipException msg)
-    
+    let inline skip_conversion (msg: string) = raise(ConversionSkipException msg)
+
     let remove_stacked_points (points: TimeArray<'T>) : TimeArray<'T> =
         if points.Length = 0 then
             [||]
         else
-        
+
         let mutable current = points.[0]
-        
+
         seq {
             for i = 1 to points.Length - 1 do
                 let next = points.[i]
-                
+
                 if next.Time > current.Time then
                     yield current
-                    
+
                 current <- next
-                
+
             yield current
         }
         |> Array.ofSeq
@@ -93,8 +95,9 @@ module Conversions =
     let cleanup_sv (sv: TimeArray<float32>) : TimeArray<float32> =
         seq {
             let mutable previous_value = 1.0f
+
             for s in remove_stacked_points(sv) do
-                if abs (s.Data - previous_value) > 0.005f then
+                if abs(s.Data - previous_value) > 0.005f then
                     yield s
                     previous_value <- s.Data
         }
@@ -102,6 +105,7 @@ module Conversions =
 
     let (|ChartFile|_|) (path: string) =
         let s = Path.GetExtension(path).ToLower()
+
         match s with
         | ".sm"
         | ".qua"
@@ -110,6 +114,7 @@ module Conversions =
 
     let (|ChartArchive|_|) (path: string) =
         let s = Path.GetExtension(path).ToLower()
+
         match s with
         | ".osz"
         | ".qp"
@@ -117,9 +122,9 @@ module Conversions =
         | _ -> None
 
     let (|SongFolder|_|) (path: string) =
-        if Directory.Exists path then
-            Directory.EnumerateFiles path
-            |> Seq.tryPick (fun x ->
+        if Directory.Exists(path) then
+            Directory.EnumerateFiles(path)
+            |> Seq.tryPick(fun x ->
                 match x with
                 | ChartFile s -> Some s
                 | _ -> None
@@ -128,9 +133,9 @@ module Conversions =
             None
 
     let (|PackFolder|_|) (path: string) =
-        if Directory.Exists path then
-            Directory.EnumerateDirectories path
-            |> Seq.forall (fun x ->
+        if Directory.Exists(path) then
+            Directory.EnumerateDirectories(path)
+            |> Seq.forall(fun x ->
                 match x with
                 | SongFolder _ -> false
                 | _ -> true
@@ -140,9 +145,9 @@ module Conversions =
             None
 
     let (|FolderOfPacks|_|) (path: string) =
-        if Directory.Exists path then
-            Directory.EnumerateDirectories path
-            |> Seq.forall (fun x ->
+        if Directory.Exists(path) then
+            Directory.EnumerateDirectories(path)
+            |> Seq.forall(fun x ->
                 match x with
                 | PackFolder -> false
                 | _ -> true
@@ -152,15 +157,17 @@ module Conversions =
             None
 
     let (|FolderOfOszs|_|) (path: string) =
-        if Directory.Exists path then
+        if Directory.Exists(path) then
             if
-                Directory.EnumerateFiles path
-                |> Seq.exists (fun x ->
+                Directory.EnumerateFiles(path)
+                |> Seq.exists(fun x ->
                     match x with
                     | ChartArchive ".osz" -> true
                     | _ -> false
                 )
-            then Some()
-            else None
+            then
+                Some()
+            else
+                None
         else
             None

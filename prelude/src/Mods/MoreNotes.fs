@@ -1,4 +1,4 @@
-﻿namespace Prelude.Mods
+namespace Prelude.Mods
 
 open Prelude
 open Prelude.Charts
@@ -15,8 +15,7 @@ module MoreNotes =
 
             let add_note (if_jack_in_column: int) (add_to_column: int) (nr: NoteRow) =
                 if
-                    (nr.[if_jack_in_column] = NoteType.NORMAL
-                     || nr.[if_jack_in_column] = NoteType.HOLDHEAD)
+                    (nr.[if_jack_in_column] = NoteType.NORMAL || nr.[if_jack_in_column] = NoteType.HOLDHEAD)
                     && previous_nr.[if_jack_in_column] = NoteType.NORMAL
                     && nr.[add_to_column] = NoteType.NOTHING
                 then
@@ -26,14 +25,9 @@ module MoreNotes =
 
             let new_notes =
                 chart.Notes
-                |> TimeArray.map (fun nr ->
+                |> TimeArray.map(fun nr ->
                     let new_notes =
-                        nr
-                        |> NoteRow.clone
-                        |> add_note 0 1
-                        |> add_note 1 0
-                        |> add_note 2 3
-                        |> add_note 3 2
+                        nr |> NoteRow.clone |> add_note 0 1 |> add_note 1 0 |> add_note 2 3 |> add_note 3 2
 
                     previous_nr <- new_notes
                     new_notes
@@ -58,11 +52,8 @@ module MoreNotes =
                 flip <- not flip
 
                 match
-                    if flip then
-                        seq { 0 .. chart.Keys - 1 }
-                    else
-                        seq { chart.Keys - 1 .. -1 .. 0 }
-                    |> Seq.tryFind (fun i -> previous_nr.[i] <> NoteType.NORMAL && nr.[i] = NoteType.NOTHING)
+                    if flip then seq { 0 .. chart.Keys - 1 } else seq { chart.Keys - 1 .. -1 .. 0 }
+                    |> Seq.tryFind(fun i -> previous_nr.[i] <> NoteType.NORMAL && nr.[i] = NoteType.NOTHING)
                 with
                 | Some i -> nr.[i] <- NoteType.NORMAL
                 | None -> ()
@@ -71,7 +62,7 @@ module MoreNotes =
 
             let new_notes =
                 chart.Notes
-                |> Array.map (fun { Time = time; Data = nr } ->
+                |> Array.map(fun { Time = time; Data = nr } ->
                     skip <- skip || (time - previous_time) < MS_THRESHOLD
                     let new_notes = nr |> NoteRow.clone |> (if not skip then add_note else id)
 

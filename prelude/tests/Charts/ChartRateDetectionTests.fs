@@ -27,7 +27,7 @@ module ChartRateDetectionTests =
     [<TestCase("[4K] Test 0.5x", 0.5f<rate>)>]
     [<TestCase("3.00x", 3.0f<rate>)>]
     [<TestCase("0.50x", 0.5f<rate>)>]
-    let RateDetection_Regex_ExpectedValue (difficulty_name: string, expected_value: float32<rate>) =
+    let RateDetection_Regex_ExpectedValue (difficulty_name: string, expected_value: Rate) =
 
         let result = detect_rate_mod difficulty_name
 

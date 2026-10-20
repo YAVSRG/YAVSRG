@@ -1,4 +1,4 @@
-﻿namespace Prelude.Mods
+namespace Prelude.Mods
 
 open System
 open Prelude
@@ -13,7 +13,7 @@ module ModState =
     let private seed_generation = Random()
 
     let cycle_fd (id: string) (mods: ModState) : ModState =
-        if mods.ContainsKey id then
+        if mods.ContainsKey(id) then
 
             match AVAILABLE_MODS.[id].Type with
             | Stateless
@@ -21,23 +21,20 @@ module ModState =
             | ColumnSwap -> Map.remove id mods
             | MultipleModes states ->
                 let state = mods.[id] + 1L
-                if state >= states then
-                    Map.remove id mods
-                else
-                    Map.add id state mods
+                if state >= states then Map.remove id mods else Map.add id state mods
         else
 
             let state =
                 match AVAILABLE_MODS.[id].Type with
                 | Stateless
                 | MultipleModes _ -> 0L
-                | RandomSeed -> seed_generation.Next(-Int32.MinValue,0)
+                | RandomSeed -> seed_generation.Next(-Int32.MinValue, 0)
                 | ColumnSwap -> failwith "column swap should be cycled using `cycle_column_swap`"
 
             List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
 
     let cycle_bk (id: string) (mods: ModState) : ModState =
-        if mods.ContainsKey id then
+        if mods.ContainsKey(id) then
 
             match AVAILABLE_MODS.[id].Type with
             | Stateless
@@ -45,37 +42,37 @@ module ModState =
             | ColumnSwap -> Map.remove id mods
             | MultipleModes _ ->
                 let state = mods.[id] - 1L
-                if state < 0L then
-                    Map.remove id mods
-                else
-                    Map.add id state mods
+                if state < 0L then Map.remove id mods else Map.add id state mods
         else
 
             let state =
                 match AVAILABLE_MODS.[id].Type with
                 | Stateless -> 0L
                 | MultipleModes states -> states - 1L
-                | RandomSeed -> seed_generation.Next(-Int32.MinValue,0)
+                | RandomSeed -> seed_generation.Next(-Int32.MinValue, 0)
                 | ColumnSwap -> failwith "column swap should be cycled using `cycle_column_swap`"
 
             List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
 
     let cycle_column_swap (id: string) (columns: int array) (mods: ModState) : ModState =
-        if mods.ContainsKey id then
+        if mods.ContainsKey(id) then
             Map.remove id mods
         else
-            List.fold (fun m i -> Map.remove i m) (Map.add id (ColumnSwap.pack columns) mods) AVAILABLE_MODS.[id].Exclusions
+            List.fold
+                (fun m i -> Map.remove i m)
+                (Map.add id (ColumnSwap.pack columns) mods)
+                AVAILABLE_MODS.[id].Exclusions
 
     let in_priority_order (mods: ModState) : (string * Mod * int64) seq =
         APPLICATION_PRIORITY_ORDER
-        |> Seq.choose (fun id ->
+        |> Seq.choose(fun id ->
             match Map.tryFind id mods with
-            | Some state -> Some (id, AVAILABLE_MODS.[id], state)
+            | Some state -> Some(id, AVAILABLE_MODS.[id], state)
             | None -> None
         )
 
     let apply (mods: ModState) (chart: Chart) : ModdedChart =
-        let mutable modchart_internal = ModdedChartInternal.OfChart chart
+        let mutable modchart_internal = ModdedChartInternal.OfChart(chart)
 
         let mutable mods_applied = []
         let mutable status = ModStatus.Ranked
@@ -103,10 +100,7 @@ module ModState =
         String.Join(
             ", ",
             sprintf "%.2fx" rate
-            :: (mods
-                |> in_priority_order
-                |> Seq.map (fun (_, m, state) -> m.Shorthand state)
-                |> List.ofSeq)
+            :: (mods |> in_priority_order |> Seq.map(fun (_, m, state) -> m.Shorthand(state)) |> List.ofSeq)
         )
 
     let check (mods: ModState) : Result<ModStatus, string> =
@@ -114,12 +108,13 @@ module ModState =
             let mutable status = ModStatus.Ranked
 
             for m in mods.Keys do
-                if AVAILABLE_MODS.ContainsKey m then
+                if AVAILABLE_MODS.ContainsKey(m) then
                     status <- max status AVAILABLE_MODS.[m].Status
 
                     match AVAILABLE_MODS.[m].Type with
                     | Stateless ->
-                        if mods.[m] <> 0L then failwithf "Mod '%s' in invalid state %i" m mods.[m]
+                        if mods.[m] <> 0L then
+                            failwithf "Mod '%s' in invalid state %i" m mods.[m]
                     | RandomSeed -> ()
                     | ColumnSwap -> ColumnSwap.unpack mods.[m] |> ignore
                     | MultipleModes states ->
@@ -127,7 +122,7 @@ module ModState =
                             failwithf "Mod '%s' in invalid state %i" m mods.[m]
 
                     for e in AVAILABLE_MODS.[m].Exclusions do
-                        if mods.ContainsKey e then
+                        if mods.ContainsKey(e) then
                             failwithf "Mods '%s' and '%s' cannot both be selected" m e
                 else
                     failwithf "No such mod '%s'" m

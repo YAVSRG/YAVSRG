@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Library
+namespace Prelude.Data.Library
 
 open System
 open Percyqaz.Common
@@ -21,6 +21,7 @@ type SuggestionContext =
         Ruleset: Ruleset
         Library: Library
     }
+
     member this.LibraryViewContext: LibraryViewContext =
         {
             Rate = let _, rate = this.BaseChart in rate
@@ -34,39 +35,52 @@ module Suggestion =
     let mutable recommended_already = Set.empty
 
     let most_common_pattern (total: Time) (patterns: PatternReport) : CorePattern =
-        Array.tryHead patterns.Clusters
-        |> Option.map _.Pattern
-        |> Option.defaultValue Stream
+        Array.tryHead patterns.Clusters |> Option.map _.Pattern |> Option.defaultValue Stream
 
-    let private pattern_similarity (total: Time) (rate: Rate, patterns: PatternReport) (c_rate: Rate, c_patterns: PatternReport) : float32 =
+    let private pattern_similarity
+        (total: Time)
+        (rate: Rate, patterns: PatternReport)
+        (c_rate: Rate, c_patterns: PatternReport)
+        : float32 =
 
         let c_total = c_patterns.Clusters |> Seq.sumBy _.Amount
-        if most_common_pattern total patterns <> most_common_pattern c_total c_patterns then 0.0f
+
+        if most_common_pattern total patterns <> most_common_pattern c_total c_patterns then
+            0.0f
         else
 
         let mutable similarity = 0.0f
+
         for p2 in c_patterns.Clusters do
             for p1 in patterns.Clusters do
                 if p1.Pattern = p2.Pattern then
                     let mixed_similarity = if p1.Mixed = p2.Mixed then 1.0f else 0.5f
+
                     let bpm_similarity =
                         let difference = (rate * float32 p1.BPM) / (c_rate * float32 p2.BPM) |> log |> abs
                         Math.Clamp(1.0f - 10.0f * difference, 0.0f, 1.0f)
+
                     let density_similarity =
                         let difference = (rate * p1.Density75) / (c_rate * p2.Density75) |> log |> abs
                         Math.Clamp(1.0f - 10.0f * difference, 0.0f, 1.0f)
-                    similarity <- similarity + mixed_similarity * bpm_similarity * density_similarity * (p1.Amount / total) * (p2.Amount / c_total)
+
+                    similarity <-
+                        similarity
+                        + mixed_similarity
+                          * bpm_similarity
+                          * density_similarity
+                          * (p1.Amount / total)
+                          * (p2.Amount / c_total)
+
         similarity
 
     let get_random (filter_by: Filter) (ctx: LibraryViewContext) : ChartMeta option =
         let rand = Random()
 
-        let charts =
-            filter_by.Apply ctx.Library.Charts.Cache.Values
-            |> Array.ofSeq
+        let charts = filter_by.Apply(ctx.Library.Charts.Cache.Values) |> Array.ofSeq
 
         if charts.Length > 0 then
-            let result = charts.[rand.Next charts.Length]
+            let result = charts.[rand.Next(charts.Length)]
             Some result
         else
             None
@@ -85,26 +99,30 @@ module Suggestion =
         let max_ln_pc = patterns.LNPercent + 0.1f
         let min_ln_pc = patterns.LNPercent - 0.1f
 
-        let now = Timestamp.now ()
+        let now = Timestamp.now()
         let THIRTY_DAYS = 30L * 24L * 3600_000L
 
         let candidates =
             ctx.Library.Charts.Cache.Values
-            |> Seq.filter (fun chart_meta -> chart_meta.Keys = base_chart.Keys)
-            |> Seq.filter (fun chart_meta -> not (recommended_already.Contains chart_meta.Hash))
-            |> Seq.filter (fun chart_meta -> not (recommended_already.Contains (chart_meta.Title.ToLower())))
-            |> Seq.choose (fun chart_meta ->
+            |> Seq.filter(fun chart_meta -> chart_meta.Keys = base_chart.Keys)
+            |> Seq.filter(fun chart_meta -> not(recommended_already.Contains(chart_meta.Hash)))
+            |> Seq.filter(fun chart_meta -> not(recommended_already.Contains(chart_meta.Title.ToLower())))
+            |> Seq.choose(fun chart_meta ->
                 let best_rate = target_density / chart_meta.Patterns.Density50
                 let best_approx_rate = round(best_rate / 0.05f<rate>) * 0.05f<rate>
+
                 if best_approx_rate >= ctx.MinimumRate && best_approx_rate <= ctx.MaximumRate then
-                    Some (chart_meta, (best_approx_rate, chart_meta.Patterns))
-                else None
+                    Some(chart_meta, (best_approx_rate, chart_meta.Patterns))
+                else
+                    None
             )
-            |> Seq.filter (fun (chart_meta, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
+            |> Seq.filter(fun (chart_meta, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
             |> if ctx.OnlyNewCharts then
-                Seq.filter (fun (chart_meta, (rate, p)) -> now - ctx.Library.UserData.GetChartData(chart_meta.Hash).LastPlayed > THIRTY_DAYS)
+                   Seq.filter(fun (chart_meta, (rate, p)) ->
+                       now - ctx.Library.UserData.GetChartData(chart_meta.Hash).LastPlayed > THIRTY_DAYS
+                   )
                else
-                id
+                   id
             |> ctx.Filter.Apply
 
         let total_pattern_amount = patterns.Clusters |> Seq.sumBy _.Amount
@@ -114,18 +132,16 @@ module Suggestion =
             for chart_meta, (c_rate, c_patterns) in candidates do
 
                 let sv_compatibility =
-                    if (patterns.SVAmount < 30000.0f<ms>) <> (c_patterns.SVAmount < 30000.0f<ms>) then
-                        0.5f
-                    else 1.0f
+                    if (patterns.SVAmount < 30000.0f<ms>) <> (c_patterns.SVAmount < 30000.0f<ms>) then 0.5f else 1.0f
 
                 let length_compatibility =
                     let l1 = base_chart.Length / rate
                     let l2 = chart_meta.Length / c_rate
-                    1.0f - min 1.0f (abs (l2 - l1) / l1 * 10.0f)
+                    1.0f - min 1.0f (abs(l2 - l1) / l1 * 10.0f)
 
                 let difficulty_compatibility =
                     let c_spikiness = c_patterns.Density90 / c_patterns.Density50
-                    1.0f - min 1.0f (abs (c_spikiness - spikiness) * 10.0f)
+                    1.0f - min 1.0f (abs(c_spikiness - spikiness) * 10.0f)
 
                 let pattern_compatibility =
                     pattern_similarity total_pattern_amount (rate, patterns) (c_rate, c_patterns)
@@ -148,24 +164,17 @@ module Suggestion =
 
             let chart_meta, rate =
                 let index =
-                    rand.NextDouble()
-                    |> fun x -> x * x
-                    |> fun x -> x * float best_matches.Length
-                    |> floor
-                    |> int
+                    rand.NextDouble() |> (fun x -> x * x) |> (fun x -> x * float best_matches.Length) |> floor |> int
 
                 best_matches.[index]
 
             recommended_already <- Set.add chart_meta.Hash recommended_already
             recommended_already <- Set.add (chart_meta.Title.ToLower()) recommended_already
 
-            Some (chart_meta, rate)
+            Some(chart_meta, rate)
 
 type EndlessModeState =
-    internal {
-        mutable Playlist: string
-        mutable Queue: (ChartMeta * (int * PlaylistEntryInfo)) list
-    }
+    internal { mutable Playlist: string; mutable Queue: (ChartMeta * (int * PlaylistEntryInfo)) list }
 
 module EndlessModeState =
 
@@ -173,15 +182,23 @@ module EndlessModeState =
 
     let private shuffle_playlist_charts (items: 'T seq) =
         let random = Random()
-        items |> Seq.map (fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
+        items |> Seq.map(fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
 
-    let queue_playlist (from: int) (name: string) (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
+    let queue_playlist
+        (from: int)
+        (name: string)
+        (playlist: Playlist)
+        (library: Library)
+        (filter: FilteredSearch)
+        (state: EndlessModeState)
+        =
         state.Playlist <- name
+
         state.Queue <-
             playlist.Charts
             |> Seq.indexed
             |> Seq.skip from
-            |> Seq.choose (fun (i, (c, info)) ->
+            |> Seq.choose(fun (i, (c, info)) ->
                 match library.Charts.GetChartMeta(c.Hash) with
                 | Some chart_meta -> Some(chart_meta, (i, info))
                 | None -> None
@@ -189,12 +206,19 @@ module EndlessModeState =
             |> filter.Apply
             |> List.ofSeq
 
-    let queue_shuffled_playlist (name: string) (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
+    let queue_shuffled_playlist
+        (name: string)
+        (playlist: Playlist)
+        (library: Library)
+        (filter: FilteredSearch)
+        (state: EndlessModeState)
+        =
         state.Playlist <- name
+
         state.Queue <-
             playlist.Charts
             |> Seq.indexed
-            |> Seq.choose (fun (i, (c, info)) ->
+            |> Seq.choose(fun (i, (c, info)) ->
                 match library.Charts.GetChartMeta(c.Hash) with
                 | Some chart_meta -> Some(chart_meta, (i, info))
                 | None -> None
@@ -220,6 +244,7 @@ module EndlessModeState =
         match state.Queue with
         | (chart_meta, (index, playlist_data)) :: xs ->
             state.Queue <- xs
+
             Some
                 {
                     ChartMeta = chart_meta
@@ -230,7 +255,7 @@ module EndlessModeState =
                 }
         | [] ->
             match Suggestion.get_suggestion ctx with
-            | Some (next_chart_meta, rate) ->
+            | Some(next_chart_meta, rate) ->
                 Some
                     {
                         ChartMeta = next_chart_meta

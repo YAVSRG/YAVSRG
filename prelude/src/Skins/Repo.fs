@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Repo
+namespace Prelude.Skins.Repo
 
 open Percyqaz.Data
 open Prelude
@@ -17,7 +17,7 @@ module NoteskinPreview =
     let private HITPOSITION = HEIGHT - NOTE_SIZE
 
     let private get_texture (id: string) (ns: Noteskin) : Bitmap * int * int =
-        match ns.GetTexture id with
+        match ns.GetTexture(id) with
         | TextureOk(a, columns, rows) -> a, columns, rows
         | _ -> failwithf "Failed to get texture '%s'" id
 
@@ -39,12 +39,12 @@ module NoteskinPreview =
 
         let rotate_tex (deg: float32) (bmp: Bitmap) =
             let new_img = bmp.Clone()
-            new_img.Mutate(fun i -> i.Rotate deg |> ignore)
+            new_img.Mutate(fun i -> i.Rotate(deg) |> ignore)
             new_img
 
         let flip_tex (bmp: Bitmap) =
             let new_img = bmp.Clone()
-            new_img.Mutate(fun i -> i.Flip FlipMode.Vertical |> ignore)
+            new_img.Mutate(fun i -> i.Flip(FlipMode.Vertical) |> ignore)
             new_img
 
         let draw_tex (x, y) (tex: Bitmap) =
@@ -52,10 +52,7 @@ module NoteskinPreview =
 
         // 4k only for now
         let rotations =
-            if ns.Config.UseRotation then
-                ns.Config.Rotations.[1]
-            else
-                Array.zeroCreate 4
+            if ns.Config.UseRotation then ns.Config.Rotations.[1] else Array.zeroCreate 4
             |> Array.map float32
 
         // todo: playfield
@@ -100,7 +97,7 @@ module NoteskinPreview =
         let holdhead = get_texture "holdhead" ns
         let holdbody = get_texture "holdbody" ns
 
-        use body = gen_tex (2, 1) holdbody |> stretch_tex (NOTE_SIZE * 2) in
+        use body = gen_tex (2, 1) holdbody |> stretch_tex(NOTE_SIZE * 2) in
         draw_tex (COLUMN_START + NOTE_SIZE, 180) body
         use head = gen_tex (2, 1) holdhead
         use r = rotate_tex rotations.[1] head in
@@ -140,18 +137,14 @@ type SkinVersion =
     }
 
 [<Json.AutoCodec>]
-type SkinGroup =
-    {
-        Name: string
-        Versions: SkinVersion list
-        Thumbnail: string
-    }
+type SkinGroup = { Name: string; Versions: SkinVersion list; Thumbnail: string }
 
 [<Json.AutoCodec>]
 type SkinRepo =
     {
         Skins: SkinGroup list
     }
+
     static member Empty = { Skins = [] }
 
 module SkinRepo =
@@ -169,13 +162,10 @@ module SkinRepo =
         let author = skin_meta.Author.Trim()
         let editor = skin_meta.Editor |> Option.map _.Trim()
 
-        match repo.Skins |> List.tryFind (fun x -> x.Name = name) with
+        match repo.Skins |> List.tryFind(fun x -> x.Name = name) with
         | Some existing_group ->
             let new_group, new_skin_was_added =
-                match
-                    existing_group.Versions
-                    |> List.tryFind (fun x -> x.Version.ToLower() = version.ToLower())
-                with
+                match existing_group.Versions |> List.tryFind(fun x -> x.Version.ToLower() = version.ToLower()) with
                 | Some existing ->
                     { existing_group with
                         Versions =
@@ -204,10 +194,7 @@ module SkinRepo =
                     },
                     true
 
-            { repo with
-                Skins = new_group :: (repo.Skins |> List.except [ existing_group ])
-            },
-            new_skin_was_added
+            { repo with Skins = new_group :: (repo.Skins |> List.except [ existing_group ]) }, new_skin_was_added
         | None ->
             { repo with
                 Skins =

@@ -1,13 +1,9 @@
-﻿namespace Prelude.Gameplay.Scoring
+namespace Prelude.Gameplay.Scoring
 
 open Prelude.Gameplay.Rulesets
 
 [<Struct>]
-type GradeResult =
-    {
-        Grade: int
-        AccuracyIncreaseForNextGrade: float option
-    }
+type GradeResult = { Grade: int; AccuracyIncreaseForNextGrade: float option }
 
 module Grade =
 
@@ -15,20 +11,14 @@ module Grade =
 
         let rec loop (achieved: int) =
             if achieved + 1 = grades.Length then // got max grade already
-                {
-                    Grade = achieved
-                    AccuracyIncreaseForNextGrade = None
-                }
+                { Grade = achieved; AccuracyIncreaseForNextGrade = None }
             else
                 let accuracy_needed = grades.[achieved + 1].Accuracy - accuracy
 
                 if accuracy_needed > 0.0 then
-                    {
-                        Grade = achieved
-                        AccuracyIncreaseForNextGrade = Some accuracy_needed
-                    }
+                    { Grade = achieved; AccuracyIncreaseForNextGrade = Some accuracy_needed }
                 else
-                    loop (achieved + 1)
+                    loop(achieved + 1)
 
         loop -1
 

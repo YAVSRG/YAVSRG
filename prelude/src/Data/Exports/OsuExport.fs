@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Exports
+namespace Prelude.Data.Exports
 
 open System.IO
 open Prelude
@@ -11,6 +11,7 @@ type OsuExportOptions =
         OD: float
         HP: float
     }
+
     static member Default = { OD = 8.0; HP = 8.0 }
 
 module OsuExport =
@@ -18,11 +19,7 @@ module OsuExport =
     let notes_to_hitobjects (notes: TimeArray<NoteRow>) (keys: int) : HitObject list =
         let rec ln_lookahead k (snaps: TimeItem<NoteRow> list) =
             match snaps with
-            | { Time = offset; Data = nr } :: ss ->
-                if nr.[k] = NoteType.HOLDTAIL then
-                    offset
-                else
-                    ln_lookahead k ss
+            | { Time = offset; Data = nr } :: ss -> if nr.[k] = NoteType.HOLDTAIL then offset else ln_lookahead k ss
             | [] -> failwith "hold note has no end"
 
         let rec convert (snaps: TimeItem<NoteRow> list) =
@@ -39,7 +36,7 @@ module OsuExport =
                 | [] -> ()
             }
 
-        convert (notes |> Array.toList) |> List.ofSeq
+        convert(notes |> Array.toList) |> List.ofSeq
 
     let convert_timing_points
         (bpm: TimeArray<BPM>)
@@ -91,11 +88,11 @@ module OsuExport =
         List.ofSeq result
 
     let convert (options: OsuExportOptions) (chart: Chart) (chart_meta: ChartMeta) : Beatmap =
-        let general : General =
+        let general: General =
             {
                 AudioFilename =
                     match chart_meta.Audio with
-                    | AssetLocation.Absolute s -> Path.GetFileName s
+                    | AssetLocation.Absolute s -> Path.GetFileName(s)
                     | AssetLocation.Hash _
                     | AssetLocation.Missing -> "audio.mp3"
                 AudioLeadIn = 0
@@ -145,11 +142,12 @@ module OsuExport =
             Events =
                 [
                     Background(
-                        ( match chart_meta.Background with
-                          | AssetLocation.Absolute s -> Path.GetFileName s
-                          | AssetLocation.Hash _
-                          | AssetLocation.Missing -> "bg.png"),
-                        0, 0
+                        (match chart_meta.Background with
+                         | AssetLocation.Absolute s -> Path.GetFileName(s)
+                         | AssetLocation.Hash _
+                         | AssetLocation.Missing -> "bg.png"),
+                        0,
+                        0
                     )
                 ]
             Objects = notes_to_hitobjects chart.Notes chart.Keys

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data
+namespace Prelude.Data
 
 open System
 open System.IO
@@ -12,23 +12,23 @@ module ImageServices =
 
     let save_image_jpg =
         { new Async.Queue<Bitmap * string, unit>() with
-            override this.Handle((image, path)) =
+            override this.Handle((image: Bitmap, path: string)) : Async<unit> =
                 image.SaveAsJpegAsync(path, JpegEncoder(Quality = 90)) |> Async.AwaitTask
         }
 
     let save_image_png =
         { new Async.Queue<Bitmap * string, unit>() with
-            override this.Handle((image, path)) =
+            override this.Handle((image: Bitmap, path: string)) : Async<unit> =
                 image.SaveAsPngAsync(path) |> Async.AwaitTask
         }
 
     let get_cached_image =
         { new Async.Queue<string, Bitmap option>() with
-            override this.Handle(url: string) =
+            override this.Handle(url: string) : Async<Bitmap option> =
                 async {
                     let cached_file_name =
                         let uri = Uri(url)
-                        let name = Uri.UnescapeDataString(uri.Segments[uri.Segments.Length - 1])
+                        let name = Uri.UnescapeDataString(uri.Segments.[uri.Segments.Length - 1])
                         Path.Combine(get_game_folder("Downloads"), name)
 
                     if File.Exists(cached_file_name) then

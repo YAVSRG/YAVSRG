@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.ChartDatabase
+namespace Prelude.Data.ChartDatabase
 
 open System.IO
 open Percyqaz.Common
@@ -9,14 +9,15 @@ open Prelude.Calculator.Patterns
 
 module DbCharts =
 
-    let private no_nan x = if System.Single.IsFinite x then x else 0.0f
+    let private no_nan x =
+        if System.Single.IsFinite(x) then x else 0.0f
 
     // Increment this to recalculate pattern & rating data
     let private CALC_VERSION = 5uy
 
     // todo: create binary representation of Patterns data for much faster reading/writing and storage efficiency
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE charts (
@@ -63,9 +64,7 @@ module DbCharts =
         }
 
     let internal RESET_ORIGINS: NonQuery<unit> =
-        { NonQuery.without_parameters() with
-            SQL = """ UPDATE charts SET Origin = '[]'; """
-        }
+        { NonQuery.without_parameters() with SQL = """ UPDATE charts SET Origin = '[]'; """ }
 
     let private SAVE: NonQuery<ChartMeta * Chart> =
         {
@@ -160,34 +159,35 @@ module DbCharts =
                 ]
             FillParameters =
                 (fun p (db_chart, chart_data) ->
-                    p.String db_chart.Hash
-                    p.String db_chart.Title
-                    p.StringOption db_chart.TitleNative
-                    p.String db_chart.Artist
-                    p.StringOption db_chart.ArtistNative
-                    p.String db_chart.DifficultyName
-                    p.StringOption db_chart.Subtitle
-                    p.StringOption db_chart.Source
-                    p.String db_chart.Creator
+                    p.String(db_chart.Hash)
+                    p.String(db_chart.Title)
+                    p.StringOption(db_chart.TitleNative)
+                    p.String(db_chart.Artist)
+                    p.StringOption(db_chart.ArtistNative)
+                    p.String(db_chart.DifficultyName)
+                    p.StringOption(db_chart.Subtitle)
+                    p.StringOption(db_chart.Source)
+                    p.String(db_chart.Creator)
                     p.Json JSON db_chart.Tags
                     p.Json JSON db_chart.Background
                     p.Json JSON db_chart.Audio
-                    p.Float32 (float32 db_chart.PreviewTime |> no_nan)
+                    p.Float32(float32 db_chart.PreviewTime |> no_nan)
                     p.Json JSON db_chart.Packs
                     p.Json JSON db_chart.Origins
-                    p.Byte (byte db_chart.Keys)
-                    p.Float32 (float32 db_chart.Length |> no_nan)
-                    p.Int32 db_chart.BPM
-                    p.Int64 db_chart.DateAdded
-                    p.Byte CALC_VERSION
-                    p.Float32 (no_nan db_chart.Rating)
+                    p.Byte(byte db_chart.Keys)
+                    p.Float32(float32 db_chart.Length |> no_nan)
+                    p.Int32(db_chart.BPM)
+                    p.Int64(db_chart.DateAdded)
+                    p.Byte(CALC_VERSION)
+                    p.Float32(no_nan db_chart.Rating)
                     p.Json JSON db_chart.Patterns
-                    p.Blob (
+
+                    p.Blob(
                         use ms = new MemoryStream()
                         use bw = new BinaryWriter(ms)
                         chart_data.WriteToStreamHeadless(bw)
                         ms.ToArray()
-                   )
+                    )
                 )
         }
 
@@ -199,6 +199,7 @@ module DbCharts =
 
     let private read_meta (r: RowReaderHelper) : ChartMeta =
         let mutable calc_version = 0uy
+
         {
             Hash = r.String
             Title = r.String
@@ -209,12 +210,12 @@ module DbCharts =
             Subtitle = r.StringOption
             Source = r.StringOption
             Creator = r.String
-            Tags = r.Json JSON
-            Background = r.Json JSON
-            Audio = r.Json JSON
+            Tags = r.Json(JSON)
+            Background = r.Json(JSON)
+            Audio = r.Json(JSON)
             PreviewTime = r.Float32 |> Time.of_number
-            Packs = r.Json JSON
-            Origins = r.Json JSON
+            Packs = r.Json(JSON)
+            Origins = r.Json(JSON)
             Keys = r.Byte |> int32
             Length = r.Float32 |> Time.of_number
             BPM = r.Int32
@@ -226,7 +227,8 @@ module DbCharts =
                 if calc_version <> CALC_VERSION then
                     r.String |> ignore
                     PatternReport.Default
-                else r.Json JSON
+                else
+                    r.Json(JSON)
         }
 
     let private GET_META: Query<string, ChartMeta> =
@@ -245,7 +247,7 @@ module DbCharts =
             WHERE Id = @Hash;
             """
             Parameters = [ "@Hash", SqliteType.Text, -1 ]
-            FillParameters = fun p hash -> p.String hash
+            FillParameters = fun p hash -> p.String(hash)
             Read = read_meta
         }
 
@@ -289,36 +291,38 @@ module DbCharts =
         {
             SQL = """SELECT Keys, Chart FROM charts WHERE Id = @Hash;"""
             Parameters = [ "@Hash", SqliteType.Text, -1 ]
-            FillParameters = fun p hash -> p.String hash
-            Read = fun r ->
-                let keys = r.Byte |> int32
-                use stream = r.Stream
-                use br = new BinaryReader(stream)
-                Chart.ReadFromStreamHeadless(keys, br)
+            FillParameters = fun p hash -> p.String(hash)
+            Read =
+                fun r ->
+                    let keys = r.Byte |> int32
+                    use stream = r.Stream
+                    use br = new BinaryReader(stream)
+                    Chart.ReadFromStreamHeadless(keys, br)
         }
 
     let get_chart (hash: string) (db: Database) : Result<Chart, string> =
         GET_CHART.Execute hash db
         |> expect
         |> Array.tryExactlyOne
-        |> function None -> Error "No chart in the database matching this hash" | Some res -> res
+        |> function
+            | None -> Error "No chart in the database matching this hash"
+            | Some res -> res
 
     let private DELETE: NonQuery<string> =
         {
             SQL = """DELETE FROM charts WHERE Id = @Hash;"""
             Parameters = [ "@Hash", SqliteType.Text, -1 ]
-            FillParameters = fun p hash -> p.String hash
+            FillParameters = fun p hash -> p.String(hash)
         }
 
-    let delete (hash: string) (db: Database) : bool =
-        DELETE.Execute hash db |> expect > 0
+    let delete (hash: string) (db: Database) : bool = DELETE.Execute hash db |> expect > 0
 
-    let delete_batch (hashes: string seq) (db: Database) : int =
-        DELETE.Batch hashes db |> expect
+    let delete_batch (hashes: string seq) (db: Database) : int = DELETE.Batch hashes db |> expect
 
     let private UPDATE_CALCULATED_DATA: NonQuery<string * float32 * PatternReport> =
         {
-            SQL = """
+            SQL =
+                """
             UPDATE charts
             SET
                 CalcVersion = @CalcVersion,
@@ -326,17 +330,18 @@ module DbCharts =
                 Patterns = json(@Patterns)
             WHERE Id = @Hash;
             """
-            Parameters = [
-                "@Hash", SqliteType.Text, -1
-                "@CalcVersion", SqliteType.Integer, 1
-                "@Rating", SqliteType.Real, 4
-                "@Patterns", SqliteType.Text, -1
-            ]
+            Parameters =
+                [
+                    "@Hash", SqliteType.Text, -1
+                    "@CalcVersion", SqliteType.Integer, 1
+                    "@Rating", SqliteType.Real, 4
+                    "@Patterns", SqliteType.Text, -1
+                ]
             FillParameters =
                 (fun p (hash, rating, patterns) ->
-                    p.String hash
-                    p.Byte CALC_VERSION
-                    p.Float32 rating
+                    p.String(hash)
+                    p.Byte(CALC_VERSION)
+                    p.Float32(rating)
                     p.Json JSON patterns
                 )
         }
@@ -346,19 +351,17 @@ module DbCharts =
 
     let private UPDATE_PACKS: NonQuery<string * Set<string>> =
         {
-            SQL = """
+            SQL =
+                """
             UPDATE charts
             SET
                 Packs = json(@Packs)
             WHERE Id = @Hash;
             """
-            Parameters = [
-                "@Hash", SqliteType.Text, -1
-                "@Packs", SqliteType.Text, -1
-            ]
+            Parameters = [ "@Hash", SqliteType.Text, -1; "@Packs", SqliteType.Text, -1 ]
             FillParameters =
                 (fun p (hash, packs) ->
-                    p.String hash
+                    p.String(hash)
                     p.Json JSON packs
                 )
         }

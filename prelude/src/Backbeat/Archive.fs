@@ -1,4 +1,4 @@
-﻿namespace Prelude.Backbeat.Archive
+namespace Prelude.Backbeat.Archive
 
 open System
 open System.Collections.Generic
@@ -9,11 +9,7 @@ open Prelude.Charts
 type ArtistName = string
 
 [<Json.AutoCodec>]
-type VerifiedArtist =
-    {
-        Alternatives: string list
-        IsJapaneseFullName: bool
-    }
+type VerifiedArtist = { Alternatives: string list; IsJapaneseFullName: bool }
 // store of artists that are confirmed to exist, with the correct STYLiSATION of their name
 [<Json.AutoCodec>]
 type VerifiedArtists =
@@ -22,7 +18,7 @@ type VerifiedArtists =
         Aliases: Dictionary<string, string list>
     }
     // all-lowercase string map to correct stylised artist name, if exists
-    member this.FixerMapping() =
+    member this.FixerMapping() : Dictionary<string, string> =
         let d = Dictionary<string, string>()
 
         for a in this.Artists.Keys do
@@ -38,7 +34,7 @@ type VerifiedArtists =
 
         d
     // case-sensitive mapping of what strings map to what parsed artist
-    member this.ParserMapping() =
+    member this.ParserMapping() : Dictionary<string, string> =
         let d = Dictionary<string, string>()
 
         for a in this.Artists.Keys do
@@ -75,30 +71,26 @@ type Song =
         /// Various user-defined tags
         Tags: string list
     }
+
     member this.FormattedArtists =
         String.concat ", " this.Artists
-        + if this.OtherArtists <> [] then
-              " ft. " + String.concat ", " this.OtherArtists
-          else
-              ""
+        + if this.OtherArtists <> [] then " ft. " + String.concat ", " this.OtherArtists else ""
 
     member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
 
-    member this.MergeWithIncoming(song: Song) =
+    member this.MergeWithIncoming(song: Song) : Song =
         { this with
-            Source = match this.Source with Some existing -> Some existing | None -> song.Source
-            Tags = List.distinct (this.Tags @ song.Tags)
+            Source =
+                match this.Source with
+                | Some existing -> Some existing
+                | None -> song.Source
+            Tags = List.distinct(this.Tags @ song.Tags)
         }
 
 type StepmaniaPackId = int
 
 [<Json.AutoCodec>]
-type StepmaniaPack =
-    {
-        Title: string
-        Mirrors: string list
-        Size: int64
-    }
+type StepmaniaPack = { Title: string; Mirrors: string list; Size: int64 }
 
 type ChartHash = string
 
@@ -118,12 +110,16 @@ type Chart =
         AudioHash: string
         Origins: Set<ChartOrigin>
     }
+
     member this.FormattedCreators = String.concat ", " this.Creators
 
-    member this.MergeWithIncoming(chart: Chart) =
+    member this.MergeWithIncoming(chart: Chart) : Chart =
         { this with
-            Subtitle = match this.Subtitle with Some existing -> Some existing | None -> chart.Subtitle
-            Tags = List.distinct (this.Tags @ chart.Tags)
+            Subtitle =
+                match this.Subtitle with
+                | Some existing -> Some existing
+                | None -> chart.Subtitle
+            Tags = List.distinct(this.Tags @ chart.Tags)
             Origins = Set.union this.Origins chart.Origins
             BackgroundHash = chart.BackgroundHash
             AudioHash = chart.AudioHash
@@ -143,8 +139,8 @@ module Archive =
             Source = song.Source
             Tags = chart.Tags
             PreviewTime = chart.PreviewTime
-            BackgroundFile = ImportAsset.Download chart.BackgroundHash
-            AudioFile = ImportAsset.Download chart.AudioHash
+            BackgroundFile = ImportAsset.Download(chart.BackgroundHash)
+            AudioFile = ImportAsset.Download(chart.AudioHash)
             Origins = chart.Origins
         }
 

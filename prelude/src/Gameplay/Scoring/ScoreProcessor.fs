@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Scoring
+namespace Prelude.Gameplay.Scoring
 
 open System.Collections.ObjectModel
 open Prelude
@@ -7,18 +7,8 @@ open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 
 type ScoringEventInner =
-    | Hit of
-        {|
-            Delta: GameplayTime
-            Judgement: (int * float) option
-            Missed: bool
-        |}
-    | Hold of
-        {|
-            Delta: GameplayTime
-            Judgement: (int * float) option
-            Missed: bool
-        |}
+    | Hit of {| Delta: GameplayTime; Judgement: (int * float) option; Missed: bool |}
+    | Hold of {| Delta: GameplayTime; Judgement: (int * float) option; Missed: bool |}
     | Release of
         {|
             Delta: GameplayTime
@@ -30,6 +20,7 @@ type ScoringEventInner =
     | DropHold
     | RegrabHold
     | GhostTap of {| Judgement: (int * float) option |}
+
     member this.Judgement: (int * float) option =
         match this with
         | Hit h -> h.Judgement
@@ -76,7 +67,9 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
     let mutable max_possible_combo = 0
 
     let break_combo (would_have_increased_combo: bool) =
-        if would_have_increased_combo then max_possible_combo <- max_possible_combo + 1
+        if would_have_increased_combo then
+            max_possible_combo <- max_possible_combo + 1
+
         combo_breaks <- combo_breaks + 1
         current_combo <- 0
 
@@ -95,112 +88,105 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
 
     let ms_to_judgement (delta: GameplayTime) : int =
         let mutable j = 0
-        while
-            j + 1 < ruleset.Judgements.Length
-            && (
-                match ruleset.Judgements.[j].TimingWindows with
-                | None -> true
-                | Some (early, late) -> delta < early || delta > late
-            )
-            do
+
+        while j + 1 < ruleset.Judgements.Length
+              && (
+                  match ruleset.Judgements.[j].TimingWindows with
+                  | None -> true
+                  | Some(early, late) -> delta < early || delta > late
+              ) do
             j <- j + 1
+
         j
 
-    let judgement_or_ms_to_points : GameplayTime -> int -> float =
+    let judgement_or_ms_to_points: GameplayTime -> int -> float =
         match ruleset.Accuracy with
-        | AccuracyPoints.WifeCurve j ->
-            fun (delta: GameplayTime) _ -> Wife3Curve.calculate j delta
-        | AccuracyPoints.PointsPerJudgement weights ->
-            fun _ (judgement: int) -> weights.[judgement]
+        | AccuracyPoints.WifeCurve j -> fun (delta: GameplayTime) _ -> Wife3Curve.calculate j delta
+        | AccuracyPoints.PointsPerJudgement weights -> fun _ (judgement: int) -> weights.[judgement]
 
     let judgement_to_points (judgement: int) : float =
         match ruleset.Accuracy with
         | AccuracyPoints.PointsPerJudgement weights -> weights.[judgement]
-        | _ -> failwith "Ruleset isn't using PointsPerJudgement + a feature that expects it to be used. This line should be unreachable if the ruleset was validated"
+        | _ ->
+            failwith
+                "Ruleset isn't using PointsPerJudgement + a feature that expects it to be used. This line should be unreachable if the ruleset was validated"
 
-    member val Duration : Time = (TimeArray.last note_data.Notes).Value.Time - (TimeArray.first note_data.Notes).Value.Time
-    member val JudgementCounts : int array = judgement_counts
-    member val Rate : Rate = rate
+    member val Duration: Time =
+        (TimeArray.last note_data.Notes).Value.Time - (TimeArray.first note_data.Notes).Value.Time
+
+    member val JudgementCounts: int array = judgement_counts
+    member val Rate: Rate = rate
     // todo: currently (only) used by the performance calculator, remove once calculator uses acc-only
-    member val internal NoteData : NoteData = note_data
+    member val internal NoteData: NoteData = note_data
 
-    member this.Accuracy : float = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
-    member this.FormattedAccuracy : string = ruleset.FormatAccuracy this.Accuracy
+    member this.Accuracy: float =
+        if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
 
-    member this.CurrentCombo : int = current_combo
-    member this.BestCombo : int = best_combo
-    member this.ComboBreaks : int = combo_breaks
-    member this.MaxPossibleCombo : int = max_possible_combo
+    member this.FormattedAccuracy: string = ruleset.FormatAccuracy(this.Accuracy)
 
-    member this.MaxPossiblePoints : float = max_possible_points
-    member this.PointsScored : float = points_scored
+    member this.CurrentCombo: int = current_combo
+    member this.BestCombo: int = best_combo
+    member this.ComboBreaks: int = combo_breaks
+    member this.MaxPossibleCombo: int = max_possible_combo
 
-    member this.Events : ReadOnlyCollection<ScoringEvent> = scoring_events.AsReadOnly()
-    member this.OnEvent : IEvent<ScoringEvent> = on_event
+    member this.MaxPossiblePoints: float = max_possible_points
+    member this.PointsScored: float = points_scored
+
+    member this.Events: ReadOnlyCollection<ScoringEvent> = scoring_events.AsReadOnly()
+    member this.OnEvent: IEvent<ScoringEvent> = on_event
 
     /// Throws an exception if used on a live/online replay
-    member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, replay.GetFullReplay() |> StoredReplaySource, note_data, rate)
-    member this.Recreate() = this.Recreate(ruleset)
+    member this.Recreate(ruleset: Ruleset) : ScoreProcessor =
+        ScoreProcessor(ruleset, replay.GetFullReplay() |> StoredReplaySource, note_data, rate)
+
+    member this.Recreate() : ScoreProcessor = this.Recreate(ruleset)
 
     member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboChange * ScoringEventInner =
 
         match ruleset.HoldMechanics with
         | HoldMechanics.OnlyJudgeReleases _ ->
-            (if is_missed then Break true else Increase),
-            Hit
-                {|
-                    Delta = delta
-                    Judgement = None
-                    Missed = is_missed
-                |}
+            (if is_missed then Break true else Increase), Hit {| Delta = delta; Judgement = None; Missed = is_missed |}
         | _ ->
-            let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+            let judgement =
+                if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+
             let points = judgement_or_ms_to_points delta judgement
 
             score_points(points, judgement)
 
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
-            Hit
-                {|
-                    Delta = delta
-                    Judgement = Some (judgement, points)
-                    Missed = is_missed
-                |}
+            Hit {| Delta = delta; Judgement = Some(judgement, points); Missed = is_missed |}
 
     member private this.ProcessHold(delta: GameplayTime, is_missed: bool) : ComboChange * ScoringEventInner =
 
         match ruleset.HoldMechanics with
         | HoldMechanics.OnlyRequireHold _
         | HoldMechanics.JudgeReleasesSeparately _ ->
-            let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+            let judgement =
+                if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+
             let points = judgement_or_ms_to_points delta judgement
 
             score_points(points, judgement)
 
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
-            Hold
-                {|
-                    Delta = delta
-                    Judgement = Some (judgement, points)
-                    Missed = is_missed
-                |}
+            Hold {| Delta = delta; Judgement = Some(judgement, points); Missed = is_missed |}
 
         | HoldMechanics.CombineHeadAndTail _
         | HoldMechanics.OnlyJudgeReleases _ ->
-            (if is_missed then Break true else Increase),
-            Hold
-                {|
-                    Delta = delta
-                    Judgement = None
-                    Missed = is_missed
-                |}
+            (if is_missed then Break true else Increase), Hold {| Delta = delta; Judgement = None; Missed = is_missed |}
 
-    member private this.ProcessRelease(release_delta: GameplayTime, missed: bool, overheld: bool, dropped: bool, head_delta: GameplayTime, missed_head: bool) :
-        ComboChange *
-                                                                                                                                                                ScoringEventInner
-        =
+    member private this.ProcessRelease
+        (
+            release_delta: GameplayTime,
+            missed: bool,
+            overheld: bool,
+            dropped: bool,
+            head_delta: GameplayTime,
+            missed_head: bool
+        ) : ComboChange * ScoringEventInner =
         match ruleset.HoldMechanics with
-        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania windows) ->
+        | HoldMechanics.CombineHeadAndTail(HeadTailCombineRule.OsuMania windows) ->
             let judgement =
                 if missed && missed_head && not overheld then
                     ruleset.DefaultJudgement
@@ -215,14 +201,18 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
             Release
                 {|
                     Delta = release_delta
-                    Judgement = Some (judgement, points)
+                    Judgement = Some(judgement, points)
                     Missed = missed
                     Overhold = overheld
                     Dropped = dropped
                 |}
 
-        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (_, _, judgement_if_dropped, judgement_if_overheld)) ->
+        | HoldMechanics.CombineHeadAndTail(HeadTailCombineRule.HeadJudgementOr(_,
+                                                                               _,
+                                                                               judgement_if_dropped,
+                                                                               judgement_if_overheld)) ->
             let head_judgement = ms_to_judgement head_delta
+
             let judgement =
                 if missed_head && missed then ruleset.DefaultJudgement
                 elif overheld && not dropped then max head_judgement judgement_if_overheld
@@ -237,7 +227,7 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
             Release
                 {|
                     Delta = release_delta
-                    Judgement = Some (judgement, points)
+                    Judgement = Some(judgement, points)
                     Missed = missed
                     Overhold = overheld
                     Dropped = dropped
@@ -255,23 +245,26 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
                     Dropped = dropped
                 |}
 
-        | HoldMechanics.JudgeReleasesSeparately (windows, judgement_if_overheld) ->
+        | HoldMechanics.JudgeReleasesSeparately(windows, judgement_if_overheld) ->
             let judgement =
-                if dropped then ruleset.DefaultJudgement
-                elif overheld then judgement_if_overheld
-                elif missed then ruleset.DefaultJudgement
+                if dropped then
+                    ruleset.DefaultJudgement
+                elif overheld then
+                    judgement_if_overheld
+                elif missed then
+                    ruleset.DefaultJudgement
                 else
-                    assert(windows.Length = ruleset.Judgements.Length)
+                    assert (windows.Length = ruleset.Judgements.Length)
                     let mutable j = 0
-                    while
-                        j + 1 < ruleset.Judgements.Length
-                        && (
-                            match windows.[j] with
-                            | None -> true
-                            | Some (early, late) -> release_delta < early || release_delta > late
-                        )
-                        do
+
+                    while j + 1 < ruleset.Judgements.Length
+                          && (
+                              match windows.[j] with
+                              | None -> true
+                              | Some(early, late) -> release_delta < early || release_delta > late
+                          ) do
                         j <- j + 1
+
                     j
 
             let points = judgement_or_ms_to_points release_delta judgement
@@ -281,7 +274,7 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
             Release
                 {|
                     Delta = release_delta
-                    Judgement = Some (judgement, points)
+                    Judgement = Some(judgement, points)
                     Missed = missed
                     Overhold = overheld
                     Dropped = dropped
@@ -292,8 +285,7 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
                 if missed then
                     ruleset.DefaultJudgement
                 else
-                    ms_to_judgement release_delta
-                    |> if dropped || overheld then max judgement_if_dropped else id
+                    ms_to_judgement release_delta |> if dropped || overheld then max judgement_if_dropped else id
 
             let points = judgement_or_ms_to_points release_delta judgement
 
@@ -303,19 +295,15 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
             Release
                 {|
                     Delta = release_delta
-                    Judgement = Some (judgement, points)
+                    Judgement = Some(judgement, points)
                     Missed = missed
                     Overhold = overheld
                     Dropped = dropped
                 |}
 
-    member private this.ProcessDropHold() : ComboChange * ScoringEventInner =
-        Break false,
-        DropHold
+    member private this.ProcessDropHold() : ComboChange * ScoringEventInner = Break false, DropHold
 
-    member private this.ProcessRegrabHold() : ComboChange * ScoringEventInner =
-        NoChange,
-        RegrabHold
+    member private this.ProcessRegrabHold() : ComboChange * ScoringEventInner = NoChange, RegrabHold
 
     member private this.ProcessGhostTap() : ComboChange * ScoringEventInner =
         match ruleset.HitMechanics.GhostTapJudgement with
@@ -325,18 +313,14 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
             score_points(points, judgement)
 
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else NoChange),
-            GhostTap {| Judgement = Some (judgement, points) |}
-        | None ->
-        NoChange,
-        GhostTap {| Judgement = None |}
+            GhostTap {| Judgement = Some(judgement, points) |}
+        | None -> NoChange, GhostTap {| Judgement = None |}
 
-    override this.HandleEvent (internal_event: GameplayEvent) =
+    override this.HandleEvent(internal_event: GameplayEvent) : unit =
         let combo_action, gameplay_action =
             match internal_event.Inner with
-            | HIT(delta, is_missed) ->
-                this.ProcessHit(delta, is_missed)
-            | HOLD(delta, is_missed) ->
-                this.ProcessHold(delta, is_missed)
+            | HIT(delta, is_missed) -> this.ProcessHit(delta, is_missed)
+            | HOLD(delta, is_missed) -> this.ProcessHold(delta, is_missed)
             | RELEASE(release_delta, missed, overhold, dropped, head_delta, missed_head) ->
                 this.ProcessRelease(release_delta, missed, overhold, dropped, head_delta, missed_head)
             | DROP_HOLD -> this.ProcessDropHold()
@@ -345,10 +329,10 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
 
         match combo_action with
         | NoChange -> ()
-        | Increase -> incr_combo ()
+        | Increase -> incr_combo()
         | Break instead_of_increase -> break_combo instead_of_increase
 
-        let gameplay_event : ScoringEvent =
+        let gameplay_event: ScoringEvent =
             {
                 Index = internal_event.Index
                 Time = internal_event.Time
@@ -357,20 +341,30 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
                 ComboChange = combo_action
             }
 
-        scoring_events.Add gameplay_event
-        on_event_ev.Trigger gameplay_event
-        
-    static member inline Create<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate) : ScoreProcessor =
+        scoring_events.Add(gameplay_event)
+        on_event_ev.Trigger(gameplay_event)
+
+    static member inline Create< ^T when ^T: (member ToNoteData: unit -> NoteData)>
+        (ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate)
+        : ScoreProcessor =
         ScoreProcessor(ruleset, replay, chart.ToNoteData(), rate)
-    static member inline Create<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate) : ScoreProcessor =
+
+    static member inline Create< ^T when ^T: (member ToNoteData: unit -> NoteData)>
+        (ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate)
+        : ScoreProcessor =
         ScoreProcessor.Create(ruleset, StoredReplaySource(replay), chart, rate)
-        
-    static member inline ProcessEntireReplay<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate) : ScoreProcessor =
+
+    static member inline ProcessEntireReplay< ^T when ^T: (member ToNoteData: unit -> NoteData)>
+        (ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate)
+        : ScoreProcessor =
         let score_processor = ScoreProcessor(ruleset, replay, chart.ToNoteData(), rate)
         score_processor.ProcessEntireReplay()
         score_processor
-    static member inline ProcessEntireReplay<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate) : ScoreProcessor =
+
+    static member inline ProcessEntireReplay< ^T when ^T: (member ToNoteData: unit -> NoteData)>
+        (ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate)
+        : ScoreProcessor =
         ScoreProcessor.ProcessEntireReplay(ruleset, StoredReplaySource(replay), chart, rate)
-        
-    static member inline Dummy<^T when ^T : (member ToNoteData : unit -> NoteData)>(chart: ^T) : ScoreProcessor =
+
+    static member inline Dummy< ^T when ^T: (member ToNoteData: unit -> NoteData)>(chart: ^T) : ScoreProcessor =
         ScoreProcessor.Create(SC_J4, Replay.Empty, chart, 1.0f<rate>)

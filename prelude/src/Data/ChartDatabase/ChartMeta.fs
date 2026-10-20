@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.ChartDatabase
+namespace Prelude.Data.ChartDatabase
 
 open Prelude
 open Prelude.Charts
@@ -46,7 +46,7 @@ type ChartMeta =
         // Tiebreaker rule when importing data over the top of an existing chart
         // Etterna metadata takes priority over osu, etc
         let existing_takes_priority =
-            not (Set.isEmpty existing.Origins) && existing.Origins < this.Origins
+            not(Set.isEmpty existing.Origins) && existing.Origins < this.Origins
 
         if existing_takes_priority then
             { existing with
@@ -70,10 +70,14 @@ type ChartMeta =
             },
             false
 
-    static member CreateFromImport(timestamp: int64, import_chart: ImportChart, handle_asset: ImportAsset -> AssetLocation) : ChartMeta =
+    static member CreateFromImport
+        (timestamp: int64, import_chart: ImportChart, handle_asset: ImportAsset -> AssetLocation)
+        : ChartMeta =
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
-        let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s
+
+        let truncate (s: string) =
+            if s.Length > 200 then s.Substring(0, 200) else s
 
         {
             Hash = chart.Hash()
@@ -100,9 +104,7 @@ type ChartMeta =
             BPM =
                 let mspb = Chart.find_most_common_bpm chart
                 let bpm = MS_PER_MINUTE / mspb |> float32
-                if System.Single.IsFinite(bpm) then
-                    bpm |> round |> int
-                else 0
+                if System.Single.IsFinite(bpm) then bpm |> round |> int else 0
             DateAdded = timestamp
             Rating = difficulty.Overall
             Patterns = PatternReport.from_chart(difficulty, chart)

@@ -9,9 +9,9 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
     inherit
         Container(
             NodeType.Button(fun () ->
-                if not (this.Disabled()) then
+                if not(this.Disabled()) then
                     Style.click.Play()
-                    on_click ()
+                    on_click()
             )
         )
 
@@ -24,83 +24,80 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
     new(text: string, on_click: unit -> unit) = Button(K text, on_click)
 
     override this.OnFocus(by_mouse: bool) : unit =
-        base.OnFocus by_mouse
+        base.OnFocus(by_mouse)
         Style.hover.Play()
 
     override this.Init(parent: Widget) : unit =
-        this
-            .Add(
-                Text(text)
-                    .Align(this.Align)
-                    .Color(
-                        fun () ->
-                            if this.Disabled() then Colors.text_greyout
-                            elif this.Focused then Colors.text_yellow_2
-                            else this.TextColor()
-                    ),
-                MouseListener().Button(this).Floating(),
-                HotkeyListener(
-                    this.Hotkey,
-                    fun () ->
-                        if not (this.Disabled()) then
-                            Style.click.Play()
-                            on_click ()
-                )
+        this.Add(
+            Text(text)
+                .Align(this.Align)
+                .Color(fun () ->
+                    if this.Disabled() then Colors.text_greyout
+                    elif this.Focused then Colors.text_yellow_2
+                    else this.TextColor()
+                ),
+            MouseListener().Button(this).Floating(),
+            HotkeyListener(
+                this.Hotkey,
+                fun () ->
+                    if not(this.Disabled()) then
+                        Style.click.Play()
+                        on_click()
             )
+        )
 
-        base.Init parent
+        base.Init(parent)
 
-    override this.Focusable : bool = not (this.Disabled()) && base.Focusable
+    override this.Focusable: bool = not(this.Disabled()) && base.Focusable
 
-[<Extension>]
 type ButtonExtensions =
 
     [<Extension>]
-    static member Hotkey (button: Button, hotkey: Hotkey) : Button =
+    static member Hotkey(button: Button, hotkey: Hotkey) : Button =
         button.Hotkey <- hotkey
         button
 
     [<Extension>]
-    static member Disabled (button: Button) : Button =
+    static member Disabled(button: Button) : Button =
         button.Disabled <- K true
         button
 
     [<Extension>]
-    static member Disabled (button: Button, d: bool) : Button =
+    static member Disabled(button: Button, d: bool) : Button =
         button.Disabled <- K d
         button
 
     [<Extension>]
-    static member Disabled (button: Button, d: unit -> bool) : Button =
+    static member Disabled(button: Button, d: unit -> bool) : Button =
         button.Disabled <- d
         button
 
     [<Extension>]
-    static member Floating (button: Button) : Button =
+    static member Floating(button: Button) : Button =
         button.Floating <- true
         button
 
     [<Extension>]
-    static member Align (button: Button, alignment: float32) : Button =
+    static member Align(button: Button, alignment: float32) : Button =
         button.Align <- alignment
         button
 
     [<Extension>]
-    static member TextColor (button: Button, color: Color * Color) : Button =
+    static member TextColor(button: Button, color: Color * Color) : Button =
         button.TextColor <- K color
         button
 
     [<Extension>]
-    static member TextColor (button: Button, color: Color) : Button =
-        button.TextColor <- K (color, Colors.shadow_2)
+    static member TextColor(button: Button, color: Color) : Button =
+        button.TextColor <- K(color, Colors.shadow_2)
         button
 
     [<Extension>]
-    static member TextColor (button: Button, color: unit -> Color * Color) : Button =
+    static member TextColor(button: Button, color: unit -> Color * Color) : Button =
         button.TextColor <- color
         button
 
     [<Extension>]
-    static member TextColor (button: Button, color: unit -> Color) : Button =
+    static member TextColor(button: Button, color: unit -> Color) : Button =
         button.TextColor <- fun () -> (color(), Colors.shadow_2)
         button

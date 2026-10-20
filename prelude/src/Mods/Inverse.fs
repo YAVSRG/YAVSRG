@@ -114,13 +114,7 @@ module Inverse =
                             new_row.[k] <- NoteType.HOLDTAIL
                             tail_position <- tail_position + 1
 
-                            output.Insert(
-                                tail_position,
-                                {
-                                    Time = intended_tail_time
-                                    Data = new_row
-                                }
-                            )
+                            output.Insert(tail_position, { Time = intended_tail_time; Data = new_row })
 
                         for x = tail_position - 1 downto start_index + 1 do
                             let { Data = row } = output.[x]
@@ -131,10 +125,9 @@ module Inverse =
         let mutable bpm_index = -1
 
         let update_spacing (now: Time) =
-            while bpm_index < 0
-                  || (bpm_index + 1 < chart.BPM.Length && chart.BPM.[bpm_index + 1].Time < now) do
-                let msPerBeat = chart.BPM.[bpm_index + 1].Data.MsPerBeat
-                spacing <- msPerBeat * gap_size
+            while bpm_index < 0 || (bpm_index + 1 < chart.BPM.Length && chart.BPM.[bpm_index + 1].Time < now) do
+                let ms_per_beat = chart.BPM.[bpm_index + 1].Data.MsPerBeat
+                spacing <- ms_per_beat * gap_size
                 bpm_index <- bpm_index + 1
 
         let mutable i = 0
@@ -151,10 +144,4 @@ module Inverse =
 
             i <- i + 1
 
-        { chart with
-            Notes =
-                output
-                |> Array.ofSeq
-                |> TimeArray.filter (NoteRow.is_empty >> not)
-        },
-        true
+        { chart with Notes = output |> Array.ofSeq |> TimeArray.filter(NoteRow.is_empty >> not) }, true

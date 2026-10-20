@@ -21,6 +21,7 @@ type ThemeConfig =
         AlwaysUseDefaultBackground: bool
         CursorSize: float32
     }
+
     static member Default: ThemeConfig =
         {
             Name = "Unnamed Theme"
@@ -38,8 +39,7 @@ type Theme(storage) as this =
 
     let mutable config: ThemeConfig = ThemeConfig.Default
 
-    do
-        this.ReloadFromDisk()
+    do this.ReloadFromDisk()
 
     member this.Config
         with set conf =
@@ -47,8 +47,9 @@ type Theme(storage) as this =
             this.WriteJson(config, "theme.json")
         and get () = config
 
-    override this.ReloadFromDisk() =
+    override this.ReloadFromDisk() : unit =
         base.ReloadFromDisk()
+
         config <-
             match this.TryGetJson<ThemeConfig>(true, "theme.json") with
             | Some data -> data.Validate
@@ -58,18 +59,14 @@ type Theme(storage) as this =
         let name =
             if
                 (name = "logo" || name = "rain")
-                && (let dayOfYear = System.DateTime.Today.DayOfYear in dayOfYear < 5 || dayOfYear > 350)
+                && (let day_of_year = System.DateTime.Today.DayOfYear in day_of_year < 5 || day_of_year > 350)
             then
                 name + "-winterlude"
             else
                 name
 
         let rules =
-            {
-                IsRequired = true
-                MustBeSquare = name <> "background"
-                MaxGridSize = (1, 1)
-            }
+            { IsRequired = true; MustBeSquare = name <> "background"; MaxGridSize = (1, 1) }
 
         this.LoadTexture(name, rules, "Textures")
 
@@ -78,7 +75,7 @@ type Theme(storage) as this =
 
     member this.GetFonts() : Stream seq =
         seq {
-            for file in this.GetFiles "Fonts" do
+            for file in this.GetFiles("Fonts") do
                 match Path.GetExtension(file).ToLower() with
                 | ".otf"
                 | ".ttf" ->
@@ -86,7 +83,7 @@ type Theme(storage) as this =
                     | Some s ->
                         // Font loading requires seek
                         use ms = new MemoryStream()
-                        s.CopyTo ms
+                        s.CopyTo(ms)
                         ms.Position <- 0
                         yield ms
                         s.Dispose()
@@ -94,13 +91,13 @@ type Theme(storage) as this =
                 | _ -> ()
         }
 
-    static member FromZipStream(stream: Stream) =
+    static member FromZipStream(stream: Stream) : Theme =
         new Theme(Embedded(new ZipArchive(stream)))
 
-    static member FromPath(path: string) = new Theme(Folder path)
+    static member FromPath(path: string) : Theme = new Theme(Folder path)
 
-    static member FromFolderName(name: string) =
-        Theme.FromPath(get_game_folder (Path.Combine("Themes", name)))
+    static member FromFolderName(name: string) : Theme =
+        Theme.FromPath(get_game_folder(Path.Combine("Themes", name)))
 
 module Theme =
 

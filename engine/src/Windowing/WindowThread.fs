@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Windowing
+namespace Percyqaz.Flux.Windowing
 
 open System
 open System.Threading
@@ -19,9 +19,10 @@ module WindowThread =
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
 
     let ACTION_QUEUE = ThreadActionQueue()
-    let is_window_thread() = ACTION_QUEUE.IsCurrent()
+    let is_window_thread () = ACTION_QUEUE.IsCurrent()
+
     let defer (action: unit -> unit) : unit =
-        ACTION_QUEUE.Defer action
+        ACTION_QUEUE.Defer(action)
         GLFW.PostEmptyEvent()
 
     (*
@@ -41,17 +42,17 @@ module WindowThread =
 
     let mutable private detected_monitors: MonitorDetails list = []
 
-    let private detect_monitors() =
+    let private detect_monitors () =
         let monitors =
             Monitors.GetMonitors()
             |> Seq.indexed
-            |> Seq.map (fun (i, m) ->
+            |> Seq.map(fun (i, m) ->
                 {
                     Id = i
                     FriendlyName = sprintf "%i: %s" (i + 1) m.Name
                     DisplayModes =
                         GLFW.GetVideoModes(m.Handle.ToUnsafePtr<Monitor>())
-                        |> Array.map (fun glfw_mode ->
+                        |> Array.map(fun glfw_mode ->
                             {
                                 Width = glfw_mode.Width
                                 Height = glfw_mode.Height
@@ -62,9 +63,11 @@ module WindowThread =
                 }
             )
             |> List.ofSeq
+
         lock ACTION_QUEUE (fun () -> detected_monitors <- monitors)
 
-    let get_monitors() = lock ACTION_QUEUE (fun () -> detected_monitors)
+    let get_monitors () =
+        lock ACTION_QUEUE (fun () -> detected_monitors)
 
     (*
         Window options
@@ -72,17 +75,17 @@ module WindowThread =
         `apply_config` applies new WindowOptions settings to the game window + render thread
     *)
 
-    let mutable private last_applied_config : WindowOptions = Unchecked.defaultof<_>
+    let mutable private last_applied_config: WindowOptions = Unchecked.defaultof<_>
     let mutable private refresh_rate = 60
     let mutable private letterbox: WindowedResolution option = None
 
-    let apply_config(config: WindowOptions) =
+    let apply_config (config: WindowOptions) =
         assert is_window_thread()
         detect_monitors()
 
         letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowedResolution else None
 
-        let was_fullscreen = not (NativePtr.isNullPtr (GLFW.GetWindowMonitor(window)))
+        let was_fullscreen = not(NativePtr.isNullPtr(GLFW.GetWindowMonitor(window)))
 
         let monitor =
             if config.WindowMode <> WindowType.Windowed then
@@ -91,6 +94,7 @@ module WindowThread =
                 | Some m -> m.Info
             else
                 Monitors.GetMonitorFromWindow(window)
+
         let monitor_ptr = monitor.Handle.ToUnsafePtr<Monitor>()
 
         match config.WindowMode with
@@ -98,29 +102,23 @@ module WindowThread =
         | WindowType.Windowed ->
             let width, height = fst config.WindowedResolution
             let offset_x, offset_y = snd config.WindowedResolution
+
             let x =
-                float32 (monitor.ClientArea.Size.X - width) * offset_x
+                float32(monitor.ClientArea.Size.X - width) * offset_x
                 |> round
                 |> int
                 |> max monitor.ClientArea.Min.X
-                |> min (monitor.ClientArea.Max.X - width)
+                |> min(monitor.ClientArea.Max.X - width)
 
             let y =
-                float32 (monitor.ClientArea.Size.Y - height) * offset_y
+                float32(monitor.ClientArea.Size.Y - height) * offset_y
                 |> round
                 |> int
                 |> max monitor.ClientArea.Min.Y
-                |> min (monitor.ClientArea.Max.Y - height)
+                |> min(monitor.ClientArea.Max.Y - height)
 
             if was_fullscreen then
-                GLFW.SetWindowMonitor(
-                    window,
-                    NativePtr.nullPtr<Monitor>,
-                    x, y,
-                    width,
-                    height,
-                    0
-                )
+                GLFW.SetWindowMonitor(window, NativePtr.nullPtr<Monitor>, x, y, width, height, 0)
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, true)
             else
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, true)
@@ -138,6 +136,7 @@ module WindowThread =
                     monitor.WorkArea.Size.Y - 2,
                     0
                 )
+
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
                 GLFW.HideWindow(window)
                 GLFW.MaximizeWindow(window)
@@ -161,6 +160,7 @@ module WindowThread =
                     monitor.ClientArea.Size.Y - 2,
                     0
                 )
+
             GLFW.HideWindow(window)
             GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
             GLFW.SetWindowPos(window, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
@@ -177,7 +177,8 @@ module WindowThread =
                 config.FullscreenVideoMode.Height,
                 config.FullscreenVideoMode.RefreshRate
             )
-            GameThread.defer (fun () ->
+
+            GameThread.defer(fun () ->
                 GameThread.framebuffer_resized
                     (config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height)
                     ((config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height), (0.5f, 0.5f))
@@ -199,10 +200,13 @@ module WindowThread =
                 max_height,
                 config.FullscreenVideoMode.RefreshRate
             )
-            if was_fullscreen then GLFW.RestoreWindow(window)
-            GameThread.defer (fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowedResolution)
 
-        | _ -> Logging.Error "Tried to change to invalid window mode"
+            if was_fullscreen then
+                GLFW.RestoreWindow(window)
+
+            GameThread.defer(fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowedResolution)
+
+        | _ -> Logging.Error("Tried to change to invalid window mode")
 
         refresh_rate <-
             if config.RenderMode = FrameLimit.Custom then
@@ -214,21 +218,22 @@ module WindowThread =
 
         let x, y = GLFW.GetWindowPos(window)
         let width, height = GLFW.GetWindowSize(window)
+
         let is_entire_monitor =
-            config.WindowMode = WindowType.Fullscreen ||
-            (
-                monitor.ClientArea.Min.X = x && monitor.ClientArea.Max.X = x + width
-                && monitor.ClientArea.Min.Y = y && monitor.ClientArea.Max.Y = y + height
-            )
+            config.WindowMode = WindowType.Fullscreen
+            || (monitor.ClientArea.Min.X = x
+                && monitor.ClientArea.Max.X = x + width
+                && monitor.ClientArea.Min.Y = y
+                && monitor.ClientArea.Max.Y = y + height)
 
         last_applied_config <- config
-        
-        GameThread.defer
-        <| fun () ->
+
+        GameThread.defer(fun () ->
             GameThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
             GameThread.anti_jitter <- config.SmartCapAntiJitter
             GameThread.tearline_position <- config.SmartCapTearlinePosition
             GameThread.framerate_multiplier <- config.SmartCapFramerateMultiplier
+        )
 
     (*
         Disabling windows key & Focus
@@ -241,34 +246,31 @@ module WindowThread =
     let mutable private is_focused = false
     let mutable private disabled_windows_key = false
 
-    let private should_disable_windows_key() =
-        disabled_windows_key
-        && is_focused
-        && OperatingSystem.IsWindows()
+    let private should_disable_windows_key () =
+        disabled_windows_key && is_focused && OperatingSystem.IsWindows()
 
-    let disable_windows_key() =
+    let disable_windows_key () =
         assert is_window_thread()
         disabled_windows_key <- true
+
         if should_disable_windows_key() then
             WindowsKey.disable()
 
-    let enable_windows_key() =
+    let enable_windows_key () =
         assert is_window_thread()
         disabled_windows_key <- false
         WindowsKey.enable()
 
-    let focus_window() =
+    let focus_window () =
         assert is_window_thread()
         GLFW.RestoreWindow(window)
         GLFW.FocusWindow(window)
 
     let private focus_callback (_: nativeptr<Window>) (focused: bool) =
         is_focused <- focused
-        if should_disable_windows_key() then
-            WindowsKey.disable()
-        else WindowsKey.enable()
+        if should_disable_windows_key() then WindowsKey.disable() else WindowsKey.enable()
 
-    let private focus_callback_d = GLFWCallbacks.WindowFocusCallback focus_callback
+    let private focus_callback_d = GLFWCallbacks.WindowFocusCallback(focus_callback)
 
     (*
         GLFW initialisation
@@ -277,33 +279,42 @@ module WindowThread =
     let private framebuffer_size_callback (_: nativeptr<Window>) (buffer_width: int) (buffer_height: int) =
         if buffer_width <> 0 && buffer_height <> 0 then
             match letterbox with
-            | Some ((w, h), (x, y)) when w <= buffer_width && h <= buffer_height ->
-                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) ((w, h), (x, y)))
+            | Some((w, h), (x, y)) when w <= buffer_width && h <= buffer_height ->
+                GameThread.defer(fun () ->
+                    GameThread.framebuffer_resized (buffer_width, buffer_height) ((w, h), (x, y))
+                )
             | _ ->
-                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) ((buffer_width, buffer_height), (0.5f, 0.5f)))
+                GameThread.defer(fun () ->
+                    GameThread.framebuffer_resized
+                        (buffer_width, buffer_height)
+                        ((buffer_width, buffer_height), (0.5f, 0.5f))
+                )
 
-    let private framebuffer_size_callback_d = GLFWCallbacks.FramebufferSizeCallback framebuffer_size_callback
+    let private framebuffer_size_callback_d =
+        GLFWCallbacks.FramebufferSizeCallback(framebuffer_size_callback)
 
     let private file_drop_ev = Event<string array>()
     let on_file_drop = file_drop_ev.Publish
 
     let private file_drop_callback (_: nativeptr<Window>) (count: int) (paths: nativeptr<nativeptr<byte>>) =
         let paths_array: string array = Array.zeroCreate count
+
         try
             for i = 0 to count - 1 do
-                paths_array.[i] <- Marshal.PtrToStringUTF8(NativePtr.toNativeInt (NativePtr.get paths i))
+                paths_array.[i] <- Marshal.PtrToStringUTF8(NativePtr.toNativeInt(NativePtr.get paths i))
         with err ->
             Logging.Critical "Error getting dropped file paths: %O" err
-        GameThread.defer (fun () -> file_drop_ev.Trigger paths_array)
 
-    let private file_drop_callback_d = GLFWCallbacks.DropCallback file_drop_callback
+        GameThread.defer(fun () -> file_drop_ev.Trigger(paths_array))
+
+    let private file_drop_callback_d = GLFWCallbacks.DropCallback(file_drop_callback)
 
     let private error_callback (code: ErrorCode) (desc: string) =
         Logging.Debug "GLFW Error (%O): %s" code desc
 
-    let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
+    let private error_callback_d = GLFWCallbacks.ErrorCallback(error_callback)
 
-    let internal init(config: WindowOptions, title: string, init_thunk: unit -> UIEntryPoint, icon: Bitmap option) =
+    let internal init (config: WindowOptions, title: string, init_thunk: unit -> UIEntryPoint, icon: Bitmap option) =
         last_applied_config <- config
         ACTION_QUEUE.BindToCurrent()
 
@@ -332,21 +343,37 @@ module WindowThread =
         if NativePtr.isNullPtr window then
             let mutable desc = ""
             let error = GLFW.GetError(&desc)
+
             match error with
             | ErrorCode.VersionUnavailable ->
-                Logging.Critical ""
-                Logging.Critical "=== Helpful message from Percyqaz ==="
-                Logging.Critical "This error means your PC doesn't support OpenGL 3.3 or higher, and so can't run '%s' :(" title
-                Logging.Critical "If you think your PC DOES support OpenGL 3.3+, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
-                Logging.Critical "If your PC is from about 2011/12 and supports OpenGL 3.0-3.2, complain in the Discord anyway and I could spend more time seeing if the engine can be more backwards compatible"
-                Logging.Critical ""
+                Logging.Critical("")
+                Logging.Critical("=== Helpful message from Percyqaz ===")
+
+                Logging.Critical
+                    "This error means your PC doesn't support OpenGL 3.3 or higher, and so can't run '%s' :("
+                    title
+
+                Logging.Critical(
+                    "If you think your PC DOES support OpenGL 3.3+, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
+                )
+
+                Logging.Critical(
+                    "If your PC is from about 2011/12 and supports OpenGL 3.0-3.2, complain in the Discord anyway and I could spend more time seeing if the engine can be more backwards compatible"
+                )
+
+                Logging.Critical("")
             | ErrorCode.ApiUnavailable ->
-                Logging.Critical ""
-                Logging.Critical "=== Helpful message from Percyqaz ==="
-                Logging.Critical "This error says your PC doesn't support OpenGL"
-                Logging.Critical "This is probably not actually true, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
-                Logging.Critical ""
+                Logging.Critical("")
+                Logging.Critical("=== Helpful message from Percyqaz ===")
+                Logging.Critical("This error says your PC doesn't support OpenGL")
+
+                Logging.Critical(
+                    "This is probably not actually true, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
+                )
+
+                Logging.Critical("")
             | _ -> ()
+
             failwithf "GLFW failed to create window: %A\n%s" error desc
 
         let context = GLFWGraphicsContext(window)
@@ -359,14 +386,28 @@ module WindowThread =
         | Some icon ->
             let mutable pixel_data = Span<SixLabors.ImageSharp.PixelFormats.Rgba32>.Empty
             let success = icon.TryGetSinglePixelSpan(&pixel_data)
-            if not success then failwithf "Couldn't get pixel span for icon"
+
+            if not success then
+                failwithf "Couldn't get pixel span for icon"
+
             use pixel_data_ref = fixed pixel_data
-            let image_array = [| Image(icon.Width, icon.Height, pixel_data_ref |> NativePtr.toNativeInt |> NativePtr.ofNativeInt) |]
+
+            let image_array =
+                [|
+                    Image(icon.Width, icon.Height, pixel_data_ref |> NativePtr.toNativeInt |> NativePtr.ofNativeInt)
+                |]
+
             GLFW.SetWindowIcon(window, Span<Image>(image_array))
         | None -> ()
 
         GameThread.init(window, icon, init_thunk)
-        Audio.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
+
+        Audio.init(
+            config.AudioDevice,
+            config.AudioDevicePeriod,
+            config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier
+        )
+
         letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowedResolution else None
         framebuffer_size_callback window width height
 
@@ -378,26 +419,32 @@ module WindowThread =
         GLFW.SetWindowFocusCallback(window, focus_callback_d) |> ignore
 
         let monitor_area = Monitors.GetMonitorFromWindow(window).ClientArea
-        GLFW.SetWindowPos(window, (monitor_area.Min.X + monitor_area.Max.X - width) / 2, (monitor_area.Min.Y + monitor_area.Max.Y - height) / 2)
+
+        GLFW.SetWindowPos(
+            window,
+            (monitor_area.Min.X + monitor_area.Max.X - width) / 2,
+            (monitor_area.Min.Y + monitor_area.Max.Y - height) / 2
+        )
+
         GLFW.ShowWindow(window)
         GLFW.RestoreWindow(window)
         GLFW.FocusWindow(window)
 
-    let internal run() =
+    let internal run () =
         Fonts.init()
-        GameThread.defer (fun () -> defer (fun () -> apply_config last_applied_config))
+        GameThread.defer(fun () -> defer(fun () -> apply_config last_applied_config))
         GameThread.start()
-        
+
         let polling_interval = GLFW.GetTimerFrequency() / 2000L
         let mutable next_poll = GLFW.GetTimerValue()
         let sw = SpinWait()
 
         while not(GLFW.WindowShouldClose(window)) do
             ACTION_QUEUE.RunQueue()
-            
+
             while GLFW.GetTimerValue() < next_poll do
                 sw.SpinOnce()
-                
+
             next_poll <- next_poll + polling_interval
             InputThread.glfw_polls_since_fetch <- InputThread.glfw_polls_since_fetch + 1
             GLFW.PollEvents()
@@ -414,18 +461,22 @@ module WindowThread =
         GLFW.SetWindowShouldClose(window, true)
         GLFW.PostEmptyEvent()
 
-    let debug_info() : string =
-        assert(not (NativePtr.isNullPtr window))
+    let debug_info () : string =
+        assert (not(NativePtr.isNullPtr window))
         assert is_window_thread()
 
         let monitor = Monitors.GetMonitorFromWindow(window)
         let default_monitor = Monitors.GetPrimaryMonitor()
 
         let monitor_dump (info: MonitorInfo) =
-            let max_hz_vm = info.SupportedVideoModes |> Seq.maxBy (fun vm -> (vm.RefreshRate, vm.Width, vm.Height))
-            let max_res_vm = info.SupportedVideoModes |> Seq.maxBy (fun vm -> (vm.Width, vm.Height, vm.RefreshRate))
+            let max_hz_vm =
+                info.SupportedVideoModes |> Seq.maxBy(fun vm -> (vm.RefreshRate, vm.Width, vm.Height))
 
-            sprintf "%s (%i, %i) %ix%i | S: %imm x %imm | DPI: %.4f x %.4f\n\tVideo mode: %ix%i@%ihz [%i:%i:%i]\n\tMax Refresh Rate: %ix%i@%ihz\n\tMax Resolution: %ix%i@%ihz"
+            let max_res_vm =
+                info.SupportedVideoModes |> Seq.maxBy(fun vm -> (vm.Width, vm.Height, vm.RefreshRate))
+
+            sprintf
+                "%s (%i, %i) %ix%i | S: %imm x %imm | DPI: %.4f x %.4f\n\tVideo mode: %ix%i@%ihz [%i:%i:%i]\n\tMax Refresh Rate: %ix%i@%ihz\n\tMax Resolution: %ix%i@%ihz"
                 info.Name
                 info.ClientArea.Min.X
                 info.ClientArea.Min.Y

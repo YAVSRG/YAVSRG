@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions.Osu.HUD
+namespace Prelude.Skins.Conversions.Osu.HUD
 
 open System.IO
 open SixLabors.ImageSharp
@@ -21,22 +21,24 @@ module internal HudJudgementConverter =
                 ]
                 |> List.map ctx.FileSystem.SearchForAnimation
                 |> List.map _.Load(ctx.FileSystem)
-                |> List.map (List.map _.As2x)
-            let max_frames = images |> List.map (fun x -> x.Length) |> List.max
-            let max_width = images |> List.map (List.map _.Width >> List.max) |> List.max
-            let max_height = images |> List.map (List.map _.Height >> List.max) |> List.max
+                |> List.map(List.map _.As2x)
+
+            let max_frames = images |> List.map(fun x -> x.Length) |> List.max
+            let max_width = images |> List.map(List.map _.Width >> List.max) |> List.max
+            let max_height = images |> List.map(List.map _.Height >> List.max) |> List.max
 
             for row = 0 to images.Length - 1 do
                 for column = 0 to max_frames - 1 do
-                    let image = let r = images.[row] in r[column % r.Length]
+                    let image = let r = images.[row] in r.[column % r.Length]
 
                     let padded = ImageOperations.pad (max_width, max_height) image
                     padded.Save(Path.Combine(ctx.Target, TextureFileName.to_loose "judgements" (column, row)))
+
             ctx.JudgementTextures <- true
         with err ->
             Logging.Warn "Error converting judgement textures: %O" err
-    
-    let convert_judgement_counter_textures(ctx: HudConverterContext) : unit =
+
+    let convert_judgement_counter_textures (ctx: HudConverterContext) : unit =
         try
             let images =
                 [
@@ -51,12 +53,14 @@ module internal HudJudgementConverter =
                 |> List.map _.FirstFrame
                 |> List.map _.Load(ctx.FileSystem)
                 |> List.map _.As2x
+
             let max_width = images |> List.map _.Width |> List.max
             let max_height = images |> List.map _.Height |> List.max
 
             for i, image in List.indexed images do
                 let padded = ImageOperations.pad (max_width, max_height) image
                 padded.Save(Path.Combine(ctx.Target, TextureFileName.to_loose "judgement-counter-judgements" (0, i)))
+
             ctx.JudgementCounterTextures <- true
         with err ->
             Logging.Warn "Error converting judgement counter judgement textures: %O" err

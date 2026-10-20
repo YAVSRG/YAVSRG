@@ -1,14 +1,9 @@
-﻿namespace Prelude.Gameplay.Rulesets
+namespace Prelude.Gameplay.Rulesets
 
 open Prelude
 open Prelude.Gameplay.Rulesets
 
-type RulesetComparison =
-    {
-        Average: float
-        Min: float
-        Max: float
-    }
+type RulesetComparison = { Average: float; Min: float; Max: float }
 
 module RulesetComparison =
 
@@ -26,8 +21,7 @@ module RulesetComparison =
             let x = abs x
             let t = 1.0 / (1.0 + p * x)
 
-            let y =
-                1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x)
+            let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x)
 
             sign * y
 
@@ -37,12 +31,12 @@ module RulesetComparison =
         let ERF_CONSTANT = standard_deviation * 1.41421356
 
         let mutable total = 0.0
-        let mutable previous_window = 0.0f<ms/rate>
+        let mutable previous_window = 0.0f<ms / rate>
         let mutable previous_proportion = 0.0
 
         for i, judgement in Seq.indexed ruleset.Judgements do
             match judgement.TimingWindows with
-            | Some (early, late) ->
+            | Some(early, late) ->
                 let early_proportion = 0.5 * erf(float -early / ERF_CONSTANT)
                 let late_proportion = 0.5 * erf(float late / ERF_CONSTANT)
 
@@ -74,10 +68,7 @@ module RulesetComparison =
         let mutable increment = 5.0
 
         while increment > 0.1 do
-            if (simulate ruleset sd misses_per_1000_notes) < acc then
-                sd <- sd - increment
-            else
-                sd <- sd + increment
+            if (simulate ruleset sd misses_per_1000_notes) < acc then sd <- sd - increment else sd <- sd + increment
             increment <- increment * 0.75
 
         sd
@@ -87,16 +78,17 @@ module RulesetComparison =
 
         let range =
             seq {
-                for miss_count in [0.0; 1.0; 3.0; 8.0; 15.0] do
+                for miss_count in [ 0.0; 1.0; 3.0; 8.0; 15.0 ] do
                     let sd = standard_deviation_for_accuracy base_ruleset accuracy_range_100 miss_count
 
                     let base_acc = simulate base_ruleset sd miss_count
                     let compare_acc = simulate compare_to sd miss_count
 
-                    if abs (base_acc - accuracy_range_100) < 0.11 then
+                    if abs(base_acc - accuracy_range_100) < 0.11 then
                         yield compare_acc
             }
             |> Array.ofSeq
+
         if range.Length > 0 then
             Some { Average = Array.average range * 0.01; Min = Array.min range * 0.01; Max = Array.max range * 0.01 }
         else

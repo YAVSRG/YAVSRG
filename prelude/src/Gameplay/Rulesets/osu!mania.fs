@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Rulesets
+namespace Prelude.Gameplay.Rulesets
 
 open Percyqaz.Common
 open Prelude
@@ -25,9 +25,15 @@ module OsuMania =
     let perfect_window (_: float32) : GameplayTime = 16.0f<ms / rate>
     let great_window (od: float32) : GameplayTime = 64.0f<ms / rate> - 3.0f<ms / rate> * od
     let good_window (od: float32) : GameplayTime = 97.0f<ms / rate> - 3.0f<ms / rate> * od
-    let ok_window (od: float32) : GameplayTime = 127.0f<ms / rate> - 3.0f<ms / rate> * od
-    let meh_window (od: float32) : GameplayTime = 151.0f<ms / rate> - 3.0f<ms / rate> * od
-    let miss_window (od: float32) : GameplayTime = 188.0f<ms / rate> - 3.0f<ms / rate> * od
+
+    let ok_window (od: float32) : GameplayTime =
+        127.0f<ms / rate> - 3.0f<ms / rate> * od
+
+    let meh_window (od: float32) : GameplayTime =
+        151.0f<ms / rate> - 3.0f<ms / rate> * od
+
+    let miss_window (od: float32) : GameplayTime =
+        188.0f<ms / rate> - 3.0f<ms / rate> * od
 
     let to_hard_rock_window (unclipped_window: GameplayTime) = unclipped_window / 1.4f
 
@@ -39,6 +45,7 @@ module OsuMania =
         | Easy
         | NoMod
         | HardRock
+
         member this.Apply =
             match this with
             | Easy -> to_easy_window
@@ -54,31 +61,35 @@ module OsuMania =
         let MISS = miss_window od |> mode.Apply |> floor_uom
 
         {
-            Window320 = clipped (PERFECT * 1.2f)
-            Window300 = clipped (GREAT * 1.1f)
+            Window320 = clipped(PERFECT * 1.2f)
+            Window300 = clipped(GREAT * 1.1f)
             Window200 = clipped GOOD
             Window100 = clipped OK
             Window50 = clipped MEH
             Window0 = clipped MISS
             // todo: this matches experimental data but I must not be understanding something about LNs
             WindowOverhold200 =
-                let base_window = floor (43f - od * 3f) * 1.0f<ms / rate> + 0.5f<ms / rate>
+                let base_window = floor(43f - od * 3f) * 1.0f<ms / rate> + 0.5f<ms / rate>
+
                 match mode with
-                | Easy -> floor (base_window * 1.4f<rate / ms>) * 1.0f<ms / rate> - 0.5f<ms / rate>
-                | HardRock -> floor (base_window / 1.4f<ms / rate>) * 1.0f<ms / rate> + 1.5f<ms / rate>
+                | Easy -> floor(base_window * 1.4f<rate / ms>) * 1.0f<ms / rate> - 0.5f<ms / rate>
+                | HardRock -> floor(base_window / 1.4f<ms / rate>) * 1.0f<ms / rate> + 1.5f<ms / rate>
                 | NoMod -> base_window
             WindowOverhold100 =
-                let base_window = floor (103f - od * 3f) * 1.0f<ms / rate> + 0.5f<ms / rate>
+                let base_window = floor(103f - od * 3f) * 1.0f<ms / rate> + 0.5f<ms / rate>
+
                 match mode with
-                | Easy -> floor (base_window * 1.4f<rate / ms>) * 1.0f<ms / rate> - 0.5f<ms / rate>
-                | HardRock -> floor (base_window / 1.4f<ms / rate>) * 1.0f<ms / rate> + 1.5f<ms / rate>
+                | Easy -> floor(base_window * 1.4f<rate / ms>) * 1.0f<ms / rate> - 0.5f<ms / rate>
+                | HardRock -> floor(base_window / 1.4f<ms / rate>) * 1.0f<ms / rate> + 1.5f<ms / rate>
                 | NoMod -> base_window
         }
 
     let create (od: float32) (mode: Mode) : Ruleset =
 
-        let od = round (od * 10.0f) / 10.0f
-        if od < 0.0f || od > 10.0f then failwithf "Overall difficulty must be between 0 and 10, was: %.1f" od
+        let od = round(od * 10.0f) / 10.0f
+
+        if od < 0.0f || od > 10.0f then
+            failwithf "Overall difficulty must be between 0 and 10, was: %.1f" od
 
         let PERFECT = perfect_window od |> mode.Apply |> clipped
         let GREAT = great_window od |> mode.Apply |> clipped
@@ -88,26 +99,33 @@ module OsuMania =
         let MISS = miss_window od |> mode.Apply |> clipped
 
         {
-            Name = sprintf "osu! OD%s%s" (od.ToString("R", System.Globalization.CultureInfo.InvariantCulture)) (match mode with NoMod -> "" | Easy -> " +EZ" | HardRock -> " +HR")
+            Name =
+                sprintf
+                    "osu! OD%s%s"
+                    (od.ToString("R", System.Globalization.CultureInfo.InvariantCulture))
+                    (match mode with
+                     | NoMod -> ""
+                     | Easy -> " +EZ"
+                     | HardRock -> " +HR")
             Description = "Simulates osu!'s scoring system"
             Judgements =
                 [|
                     {
                         Name = "300g"
                         Color = Color.Aqua
-                        TimingWindows = Some (-PERFECT, PERFECT)
+                        TimingWindows = Some(-PERFECT, PERFECT)
                         BreaksCombo = false
                     }
                     {
                         Name = "300"
                         Color = Color.Yellow
-                        TimingWindows = Some (-GREAT, GREAT)
+                        TimingWindows = Some(-GREAT, GREAT)
                         BreaksCombo = false
                     }
                     {
                         Name = "200"
                         Color = Color.FromArgb(0, 255, 100)
-                        TimingWindows = Some (-GOOD, GOOD)
+                        TimingWindows = Some(-GOOD, GOOD)
                         BreaksCombo = false
                     }
                     // 50 and MISS have no late window
@@ -116,104 +134,76 @@ module OsuMania =
                     {
                         Name = "100"
                         Color = Color.FromArgb(0, 160, 255)
-                        TimingWindows = Some (-OK, OK - 1.0f<ms / rate>)
+                        TimingWindows = Some(-OK, OK - 1.0f<ms / rate>)
                         BreaksCombo = false
                     }
                     {
                         Name = "50"
                         Color = Color.FromArgb(160, 160, 160)
-                        TimingWindows = Some (-MEH, OK - 1.0f<ms / rate>)
+                        TimingWindows = Some(-MEH, OK - 1.0f<ms / rate>)
                         BreaksCombo = false
                     }
                     {
                         Name = "MISS"
                         Color = Color.FromArgb(255, 80, 80)
-                        TimingWindows = Some (-MISS, OK - 1.0f<ms / rate>)
+                        TimingWindows = Some(-MISS, OK - 1.0f<ms / rate>)
                         BreaksCombo = true
                     }
                 |]
             Grades =
                 [|
-                    {
-                        Name = "D"
-                        Accuracy = 0.0
-                        Color = Color.FromArgb(255, 80, 80)
-                    }
-                    {
-                        Name = "C"
-                        Accuracy = 0.7
-                        Color = Color.FromArgb(255, 80, 255)
-                    }
-                    {
-                        Name = "B"
-                        Accuracy = 0.8
-                        Color = Color.FromArgb(0, 80, 255)
-                    }
-                    {
-                        Name = "A"
-                        Accuracy = 0.9
-                        Color = Color.FromArgb(0, 255, 100)
-                    }
-                    {
-                        Name = "S"
-                        Accuracy = 0.95
-                        Color = Color.FromArgb(246, 234, 128)
-                    }
-                    {
-                        Name = "SS"
-                        Accuracy = 1.0
-                        Color = Color.FromArgb(255, 255, 160)
-                    }
+                    { Name = "D"; Accuracy = 0.0; Color = Color.FromArgb(255, 80, 80) }
+                    { Name = "C"; Accuracy = 0.7; Color = Color.FromArgb(255, 80, 255) }
+                    { Name = "B"; Accuracy = 0.8; Color = Color.FromArgb(0, 80, 255) }
+                    { Name = "A"; Accuracy = 0.9; Color = Color.FromArgb(0, 255, 100) }
+                    { Name = "S"; Accuracy = 0.95; Color = Color.FromArgb(246, 234, 128) }
+                    { Name = "SS"; Accuracy = 1.0; Color = Color.FromArgb(255, 255, 160) }
                 |]
             Lamps =
                 [|
                     {
                         Name = "SDCB"
-                        Requirement = LampRequirement.ComboBreaksAtMost 9
+                        Requirement = LampRequirement.ComboBreaksAtMost(9)
                         Color = Color.FromArgb(255, 160, 160)
                     }
                     {
                         Name = "1CB"
-                        Requirement = LampRequirement.ComboBreaksAtMost 1
+                        Requirement = LampRequirement.ComboBreaksAtMost(1)
                         Color = Color.FromArgb(160, 160, 160)
                     }
                     {
                         Name = "FC"
-                        Requirement = LampRequirement.ComboBreaksAtMost 0
+                        Requirement = LampRequirement.ComboBreaksAtMost(0)
                         Color = Color.FromArgb(0, 255, 160)
                     }
                     {
                         Name = "PERF"
-                        Requirement = LampRequirement.JudgementAtMost (3, 0)
+                        Requirement = LampRequirement.JudgementAtMost(3, 0)
                         Color = Color.FromArgb(255, 255, 160)
                     }
                     {
                         Name = "SDG"
-                        Requirement = LampRequirement.JudgementAtMost (2, 9)
+                        Requirement = LampRequirement.JudgementAtMost(2, 9)
                         Color = Color.FromArgb(160, 255, 160)
                     }
                     {
                         Name = "1G"
-                        Requirement = LampRequirement.JudgementAtMost (2, 1)
+                        Requirement = LampRequirement.JudgementAtMost(2, 1)
                         Color = Color.FromArgb(200, 160, 255)
                     }
                     {
                         Name = "SS"
-                        Requirement = LampRequirement.JudgementAtMost (2, 0)
+                        Requirement = LampRequirement.JudgementAtMost(2, 0)
                         Color = Color.FromArgb(255, 255, 160)
                     }
                     {
                         Name = "MILL"
-                        Requirement = LampRequirement.JudgementAtMost (1, 0)
+                        Requirement = LampRequirement.JudgementAtMost(1, 0)
                         Color = Color.FromArgb(160, 255, 255)
                     }
                 |]
-            Accuracy = AccuracyPoints.PointsPerJudgement([| 1.0; 1.0; 2.0/3.0; 1.0/3.0; 1.0/6.0; 0.0 |])
-            HitMechanics =
-                {
-                    NotePriority = NotePriority.OsuMania
-                    GhostTapJudgement = None
-                }
-            HoldMechanics = HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania (ln_windows od mode))
+            Accuracy = AccuracyPoints.PointsPerJudgement([| 1.0; 1.0; 2.0 / 3.0; 1.0 / 3.0; 1.0 / 6.0; 0.0 |])
+            HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None }
+            HoldMechanics = HoldMechanics.CombineHeadAndTail(HeadTailCombineRule.OsuMania(ln_windows od mode))
             Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }

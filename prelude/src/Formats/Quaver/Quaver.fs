@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Quaver
+namespace Prelude.Formats.Quaver
 
 open System
 open System.IO
@@ -18,17 +18,9 @@ type QuaverHitObject =
         Type: QuaverHitObjectType
     }
 
-type QuaverTimingPoint =
-    {
-        StartTime: float32
-        Bpm: float32
-    }
+type QuaverTimingPoint = { StartTime: float32; Bpm: float32 }
 
-type QuaverSliderVelocity =
-    {
-        StartTime: float32
-        Multiplier: float32
-    }
+type QuaverSliderVelocity = { StartTime: float32; Multiplier: float32 }
 
 type QuaverKeys =
     | Keys1 = 1
@@ -103,13 +95,21 @@ module QuaverChart =
             Title = Yaml.get_string_or "Title" "" parsed
             Artist = Yaml.get_string_or "Artist" "" parsed
             Source = Yaml.get_string_or "Source" "" parsed
-            Tags = (Yaml.get_string_or "Tags" "" parsed).Split(',', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> List.ofArray
+            Tags =
+                (Yaml.get_string_or "Tags" "" parsed)
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+                |> List.ofArray
             Creator = Yaml.get_string_or "Creator" "" parsed
             DifficultyName = Yaml.get_string_or "DifficultyName" "" parsed
             Description = Yaml.get_string_or "Description" "" parsed
             Genre = Yaml.get_string_or "Genre" "" parsed
-            BPMDoesNotAffectScrollVelocity = (Yaml.get_string_or "BPMDoesNotAffectScrollVelocity" "true" parsed).ToLower().StartsWith('t')
-            InitialScrollVelocity = Single.Parse(Yaml.get_string_or "InitialScrollVelocity" "1" parsed, Globalization.CultureInfo.InvariantCulture)
+            BPMDoesNotAffectScrollVelocity =
+                (Yaml.get_string_or "BPMDoesNotAffectScrollVelocity" "true" parsed).ToLower().StartsWith('t')
+            InitialScrollVelocity =
+                Single.Parse(
+                    Yaml.get_string_or "InitialScrollVelocity" "1" parsed,
+                    Globalization.CultureInfo.InvariantCulture
+                )
             HasScratchKey = (Yaml.get_string_or "HasScratchKey" "false" parsed).ToLower().StartsWith('t')
             TimingPoints = Yaml.get_array<QuaverTimingPoint> "TimingPoints" timing_point_from_yaml parsed
             SliderVelocities = Yaml.get_array<QuaverSliderVelocity> "SliderVelocities" sv_from_yaml parsed
@@ -118,8 +118,8 @@ module QuaverChart =
 
     let from_file (path: string) : Result<QuaverChart, string> =
         try
-            let lines = File.ReadAllLines path
-            let parsed_yaml = Yaml.from_lines (List.ofArray lines)
+            let lines = File.ReadAllLines(path)
+            let parsed_yaml = Yaml.from_lines(List.ofArray lines)
             let chart = from_yaml parsed_yaml
             Ok chart
         with err ->
@@ -137,6 +137,6 @@ type QuaverChart with
     static member HashFromFile(path: string) : Result<string, string> =
         try
             use fs = File.OpenRead(path)
-            Ok(QuaverChart.Hash fs)
+            Ok(QuaverChart.Hash(fs))
         with err ->
             Error err.Message

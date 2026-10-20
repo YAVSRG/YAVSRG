@@ -6,7 +6,7 @@ open Interlude.Web.Server.Domain.Core
 
 module Stats =
 
-    let sync (user_id: int64) (incoming: StatsSyncUpstream): Result<unit, string> =
+    let sync (user_id: int64) (incoming: StatsSyncUpstream) : Result<unit, string> =
 
         let now = Timestamp.now()
         let month = timestamp_to_leaderboard_month now
@@ -15,20 +15,19 @@ module Stats =
 
         if incoming.Month <> month then
             Error "Stats month does not match server month"
+        elif incoming.NetworkId <> user_id then
+            Error(sprintf "Stats data is for user id #%i" incoming.NetworkId)
         else
 
-        if incoming.NetworkId <> user_id then
-            Error <| sprintf "Stats data is for user id #%i" incoming.NetworkId
-        else
+        let time_since_sync = float(now - all_time_stats.LastSync)
 
-        let time_since_sync = float (now - all_time_stats.LastSync)
         if incoming.GameTime - all_time_stats.GameTime > time_since_sync + 120000.0 then
-            Error
-                (
-                    sprintf "Increase in gametime is notably greater than real life time elapsed since last sync: +%s vs +%s"
-                        (format_long_time(incoming.GameTime - all_time_stats.GameTime))
-                        (format_long_time(time_since_sync))
-                )
+            Error(
+                sprintf
+                    "Increase in gametime is notably greater than real life time elapsed since last sync: +%s vs +%s"
+                    (format_long_time(incoming.GameTime - all_time_stats.GameTime))
+                    (format_long_time(time_since_sync))
+            )
         //elif incoming.Playtime - all_time_stats.Playtime > incoming.GameTime - all_time_stats.GameTime + 120000.0 then
         //    Error
         //        (
@@ -46,13 +45,23 @@ module Stats =
                 GameTime = safe_stat_max all_time_stats.GameTime incoming.GameTime
                 NotesHit = max all_time_stats.NotesHit incoming.NotesHit
                 XP = max all_time_stats.XP incoming.XP
-                _4KPlaytime = safe_stat_max all_time_stats._4KPlaytime (incoming.KeymodePlaytime.TryFind 4 |> Option.defaultValue 0.0)
+                _4KPlaytime =
+                    safe_stat_max
+                        all_time_stats._4KPlaytime
+                        (incoming.KeymodePlaytime.TryFind(4) |> Option.defaultValue 0.0)
                 _4K = KeymodeTinyBreakdown.Default
-                _7KPlaytime = safe_stat_max all_time_stats._7KPlaytime (incoming.KeymodePlaytime.TryFind 7 |> Option.defaultValue 0.0)
+                _7KPlaytime =
+                    safe_stat_max
+                        all_time_stats._7KPlaytime
+                        (incoming.KeymodePlaytime.TryFind(7) |> Option.defaultValue 0.0)
                 _7K = KeymodeTinyBreakdown.Default
-                _10KPlaytime = safe_stat_max all_time_stats._10KPlaytime (incoming.KeymodePlaytime.TryFind 10 |> Option.defaultValue 0.0)
+                _10KPlaytime =
+                    safe_stat_max
+                        all_time_stats._10KPlaytime
+                        (incoming.KeymodePlaytime.TryFind(10) |> Option.defaultValue 0.0)
                 _10K = KeymodeTinyBreakdown.Default
             }
+
         Stats.save user_id new_all_time_stats
 
         let new_monthly_stats: MonthlyStats =
@@ -60,13 +69,23 @@ module Stats =
                 LastSync = now
                 Playtime = safe_stat_max monthly_stats.Playtime incoming.PlaytimeThisMonth
                 XP = max monthly_stats.XP incoming.XPThisMonth
-                _4KPlaytime = safe_stat_max monthly_stats._4KPlaytime (incoming.KeymodePlaytimeThisMonth.TryFind 4 |> Option.defaultValue 0.0)
+                _4KPlaytime =
+                    safe_stat_max
+                        monthly_stats._4KPlaytime
+                        (incoming.KeymodePlaytimeThisMonth.TryFind(4) |> Option.defaultValue 0.0)
                 _4K = KeymodeTinyBreakdown.Default
-                _7KPlaytime = safe_stat_max monthly_stats._7KPlaytime (incoming.KeymodePlaytimeThisMonth.TryFind 7 |> Option.defaultValue 0.0)
+                _7KPlaytime =
+                    safe_stat_max
+                        monthly_stats._7KPlaytime
+                        (incoming.KeymodePlaytimeThisMonth.TryFind(7) |> Option.defaultValue 0.0)
                 _7K = KeymodeTinyBreakdown.Default
-                _10KPlaytime = safe_stat_max monthly_stats._10KPlaytime (incoming.KeymodePlaytimeThisMonth.TryFind 10 |> Option.defaultValue 0.0)
+                _10KPlaytime =
+                    safe_stat_max
+                        monthly_stats._10KPlaytime
+                        (incoming.KeymodePlaytimeThisMonth.TryFind(10) |> Option.defaultValue 0.0)
                 _10K = KeymodeTinyBreakdown.Default
             }
+
         MonthlyStats.save month user_id new_monthly_stats
 
         Ok()

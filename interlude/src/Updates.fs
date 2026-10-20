@@ -1,4 +1,4 @@
-﻿namespace Interlude
+namespace Interlude
 
 open System
 open System.IO
@@ -16,16 +16,13 @@ open Prelude.Data
 module Updates =
 
     /// Numeric version e.g. "0.5.16"
-    let short_version : string =
+    let short_version: string =
         let v = Assembly.GetExecutingAssembly().GetName()
 
-        if v.Version.Revision <> 0 then
-            v.Version.ToString(4)
-        else
-            v.Version.ToString(3)
+        if v.Version.Revision <> 0 then v.Version.ToString(4) else v.Version.ToString(3)
 
     /// Github commit SHA
-    let short_hash : string =
+    let short_hash: string =
         let informational_version =
             Assembly
                 .GetExecutingAssembly()
@@ -36,44 +33,38 @@ module Updates =
         hash.Substring(0, min hash.Length 6)
 
     /// Full version string e.g. "Interlude 0.5.16"
-    let version : string =
+    let version: string =
         let v = Assembly.GetExecutingAssembly().GetName()
 
-        if DEV_MODE then
-            sprintf "%s %s (%s)" v.Name short_version short_hash
-        else
-            sprintf "%s %s" v.Name short_version
+        if DEV_MODE then sprintf "%s %s (%s)" v.Name short_version short_hash else sprintf "%s %s" v.Name short_version
 
     let private get_interlude_location () : string =
         Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
 
     // this doesn't just copy a folder to a destination, but renames any existing/duplicates of the same name to .old
     let rec private swap_update_files (source: string) (dest: string) : unit =
-        Directory.EnumerateFiles source
-        |> Seq.iter (fun source ->
-            let target = Path.Combine(dest, Path.GetFileName source)
+        Directory.EnumerateFiles(source)
+        |> Seq.iter(fun source ->
+            let target = Path.Combine(dest, Path.GetFileName(source))
 
             try
                 File.Move(target, source + ".old", true)
             with
             | :? FileNotFoundException -> ()
             | other -> Logging.Error "Error while moving file '%s' during auto-update: %O" source other
+
             File.Copy(source, target, true)
         )
 
-        Directory.EnumerateDirectories source
-        |> Seq.iter (fun d ->
-            let targetd = Path.Combine(dest, Path.GetFileName d)
-            Directory.CreateDirectory targetd |> ignore
+        Directory.EnumerateDirectories(source)
+        |> Seq.iter(fun d ->
+            let targetd = Path.Combine(dest, Path.GetFileName(d))
+            Directory.CreateDirectory(targetd) |> ignore
             swap_update_files d targetd
         )
 
     [<Json.AutoCodec>]
-    type GithubAsset =
-        {
-            name: string
-            browser_download_url: string
-        }
+    type GithubAsset = { name: string; browser_download_url: string }
 
     [<Json.AutoCodec>]
     type GithubRelease =
@@ -106,10 +97,7 @@ module Updates =
         let parse_version (s: string) =
             let s = s.Split(".")
 
-            if s.Length > 3 then
-                (int s.[0], int s.[1], int s.[2], int s.[3])
-            else
-                (int s.[0], int s.[1], int s.[2], 0)
+            if s.Length > 3 then (int s.[0], int s.[1], int s.[2], int s.[3]) else (int s.[0], int s.[1], int s.[2], 0)
 
         let current = short_version
         let incoming = release.tag_name.Replace("interlude-", "").Substring(1)
@@ -128,17 +116,17 @@ module Updates =
         elif pincoming < pcurrent then
             Logging.Debug "Current build (%s) is ahead of update stream (%s)." current incoming
         else
-            Logging.Info "Game is up to date."
+            Logging.Info("Game is up to date.")
 
     let check_for_updates () : unit =
-        WebServices.download_json (
+        WebServices.download_json(
             "https://api.github.com/repos/YAVSRG/YAVSRG/releases/latest",
             function
             | WebResult.Ok(d: GithubRelease) -> handle_update d
             | _ -> ()
         )
 
-        let path = get_interlude_location ()
+        let path = get_interlude_location()
         let folder_path = Path.Combine(path, "update")
 
         FileSystemServices.delete_folder.Request(folder_path, ignore)
@@ -153,10 +141,7 @@ module Updates =
 
             update_started <- true
 
-            match
-                latest_release.Value.assets
-                |> List.tryFind (fun asset -> Ok (asset.name.ToLower()) = asset_name)
-            with
+            match latest_release.Value.assets |> List.tryFind(fun asset -> Ok(asset.name.ToLower()) = asset_name) with
             | None ->
                 Logging.Error(
                     "Update failed: The github release doesn't have a download for your platform. Report this as a bug!"
@@ -164,10 +149,10 @@ module Updates =
             | Some asset ->
 
             let download_url = asset.browser_download_url
-            let path = get_interlude_location ()
+            let path = get_interlude_location()
             let zip_path = Path.Combine(path, "update.zip")
             let folder_path = Path.Combine(path, "update")
-            File.Delete zip_path
+            File.Delete(zip_path)
 
             WebServices.download_file.Request(
                 (download_url, zip_path, progress),
@@ -176,6 +161,6 @@ module Updates =
                         ZipFile.ExtractToDirectory(zip_path, folder_path)
                         FileSystemServices.delete_file.Request(zip_path, ignore)
                         swap_update_files folder_path path
-                        callback ()
+                        callback()
                         update_complete <- true
             )

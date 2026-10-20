@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Bot
+namespace Interlude.Web.Server.Bot
 
 open Discord
 open Discord.WebSocket
@@ -12,8 +12,7 @@ module UserInteractables =
         let matches = Songs.search_songs (if details then 1L else 20L) page query
 
         if matches.Length = 0 && page = 0 then
-            EmbedBuilder(Title = "No results found").Build(),
-            ComponentBuilder().Build()
+            EmbedBuilder(Title = "No results found").Build(), ComponentBuilder().Build()
         elif matches.Length = 1 then
             let song = snd matches.[0]
 
@@ -26,8 +25,7 @@ module UserInteractables =
                     )
 
             if song.OtherArtists <> [] then
-                embed.AddField("Featuring", String.concat ", " song.OtherArtists, true)
-                |> ignore
+                embed.AddField("Featuring", String.concat ", " song.OtherArtists, true) |> ignore
 
             if song.Remixers <> [] then
                 embed.AddField("Remixed by", String.concat ", " song.Remixers, true) |> ignore
@@ -41,13 +39,16 @@ module UserInteractables =
             embed.WithFooter(EmbedFooterBuilder().WithText(sprintf "%i" (fst matches.[0]))) |> ignore
 
             embed.WithColor(Color.Blue) |> ignore
-            
-            let components = 
+
+            let components =
                 ComponentBuilder()
                     .AddRow(
                         ActionRowBuilder()
                             .WithButton(
-                                ButtonBuilder(Emote = Emoji.Parse(":arrow_left:"), CustomId = sprintf "search %s$%i%s" query (page - 1) (if details then "$d" else ""))
+                                ButtonBuilder(
+                                    Emote = Emoji.Parse(":arrow_left:"),
+                                    CustomId = sprintf "search %s$%i%s" query (page - 1) (if details then "$d" else "")
+                                )
                                     .WithStyle(ButtonStyle.Secondary)
                                     .WithDisabled(page <= 0)
                             )
@@ -64,24 +65,23 @@ module UserInteractables =
             embed.Build(), components.Build()
         else
             let embed =
-                EmbedBuilder(
-                    Title = sprintf "Search results - Page %i" (page + 1)
-                )
+                EmbedBuilder(Title = sprintf "Search results - Page %i" (page + 1))
                     .WithDescription(
                         String.concat
                             "\n"
-                            (Array.map
-                                (fun (_, song: Song) -> song.FormattedTitle.Replace("*", "\\*"))
-                                matches)
+                            (Array.map (fun (_, song: Song) -> song.FormattedTitle.Replace("*", "\\*")) matches)
                     )
                     .WithColor(Color.Blue)
 
-            let components = 
+            let components =
                 ComponentBuilder()
                     .AddRow(
                         ActionRowBuilder()
                             .WithButton(
-                                ButtonBuilder(Emote = Emoji.Parse(":arrow_left:"), CustomId = sprintf "search %s$%i" query (page - 1))
+                                ButtonBuilder(
+                                    Emote = Emoji.Parse(":arrow_left:"),
+                                    CustomId = sprintf "search %s$%i" query (page - 1)
+                                )
                                     .WithStyle(ButtonStyle.Secondary)
                                     .WithDisabled(page <= 0)
                             )
@@ -93,6 +93,7 @@ module UserInteractables =
                                     .WithStyle(ButtonStyle.Secondary)
                             )
                     )
+
             embed.Build(), components.Build()
 
     let handle_interaction

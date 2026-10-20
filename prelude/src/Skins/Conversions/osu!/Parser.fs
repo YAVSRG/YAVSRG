@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions.Osu
+namespace Prelude.Skins.Conversions.Osu
 
 open System
 open System.Globalization
@@ -14,10 +14,10 @@ module OsuSkinHelpers =
     // todo: actually verify what osu does in various cases for colors
     let rgb_or (default_color: Color) (color: string) : Color =
         let values = color.Split(',')
-        
-        let inline color_component(i: int) =
+
+        let inline color_component (i: int) =
             values.ValueAt(i).ParseInt().DefaultValue(255) |> min 255 |> max 0
-            
+
         if values.Length >= 3 then
             Color.FromArgb(color_component(0), color_component(1), color_component(2))
         else
@@ -25,10 +25,10 @@ module OsuSkinHelpers =
 
     let rgba_or (default_color: Color) (color: string) : Color =
         let values = color.Split(',')
-        
-        let inline color_component(i: int) =
+
+        let inline color_component (i: int) =
             values.ValueAt(i).ParseInt().DefaultValue(255) |> min 255 |> max 0
-            
+
         if values.Length >= 3 then
             Color.FromArgb(color_component(3), color_component(0), color_component(1), color_component(2))
         else
@@ -36,13 +36,15 @@ module OsuSkinHelpers =
 
     let parse_comma_ints_or (default_value: int list) (s: string) : int list =
         s.Split(',', StringSplitOptions.TrimEntries)
-        |> Seq.choose (fun s ->
+        |> Seq.choose(fun s ->
             match Single.TryParse(s, CultureInfo.InvariantCulture) with
-            | true, v -> Some (int v)
+            | true, v -> Some(int v)
             | false, _ -> None
         )
         |> List.ofSeq
-        |> function [] -> default_value | xs -> xs
+        |> function
+            | [] -> default_value
+            | xs -> xs
 
     let key_texture (keycount: int) (key: int) =
         match keycount with
@@ -78,6 +80,7 @@ type General =
         SpinnerFrequencyModulate: bool
         SpinnerNoBlink: bool
     }
+
     static member Default: General =
         {
             Name = ""
@@ -98,7 +101,8 @@ type General =
             SpinnerFrequencyModulate = true
             SpinnerNoBlink = false
         }
-    static member FromMap (properties: Map<string, string>) =
+
+    static member FromMap(properties: Map<string, string>) : General =
         {
             Name = properties.StringOrDefault("Name", "")
             Author = properties.StringOrDefault("Author", "")
@@ -113,7 +117,7 @@ type General =
             CustomComboBurstSounds =
                 properties.StringOrDefault("CustomComboBurstSounds", "")
                 |> fun s -> s.Split(',', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-                |> Seq.choose (fun s ->
+                |> Seq.choose(fun s ->
                     match Int32.TryParse(s, CultureInfo.InvariantCulture) with
                     | true, v -> Some v
                     | false, _ -> None
@@ -147,12 +151,13 @@ type Colours =
         SpinnerBackground: Color
         StarBreakAdditive: Color
     }
+
     static member Default: Colours =
         {
-            Combo1 = Some <| Color.FromArgb(255, 192, 0)
-            Combo2 = Some <| Color.FromArgb(0, 202, 0)
-            Combo3 = Some <| Color.FromArgb(18, 124, 255)
-            Combo4 = Some <| Color.FromArgb(242, 24, 57)
+            Combo1 = Some(Color.FromArgb(255, 192, 0))
+            Combo2 = Some(Color.FromArgb(0, 202, 0))
+            Combo3 = Some(Color.FromArgb(18, 124, 255))
+            Combo4 = Some(Color.FromArgb(242, 24, 57))
             Combo5 = None
             Combo6 = None
             Combo7 = None
@@ -167,7 +172,8 @@ type Colours =
             SpinnerBackground = Color.FromArgb(100, 100, 100)
             StarBreakAdditive = Color.FromArgb(255, 182, 193)
         }
-    static member FromMap (properties: Map<string, string>) = Colours.Default // todo: parse the real info
+
+    static member FromMap(properties: Map<string, string>) : Colours = Colours.Default // todo: parse the real info
 
 type Fonts =
     {
@@ -178,6 +184,7 @@ type Fonts =
         ComboPrefix: string
         ComboOverlap: int
     }
+
     static member Default =
         {
             HitCirclePrefix = "default"
@@ -187,7 +194,8 @@ type Fonts =
             ComboPrefix = "score"
             ComboOverlap = -2
         }
-    static member FromMap (properties: Map<string, string>) =
+
+    static member FromMap(properties: Map<string, string>) : Fonts =
         {
             HitCirclePrefix = properties.StringOrDefault("HitCirclePrefix", "default")
             HitCircleOverlap = properties.IntOrDefault("HitCircleOverlap", -2)
@@ -203,13 +211,11 @@ type CatchTheBeat =
         HyperDashFruit: Color
         HyperDashAfterImage: Color
     }
+
     static member Default =
-        {
-            HyperDash = Color.Red
-            HyperDashFruit = Color.Red
-            HyperDashAfterImage = Color.Red
-        }
-    static member FromMap (properties: Map<string, string>) = CatchTheBeat.Default // todo: parse the real info
+        { HyperDash = Color.Red; HyperDashFruit = Color.Red; HyperDashAfterImage = Color.Red }
+
+    static member FromMap(properties: Map<string, string>) : CatchTheBeat = CatchTheBeat.Default // todo: parse the real info
 
 type Mania =
     {
@@ -274,6 +280,7 @@ type Mania =
         Hit300: string
         Hit300g: string
     }
+
     static member Default (keys: int) (version: decimal) =
         {
             Keys = keys
@@ -337,15 +344,17 @@ type Mania =
             Hit300 = "mania-hit300"
             Hit300g = "mania-hit300g"
         }
-    static member FromMap (properties: Map<string, string>) =
+
+    static member FromMap(properties: Map<string, string>) : Mania =
         let keys = properties.IntOrDefault("Keys", 0)
+
         {
             Keys = keys
             ColumnStart = properties.IntOrDefault("ColumnStart", 136)
             ColumnRight = properties.IntOrDefault("ColumnRight", 19)
-            ColumnSpacing = properties.StringOrDefault("ColumnSpacing", "") |> parse_comma_ints_or [0]
-            ColumnWidth = properties.StringOrDefault("ColumnWidth", "") |> parse_comma_ints_or [30]
-            ColumnLineWidth = properties.StringOrDefault("ColumnLineWidth", "") |> parse_comma_ints_or [2]
+            ColumnSpacing = properties.StringOrDefault("ColumnSpacing", "") |> parse_comma_ints_or [ 0 ]
+            ColumnWidth = properties.StringOrDefault("ColumnWidth", "") |> parse_comma_ints_or [ 30 ]
+            ColumnLineWidth = properties.StringOrDefault("ColumnLineWidth", "") |> parse_comma_ints_or [ 2 ]
             BarlineHeight = properties.DoubleOrDefault("BarlineHeight", 1.2)
             LightingNWidth = properties.StringOrDefault("LightingNWidth", "") |> parse_comma_ints_or []
             LightingLWidth = properties.StringOrDefault("LightingLWidth", "") |> parse_comma_ints_or []
@@ -357,35 +366,95 @@ type Mania =
             JudgementLine = properties.IntOrDefault("JudgementLine", 0) <> 0
             SpecialStyle = properties.IntOrDefault("SpecialStyle", 0)
             ComboBurstStyle = properties.IntOrDefault("ComboBurstStyle", 1)
-            SplitStages = properties.TryInt("SplitStages") |> Option.map ((<>) 0)
+            SplitStages = properties.TryInt("SplitStages") |> Option.map((<>) 0)
             StageSeparation = properties.IntOrDefault("StageSeparation", 40)
             SeparateScore = properties.IntOrDefault("SeparateScore", 1) <> 0
             KeysUnderNotes = properties.IntOrDefault("KeysUnderNotes", 0) <> 0
             UpsideDown = properties.IntOrDefault("UpsideDown", 0) <> 0
             KeyFlipWhenUpsideDown = properties.IntOrDefault("KeyFlipWhenUpsideDown", 0) <> 0
-            KeyFlipWhenUpsideDownΔ = Array.init keys (fun i -> properties.IntOrDefault((sprintf "KeyFlipWhenUpsideDown%i" i), 1) <> 0)
+            KeyFlipWhenUpsideDownΔ =
+                Array.init keys (fun i -> properties.IntOrDefault((sprintf "KeyFlipWhenUpsideDown%i" i), 1) <> 0)
             NoteFlipWhenUpsideDown = properties.IntOrDefault("NoteFlipWhenUpsideDown", 1) <> 0
-            KeyFlipWhenUpsideDownΔD = Array.init keys (fun i -> properties.IntOrDefault((sprintf "KeyFlipWhenUpsideDown%iD" i), 1) <> 0)
-            NoteFlipWhenUpsideDownΔ = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%i" i), 1) <> 0)
-            NoteFlipWhenUpsideDownΔH = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iH" i), 1) <> 0)
-            NoteFlipWhenUpsideDownΔL = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iL" i), 1) <> 0)
-            NoteFlipWhenUpsideDownΔT = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iT" i), 1) <> 0)
+            KeyFlipWhenUpsideDownΔD =
+                Array.init keys (fun i -> properties.IntOrDefault((sprintf "KeyFlipWhenUpsideDown%iD" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔ =
+                Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%i" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔH =
+                Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iH" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔL =
+                Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iL" i), 1) <> 0)
+            NoteFlipWhenUpsideDownΔT =
+                Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteFlipWhenUpsideDown%iT" i), 1) <> 0)
             NoteBodyStyle = properties.IntOrDefault("NoteBodyStyle", 1)
             NoteBodyStyleΔ = Array.init keys (fun i -> properties.IntOrDefault((sprintf "NoteBodyStyle%i" i), 1))
-            ColourΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "Colour%i" (i + 1)), "") |> rgba_or Color.Black)
-            ColourLightΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "ColourLight%i" (i + 1)), "") |> rgba_or Color.White)
+            ColourΔ =
+                Array.init
+                    keys
+                    (fun i -> properties.StringOrDefault((sprintf "Colour%i" (i + 1)), "") |> rgba_or Color.Black)
+            ColourLightΔ =
+                Array.init
+                    keys
+                    (fun i -> properties.StringOrDefault((sprintf "ColourLight%i" (i + 1)), "") |> rgba_or Color.White)
             ColourColumnLine = properties.StringOrDefault("ColourColumnLine", "") |> rgba_or Color.White
             ColourBarline = properties.StringOrDefault("ColourBarline", "") |> rgba_or Color.White
             ColourJudgementLine = properties.StringOrDefault("ColourJudgementLine", "") |> rgb_or Color.White
             ColourKeyWarning = properties.StringOrDefault("ColourKeyWarning", "") |> rgb_or Color.Black
-            ColourHold = properties.StringOrDefault("ColourHold", "") |> rgba_or (Color.FromArgb(255, 191, 51))
-            ColourBreak = properties.StringOrDefault("ColourBreak", "") |> rgb_or (Color.FromArgb(255, 0, 0))
-            KeyImageΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "KeyImage%i" i), (sprintf "mania-key%s" (key_texture keys i))))
-            KeyImageΔD = Array.init keys (fun i -> properties.StringOrDefault((sprintf "KeyImage%iD" i), (sprintf "mania-key%sD" (key_texture keys i))))
-            NoteImageΔ = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%i" i), (sprintf "mania-note%s" (key_texture keys i))))
-            NoteImageΔH = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%iH" i), (sprintf "mania-note%sH" (key_texture keys i))))
-            NoteImageΔL = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%iL" i), (sprintf "mania-note%sL" (key_texture keys i))))
-            NoteImageΔT = Array.init keys (fun i -> properties.StringOrDefault((sprintf "NoteImage%iT" i), (sprintf "mania-note%sT" (key_texture keys i))))
+            ColourHold = properties.StringOrDefault("ColourHold", "") |> rgba_or(Color.FromArgb(255, 191, 51))
+            ColourBreak = properties.StringOrDefault("ColourBreak", "") |> rgb_or(Color.FromArgb(255, 0, 0))
+            KeyImageΔ =
+                Array.init
+                    keys
+                    (fun i ->
+                        properties.StringOrDefault(
+                            (sprintf "KeyImage%i" i),
+                            (sprintf "mania-key%s" (key_texture keys i))
+                        )
+                    )
+            KeyImageΔD =
+                Array.init
+                    keys
+                    (fun i ->
+                        properties.StringOrDefault(
+                            (sprintf "KeyImage%iD" i),
+                            (sprintf "mania-key%sD" (key_texture keys i))
+                        )
+                    )
+            NoteImageΔ =
+                Array.init
+                    keys
+                    (fun i ->
+                        properties.StringOrDefault(
+                            (sprintf "NoteImage%i" i),
+                            (sprintf "mania-note%s" (key_texture keys i))
+                        )
+                    )
+            NoteImageΔH =
+                Array.init
+                    keys
+                    (fun i ->
+                        properties.StringOrDefault(
+                            (sprintf "NoteImage%iH" i),
+                            (sprintf "mania-note%sH" (key_texture keys i))
+                        )
+                    )
+            NoteImageΔL =
+                Array.init
+                    keys
+                    (fun i ->
+                        properties.StringOrDefault(
+                            (sprintf "NoteImage%iL" i),
+                            (sprintf "mania-note%sL" (key_texture keys i))
+                        )
+                    )
+            NoteImageΔT =
+                Array.init
+                    keys
+                    (fun i ->
+                        properties.StringOrDefault(
+                            (sprintf "NoteImage%iT" i),
+                            (sprintf "mania-note%sT" (key_texture keys i))
+                        )
+                    )
             StageLeft = properties.StringOrDefault("StageLeft", "mania-stage-left")
             StageRight = properties.StringOrDefault("StageRight", "mania-stage-right")
             StageBottom = properties.StringOrDefault("StageBottom", "mania-stage-bottom")
@@ -432,12 +501,15 @@ module SkinIni =
         let mania_sections = ResizeArray<Mania>()
 
         let change_state (s: ParserState) =
-            if state = ManiaHeader then mania_sections.Add(Mania.FromMap section_ref.Value)
+            if state = ManiaHeader then
+                mania_sections.Add(Mania.FromMap(section_ref.Value))
+
             state <- s
 
         while reader.Peek() >= 0 do
             let line = reader.ReadLine()
             let trimmed = line.Trim()
+
             match trimmed with
             | "" -> ()
             | _ when line.StartsWith("//") -> ()
@@ -462,29 +534,33 @@ module SkinIni =
             | Nothing -> ()
             | Header
             | ManiaHeader ->
-                let parts = trimmed.Split([|':'|], 2, StringSplitOptions.TrimEntries)
+                let parts = trimmed.Split([| ':' |], 2, StringSplitOptions.TrimEntries)
+
                 if parts.Length = 2 then
-                    if not (Map.containsKey parts.[0] section_ref.Value) then
+                    if not(Map.containsKey parts.[0] section_ref.Value) then
                         section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
 
         change_state Nothing
 
         {
-            General = General.FromMap general.Value
-            Colours = Colours.FromMap colours.Value
-            Fonts = Fonts.FromMap fonts.Value
-            CatchTheBeat = CatchTheBeat.FromMap ctb.Value
+            General = General.FromMap(general.Value)
+            Colours = Colours.FromMap(colours.Value)
+            Fonts = Fonts.FromMap(fonts.Value)
+            CatchTheBeat = CatchTheBeat.FromMap(ctb.Value)
             Mania = mania_sections |> List.ofSeq
         }
 
 type SkinIni with
 
-    static member FromStream(stream: Stream) =
-        try Ok (SkinIni.from_stream stream)
-        with err -> Error err.Message
+    static member FromStream(stream: Stream) : Result<SkinIni, string> =
+        try
+            Ok(SkinIni.from_stream stream)
+        with err ->
+            Error err.Message
 
-    static member FromFile(path: string) =
+    static member FromFile(path: string) : Result<SkinIni, string> =
         try
             use stream = File.OpenRead(path)
-            Ok (SkinIni.from_stream stream)
-        with err -> Error err.Message
+            Ok(SkinIni.from_stream stream)
+        with err ->
+            Error err.Message
