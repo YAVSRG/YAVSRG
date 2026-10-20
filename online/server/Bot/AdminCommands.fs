@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Bot
+namespace Interlude.Web.Server.Bot
 
 open System
 open Discord
@@ -41,7 +41,7 @@ module AdminCommands =
 
             let reply_emoji emoji =
                 task {
-                    let! _ = context.AddReactionAsync(Emoji.Parse emoji)
+                    let! _ = context.AddReactionAsync(Emoji.Parse(emoji))
                     return ()
                 }
 
@@ -71,15 +71,12 @@ module AdminCommands =
                                 )
                                 .AddField(
                                     "Badges",
-                                    (if user.Badges.IsEmpty then
-                                         "[ no badges ]"
-                                     else
-                                         String.concat ", " user.Badges),
+                                    (if user.Badges.IsEmpty then "[ no badges ]" else String.concat ", " user.Badges),
                                     false
                                 )
                                 .WithColor(Color.Blue)
 
-                        do! reply_embed (embed.Build())
+                        do! reply_embed(embed.Build())
                     | None -> do! reply "No user found."
 
             | "users" ->
@@ -88,16 +85,13 @@ module AdminCommands =
                 ()
 
             | "online" ->
-                let user_list = Session.list_online_users ()
+                let user_list = Session.list_online_users()
                 let lobby_count = Lobby.count()
 
                 do!
                     EmbedBuilder(Title = sprintf "All online users (%i)" user_list.Length)
                         .WithDescription(
-                            if user_list.Length = 0 then
-                                "nobody :("
-                            else
-                                user_list |> Seq.map snd |> String.concat "\n"
+                            if user_list.Length = 0 then "nobody :(" else user_list |> Seq.map snd |> String.concat "\n"
                         )
                         .WithFooter(sprintf "%i multiplayer lobbies in progress" lobby_count)
                         .WithColor(Color.Blue)
@@ -111,7 +105,7 @@ module AdminCommands =
                 | name :: badge :: _ ->
                     match user_by_name name with
                     | Some(id, user) ->
-                        User.update_badges (id, Set.add badge user.Badges)
+                        User.update_badges(id, Set.add badge user.Badges)
 
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
@@ -123,7 +117,7 @@ module AdminCommands =
                 | name :: badge :: _ ->
                     match user_by_name name with
                     | Some(id, user) ->
-                        User.update_badges (id, Set.remove badge user.Badges)
+                        User.update_badges(id, Set.remove badge user.Badges)
 
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
@@ -133,7 +127,7 @@ module AdminCommands =
                 | [] -> do! reply "Enter a username, for example: $whois Percyqaz"
                 | name :: _ ->
                     match user_by_name name with
-                    | Some(id, user) -> do! reply (sprintf "<@%i>" user.DiscordId)
+                    | Some(id, user) -> do! reply(sprintf "<@%i>" user.DiscordId)
                     | None -> do! reply "No user found."
 
             | "removeuser" ->
@@ -142,14 +136,17 @@ module AdminCommands =
                 | name :: _ ->
                     match user_by_name name with
                     | Some(id, user) ->
-                        Users.permanently_delete_user (id)
+                        Users.permanently_delete_user(id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
             | "renameuser" ->
                 match args with
                 | []
-                | [_] -> do! reply "Enter an existing username and new username, for example: $renameuser Percyqaz$Bananahira"
+                | [ _ ] ->
+                    do!
+                        reply
+                            "Enter an existing username and new username, for example: $renameuser Percyqaz$Bananahira"
                 | old_name :: new_name :: _ ->
                     match Users.Auth.rename old_name new_name with
                     | Ok() -> do! reply_emoji ":white_check_mark:"
@@ -158,21 +155,24 @@ module AdminCommands =
             | "reassignuser" ->
                 match args with
                 | []
-                | [_] -> do! reply "Enter an existing username and new discord ID, for example: $reassignuser Percyqaz$165506274820096000"
+                | [ _ ] ->
+                    do!
+                        reply
+                            "Enter an existing username and new discord ID, for example: $reassignuser Percyqaz$165506274820096000"
                 | old_name :: new_id :: _ ->
-                    if new_id.Length < 10 || new_id.Length > 20 || not (Seq.forall Char.IsDigit new_id) then
+                    if new_id.Length < 10 || new_id.Length > 20 || not(Seq.forall Char.IsDigit new_id) then
                         do! reply "Provide a valid Discord ID"
                     else
                         let new_id = uint64 new_id
+
                         match Users.Auth.reassign_discord_id old_name new_id with
-                        | Ok old_id -> do! reply (sprintf "Account belonging to <@%i> assigned to <@%i>" old_id new_id)
+                        | Ok old_id -> do! reply(sprintf "Account belonging to <@%i> assigned to <@%i>" old_id new_id)
                         | Error reason -> do! reply reason
 
             | "search" ->
                 match args with
 
-                | [] ->
-                    do! reply "Enter a search term, for example: $search PLANET//SHAPER"
+                | [] -> do! reply "Enter a search term, for example: $search PLANET//SHAPER"
 
                 | query :: [] ->
                     let embed, components = UserInteractables.song_search query 0 false
@@ -194,19 +194,21 @@ module AdminCommands =
                 | duplicate :: original :: [] ->
                     if Songs.merge_songs (int64 original) (int64 duplicate) then
                         do! reply_emoji ":white_check_mark:"
-                    else do! reply_emoji ":x:"
+                    else
+                        do! reply_emoji ":x:"
                 | _ -> do! reply "Enter two song ids, for example: $merge <id of duplicate>$<id of original>"
 
             | "stats" ->
-                let total_gametime = Stats.sum_gametime ()
-                let total_playtime = Stats.sum_playtime ()
+                let total_gametime = Stats.sum_gametime()
+                let total_playtime = Stats.sum_playtime()
                 let month = Timestamp.now() |> timestamp_to_leaderboard_month
                 let monthly_playtime = MonthlyStats.sum_playtime month
 
                 do!
                     EmbedBuilder(Title = "Interlude server stats")
                         .WithDescription(
-                            sprintf "Total time game open: %s\nTotal time playing: %s\nMonthly playtime: %s"
+                            sprintf
+                                "Total time game open: %s\nTotal time playing: %s\nMonthly playtime: %s"
                                 (format_long_time total_gametime)
                                 (format_long_time total_playtime)
                                 (format_long_time monthly_playtime)

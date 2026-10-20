@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Services
+namespace Interlude.Web.Server.Domain.Services
 
 open Percyqaz.Common
 open Prelude
@@ -17,39 +17,35 @@ module Scores =
         | Ranked of int option
 
     let inline new_leaderboard_rank (score: Score) : int option =
-        if not score.Ranked then None else
+        if not score.Ranked then
+            None
+        else
 
         let existing_leaderboard_scores = Score.get_leaderboard(score.ChartId)
+
         let existing_score =
-            existing_leaderboard_scores
-            |> Array.tryFind (fun lb_score -> lb_score.UserId = score.UserId)
-        
-        let inline position_in_leaderboard(lb_scores: Score.LeaderboardScore array) : int option =
+            existing_leaderboard_scores |> Array.tryFind(fun lb_score -> lb_score.UserId = score.UserId)
+
+        let inline position_in_leaderboard (lb_scores: Score.LeaderboardScore array) : int option =
             let mutable position = 0
+
             while position < lb_scores.Length && lb_scores.[position].Accuracy >= score.Accuracy do
                 position <- position + 1
-            
+
             let rank = position + 1
             if rank > Score.LEADERBOARD_SIZE then None else Some(rank)
-        
+
         match existing_score with
         | Some existing_score ->
-            if existing_score.Accuracy > score.Accuracy then None
+            if existing_score.Accuracy > score.Accuracy then
+                None
             else
-                let not_your_scores = Array.except [existing_score] existing_leaderboard_scores
+                let not_your_scores = Array.except [ existing_score ] existing_leaderboard_scores
                 position_in_leaderboard(not_your_scores)
-        | None ->
-            position_in_leaderboard(existing_leaderboard_scores)
+        | None -> position_in_leaderboard(existing_leaderboard_scores)
 
     let submit
-        (
-            user_id: int64,
-            chart_id: string,
-            replay_untrusted_string: string,
-            rate: Rate,
-            mods: ModState,
-            timestamp: int64
-        ) =
+        (user_id: int64, chart_id: string, replay_untrusted_string: string, rate: Rate, mods: ModState, timestamp: int64) =
         async {
 
             if rate < LOWEST_SUPPORTED_RATE || rate > HIGHEST_SUPPORTED_RATE then
@@ -80,14 +76,13 @@ module Scores =
 
             let ruleset = Backbeat.rulesets.[Score.PRIMARY_RULESET]
 
-            let scoring =
-                ScoreProcessor.ProcessEntireReplay(ruleset, replay, mod_chart, rate)
+            let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, replay, mod_chart, rate)
 
             let accuracy = scoring.Accuracy
 
             if accuracy >= 0.7 then
                 let score: Score =
-                    Score.create (
+                    Score.create(
                         user_id,
                         chart_id,
                         timestamp,
@@ -102,16 +97,14 @@ module Scores =
                 match new_leaderboard_rank(score) with
                 | Some rank ->
                     let replay_id =
-                        (user_id, chart_id, timestamp, replay)
-                        |> Replay.create
-                        |> Replay.save
+                        (user_id, chart_id, timestamp, replay) |> Replay.create |> Replay.save
 
                     let score_id = Score.save(score.WithReplay(replay_id))
                     Logging.Debug "Saved score %i with replay %i (#%i)" score_id replay_id rank
                     return ScoreUploadOutcome.Ranked(Some(rank))
                 | None ->
-                    Score.save(score) |> Logging.Debug "Saved score %i"
-                    return ScoreUploadOutcome.Ranked None
+                    Score.save(score) |> Logging.Debug("Saved score %i")
+                    return ScoreUploadOutcome.Ranked(None)
 
             else
 
@@ -122,21 +115,15 @@ module Scores =
         let leaderboard_scores = Score.get_leaderboard chart_id
 
         let users =
-            leaderboard_scores
-            |> Array.map (fun x -> x.UserId)
-            |> User.by_ids
-            |> Map.ofArray
+            leaderboard_scores |> Array.map(fun x -> x.UserId) |> User.by_ids |> Map.ofArray
 
         let replays =
-            leaderboard_scores
-            |> Array.choose (fun x -> x.ReplayId)
-            |> Replay.by_ids
-            |> Map.ofArray
+            leaderboard_scores |> Array.choose(fun x -> x.ReplayId) |> Replay.by_ids |> Map.ofArray
 
         leaderboard_scores
         |> Array.indexed
-        |> Array.choose (fun (i, score) ->
-            match users.TryFind score.UserId with
+        |> Array.choose(fun (i, score) ->
+            match users.TryFind(score.UserId) with
             | None -> None
             | Some user ->
 
@@ -144,7 +131,7 @@ module Scores =
             | None -> None
             | Some replay_id ->
 
-            match replays.TryFind replay_id with
+            match replays.TryFind(replay_id) with
             | None -> None
             | Some replay ->
 

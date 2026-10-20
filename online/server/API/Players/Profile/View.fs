@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Players.Profile
+namespace Interlude.Web.Server.API.Players.Profile
 
 open NetCoreServer
 open Interlude.Web.Shared
@@ -12,12 +12,8 @@ module View =
     open Players.Profile.View
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             let user_id, user = authorize headers
 
@@ -33,7 +29,7 @@ module View =
 
             let scores: RecentScore array =
                 recent_scores
-                |> Array.map (fun s ->
+                |> Array.map(fun s ->
                     match Backbeat.Charts.by_hash s.ChartId with
                     | Some(chart, song) ->
                         {
@@ -59,7 +55,7 @@ module View =
                         }
                 )
 
-            let relation = Friends.relation (user_id, target_user_id)
+            let relation = Friends.relation(user_id, target_user_id)
 
             let stats = Stats.get_or_default target_user_id
 
@@ -69,12 +65,7 @@ module View =
                     Color = target_user.Color
                     Badges =
                         target_user.Badges
-                        |> Seq.map (fun b ->
-                            {
-                                Badge.Name = b
-                                Badge.Colors = Badge.badge_color b
-                            }
-                        )
+                        |> Seq.map(fun b -> { Badge.Name = b; Badge.Colors = Badge.badge_color b })
                         |> Array.ofSeq
                     RecentScores = scores
                     DateSignedUp = target_user.DateSignedUp
@@ -85,7 +76,13 @@ module View =
                             LastUpdated = stats.LastSync
                             XP = stats.XP
                             TotalPlaytime = stats.Playtime
-                            Keymodes = Map.ofSeq [ 4, (stats._4KPlaytime, 0.0f); 7, (stats._7KPlaytime, 0.0f); 10, (stats._10KPlaytime, 0.0f) ]
+                            Keymodes =
+                                Map.ofSeq
+                                    [
+                                        4, (stats._4KPlaytime, 0.0f)
+                                        7, (stats._7KPlaytime, 0.0f)
+                                        10, (stats._10KPlaytime, 0.0f)
+                                    ]
                         }
                 }
                 : Response

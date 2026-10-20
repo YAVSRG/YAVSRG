@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Bot
+namespace Interlude.Web.Server.Bot
 
 open System
 open System.Threading
@@ -28,13 +28,13 @@ module Bot =
         task {
             // Normal user commands via #bot
             // Require a registered account
-            if message.Channel.Id = MAIN_CHANNEL_ID && message.Content.StartsWith "$" then
+            if message.Channel.Id = MAIN_CHANNEL_ID && message.Content.StartsWith("$") then
                 let cmd =
                     message.Content
                         .Substring(1)
                         .Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
 
-                match User.by_discord_id (message.Author.Id) with
+                match User.by_discord_id(message.Author.Id) with
                 | Some(id, user) ->
                     try
                         do!
@@ -63,22 +63,22 @@ module Bot =
                 && message.Author.Id = PERCYQAZ_ID
                 && message.Content.StartsWith("$developer")
             then
-                match User.by_discord_id (PERCYQAZ_ID) with
+                match User.by_discord_id(PERCYQAZ_ID) with
                 | Some(id, user) ->
-                    User.update_badges (id, Set.add Badge.DEVELOPER user.Badges)
+                    User.update_badges(id, Set.add Badge.DEVELOPER user.Badges)
 
                     do! message.AddReactionAsync(Emoji.Parse(":heart_eyes:"))
                 | None -> do! message.AddReactionAsync(Emoji.Parse(":face_with_spiral_eyes:"))
 
             // Admin dashboard commands via #admin, hidden channel for admins
             // Require a registered account with the 'developer' badge
-            elif message.Channel.Id = ADMIN_CHANNEL_ID && message.Content.StartsWith "$" then
+            elif message.Channel.Id = ADMIN_CHANNEL_ID && message.Content.StartsWith("$") then
                 let cmd =
                     message.Content
                         .Substring(1)
                         .Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
 
-                match User.by_discord_id (message.Author.Id) with
+                match User.by_discord_id(message.Author.Id) with
                 | Some(id, user) when user.Badges.Contains(Badge.DEVELOPER) ->
                     try
                         do!
@@ -100,9 +100,7 @@ module Bot =
                         Logging.Error "Error handling admin command '%s': %O" message.Content err
                         do! message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | _ ->
-                    Logging.Warn
-                        "Discord user with id %i attempted to trigger an admin command"
-                        message.Author.Id
+                    Logging.Warn "Discord user with id %i attempted to trigger an admin command" message.Author.Id
 
                     do! message.AddReactionAsync(Emoji.Parse(":skull:"))
         }
@@ -115,8 +113,9 @@ module Bot =
                     2,
                     StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries
                 )
+
             if comp.Channel.Id = ADMIN_CHANNEL_ID then
-                match User.by_discord_id (comp.User.Id) with
+                match User.by_discord_id(comp.User.Id) with
                 | Some(id, user) when user.Badges.Contains(Badge.DEVELOPER) ->
                     try
                         do!
@@ -139,7 +138,7 @@ module Bot =
                         do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | _ -> ()
             elif comp.Channel.Id = MAIN_CHANNEL_ID then
-                match User.by_discord_id (comp.User.Id) with
+                match User.by_discord_id(comp.User.Id) with
                 | Some(id, user) ->
                     try
                         do!
@@ -168,15 +167,11 @@ module Bot =
 
             let mutable startup_message_shown = false
 
-            client.add_Ready (fun () ->
+            client.add_Ready(fun () ->
                 task {
                     Discord.debug_log <-
                         fun s ->
-                            let s =
-                                if s.Length > 2000 then
-                                    s.Substring(0, 1995) + "\n..."
-                                else
-                                    s
+                            let s = if s.Length > 2000 then s.Substring(0, 1995) + "\n..." else s
 
                             try
                                 (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(s)
@@ -188,11 +183,7 @@ module Bot =
 
                     Discord.feed_log <-
                         fun s ->
-                            let s =
-                                if s.Length > 2000 then
-                                    s.Substring(0, 1995) + "\n..."
-                                else
-                                    s
+                            let s = if s.Length > 2000 then s.Substring(0, 1995) + "\n..." else s
 
                             try
                                 (client.GetChannel(FEED_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(s)
@@ -216,24 +207,23 @@ module Bot =
                 }
             )
 
-            client.add_MessageReceived (fun msg -> on_message msg)
+            client.add_MessageReceived(fun msg -> on_message msg)
             //client.add_Log(fun log -> on_log log)
 
-            client.add_ButtonExecuted (fun x -> on_button_executed x)
+            client.add_ButtonExecuted(fun x -> on_button_executed x)
 
-            client.LoginAsync(TokenType.Bot, SECRETS.DiscordBotToken)
-            |> Async.AwaitTask
-            |> Async.RunSynchronously
+            client.LoginAsync(TokenType.Bot, SECRETS.DiscordBotToken) |> Async.AwaitTask |> Async.RunSynchronously
 
             client.StartAsync() |> Async.AwaitTask |> Async.RunSynchronously
 
-            Thread.Sleep Timeout.Infinite
+            Thread.Sleep(Timeout.Infinite)
 
         with err ->
             Logging.Critical "%O" err
 
     let create_admin_prompt (embed, components) : unit =
-        (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(embed = embed, components = components)
+        (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel)
+            .SendMessageAsync(embed = embed, components = components)
         |> Async.AwaitTask
         |> Async.Ignore
         |> Async.RunSynchronously

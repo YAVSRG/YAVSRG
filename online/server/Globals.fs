@@ -19,6 +19,7 @@ type Secrets =
         DiscordClientSecret: string
         IsProduction: bool
     }
+
     static member Default =
         {
             SocketCert = "localhost.pfx"
@@ -36,7 +37,7 @@ type Secrets =
 module Secrets =
 
     let SECRETS =
-        if not (File.Exists "./secrets/secrets.json") then
+        if not(File.Exists("./secrets/secrets.json")) then
 #if DEBUG
             Logging.Info "Looks like you are running the server locally, and the secrets file is missing! Starting with default"
             Logging.Info "You need to create a file: %s" (Path.GetFullPath("./secrets/secrets.json"))
@@ -51,9 +52,7 @@ module Secrets =
 
     let TAGLINE =
         let stream =
-            Assembly
-                .GetExecutingAssembly()
-                .GetManifestResourceStream("Interlude.Web.Server.Version.txt")
+            Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Web.Server.Version.txt")
 
         use tr = new StreamReader(stream)
         tr.ReadToEnd()

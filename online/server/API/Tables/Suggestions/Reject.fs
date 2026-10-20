@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Tables.Suggestions
+namespace Interlude.Web.Server.API.Tables.Suggestions
 
 open NetCoreServer
 open Prelude
@@ -14,23 +14,19 @@ module Reject =
     open Tables.Suggestions.Reject
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             let user_id, user = authorize headers
 
-            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
+            if not(user.Badges.Contains(Badge.TABLE_EDITOR)) then
                 raise PermissionDeniedException
 
-            match JSON.FromString body with
-            | Error e -> raise (BadRequestException None)
+            match JSON.FromString(body) with
+            | Error e -> raise(BadRequestException None)
             | Ok(request: Request) ->
 
-            if not (Backbeat.Tables.exists request.TableId) then
+            if not(Backbeat.Tables.exists request.TableId) then
                 raise NotFoundException
 
             let chart_id = request.ChartId.ToUpper()

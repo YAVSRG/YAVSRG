@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Charts.Scores
+namespace Interlude.Web.Server.API.Charts.Scores
 
 open NetCoreServer
 open Prelude
@@ -12,17 +12,13 @@ module Save =
     open Charts.Scores.Save
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             let user_id, _ = authorize headers
 
-            match JSON.FromString body with
-            | Error _ -> raise (BadRequestException None)
+            match JSON.FromString(body) with
+            | Error _ -> raise(BadRequestException None)
             | Ok(request: Request) -> // todo: basic clamp on how much data can be sent in one request (about 10kb?)
 
             let chart_id = request.ChartId.ToUpper()

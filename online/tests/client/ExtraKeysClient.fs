@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Client
+namespace Interlude.Web.Tests.Client
 
 open Interlude.Web.Shared
 
@@ -23,22 +23,21 @@ type ExtraKeysClient(token: string) =
             status <- LoggedIn
             this.Send(Upstream.GET_LOBBIES)
         | Downstream.LOBBY_LIST lobbies ->
-            if lobbies.Length > 0 then this.Send(Upstream.JOIN_LOBBY(lobbies.[0].Id))
+            if lobbies.Length > 0 then
+                this.Send(Upstream.JOIN_LOBBY(lobbies.[0].Id))
         | Downstream.YOU_JOINED_LOBBY ps -> status <- InLobby
         | Downstream.SELECT_CHART _ ->
-            this.Send(Upstream.READY_STATUS ReadyFlag.Play)
+            this.Send(Upstream.READY_STATUS(ReadyFlag.Play))
             ready_to_play <- true
         | Downstream.GAME_START ->
-            if ready_to_play then
-                this.Send(Upstream.BEGIN_PLAYING)
-            else
-                this.Send(Upstream.BEGIN_SPECTATING)
-        | Downstream.INVITED_TO_LOBBY(_, id) -> this.Send(Upstream.JOIN_LOBBY id)
-        | Downstream.YOU_ARE_HOST true -> this.Send(Upstream.TRANSFER_HOST "Percyqaz")
+            if ready_to_play then this.Send(Upstream.BEGIN_PLAYING) else this.Send(Upstream.BEGIN_SPECTATING)
+        | Downstream.INVITED_TO_LOBBY(_, id) -> this.Send(Upstream.JOIN_LOBBY(id))
+        | Downstream.YOU_ARE_HOST true -> this.Send(Upstream.TRANSFER_HOST("Percyqaz"))
         | Downstream.YOU_LEFT_LOBBY -> status <- LoggedIn
         | Downstream.PLAY_DATA("Percyqaz", ts, data) ->
-            if ready_to_play then 
+            if ready_to_play then
                 for i = 0 to (data.Length / 6) - 1 do
                     data.[i + 5] <- data.[i + 5] ||| 255uy
-                this.Send(Upstream.PLAY_DATA (ts, data))
+
+                this.Send(Upstream.PLAY_DATA(ts, data))
         | _ -> ()

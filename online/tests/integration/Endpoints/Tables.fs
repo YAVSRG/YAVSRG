@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Integration
+namespace Interlude.Web.Tests.Integration
 
 open NUnit.Framework
 open Interlude.Web.Shared.Requests
@@ -10,7 +10,7 @@ module Tables =
     let Records () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Records.get (
+        Tables.Records.get(
             USERNAME,
             "crescent",
             Option.get
@@ -25,7 +25,7 @@ module Tables =
     let Records_TableNotFound () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Records.get (
+        Tables.Records.get(
             USERNAME,
             "doesntexist",
             function
@@ -39,7 +39,7 @@ module Tables =
     let Records_UserNotFound () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Records.get (
+        Tables.Records.get(
             "ThisUserDoesNotExist",
             "crescent",
             function
@@ -53,7 +53,7 @@ module Tables =
     let Leaderboard () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Leaderboard.get (
+        Tables.Leaderboard.get(
             "crescent",
             Option.get
             >> fun (res: Tables.Leaderboard.Response) ->
@@ -67,7 +67,7 @@ module Tables =
     let Leaderboard_NotFound () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Leaderboard.get (
+        Tables.Leaderboard.get(
             "doesntexist",
             function
             | Some _ -> Assert.Fail()
@@ -80,7 +80,7 @@ module Tables =
     let List () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.List.get (
+        Tables.List.get(
             Option.get
             >> fun (res: Tables.List.Response) ->
                 printfn "%A" res.Tables
@@ -93,7 +93,7 @@ module Tables =
     let Charts_All () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Charts.get (
+        Tables.Charts.get(
             "crescent",
             Option.get
             >> fun (res: Tables.Charts.Response) ->
@@ -107,7 +107,7 @@ module Tables =
     let Charts_Section () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Charts.get_section (
+        Tables.Charts.get_section(
             "crescent",
             "advanced",
             Option.get
@@ -122,7 +122,7 @@ module Tables =
     let Charts_TableNotFound () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Charts.get_section (
+        Tables.Charts.get_section(
             "doesntexist",
             "advanced",
             function
@@ -136,7 +136,7 @@ module Tables =
     let Charts_SectionNotFound () =
         use done_signal = new AutoResetEvent(false)
 
-        Tables.Charts.get_section (
+        Tables.Charts.get_section(
             "crescent",
             "doesntexist",
             function
@@ -152,7 +152,7 @@ module Tables =
         let List () =
             use done_signal = new AutoResetEvent(false)
 
-            Tables.Suggestions.List.get (
+            Tables.Suggestions.List.get(
                 "crescent",
                 Option.get
                 >> fun (res: Tables.Suggestions.List.Response) ->
@@ -166,7 +166,7 @@ module Tables =
         let Missing () =
             use done_signal = new AutoResetEvent(false)
 
-            Tables.Suggestions.Missing.get (
+            Tables.Suggestions.Missing.get(
                 "crescent",
                 Option.get
                 >> fun (res: Tables.Suggestions.Missing.Response) ->
@@ -180,12 +180,8 @@ module Tables =
         let Vote () =
             use done_signal = new AutoResetEvent(false)
 
-            Tables.Suggestions.Vote.post (
-                {
-                    TableId = "crescent"
-                    ChartId = "chart_id"
-                    Level = 5
-                },
+            Tables.Suggestions.Vote.post(
+                { TableId = "crescent"; ChartId = "chart_id"; Level = 5 },
                 Option.get
                 >> fun (res: Tables.Suggestions.Vote.Response) ->
                     printfn "%A" res
@@ -198,12 +194,8 @@ module Tables =
         let Vote_TableNotFound () =
             use done_signal = new AutoResetEvent(false)
 
-            Tables.Suggestions.Vote.post (
-                {
-                    TableId = "doesntexist"
-                    ChartId = "chart_id"
-                    Level = 5
-                },
+            Tables.Suggestions.Vote.post(
+                { TableId = "doesntexist"; ChartId = "chart_id"; Level = 5 },
                 function
                 | Some _ -> Assert.Fail()
                 | None -> done_signal.Set() |> ignore
@@ -215,12 +207,8 @@ module Tables =
         let Accept_PermissionDenied () =
             use done_signal = new AutoResetEvent(false)
 
-            Tables.Suggestions.Accept.post (
-                {
-                    TableId = "crescent"
-                    ChartId = "chart_id"
-                    Level = 5
-                },
+            Tables.Suggestions.Accept.post(
+                { TableId = "crescent"; ChartId = "chart_id"; Level = 5 },
                 function
                 | Some _ -> Assert.Fail()
                 | None -> done_signal.Set() |> ignore
@@ -232,12 +220,8 @@ module Tables =
         let Reject_PermissionDenied () =
             use done_signal = new AutoResetEvent(false)
 
-            Tables.Suggestions.Reject.post (
-                {
-                    TableId = "crescent"
-                    ChartId = "chart_id"
-                    Reason = "I don't like it"
-                },
+            Tables.Suggestions.Reject.post(
+                { TableId = "crescent"; ChartId = "chart_id"; Reason = "I don't like it" },
                 function
                 | Some _ -> Assert.Fail()
                 | None -> done_signal.Set() |> ignore

@@ -1,9 +1,10 @@
 **/bin
 **/obj
-online
 backbeat
 engine/tests
 libraries
 prelude/src/Shared/Helpers.fs
 prelude/src/Calculator
 prelude/playground
+online/server/Globals.fs
+online/server/Program.fs

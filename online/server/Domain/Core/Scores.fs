@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Core
+namespace Interlude.Web.Server.Domain.Core
 
 open System
 open Percyqaz.Common
@@ -21,12 +21,13 @@ type Score =
         Lamp: int
         ReplayId: int64 option
     }
+
     member this.WithReplay(replay_id) = { this with ReplayId = Some replay_id }
 
 module Score =
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE scores2 (
@@ -48,10 +49,11 @@ module Score =
             );
             """
         }
-        
+
     let internal LEADERBOARD_BUG_FIX: NonQuery<unit> =
         { NonQuery.without_parameters() with
-            SQL = """
+            SQL =
+                """
                 UPDATE scores2 AS s
                 SET ReplayId = (
                   SELECT r.Id
@@ -87,7 +89,7 @@ module Score =
             UserId = user_id
             ChartId = chart_id
             TimePlayed = time_played
-            TimeUploaded = Timestamp.now ()
+            TimeUploaded = Timestamp.now()
             Rate = MathF.Round(float32 rate, 2) * 1.0f<rate>
             Mods = mods
             Ranked = is_ranked
@@ -125,17 +127,17 @@ module Score =
                 ]
             FillParameters =
                 (fun p score ->
-                    p.Int64 score.UserId
-                    p.String score.ChartId
-                    p.Int64 score.TimePlayed
-                    p.Int64 score.TimeUploaded
-                    p.Float32 (float32 score.Rate)
+                    p.Int64(score.UserId)
+                    p.String(score.ChartId)
+                    p.Int64(score.TimePlayed)
+                    p.Int64(score.TimeUploaded)
+                    p.Float32(float32 score.Rate)
                     p.Json JSON score.Mods
-                    p.Boolean score.Ranked
-                    p.Float64 score.Accuracy
-                    p.Int32 score.Grade
-                    p.Int32 score.Lamp
-                    p.Int64Option score.ReplayId
+                    p.Boolean(score.Ranked)
+                    p.Float64(score.Accuracy)
+                    p.Int32(score.Grade)
+                    p.Int32(score.Lamp)
+                    p.Int64Option(score.ReplayId)
                 )
             Read = fun r -> r.Int64
         }
@@ -167,7 +169,7 @@ module Score =
             LIMIT 10;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p id -> p.Int64 id
+            FillParameters = fun p id -> p.Int64(id)
             Read =
                 (fun r ->
                     {
@@ -175,7 +177,7 @@ module Score =
                         ChartId = r.String
                         TimePlayed = r.Int64
                         Rate = r.Float32 * 1.0f<rate>
-                        Mods = r.Json JSON
+                        Mods = r.Json(JSON)
                         Accuracy = r.Float64
                         Grade = r.Int32
                         Lamp = r.Int32
@@ -199,6 +201,7 @@ module Score =
         }
 
     let LEADERBOARD_SIZE = 20
+
     let private GET_LEADERBOARD: Query<string, LeaderboardScore> =
         {
             SQL =
@@ -217,16 +220,14 @@ module Score =
             LIMIT 20;
             """
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
-            FillParameters =
-                fun p chart_id ->
-                    p.String chart_id
+            FillParameters = fun p chart_id -> p.String(chart_id)
             Read =
                 (fun r ->
                     {
                         UserId = r.Int64
                         TimePlayed = r.Int64
                         Rate = r.Float32 * 1.0f<rate>
-                        Mods = r.Json JSON
+                        Mods = r.Json(JSON)
                         Accuracy = r.Float64
                         Grade = r.Int32
                         Lamp = r.Int32
@@ -258,22 +259,18 @@ module Score =
             ORDER BY Accuracy DESC
             LIMIT 1;
             """
-            Parameters =
-                [
-                    "@UserId", SqliteType.Integer, 8
-                    "@ChartId", SqliteType.Text, -1
-                ]
+            Parameters = [ "@UserId", SqliteType.Integer, 8; "@ChartId", SqliteType.Text, -1 ]
             FillParameters =
                 (fun p (user_id, chart_id) ->
-                    p.Int64 user_id
-                    p.String chart_id
+                    p.Int64(user_id)
+                    p.String(chart_id)
                 )
             Read =
                 (fun r ->
                     {
                         TimePlayed = r.Int64
                         Rate = r.Float32 * 1.0f<rate>
-                        Mods = r.Json JSON
+                        Mods = r.Json(JSON)
                         Accuracy = r.Float64
                         Grade = r.Int32
                         Lamp = r.Int32
@@ -282,13 +279,8 @@ module Score =
                 )
         }
 
-    let get_user_leaderboard_score
-        (user_id: int64)
-        (chart_id: string)
-        : UserLeaderboardScore option =
-        GET_USER_LEADERBOARD_SCORE.Execute (user_id, chart_id) core_db
-        |> expect
-        |> Array.tryExactlyOne
+    let get_user_leaderboard_score (user_id: int64) (chart_id: string) : UserLeaderboardScore option =
+        GET_USER_LEADERBOARD_SCORE.Execute (user_id, chart_id) core_db |> expect |> Array.tryExactlyOne
 
     let private AGGREGATE_USER_RANKED_GRADES: Query<int64, string * int> =
         {
@@ -306,7 +298,7 @@ module Score =
             WHERE ChartScoreRank = 1;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p user_id -> p.Int64 user_id
+            FillParameters = fun p user_id -> p.Int64(user_id)
             Read = fun r -> r.String, r.Int32
         }
 
@@ -329,7 +321,7 @@ module Score =
             WHERE ChartScoreRank = 1;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p user_id -> p.Int64 user_id
+            FillParameters = fun p user_id -> p.Int64(user_id)
             Read = fun r -> r.String, r.Float64
         }
 
@@ -356,7 +348,7 @@ module Score =
             WHERE Id = @Id
             """
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
-            FillParameters = fun p id -> p.Int64 id
+            FillParameters = fun p id -> p.Int64(id)
             Read =
                 (fun r ->
                     {
@@ -364,7 +356,7 @@ module Score =
                         ChartId = r.String
                         TimePlayed = r.Int64
                         Rate = r.Float32
-                        Mods = r.Json JSON
+                        Mods = r.Json(JSON)
                         Accuracy = r.Float64
                         Grade = r.Int32
                         Lamp = r.Int32
@@ -382,7 +374,7 @@ module Score =
         | Some(score, None) -> Some(score, None)
         | None -> None
 
-    let WIPE_LEADERBOARD : NonQuery<string> =
+    let WIPE_LEADERBOARD: NonQuery<string> =
         {
             SQL =
                 """
@@ -390,7 +382,7 @@ module Score =
             DELETE FROM scores2 WHERE ChartId = @ChartId;
             """
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
-            FillParameters = fun p chart_id -> p.String chart_id
+            FillParameters = fun p chart_id -> p.String(chart_id)
         }
 
     let wipe_leaderboard (chart_id: string) =

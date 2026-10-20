@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Stats
+namespace Interlude.Web.Server.API.Stats
 
 open NetCoreServer
 open Percyqaz.Common
@@ -13,17 +13,13 @@ module Sync =
     open Stats.Sync
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             let user_id, user = authorize headers
 
-            match JSON.FromString body with
-            | Error e -> raise (BadRequestException None)
+            match JSON.FromString(body) with
+            | Error e -> raise(BadRequestException None)
             | Ok(request: Request) ->
 
             match Stats.sync user_id request with

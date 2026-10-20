@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Domain.Core
+namespace Interlude.Web.Tests.Domain.Core
 
 open NUnit.Framework
 
@@ -8,7 +8,7 @@ module TablesTests =
 
     [<Test>]
     let TableRating_RoundTrip () =
-        let user_id = User.create ("TableRatingRoundTrip", 0uL) |> User.save_new
+        let user_id = User.create("TableRatingRoundTrip", 0uL) |> User.save_new
         TableRating.set user_id "RoundTrip" 10.0
 
         match TableRating.get user_id "RoundTrip" with
@@ -17,7 +17,7 @@ module TablesTests =
 
     [<Test>]
     let TableRating_SetIdempotent () =
-        let user_id = User.create ("TableRatingSetIdempotent", 0uL) |> User.save_new
+        let user_id = User.create("TableRatingSetIdempotent", 0uL) |> User.save_new
         TableRating.set user_id "Table" 10.0
         TableRating.set user_id "Table" 11.0
         TableRating.set user_id "Table" 10.0
@@ -29,24 +29,24 @@ module TablesTests =
 
     [<Test>]
     let TableRating_TableDoesntExist () =
-        let user_id = User.create ("TableRatingTableDoesntExist", 0uL) |> User.save_new
+        let user_id = User.create("TableRatingTableDoesntExist", 0uL) |> User.save_new
         TableRating.set user_id "Table" 10.0
 
         Assert.AreEqual(None, TableRating.get user_id "TableDoesntExist")
 
     [<Test>]
     let TableRating_UserDoesntExist () =
-        let user_id = User.create ("TableRatingUserDoesntExist", 0uL) |> User.save_new
+        let user_id = User.create("TableRatingUserDoesntExist", 0uL) |> User.save_new
         TableRating.set user_id "Table" 10.0
 
         Assert.AreEqual(None, TableRating.get 99999l "Table")
 
     [<Test>]
     let TableRating_Leaderboard () =
-        let user_id1 = User.create ("TableRatingLeaderboardA", 0uL) |> User.save_new
-        let user_id2 = User.create ("TableRatingLeaderboardB", 0uL) |> User.save_new
-        let user_id3 = User.create ("TableRatingLeaderboardC", 0uL) |> User.save_new
-        let user_id4 = User.create ("TableRatingLeaderboardD", 0uL) |> User.save_new
+        let user_id1 = User.create("TableRatingLeaderboardA", 0uL) |> User.save_new
+        let user_id2 = User.create("TableRatingLeaderboardB", 0uL) |> User.save_new
+        let user_id3 = User.create("TableRatingLeaderboardC", 0uL) |> User.save_new
+        let user_id4 = User.create("TableRatingLeaderboardD", 0uL) |> User.save_new
 
         TableRating.set user_id1 "TableA" 10.0
         TableRating.set user_id2 "TableB" 5.0

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Shared
+namespace Interlude.Web.Shared
 
 open System
 open System.Net.Sockets
@@ -23,10 +23,10 @@ module Server =
         let buffer = ref Empty
 
         override this.OnConnected() =
-            config.Handle_Connect this.Id
+            config.Handle_Connect(this.Id)
             Logging.Debug "%O :: %O :: %O" DateTime.UtcNow this.Id this.Socket.RemoteEndPoint
 
-        override this.OnDisconnected() = config.Handle_Disconnect this.Id
+        override this.OnDisconnected() = config.Handle_Disconnect(this.Id)
 
         override this.OnError(error: SocketError) =
             if error <> SocketError.NotConnected then
@@ -34,7 +34,7 @@ module Server =
 
         override this.OnReceived(data: byte array, offset, size) =
             try
-                Buffer.handle (
+                Buffer.handle(
                     buffer,
                     data,
                     offset,
@@ -43,14 +43,14 @@ module Server =
                 )
             with err ->
                 Logging.Error "Internal error processing socket data: %O" err
-                this.ProtocolDisconnect "Internal error"
+                this.ProtocolDisconnect("Internal error")
 
         member this.SendPacket(packet: Downstream) =
-            let packet_with_header = Buffer.packet_bytes (packet.Write())
-            this.Send packet_with_header
+            let packet_with_header = Buffer.packet_bytes(packet.Write())
+            this.Send(packet_with_header)
 
         member this.ProtocolDisconnect(reason: string) =
-            this.SendPacket(Downstream.DISCONNECT reason) |> ignore
+            this.SendPacket(Downstream.DISCONNECT(reason)) |> ignore
             this.Disconnect() |> ignore
 
     type private Listener(config: Config) =
@@ -75,26 +75,26 @@ module Server =
 
     let start () =
         if server.Start() then
-            Logging.Info "TCP server is listening!"
+            Logging.Info("TCP server is listening!")
 
     let send (id: Guid, packet: Downstream) =
-        let packet_with_header = Buffer.packet_bytes (packet.Write())
+        let packet_with_header = Buffer.packet_bytes(packet.Write())
         let session = server.FindSession(id)
 
-        if not (isNull session) then
+        if not(isNull session) then
             try
-                session.Send packet_with_header |> ignore
+                session.Send(packet_with_header) |> ignore
             with :? ObjectDisposedException ->
-                Logging.Debug "Socket was disposed before packet could be sent"
+                Logging.Debug("Socket was disposed before packet could be sent")
 
     let kick (id: Guid, reason: string) =
         Logging.Info "Kicking session %O: %s" id reason
-        send (id, Downstream.DISCONNECT reason)
+        send(id, Downstream.DISCONNECT(reason))
         let session = server.FindSession(id)
 
-        if not (isNull session) then
+        if not(isNull session) then
             session.Disconnect() |> ignore
 
     let stop () =
         if server.Stop() then
-            Logging.Info "Stopped TCP server."
+            Logging.Info("Stopped TCP server.")

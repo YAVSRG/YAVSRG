@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Songs
+namespace Interlude.Web.Server.API.Songs
 
 open NetCoreServer
 open Interlude.Web.Shared
@@ -11,12 +11,8 @@ module Search =
     open Songs.Search
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             let user_id, user = authorize headers
 
@@ -27,9 +23,6 @@ module Search =
             let results = Songs.search_songs 100 0 query
 
             response.ReplyJson(
-                ({
-                    Results = Array.map (fun (id, song) -> { SongId = id; Song = song }) results
-                }
-                : Response)
+                ({ Results = Array.map (fun (id, song) -> { SongId = id; Song = song }) results }: Response)
             )
         }

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Online
+namespace Interlude.Web.Server.Online
 
 open System
 open System.Collections.Generic
@@ -19,9 +19,9 @@ module Errors =
     exception UserError of PlayerId * string
 
     let malice id error_message =
-        raise (MaliciousError(id, error_message))
+        raise(MaliciousError(id, error_message))
 
-    let user_error id error_message = raise (UserError(id, error_message))
+    let user_error id error_message = raise(UserError(id, error_message))
 
 type Player =
     {
@@ -32,6 +32,7 @@ type Player =
         mutable PlayPacketsReceived: int
         mutable PlayComplete: bool
     }
+
     static member Create name =
         {
             Username = name
@@ -64,12 +65,12 @@ type Player =
             this.PlayPacketsReceived <- this.PlayPacketsReceived + 1
 
             if
-                int this.CurrentPlayBuffer.Length
-                / (this.PlayPacketsReceived * MULTIPLAYER_REPLAY_DELAY_SECONDS) > PLAY_PACKET_THRESHOLD_PER_SECOND
+                int this.CurrentPlayBuffer.Length / (this.PlayPacketsReceived * MULTIPLAYER_REPLAY_DELAY_SECONDS) > PLAY_PACKET_THRESHOLD_PER_SECOND
             then
                 malice id "Too much data sent too often"
 
-    member this.GetReplay() = this.CurrentChartTime, this.CurrentPlayBuffer.ToArray()
+    member this.GetReplay() =
+        this.CurrentChartTime, this.CurrentPlayBuffer.ToArray()
 
 type Lobby =
     {
@@ -82,6 +83,7 @@ type Lobby =
         mutable GameRunning: bool
         Players: Dictionary<PlayerId, Player>
     }
+
     static member CountdownDurationSeconds = 5
 
     static member Create(playerId, username, name) =
@@ -95,7 +97,7 @@ type Lobby =
             GameRunning = false
             Players =
                 let d = Dictionary<PlayerId, Player>()
-                d.Add(playerId, Player.Create username)
+                d.Add(playerId, Player.Create(username))
                 d
         }
 
@@ -126,37 +128,31 @@ module Lobby =
     let private in_lobby = Dictionary<PlayerId, LobbyId>()
 
     let private get_player_lobby_id (player: PlayerId) : LobbyId option =
-        if in_lobby.ContainsKey player then
-            Some in_lobby.[player]
-        else
-            None
+        if in_lobby.ContainsKey(player) then Some in_lobby.[player] else None
 
     let private valid_lobby_name (proposed: string) : bool =
-        if (proposed.Length < 3 || proposed.Length > 30) then
-            false
-        elif proposed.Trim().Length <> proposed.Length then
-            false
-        else
-            (Seq.forall (fun (c: char) -> Seq.contains c Users.Username.VALID_CHARACTERS) proposed)
+        if (proposed.Length < 3 || proposed.Length > 30) then false
+        elif proposed.Trim().Length <> proposed.Length then false
+        else (Seq.forall (fun (c: char) -> Seq.contains c Users.Username.VALID_CHARACTERS) proposed)
 
     let private multicast (lobby: Lobby, packet: Downstream) =
         for p in lobby.Players.Keys do
-            Server.send (p, packet)
+            Server.send(p, packet)
 
     let private multicast_except (id: PlayerId, lobby: Lobby, packet: Downstream) =
         for p in lobby.Players.Keys do
             if p <> id then
-                Server.send (p, packet)
+                Server.send(p, packet)
 
     let private transfer_host (lobby: Lobby, new_host: PlayerId) =
-        Server.send (lobby.Host, Downstream.YOU_ARE_HOST false)
-        Server.send (new_host, Downstream.YOU_ARE_HOST true)
-        multicast (lobby, Downstream.LOBBY_EVENT(LobbyEvent.Host, lobby.Players.[new_host].Username))
+        Server.send(lobby.Host, Downstream.YOU_ARE_HOST(false))
+        Server.send(new_host, Downstream.YOU_ARE_HOST(true))
+        multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Host, lobby.Players.[new_host].Username))
         lobby.Host <- new_host
 
     let private game_end (lobby: Lobby) =
         lobby.GameRunning <- false
-        multicast (lobby, Downstream.GAME_END)
+        multicast(lobby, Downstream.GAME_END)
         Logging.Debug "End of song (%s) in lobby %s" lobby.Chart.Value.Title lobby.Settings.Name
 
         if lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) then
@@ -164,7 +160,7 @@ module Lobby =
             Logging.Debug "%s round (%s) did not end cleanly" lobby.Settings.Name lobby.Chart.Value.Title
 
             if lobby.Settings.HostRotation then
-                Server.send (lobby.Host, Downstream.SYSTEM_MESSAGE "Round didn't end properly so you are still host")
+                Server.send(lobby.Host, Downstream.SYSTEM_MESSAGE("Round didn't end properly so you are still host"))
 
         elif
             lobby.Settings.HostRotation
@@ -173,7 +169,7 @@ module Lobby =
             // Somebody played the song successfully and nobody was a straggler, hence the round went ok, time for host rotate
             let user_ids = ResizeArray(lobby.Players.Keys)
             let host_index = (user_ids.IndexOf(lobby.Host) + 1) % user_ids.Count
-            transfer_host (lobby, user_ids[host_index])
+            transfer_host(lobby, user_ids.[host_index])
 
         for p in lobby.Players.Values do
             p.Status <- LobbyPlayerStatus.NotReady
@@ -220,17 +216,14 @@ module Lobby =
                                 }
                                 |> Array.ofSeq
 
-                            Server.send (player, Downstream.LOBBY_LIST lobbies)
+                            Server.send(player, Downstream.LOBBY_LIST(lobbies))
 
                         | Create(player, lobby_name) ->
                             let username = ensure_logged_in player
                             ensure_not_in_lobby player
 
                             let lobby_name =
-                                if valid_lobby_name lobby_name then
-                                    lobby_name
-                                else
-                                    username + "'s lobby"
+                                if valid_lobby_name lobby_name then lobby_name else username + "'s lobby"
 
                             let lobby_id = Guid.NewGuid()
 
@@ -238,16 +231,16 @@ module Lobby =
 
                             lobbies.Add(lobby_id, lobby)
                             in_lobby.Add(player, lobby_id)
-                            Server.send (player, Downstream.YOU_JOINED_LOBBY [||])
-                            Server.send (player, Downstream.YOU_ARE_HOST true)
-                            Server.send (player, Downstream.LOBBY_SETTINGS lobby.Settings)
+                            Server.send(player, Downstream.YOU_JOINED_LOBBY([||]))
+                            Server.send(player, Downstream.YOU_ARE_HOST(true))
+                            Server.send(player, Downstream.LOBBY_SETTINGS(lobby.Settings))
                             Logging.Info "Opened lobby: %s (%O)" lobby.Settings.Name lobby_id
 
                         | Join(player, lobby_id) ->
                             let username = ensure_logged_in player
                             ensure_not_in_lobby player
 
-                            if not (lobbies.ContainsKey lobby_id) then
+                            if not(lobbies.ContainsKey(lobby_id)) then
                                 user_error player "Lobby no longer exists"
 
                             let lobby = lobbies.[lobby_id]
@@ -256,42 +249,40 @@ module Lobby =
                                 malice player "Joined lobby twice"
 
                             let player_list =
-                                lobby.Players.Values
-                                |> Seq.map (fun p -> p.Username, Badge.DEFAULT_COLOR)
-                                |> Array.ofSeq
+                                lobby.Players.Values |> Seq.map(fun p -> p.Username, Badge.DEFAULT_COLOR) |> Array.ofSeq
 
-                            multicast (lobby, Downstream.PLAYER_JOINED_LOBBY(username, Badge.DEFAULT_COLOR))
-                            multicast (lobby, Downstream.LOBBY_EVENT(LobbyEvent.Join, username))
+                            multicast(lobby, Downstream.PLAYER_JOINED_LOBBY(username, Badge.DEFAULT_COLOR))
+                            multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Join, username))
 
                             in_lobby.Add(player, lobby_id)
-                            lobby.Players.Add(player, Player.Create username)
+                            lobby.Players.Add(player, Player.Create(username))
 
-                            Server.send (player, Downstream.YOU_JOINED_LOBBY player_list)
-                            Server.send (player, Downstream.LOBBY_SETTINGS lobby.Settings)
+                            Server.send(player, Downstream.YOU_JOINED_LOBBY(player_list))
+                            Server.send(player, Downstream.LOBBY_SETTINGS(lobby.Settings))
 
                             if lobby.Chart.IsSome then
-                                Server.send (player, Downstream.SELECT_CHART lobby.Chart.Value)
+                                Server.send(player, Downstream.SELECT_CHART(lobby.Chart.Value))
 
                             if lobby.GameRunning then
-                                Server.send (player, Downstream.GAME_START)
+                                Server.send(player, Downstream.GAME_START)
 
                             for p in lobby.Players.Values do
                                 if p.Status <> LobbyPlayerStatus.NotReady then
-                                    Server.send (player, Downstream.PLAYER_STATUS(p.Username, p.Status))
+                                    Server.send(player, Downstream.PLAYER_STATUS(p.Username, p.Status))
 
                         | Leave player ->
                             let username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
-                            lobby.Players.Remove player |> ignore
-                            in_lobby.Remove player |> ignore
+                            lobby.Players.Remove(player) |> ignore
+                            in_lobby.Remove(player) |> ignore
 
-                            multicast (lobby, Downstream.LOBBY_EVENT(LobbyEvent.Leave, username))
-                            multicast (lobby, Downstream.PLAYER_LEFT_LOBBY username)
-                            Server.send (player, Downstream.YOU_LEFT_LOBBY)
+                            multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Leave, username))
+                            multicast(lobby, Downstream.PLAYER_LEFT_LOBBY(username))
+                            Server.send(player, Downstream.YOU_LEFT_LOBBY)
 
                             if lobby.Players.Count = 0 then
-                                lobbies.Remove lobby_id |> ignore
+                                lobbies.Remove(lobby_id) |> ignore
                                 Logging.Info "Closed lobby: %s (%O)" lobby.Settings.Name lobby_id
                             else
                                 if
@@ -305,9 +296,9 @@ module Lobby =
 
                                 if lobby.Host = player then
                                     lobby.Host <- Seq.head lobby.Players.Keys
-                                    Server.send (lobby.Host, Downstream.YOU_ARE_HOST true)
+                                    Server.send(lobby.Host, Downstream.YOU_ARE_HOST(true))
 
-                                    multicast (
+                                    multicast(
                                         lobby,
                                         Downstream.LOBBY_EVENT(LobbyEvent.Host, lobby.Players.[lobby.Host].Username)
                                     )
@@ -320,18 +311,18 @@ module Lobby =
                             | None -> user_error sender "User not found"
                             | Some recipient_id ->
 
-                            if in_lobby.ContainsKey recipient_id && in_lobby.[recipient_id] = lobby_id then
+                            if in_lobby.ContainsKey(recipient_id) && in_lobby.[recipient_id] = lobby_id then
                                 user_error sender "User is already in this lobby"
 
-                            Server.send (recipient_id, Downstream.INVITED_TO_LOBBY(username, lobby_id))
-                            multicast (lobby, Downstream.LOBBY_EVENT(LobbyEvent.Invite, recipient))
+                            Server.send(recipient_id, Downstream.INVITED_TO_LOBBY(username, lobby_id))
+                            multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Invite, recipient))
 
                         | Chat(player, message) ->
                             let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             Logging.Info "%s: %s" username message
-                            multicast (lobby, Downstream.CHAT(username, message))
+                            multicast(lobby, Downstream.CHAT(username, message))
 
                         | ReadyUp(player, flag) ->
                             let username = ensure_logged_in player
@@ -357,8 +348,8 @@ module Lobby =
 
                                 lobby.Players.[player].Status <- new_status
 
-                                multicast_except (player, lobby, Downstream.PLAYER_STATUS(username, new_status))
-                                multicast (lobby, Downstream.LOBBY_EVENT(lobby_event_flag, username))
+                                multicast_except(player, lobby, Downstream.PLAYER_STATUS(username, new_status))
+                                multicast(lobby, Downstream.LOBBY_EVENT(lobby_event_flag, username))
 
                                 if
                                     not lobby.CountingDown
@@ -373,9 +364,9 @@ module Lobby =
                                     lobby.CountdownId <- lobby.CountdownId + 1
                                     let cid = lobby.CountdownId
                                     lobby.CountingDown <- true
-                                    multicast (lobby, Downstream.GAME_COUNTDOWN true)
+                                    multicast(lobby, Downstream.GAME_COUNTDOWN(true))
 
-                                    multicast (
+                                    multicast(
                                         lobby,
                                         Downstream.COUNTDOWN("Round starting", Lobby.CountdownDurationSeconds)
                                     )
@@ -403,7 +394,7 @@ module Lobby =
                                 for p in lobby.Players.Values do
                                     p.Status <- LobbyPlayerStatus.NotReady
 
-                                multicast (lobby, Downstream.SELECT_CHART chart)
+                                multicast(lobby, Downstream.SELECT_CHART(chart))
 
                         | StartGame player ->
                             let _ = ensure_logged_in player
@@ -424,8 +415,8 @@ module Lobby =
                             lobby.CountdownId <- lobby.CountdownId + 1
                             let cid = lobby.CountdownId
                             lobby.CountingDown <- true
-                            multicast (lobby, Downstream.GAME_COUNTDOWN true)
-                            multicast (lobby, Downstream.COUNTDOWN("Round starting", Lobby.CountdownDurationSeconds))
+                            multicast(lobby, Downstream.GAME_COUNTDOWN(true))
+                            multicast(lobby, Downstream.COUNTDOWN("Round starting", Lobby.CountdownDurationSeconds))
 
                             async {
                                 do! Async.Sleep(1000 * Lobby.CountdownDurationSeconds)
@@ -447,8 +438,8 @@ module Lobby =
                                 user_error player "No countdown to cancel"
 
                             lobby.CountingDown <- false
-                            multicast (lobby, Downstream.GAME_COUNTDOWN false)
-                            multicast (lobby, Downstream.SYSTEM_MESSAGE "Countdown cancelled")
+                            multicast(lobby, Downstream.GAME_COUNTDOWN(false))
+                            multicast(lobby, Downstream.SYSTEM_MESSAGE("Countdown cancelled"))
 
                         | BeginPlaying player ->
                             let username = ensure_logged_in player
@@ -459,7 +450,7 @@ module Lobby =
 
                             lobby.Players.[player].StartPlay()
 
-                            multicast_except (
+                            multicast_except(
                                 player,
                                 lobby,
                                 Downstream.PLAYER_STATUS(username, lobby.Players.[player].Status)
@@ -482,7 +473,7 @@ module Lobby =
 
                             if abandoned then
                                 plr.Status <- LobbyPlayerStatus.AbandonedPlay
-                                multicast_except (player, lobby, Downstream.PLAYER_STATUS(username, plr.Status))
+                                multicast_except(player, lobby, Downstream.PLAYER_STATUS(username, plr.Status))
 
                             if
                                 lobby.Players.Values.Any(fun p ->
@@ -526,7 +517,7 @@ module Lobby =
                             let needs_catchup = lobby.Players.[player].Status <> LobbyPlayerStatus.AbandonedPlay
                             lobby.Players.[player].Status <- LobbyPlayerStatus.Spectating
 
-                            multicast_except (
+                            multicast_except(
                                 player,
                                 lobby,
                                 Downstream.PLAYER_STATUS(username, LobbyPlayerStatus.Spectating)
@@ -545,14 +536,18 @@ module Lobby =
                                             let sub_data = Array.zeroCreate PACKET_SIZE
                                             Buffer.BlockCopy(data, offset, sub_data, 0, PACKET_SIZE)
                                             offset <- offset + PACKET_SIZE
-                                            Server.send (player, Downstream.PLAY_DATA(p.Username, timestamp, sub_data))
+                                            Server.send(player, Downstream.PLAY_DATA(p.Username, timestamp, sub_data))
 
                                         if offset > 0 then
-                                            let remaining_data = Array.zeroCreate (data.Length - offset)
+                                            let remaining_data = Array.zeroCreate(data.Length - offset)
                                             Buffer.BlockCopy(data, offset, remaining_data, 0, remaining_data.Length)
-                                            Server.send (player, Downstream.PLAY_DATA(p.Username, timestamp, remaining_data))
+
+                                            Server.send(
+                                                player,
+                                                Downstream.PLAY_DATA(p.Username, timestamp, remaining_data)
+                                            )
                                         else
-                                            Server.send (player, Downstream.PLAY_DATA(p.Username, timestamp, data))
+                                            Server.send(player, Downstream.PLAY_DATA(p.Username, timestamp, data))
 
                         | PlayData(player, timestamp, data) ->
                             let username = ensure_logged_in player
@@ -570,7 +565,7 @@ module Lobby =
                                         || lobby.Players.[p].Status = LobbyPlayerStatus.AbandonedPlay
                                         || lobby.Players.[p].Status = LobbyPlayerStatus.Spectating)
                                 then
-                                    Server.send (p, Downstream.PLAY_DATA(username, timestamp, data))
+                                    Server.send(p, Downstream.PLAY_DATA(username, timestamp, data))
 
                         | Settings(player, settings) ->
                             let _ = ensure_logged_in player
@@ -583,7 +578,8 @@ module Lobby =
                                 { settings with
                                     Name = if valid_lobby_name settings.Name then settings.Name else lobby.Settings.Name
                                 }
-                            multicast (lobby, Downstream.LOBBY_SETTINGS lobby.Settings)
+
+                            multicast(lobby, Downstream.LOBBY_SETTINGS(lobby.Settings))
 
                         | ChangeHost(player, newhost) ->
                             let _ = ensure_logged_in player
@@ -599,10 +595,10 @@ module Lobby =
                             if player = newhost_id then
                                 malice player "Hosting yourself"
 
-                            if not (in_lobby.ContainsKey newhost_id) || in_lobby.[newhost_id] <> lobby_id then
+                            if not(in_lobby.ContainsKey(newhost_id)) || in_lobby.[newhost_id] <> lobby_id then
                                 user_error player "User is not in this lobby"
 
-                            transfer_host (lobby, newhost_id)
+                            transfer_host(lobby, newhost_id)
 
                         | MissingChart(player) ->
                             let username = ensure_logged_in player
@@ -617,14 +613,14 @@ module Lobby =
 
                                 lobby.Players.[player].Status <- LobbyPlayerStatus.MissingChart
 
-                                multicast_except (
+                                multicast_except(
                                     player,
                                     lobby,
                                     Downstream.PLAYER_STATUS(username, LobbyPlayerStatus.MissingChart)
                                 )
 
                         | GameplayTimeout(lobby_id, countdown_ref) ->
-                            if not (lobbies.ContainsKey lobby_id) then
+                            if not(lobbies.ContainsKey(lobby_id)) then
                                 Logging.Debug("Lobby closed before gameplay timeout")
                             else
 
@@ -635,7 +631,7 @@ module Lobby =
                                 game_end lobbies.[lobby_id]
 
                         | CountdownTimeout(lobby_id, countdown_ref, automatic) ->
-                            if not (lobbies.ContainsKey lobby_id) then
+                            if not(lobbies.ContainsKey(lobby_id)) then
                                 Logging.Debug("Lobby closed before countdown timeout")
                             else
 
@@ -645,7 +641,7 @@ module Lobby =
 
                                 if
                                     automatic
-                                    && not (
+                                    && not(
                                         lobby.Players.Values.All(fun p ->
                                             p.Status = LobbyPlayerStatus.Ready
                                             || p.Status = LobbyPlayerStatus.ReadyToSpectate
@@ -655,8 +651,8 @@ module Lobby =
                                 then
                                     Logging.Debug("Cancelling auto lobby start because someone is no longer ready")
                                     lobby.CountingDown <- false
-                                    multicast (lobby, Downstream.GAME_COUNTDOWN false)
-                                    multicast (lobby, Downstream.SYSTEM_MESSAGE "Automatic countdown cancelled")
+                                    multicast(lobby, Downstream.GAME_COUNTDOWN(false))
+                                    multicast(lobby, Downstream.SYSTEM_MESSAGE("Automatic countdown cancelled"))
 
                                 elif
                                     not automatic
@@ -664,19 +660,19 @@ module Lobby =
                                 then
                                     Logging.Debug("Cancelling manual lobby start because nobody is ready")
                                     lobby.CountingDown <- false
-                                    multicast (lobby, Downstream.GAME_COUNTDOWN false)
-                                    multicast (lobby, Downstream.SYSTEM_MESSAGE "Countdown cancelled")
+                                    multicast(lobby, Downstream.GAME_COUNTDOWN(false))
+                                    multicast(lobby, Downstream.SYSTEM_MESSAGE("Countdown cancelled"))
 
                                 else
                                     lobby.CountingDown <- false
                                     lobby.GameRunning <- true
-                                    multicast (lobby, Downstream.GAME_START)
+                                    multicast(lobby, Downstream.GAME_START)
 
                     // todo: start a 5 second countdown - if nobody is playing then stop the round
 
                     with
-                    | MaliciousError(player, error) -> Server.kick (player, error)
-                    | UserError(player, message) -> Server.send (player, Downstream.SYSTEM_MESSAGE message)
+                    | MaliciousError(player, error) -> Server.kick(player, error)
+                    | UserError(player, message) -> Server.send(player, Downstream.SYSTEM_MESSAGE(message))
                 }
         }
 
@@ -684,9 +680,6 @@ module Lobby =
         member this.Do = state_change.Request(this, ignore)
 
     let ensure_player_leaves_lobby (session_id, callback) =
-        if in_lobby.ContainsKey(session_id) then
-            state_change.Request(Leave(session_id), callback)
-        else
-            callback()
+        if in_lobby.ContainsKey(session_id) then state_change.Request(Leave(session_id), callback) else callback()
 
-    let count() = lobbies.Count
+    let count () = lobbies.Count
