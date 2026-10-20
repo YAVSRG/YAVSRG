@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System.Runtime.CompilerServices
 
@@ -30,7 +30,6 @@ type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
 
     member this.Child: 'T = child
 
-[<Extension>]
 type ConditionalExtensions =
 
     [<Extension>]

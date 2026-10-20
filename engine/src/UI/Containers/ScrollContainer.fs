@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System
 open System.Drawing
@@ -107,7 +107,6 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
         elif target.Top < this.Bounds.Top && target.Bottom < this.Bounds.CenterY then
             this.Scroll(target.Top - this.Bounds.Top - Style.PADDING)
 
-[<Extension>]
 type ScrollContainerExtensions =
 
     [<Extension>]

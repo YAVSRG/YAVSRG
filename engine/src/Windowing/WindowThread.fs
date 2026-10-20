@@ -228,12 +228,12 @@ module WindowThread =
 
         last_applied_config <- config
 
-        GameThread.defer
-        <| fun () ->
+        GameThread.defer(fun () ->
             GameThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
             GameThread.anti_jitter <- config.SmartCapAntiJitter
             GameThread.tearline_position <- config.SmartCapTearlinePosition
             GameThread.framerate_multiplier <- config.SmartCapFramerateMultiplier
+        )
 
     (*
         Disabling windows key & Focus

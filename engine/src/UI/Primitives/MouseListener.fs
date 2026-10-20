@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Input
 open System.Runtime.CompilerServices
@@ -36,7 +36,6 @@ type MouseListener() =
 
     override this.Draw() : unit = ()
 
-[<Extension>]
 type MouseListenerExtensions =
 
     [<Extension>]

@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Graphics
 
@@ -7,14 +7,14 @@ type Overlay(node_type: NodeType) =
     inherit Widget(node_type)
 
     override this.Position
-        with set _ = failwith "Position can not be set for overlay components"
+        with set _ = failwith "Position cannot be set for overlay components"
 
     override this.Init(parent: Widget) : unit =
         base.Init(parent)
         this.Bounds <- Render._bounds
         this.VisibleBounds <- Render._bounds
 
-    override this.Update(elapsed_ms: float, moved: bool) : unit =
+    override this.Update(_elapsed_ms: float, moved: bool) : unit =
         if moved then
             this.Bounds <- Render._bounds
             this.VisibleBounds <- Render._bounds

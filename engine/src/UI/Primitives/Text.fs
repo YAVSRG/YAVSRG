@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
 open System.Runtime.CompilerServices
@@ -19,7 +19,6 @@ type Text(text_func: unit -> string) =
 
     override this.Init(parent: Widget) : unit = base.Init(parent)
 
-[<Extension>]
 type TextExtensions =
 
     [<Extension>]

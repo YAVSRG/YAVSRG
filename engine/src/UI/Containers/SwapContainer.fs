@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 /// Container whose content can be swapped for other widgets
 type SwapContainer(current: Widget) as this =
@@ -11,7 +11,7 @@ type SwapContainer(current: Widget) as this =
 
     member this.Current
         with get () = current
-        and set (child) =
+        and set (child: Widget) =
             let old_child = current
             current <- child
 

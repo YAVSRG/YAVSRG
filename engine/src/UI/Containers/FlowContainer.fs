@@ -28,7 +28,7 @@ module FlowContainer =
         member this.Count = children.Count
 
         member private this.WhoIsFocused: int option =
-            Seq.tryFindIndex (fun c -> c.Widget.Focused) children
+            Seq.tryFindIndex _.Widget.Focused children
 
         member private this.WhoShouldFocus: Widget option =
             if children.Count = 0 then
@@ -100,14 +100,14 @@ module FlowContainer =
 
         member this.Spacing
             with get () = spacing
-            and set (value) =
+            and set (value: float32) =
                 spacing <- value
                 refresh <- true
                 size_change()
 
         member this.ItemSize
             with get () = item_size
-            and set (value) =
+            and set (value: float32) =
                 item_size <- value
                 refresh <- true
                 size_change()
@@ -120,7 +120,7 @@ module FlowContainer =
             float32 count * item_size + (float32 count - 1.0f) * spacing
 
         member this.Clear() : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
             children.Clear()
             refresh <- true
             size_change()
@@ -163,7 +163,7 @@ module FlowContainer =
                 c.Init(this)
 
         member this.Iter(f: 'T -> unit) : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
 
             for { Widget = c } in children do
                 f c
@@ -171,7 +171,7 @@ module FlowContainer =
         interface IContainer<'T> with
 
             member this.Add(child: 'T) : unit =
-                assert (GameThread.is_game_thread())
+                assert GameThread.is_game_thread()
 
                 children.Add({ Widget = child; Visible = filter child })
 
@@ -186,7 +186,7 @@ module FlowContainer =
                 size_change()
 
             member this.Remove(child: 'T) : bool =
-                assert (GameThread.is_game_thread())
+                assert GameThread.is_game_thread()
 
                 match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
                 | Some x ->
@@ -204,7 +204,7 @@ module FlowContainer =
     type Vertical<'T when 'T :> Widget>(item_height: float32) =
         inherit Base<'T>(item_height)
 
-        override this.FlowContent children =
+        override this.FlowContent(children: ResizeArray<FlowItem<'T>>) : unit =
             let mutable t = 0.0f
 
             for { Widget = c; Visible = visible } in children do
@@ -229,7 +229,7 @@ module FlowContainer =
     type LeftToRight<'T when 'T :> Widget>(item_width: float32) =
         inherit Base<'T>(item_width)
 
-        override this.FlowContent children =
+        override this.FlowContent(children: ResizeArray<FlowItem<'T>>) : unit =
             let mutable l = 0.0f
 
             for { Widget = c; Visible = visible } in children do
@@ -254,7 +254,7 @@ module FlowContainer =
     type RightToLeft<'T when 'T :> Widget>(item_width: float32) =
         inherit Base<'T>(item_width)
 
-        override this.FlowContent children =
+        override this.FlowContent(children: ResizeArray<FlowItem<'T>>) : unit =
             let mutable r = 0.0f
 
             for { Widget = c; Visible = visible } in children do
@@ -282,7 +282,6 @@ module FlowContainer =
         interface IWidth with
             member this.Width = this.ContentSize
 
-[<Extension>]
 type FlowContainerExtensions =
 
     [<Extension>]

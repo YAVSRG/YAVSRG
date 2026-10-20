@@ -102,12 +102,12 @@ module private FrameTimeStrategies =
 
         match handles |> List.tryFind(fun (name, _) -> glfw_monitor_name.StartsWith(name)) with
         | Some(name, _) ->
-            let hDc = CreateDC(null, name, null, 0)
+            let h_dc = CreateDC(null, name, null, 0)
 
-            if hDc = 0 then
+            if h_dc = 0 then
                 Logging.Error("Failed to get hDC for monitor")
 
-            hDc
+            h_dc
         | None -> 0
 
     (* THREAD SLEEPING STRATEGIES *)
@@ -133,9 +133,9 @@ module private FrameTimeStrategies =
 
         let private open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
             close_adapter()
-            let hDc = get_display_handle glfw_monitor_name
+            let h_dc = get_display_handle glfw_monitor_name
 
-            if hDc = 0 then
+            if h_dc = 0 then
                 let mutable info =
                     { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with pDeviceName = gdi_adapter_name }
 
@@ -145,7 +145,8 @@ module private FrameTimeStrategies =
                 _hAdapter <- info.hAdapter
                 _VinPnSourceId <- info.VinPnSourceId
             else
-                let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with hDc = hDc }
+                let mutable info =
+                    { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with hDc = h_dc }
 
                 if D3DKMTOpenAdapterFromHdc &info <> 0l then
                     Logging.Error("Error getting adapter handle by hDc")
@@ -153,7 +154,7 @@ module private FrameTimeStrategies =
                 _hAdapter <- info.hAdapter
                 _VinPnSourceId <- info.VinPnSourceId
 
-                if not(DeleteDC hDc) then
+                if not(DeleteDC(h_dc)) then
                     Logging.Error("Error deleting hDc after use")
 
         (* USING OPEN ADAPTER TO GET SYNC INFORMATION *)
@@ -212,15 +213,17 @@ module private FrameTimeStrategies =
 
                     _vblank_number <- _vblank_number + 1uL
 
-                lock LOCK_OBJ
-                <| fun () ->
-                    last_time <- _last_time
-                    vblank_number <- _vblank_number
+                lock
+                    LOCK_OBJ
+                    (fun () ->
+                        last_time <- _last_time
+                        vblank_number <- _vblank_number
 
-                    for action in action_queue do
-                        action()
+                        for action in action_queue do
+                            action()
 
-                    action_queue <- []
+                        action_queue <- []
+                    )
 
         let start (sw: Stopwatch) =
             if ENABLED then
@@ -230,30 +233,34 @@ module private FrameTimeStrategies =
 
         let switch (period: float) (gdi_adapter_name: string) (glfw_monitor_name: string) =
             if ENABLED then
-                lock LOCK_OBJ
-                <| fun () ->
-                    action_queue <-
-                        (fun () ->
-                            _vblank_number <- 0uL
-                            sync_broken <- false
-                            est_period <- period
-                            open_adapter gdi_adapter_name glfw_monitor_name
-                        )
-                        :: action_queue
+                lock
+                    LOCK_OBJ
+                    (fun () ->
+                        action_queue <-
+                            (fun () ->
+                                _vblank_number <- 0uL
+                                sync_broken <- false
+                                est_period <- period
+                                open_adapter gdi_adapter_name glfw_monitor_name
+                            )
+                            :: action_queue
+                    )
             else
                 _vblank_number <- 0uL
                 sync_broken <- true
                 est_period <- period
 
         let get (sync_adjustment: float, sw: Stopwatch) =
-            lock LOCK_OBJ
-            <| fun () ->
-                if sync_broken then
-                    sw.Elapsed.TotalMilliseconds, est_period
-                else
-                    let adjusted_last_time = last_time + sync_adjustment * est_period
-
-                    if sw.Elapsed.TotalMilliseconds < adjusted_last_time then
-                        adjusted_last_time - est_period, est_period
+            lock
+                LOCK_OBJ
+                (fun () ->
+                    if sync_broken then
+                        sw.Elapsed.TotalMilliseconds, est_period
                     else
-                        adjusted_last_time, est_period
+                        let adjusted_last_time = last_time + sync_adjustment * est_period
+
+                        if sw.Elapsed.TotalMilliseconds < adjusted_last_time then
+                            adjusted_last_time - est_period, est_period
+                        else
+                            adjusted_last_time, est_period
+                )

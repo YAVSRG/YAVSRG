@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System.Runtime.CompilerServices
 open Percyqaz.Flux.Graphics
@@ -66,7 +66,6 @@ type Widget(node_type: NodeType) =
     override this.ToString() : string =
         (if _parent.IsNone then "*" else _parent.Value.ToString()) + " > " + this.GetType().Name
 
-[<Extension>]
 type WidgetExtensions =
     [<Extension>]
     static member Position(w: #Widget, position: Position) : #Widget =

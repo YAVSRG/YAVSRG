@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
 open Percyqaz.Flux.Input
@@ -51,7 +51,7 @@ module Dialog =
 
     let show (d: Dialog) =
         match current with
-        | Some existing ->
+        | Some _existing ->
             d.Init(display)
             d.Close()
         | None ->

@@ -96,7 +96,7 @@ module DynamicFlowContainer =
 
         member this.Spacing
             with get () = spacing
-            and set (value) =
+            and set (value: float32) =
                 spacing <- value
                 refresh <- true
 
@@ -104,7 +104,7 @@ module DynamicFlowContainer =
         member val AllowNavigation = true with get, set
 
         member this.Clear() : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
 
             this.Iter(fun c ->
                 match c :> obj with
@@ -162,7 +162,7 @@ module DynamicFlowContainer =
                 | _ -> ()
 
         member this.Iter(f: 'T -> unit) : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
 
             for { Widget = c } in children do
                 f c
@@ -170,7 +170,7 @@ module DynamicFlowContainer =
         interface IContainer<'T> with
 
             member this.Add(child: 'T) : unit =
-                assert (GameThread.is_game_thread())
+                assert GameThread.is_game_thread()
 
                 children.Add({ Widget = child; Visible = filter child })
 
@@ -188,7 +188,7 @@ module DynamicFlowContainer =
                     refresh <- true
 
             member this.Remove(child: 'T) : bool =
-                assert (GameThread.is_game_thread())
+                assert GameThread.is_game_thread()
 
                 match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
                 | Some x ->
@@ -289,7 +289,7 @@ module DynamicFlowContainer =
         let mutable size_change = ignore
         let mutable content_width = 0.0f
 
-        override this.FlowContent children =
+        override this.FlowContent(children: ResizeArray<FlowItem<'T>>) : unit =
             let mutable r = 0.0f
             let mutable l = 0.0f
 
@@ -329,7 +329,6 @@ module DynamicFlowContainer =
             member this.OnSizeChanged
                 with set v = size_change <- v
 
-[<Extension>]
 type DynamicFlowContainerExtensions =
 
     [<Extension>]

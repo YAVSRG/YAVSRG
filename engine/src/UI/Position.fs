@@ -11,6 +11,13 @@ module Alignment =
     [<Literal>]
     let RIGHT = 1.0f
 
+[<AutoOpen>]
+module PositionOperators =
+    let (%+) (percentage: float32) (offset: float32) = (offset, percentage)
+    let (%-) (percentage: float32) (offset: float32) = (-offset, percentage)
+    let (^+) (x, percentage) offset = (x + offset, percentage)
+    let (^-) (x, percentage) offset = (x - offset, percentage)
+
 type Position =
     {
         Left: float32 * float32
@@ -19,38 +26,32 @@ type Position =
         Bottom: float32 * float32
     }
 
-[<AutoOpen>]
-module PositionOperators =
-    let (%+) (percentage: float32) (offset: float32) = (offset, percentage)
-    let (%-) (percentage: float32) (offset: float32) = (-offset, percentage)
-    let (^+) (x, percentage) offset = (x + offset, percentage)
-    let (^-) (x, percentage) offset = (x - offset, percentage)
+    static member val MIN = 0.0f %+ 0.0f
+    static member val MAX = 1.0f %+ 0.0f
+
+    static member val DEFAULT =
+        {
+            Left = Position.MIN
+            Top = Position.MIN
+            Right = Position.MAX
+            Bottom = Position.MAX
+        }
 
 module Position =
-    let MIN = 0.0f %+ 0.0f
-    let MAX = 1.0f %+ 0.0f
 
     let lerp (amount: float32) (x, percentage) (x2, percentage2) =
         x + (x2 - x) * amount, percentage + (percentage2 - percentage) * amount
 
     let calculate (pos: Position) (bounds: Percyqaz.Flux.Graphics.Rect) =
-        let inline c (offset, percent) min max : float32 = min + percent * (max - min) + offset
+        let inline calc (offset, percent) min max : float32 = min + percent * (max - min) + offset
 
         {
-            Left = c pos.Left bounds.Left bounds.Right
-            Top = c pos.Top bounds.Top bounds.Bottom
-            Right = c pos.Right bounds.Left bounds.Right
-            Bottom = c pos.Bottom bounds.Top bounds.Bottom
+            Left = calc pos.Left bounds.Left bounds.Right
+            Top = calc pos.Top bounds.Top bounds.Bottom
+            Right = calc pos.Right bounds.Left bounds.Right
+            Bottom = calc pos.Bottom bounds.Top bounds.Bottom
         }
         : Percyqaz.Flux.Graphics.Rect
-
-    let DEFAULT =
-        {
-            Left = MIN
-            Top = MIN
-            Right = MAX
-            Bottom = MAX
-        }
 
 // -- Various transform utilities --
 type Position with

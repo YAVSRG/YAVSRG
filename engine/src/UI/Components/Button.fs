@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
 open Percyqaz.Common
@@ -50,7 +50,6 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
 
     override this.Focusable: bool = not(this.Disabled()) && base.Focusable
 
-[<Extension>]
 type ButtonExtensions =
 
     [<Extension>]

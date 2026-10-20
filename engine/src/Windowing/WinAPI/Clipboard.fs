@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.Windowing
+﻿namespace Percyqaz.Flux.Windowing
 
 open System
 open System.IO
@@ -59,18 +59,15 @@ module ClipboardWin32 =
             try
                 if OpenClipboard(IntPtr.Zero) |> not then
                     failwith "OpenClipboard"
-                else if
-
-                    clear && EmptyClipboard() |> not
-                then
+                elif clear && EmptyClipboard() |> not then
                     failwith "EmptyClipboard"
                 else
 
-                let mutable hGlobal = GlobalAlloc(0x02u ||| 0x40u, UIntPtr(uint32 length))
+                let mutable h_global = GlobalAlloc(0x02u ||| 0x40u, UIntPtr(uint32 length))
 
                 try
 
-                    let mutable target = GlobalLock(hGlobal)
+                    let mutable target = GlobalLock(h_global)
 
                     if target = IntPtr.Zero then
                         failwith "GlobalLock"
@@ -87,12 +84,12 @@ module ClipboardWin32 =
 
                         Marshal.FreeHGlobal(ptr)
 
-                    if SetClipboardData(format, hGlobal) |> int64 <> 0 then
-                        hGlobal <- IntPtr.Zero
+                    if SetClipboardData(format, h_global) |> int64 <> 0 then
+                        h_global <- IntPtr.Zero
                         success <- true
                 finally
-                    if hGlobal <> IntPtr.Zero then
-                        GlobalFree(hGlobal) |> ignore
+                    if h_global <> IntPtr.Zero then
+                        GlobalFree(h_global) |> ignore
             finally
                 CloseClipboard() |> ignore
         with err ->

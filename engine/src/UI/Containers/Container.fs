@@ -11,7 +11,7 @@ type Container(node_type: NodeType) =
     let mutable position_changed = false
 
     override this.Position
-        with set (value) =
+        with set (value: Position) =
             base.set_Position value
             position_changed <- true
 
@@ -51,12 +51,12 @@ type Container(node_type: NodeType) =
     interface IContainer<Widget> with
 
         member this.Add(child: Widget) : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
             children.Add(child)
 
             if this.Initialised then
                 child.Init(this)
 
         member this.Remove(child: Widget) : bool =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
             children.Remove(child)

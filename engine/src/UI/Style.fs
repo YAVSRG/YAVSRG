@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -7,8 +7,6 @@ open Percyqaz.Flux.Audio
 open System.Drawing
 
 module Colors =
-
-    // todo: capitalise all of these constants
 
     let black = Color.Black
     let shadow_1 = Color.FromArgb(0xFF_050308)

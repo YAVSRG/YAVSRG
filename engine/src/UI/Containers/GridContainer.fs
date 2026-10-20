@@ -15,7 +15,7 @@ type private GridFlowItem<'T when 'T :> Widget> =
     }
 
 /// Container that automatically positions its contents packed in a grid arrangement
-type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
+type GridFlowContainer<'T when 'T :> Widget>(row_height: float32, columns: int) as this =
     inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map(fun x -> x :> ISelection)))
 
     let mutable spacing = 0.0f, 0.0f
@@ -28,7 +28,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     let mutable content_height = 0.0f
 
     member this.Clear() : unit =
-        assert (GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         children.Clear()
 
     member val Floating = false with get, set
@@ -45,7 +45,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
     member this.Spacing
         with get () = spacing
-        and set (value) =
+        and set (value: float32 * float32) =
             spacing <- value
             refresh <- true
 
@@ -338,7 +338,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     interface IContainer<'T> with
 
         member this.Add(child: 'T) : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
 
             children.Add(
                 {
@@ -354,10 +354,9 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 refresh <- true
 
         member this.Remove(child: 'T) : bool =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
             children.RemoveAll(fun x -> System.Object.ReferenceEquals(x.Widget, child)) > 0
 
-[<Extension>]
 type GridFlowContainerExtensions =
 
     [<Extension>]

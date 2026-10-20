@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Graphics
@@ -8,9 +8,9 @@ type Root() =
     inherit Widget(NodeType.None)
 
     override this.Position
-        with set (value) = failwith "root position is tied to the bounds of the screen"
+        with set (_value: Position) = failwith "root position is tied to the bounds of the screen"
 
-    override this.Init(parent: Widget) : unit = failwith "call .Init() instead"
+    override this.Init(_parent: Widget) : unit = failwith "call .Init() instead"
     abstract member Init: unit -> unit
 
     default this.Init() =

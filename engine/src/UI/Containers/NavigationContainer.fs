@@ -108,20 +108,20 @@ module NavigationContainer =
                 c.Init(this)
 
         member this.Clear() : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
             children.Clear()
 
         interface IContainer<Widget> with
 
             member this.Add(child: Widget) : unit =
-                assert (GameThread.is_game_thread())
+                assert GameThread.is_game_thread()
                 children.Add(child)
 
                 if this.Initialised then
                     child.Init(this)
 
             member this.Remove(child: Widget) : bool =
-                assert (GameThread.is_game_thread())
+                assert GameThread.is_game_thread()
                 children.Remove(child)
 
     [<Sealed>]
@@ -388,7 +388,6 @@ module NavigationContainer =
             if this.Initialised then
                 child.Init(this)
 
-[<Extension>]
 type NavigationContainerExtensions =
 
     [<Extension>]

@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
 open System.Runtime.CompilerServices
@@ -31,7 +31,6 @@ type Frame() =
 
             Render.rect base.Bounds fill
 
-[<Extension>]
 type FrameExtensions() =
 
     [<Extension>]

@@ -41,7 +41,7 @@ type private SlideablePosition(pos: Position) =
                 : Position
             else
                 pos
-        and set (value) =
+        and set (value: Position) =
             pos <- value
             left_offset.Target <- fst pos.Left
             left_anchor.Target <- snd pos.Left
@@ -74,7 +74,7 @@ type SlideContainer(node_type) =
     let mutable snapped_last_frame = false
 
     override this.Position
-        with set (value) =
+        with set (value: Position) =
             pos.Position <- value
 
             if not this.Initialised then
@@ -129,12 +129,12 @@ type SlideContainer(node_type) =
     interface IContainer<Widget> with
 
         member this.Add(child: Widget) : unit =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
             children.Add(child)
 
             if this.Initialised then
                 child.Init(this)
 
         member this.Remove(child: Widget) : bool =
-            assert (GameThread.is_game_thread())
+            assert GameThread.is_game_thread()
             children.Remove(child)
