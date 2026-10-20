@@ -1,4 +1,4 @@
-namespace Prelude.Data.Stats
+﻿namespace Prelude.Data.Stats
 
 open Percyqaz.Data
 
@@ -94,7 +94,7 @@ type StatsSyncDownstream =
                     combine_playtimes
                         safe_stat_max
                         state.TotalStats.KeymodePlaytime
-                        (combine_playtimes (-) this.KeymodePlaytime state.CurrentSession.KeymodePlaytime)
+                        (combine_playtimes (fun a b -> a - b) this.KeymodePlaytime state.CurrentSession.KeymodePlaytime)
             }
 
         true

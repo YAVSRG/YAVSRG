@@ -1,4 +1,4 @@
-namespace Prelude.Gameplay.Rulesets
+﻿namespace Prelude.Gameplay.Rulesets
 
 open System
 open Percyqaz.Data
@@ -147,7 +147,7 @@ type Ruleset =
 
     member this.GradeName i =
         if i < 0 then "F"
-        else if i >= this.Grades.Length then "??"
+        elif i >= this.Grades.Length then "??"
         else this.Grades.[i].Name
 
     member this.GradeColor i =
@@ -155,7 +155,7 @@ type Ruleset =
 
     member this.LampName(i: int) : string =
         if i < 0 then "NONE"
-        else if i >= this.Lamps.Length then "??"
+        elif i >= this.Lamps.Length then "??"
         else this.Lamps.[i].Name
 
     member this.LampColor(i: int) : Color =

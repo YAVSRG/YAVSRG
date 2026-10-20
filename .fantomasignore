@@ -6,5 +6,6 @@ interlude
 !interlude/src/Features
 !interlude/src/UI
 libraries
+prelude/src/Shared/Helpers.fs
 prelude/src/Calculator
 prelude/playground

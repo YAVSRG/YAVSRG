@@ -42,7 +42,7 @@ module Vote =
                         Response.Ok
                     else
                         Response.OkDetailsRequired
-                else if TableSuggestion.suggest request.TableId chart_id user_id request.Level then
+                elif TableSuggestion.suggest request.TableId chart_id user_id request.Level then
                     if chart_is_known then
                         Response.Ok
                     else

@@ -448,21 +448,12 @@ type Storage(storage: StorageType) =
         match
             let max_rows, max_columns = rules.MaxGridSize in
 
-            if columns < 1 then
-                Error "Columns must be a positive number"
-            elif columns > max_columns then
-                Error(sprintf "Columns must be at most %i for this texture" max_columns)
-            elif rows < 1 then
-                Error "Rows must be a positive number"
-            elif rows > max_rows then
-                Error(sprintf "Rows must be at most %i for this texture" max_rows)
-            else if
-
-                is_grid
-            then
-                this.LoadGridTexture(name, columns, rows, path, rules.MustBeSquare)
-            else
-                this.LoadLooseTextures(name, columns, rows, path, rules.MustBeSquare)
+            if columns < 1 then Error "Columns must be a positive number"
+            elif columns > max_columns then Error(sprintf "Columns must be at most %i for this texture" max_columns)
+            elif rows < 1 then Error "Rows must be a positive number"
+            elif rows > max_rows then Error(sprintf "Rows must be at most %i for this texture" max_rows)
+            elif is_grid then this.LoadGridTexture(name, columns, rows, path, rules.MustBeSquare)
+            else this.LoadLooseTextures(name, columns, rows, path, rules.MustBeSquare)
         with
         | Ok img -> TextureOk(img, columns, rows)
         | Error reason -> if rules.IsRequired then TextureError reason else TextureNotRequired
@@ -725,10 +716,7 @@ type Storage(storage: StorageType) =
                             Message = sprintf "Rows must be between %i and %i" 1 max_rows
                             SuggestedFix = None
                         }
-            else if
-
-                is_grid
-            then
+            elif is_grid then
                 yield! this.ValidateGridTexture(name, columns, rows, rules, path)
             else
                 yield! this.ValidateLooseTextures(name, columns, rows, rules, path)
@@ -994,10 +982,7 @@ type Storage(storage: StorageType) =
 
         if rows <= 1 then
             false
-        else if
-
-            is_grid
-        then
+        elif is_grid then
             Logging.Warn "Cannot delete %s (*, %i) as it is a grid texture" name row
             false
         else
@@ -1030,10 +1015,7 @@ type Storage(storage: StorageType) =
 
         if columns <= 1 then
             false
-        else if
-
-            is_grid
-        then
+        elif is_grid then
             Logging.Warn "Cannot delete %s (%i, *) as it is a grid texture" name col
             false
         else

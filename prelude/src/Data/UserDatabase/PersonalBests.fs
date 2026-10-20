@@ -1,4 +1,4 @@
-namespace Prelude.Data.UserDatabase
+﻿namespace Prelude.Data.UserDatabase
 
 open Percyqaz.Data
 open Prelude
@@ -74,7 +74,7 @@ module PersonalBests =
                     (value, rate, timestamp) :: remove_worse_breakpoints value xs, Improvement.Better(value - v)
                 elif rate = r then
                     (v, r, t) :: xs, Improvement.None
-                else if value > v then
+                elif value > v then
                     (value, rate, timestamp) :: remove_worse_breakpoints value xs,
                     Improvement.FasterBetter(rate - r, value - v)
                 elif value = v then

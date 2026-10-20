@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Noteskins
+namespace Prelude.Skins.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -345,12 +345,7 @@ module NoteskinTextureRules =
                 "receptorlighting",
                 { IsRequired = _.EnableColumnLight; MustBeSquare = K false; MaxGridSize = K(10, 32) }
                 "stageleft", { IsRequired = _.EnableStageTextures; MustBeSquare = K false; MaxGridSize = K(1, 1) }
-                "stageright",
-                {
-                    IsRequired = _.EnableStageTextures
-                    MustBeSquare = K false
-                    MaxGridSize = K(1, 1)
-                }
+                "stageright", { IsRequired = _.EnableStageTextures; MustBeSquare = K false; MaxGridSize = K(1, 1) }
             ]
 
     let get (config: NoteskinConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate config

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.HudLayouts
+namespace Prelude.Skins.HudLayouts
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -114,7 +114,7 @@ type HudPosition =
             if lo >= 0.0f then 0.0f
             elif ro <= 0.0f then 1.0f
             else 0.5f
-        else if lo >= 0.0f then
+        elif lo >= 0.0f then
             0.0f
         elif ro <= 0.0f then
             1.0f
@@ -618,30 +618,11 @@ module HudTextureRules =
                     MustBeSquare = K false
                     MaxGridSize = K(13, 1)
                 }
-                "combo-font",
-                {
-                    IsRequired = _.ComboUseFont
-                    MustBeSquare = K false
-                    MaxGridSize = K(13, 1)
-                }
-                "accuracy-font",
-                {
-                    IsRequired = _.AccuracyUseFont
-                    MustBeSquare = K false
-                    MaxGridSize = K(13, 1)
-                }
+                "combo-font", { IsRequired = _.ComboUseFont; MustBeSquare = K false; MaxGridSize = K(13, 1) }
+                "accuracy-font", { IsRequired = _.AccuracyUseFont; MustBeSquare = K false; MaxGridSize = K(13, 1) }
                 "progress-meter-font",
-                {
-                    IsRequired = _.ProgressMeterUseFont
-                    MustBeSquare = K false
-                    MaxGridSize = K(13, 1)
-                }
-                "custom-image",
-                {
-                    IsRequired = _.CustomImageEnabled
-                    MustBeSquare = K false
-                    MaxGridSize = K(16, 32)
-                }
+                { IsRequired = _.ProgressMeterUseFont; MustBeSquare = K false; MaxGridSize = K(13, 1) }
+                "custom-image", { IsRequired = _.CustomImageEnabled; MustBeSquare = K false; MaxGridSize = K(16, 32) }
             ]
 
     let get (config: HudConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate(config)

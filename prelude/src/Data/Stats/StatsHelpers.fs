@@ -1,4 +1,4 @@
-namespace Prelude.Data.Stats
+﻿namespace Prelude.Data.Stats
 
 open System
 open Percyqaz.Common
@@ -30,12 +30,12 @@ module StatsHelpers =
         (session: Map<int, float>)
         : Map<int, float> =
         Map.fold
-            (fun (pt: Map<int, float>) keymode time ->
-                pt.Change(
+            (fun (playtimes: Map<int, float>) (keymode: int) (incoming_time: float) ->
+                playtimes.Change(
                     keymode,
                     function
-                    | None -> Some time
-                    | Some t -> Some(op t time)
+                    | None -> Some incoming_time
+                    | Some existing_time -> Some(op existing_time incoming_time)
                 )
             )
             total

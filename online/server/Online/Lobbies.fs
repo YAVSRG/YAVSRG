@@ -166,7 +166,7 @@ module Lobby =
             if lobby.Settings.HostRotation then
                 Server.send (lobby.Host, Downstream.SYSTEM_MESSAGE "Round didn't end properly so you are still host")
 
-        else if
+        elif
             lobby.Settings.HostRotation
             && lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && p.PlayComplete)
         then
