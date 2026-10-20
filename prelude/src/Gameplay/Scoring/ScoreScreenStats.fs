@@ -87,14 +87,14 @@ module ScoreScreenStats =
         let taps = ref 0
         let early_taps = ref 0
         let tap_sum = ref 0.0f<ms / rate>
-        let tap_sumOfSq = ref 0.0f<ms / rate> // f# type system bug
+        let tap_sum_of_squares = ref 0.0f<ms / rate> // f# type system bug
         let earliest_tap = ref 0.0f<ms / rate>
         let latest_tap = ref 0.0f<ms / rate>
 
         let releases = ref 0
         let early_releases = ref 0
         let release_sum = ref 0.0f<ms / rate>
-        let release_sumOfSq = ref 0.0f<ms / rate>
+        let release_sum_of_squares = ref 0.0f<ms / rate>
         let earliest_release = ref 0.0f<ms / rate>
         let latest_release = ref 0.0f<ms / rate>
 
@@ -123,7 +123,7 @@ module ScoreScreenStats =
                 if not e.Missed then
                     inc taps
                     tap_sum ++ e.Delta
-                    tap_sumOfSq ++ e.Delta * float32 e.Delta
+                    tap_sum_of_squares ++ e.Delta * float32 e.Delta
                     earliest_tap.Value <- min earliest_tap.Value e.Delta
                     latest_tap.Value <- max latest_tap.Value e.Delta
 
@@ -146,7 +146,7 @@ module ScoreScreenStats =
                 if not e.Missed then
                     inc taps
                     tap_sum ++ e.Delta
-                    tap_sumOfSq ++ e.Delta * float32 e.Delta
+                    tap_sum_of_squares ++ e.Delta * float32 e.Delta
                     earliest_tap.Value <- min earliest_tap.Value e.Delta
                     latest_tap.Value <- max latest_tap.Value e.Delta
 
@@ -167,7 +167,7 @@ module ScoreScreenStats =
                     inc releases
                     inc releases_released
                     release_sum ++ e.Delta
-                    release_sumOfSq ++ e.Delta * float32 e.Delta
+                    release_sum_of_squares ++ e.Delta * float32 e.Delta
                     earliest_release.Value <- min earliest_release.Value e.Delta
                     latest_release.Value <- max latest_release.Value e.Delta
 
@@ -208,7 +208,9 @@ module ScoreScreenStats =
             let mean = tap_sum.Value / float32(max 1 taps.Value)
 
             let standard_deviation =
-                sqrt(((tap_sumOfSq.Value / float32(max 1 taps.Value) * 1.0f<ms / rate>) - mean * mean) |> float32)
+                sqrt(
+                    ((tap_sum_of_squares.Value / float32(max 1 taps.Value) * 1.0f<ms / rate>) - mean * mean) |> float32
+                )
                 * 1.0f<ms / rate>
 
             let lamp =
@@ -269,7 +271,8 @@ module ScoreScreenStats =
             TapMean = tap_mean
             TapStandardDeviation =
                 sqrt(
-                    ((tap_sumOfSq.Value / float32(max 1 taps.Value) * 1.0f<ms / rate>) - tap_mean * tap_mean) |> float32
+                    ((tap_sum_of_squares.Value / float32(max 1 taps.Value) * 1.0f<ms / rate>) - tap_mean * tap_mean)
+                    |> float32
                 )
                 * 1.0f<ms / rate>
             TapEarlyPercent = float early_taps.Value / float(max 1 taps.Value)
@@ -278,7 +281,7 @@ module ScoreScreenStats =
             ReleaseMean = release_mean
             ReleaseStandardDeviation =
                 sqrt(
-                    ((release_sumOfSq.Value / float32(max 1 releases.Value) * 1.0f<ms / rate>)
+                    ((release_sum_of_squares.Value / float32(max 1 releases.Value) * 1.0f<ms / rate>)
                      - release_mean * release_mean)
                     |> float32
                 )

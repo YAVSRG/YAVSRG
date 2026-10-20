@@ -1,4 +1,4 @@
-namespace Prelude
+﻿namespace Prelude
 
 open System
 open System.Drawing
@@ -31,19 +31,19 @@ module ColorExtensions =
             let R = float32 this.R / 255.0f
             let G = float32 this.G / 255.0f
             let B = float32 this.B / 255.0f
-            let Cmax = max R G |> max B
-            let Cmin = min R G |> min B
-            let d = Cmax - Cmin
+            let c_max = max R G |> max B
+            let c_min = min R G |> min B
+            let d = c_max - c_min
 
             let H =
                 if d = 0.0f then 0.0f
-                elif Cmax = R then (((G - B) / d) %% 6.0f) / 6.0f
-                elif Cmax = G then (((B - R) / d) + 2.0f) / 6.0f
+                elif c_max = R then (((G - B) / d) %% 6.0f) / 6.0f
+                elif c_max = G then (((B - R) / d) + 2.0f) / 6.0f
                 else (((R - G) / d) + 4.0f) / 6.0f
 
-            let S = if Cmax = 0.0f then 0.0f else d / Cmax
+            let S = if c_max = 0.0f then 0.0f else d / c_max
 
-            let V = Cmax
+            let V = c_max
 
             (H, S, V)
 

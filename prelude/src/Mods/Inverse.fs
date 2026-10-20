@@ -1,4 +1,4 @@
-namespace Prelude.Mods
+﻿namespace Prelude.Mods
 
 open Prelude
 open Prelude.Charts
@@ -126,8 +126,8 @@ module Inverse =
 
         let update_spacing (now: Time) =
             while bpm_index < 0 || (bpm_index + 1 < chart.BPM.Length && chart.BPM.[bpm_index + 1].Time < now) do
-                let msPerBeat = chart.BPM.[bpm_index + 1].Data.MsPerBeat
-                spacing <- msPerBeat * gap_size
+                let ms_per_beat = chart.BPM.[bpm_index + 1].Data.MsPerBeat
+                spacing <- ms_per_beat * gap_size
                 bpm_index <- bpm_index + 1
 
         let mutable i = 0

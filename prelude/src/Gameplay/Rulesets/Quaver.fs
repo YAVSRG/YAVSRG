@@ -1,4 +1,4 @@
-namespace Prelude.Gameplay.Rulesets
+﻿namespace Prelude.Gameplay.Rulesets
 
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -87,7 +87,7 @@ module Quaver =
 
     let create (judgement: Judgement) : Ruleset =
 
-        let MARV, PERF, GREAT, GOOD, OKAY, MISS = judgement.Windows
+        let marvellous, perfect, great, good, okay, miss = judgement.Windows
 
         {
             Name = sprintf "Quaver %O" judgement
@@ -97,19 +97,19 @@ module Quaver =
                     {
                         Name = "Marvelous"
                         Color = Color.Aqua
-                        TimingWindows = Some(-MARV, MARV)
+                        TimingWindows = Some(-marvellous, marvellous)
                         BreaksCombo = false
                     }
                     {
                         Name = "Perfect"
                         Color = Color.Yellow
-                        TimingWindows = Some(-PERF, PERF)
+                        TimingWindows = Some(-perfect, perfect)
                         BreaksCombo = false
                     }
                     {
                         Name = "Great"
                         Color = Color.FromArgb(0, 255, 100)
-                        TimingWindows = Some(-GREAT, GREAT)
+                        TimingWindows = Some(-great, great)
                         BreaksCombo = false
                     }
                     // 50 and MISS have no late window
@@ -118,19 +118,19 @@ module Quaver =
                     {
                         Name = "Good"
                         Color = Color.FromArgb(0, 160, 255)
-                        TimingWindows = Some(-GOOD, GOOD)
+                        TimingWindows = Some(-good, good)
                         BreaksCombo = false
                     }
                     {
                         Name = "Okay"
                         Color = Color.FromArgb(160, 160, 160)
-                        TimingWindows = Some(-OKAY, OKAY)
+                        TimingWindows = Some(-okay, okay)
                         BreaksCombo = false
                     }
                     {
                         Name = "Miss"
                         Color = Color.FromArgb(255, 80, 80)
-                        TimingWindows = Some(-MISS, MISS)
+                        TimingWindows = Some(-miss, miss)
                         BreaksCombo = true
                     }
                 |]
@@ -192,10 +192,10 @@ module Quaver =
             HoldMechanics =
                 HoldMechanics.JudgeReleasesSeparately(
                     [|
-                        Some(-MARV * 1.5f, MARV * 1.5f)
-                        Some(-PERF * 1.5f, PERF * 1.5f)
-                        Some(-GREAT * 1.5f, GREAT * 1.5f)
-                        Some(-OKAY * 1.5f, OKAY * 1.5f)
+                        Some(-marvellous * 1.5f, marvellous * 1.5f)
+                        Some(-perfect * 1.5f, perfect * 1.5f)
+                        Some(-great * 1.5f, great * 1.5f)
+                        Some(-okay * 1.5f, okay * 1.5f)
                         None
                         None
                     |],

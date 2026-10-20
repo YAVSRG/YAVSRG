@@ -1,4 +1,4 @@
-namespace Prelude.Data.UserDatabase
+﻿namespace Prelude.Data.UserDatabase
 
 open System.Collections.Generic
 open Percyqaz.Data
@@ -73,8 +73,8 @@ type Playlist =
 
     member this.Add(chart: ChartMeta, rate: Rate, mods: ModState) : bool =
         let entry = CollectionEntry.OfChart(chart)
-        let plEntry = PlaylistEntryInfo.Create(rate, mods)
-        this.Charts.Add(entry, plEntry)
+        let playlist_entry = PlaylistEntryInfo.Create(rate, mods)
+        this.Charts.Add(entry, playlist_entry)
         true
 
     member this.RemoveSingle(chart: ChartMeta) : bool =
