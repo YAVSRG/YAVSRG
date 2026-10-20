@@ -1,4 +1,4 @@
-namespace Prelude.Skins.HudLayouts
+﻿namespace Prelude.Skins.HudLayouts
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -620,34 +620,30 @@ module HudTextureRules =
                 }
                 "combo-font",
                 {
-                    IsRequired =
-                        fun config ->
-                            config.ComboUseFont
-                            MustBeSquare = K false
-                            MaxGridSize = K(13, 1)
+                    IsRequired = _.ComboUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
                 }
                 "accuracy-font",
                 {
-                    IsRequired =
-                        fun config ->
-                            config.AccuracyUseFont
-                            MustBeSquare = K false
-                            MaxGridSize = K(13, 1)
+                    IsRequired = _.AccuracyUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
                 }
                 "progress-meter-font",
                 {
-                    IsRequired = fun config -> config.ProgressMeterUseFont
+                    IsRequired = _.ProgressMeterUseFont
                     MustBeSquare = K false
                     MaxGridSize = K(13, 1)
                 }
                 "custom-image",
                 {
-                    IsRequired = fun config -> config.CustomImageEnabled
+                    IsRequired = _.CustomImageEnabled
                     MustBeSquare = K false
                     MaxGridSize = K(16, 32)
                 }
             ]
 
-    let get (config: HudConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate config
+    let get (config: HudConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate(config)
 
     let list () : string seq = TEXTURES.Keys :> string seq

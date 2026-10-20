@@ -46,7 +46,7 @@ type StepManiaChartType =
         | Pump_Double
         | Pump_Routine -> 10
 
-    override this.ToString() =
+    override this.ToString() : string =
         match this with
         | UNKNOWN -> ""
         | _ -> sprintf "%iK " this.Keycount

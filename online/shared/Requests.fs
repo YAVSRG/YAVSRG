@@ -456,7 +456,7 @@ module Players =
                     Difficulty: string
                     Score: float
                     Lamp: int
-                    Rate: float32<rate>
+                    Rate: Rate
                     Mods: ModState
                     Timestamp: int64
                 }

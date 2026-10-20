@@ -18,7 +18,7 @@ module Quaver =
         | Extreme
         | Impossible
 
-        override this.ToString() =
+        override this.ToString() : string =
             match this with
             | Standard -> "Standard*"
             | _ -> sprintf "%A" this

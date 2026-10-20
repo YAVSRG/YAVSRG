@@ -86,7 +86,7 @@ type Noteskin(storage: StorageType) as this =
             this.WriteJson(config, "noteskin.json")
         and get (): NoteskinConfig = config
 
-    override this.ReloadFromDisk() =
+    override this.ReloadFromDisk() : unit =
         base.ReloadFromDisk()
 
         config <-

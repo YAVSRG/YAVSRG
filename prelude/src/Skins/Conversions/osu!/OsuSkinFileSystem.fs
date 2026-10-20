@@ -15,7 +15,7 @@ type OsuSkinFileSystem() =
         user_string.ToLower().Replace(@"\\", "\\").Replace("\\", "/")
 
     interface IDisposable with
-        override this.Dispose() = this.Dispose()
+        override this.Dispose() : unit = this.Dispose()
 
 [<Sealed>]
 type OsuSkinFolderFileSystem(path: string) =
@@ -44,7 +44,7 @@ type OsuSkinFolderFileSystem(path: string) =
                 Error(sprintf "File open failed: '%s' -> '%s' (%O) %s" key absolute_path (exn.GetType()) exn.Message)
         | false, _ -> Error(sprintf "File not found: '%s'" key)
 
-    override this.Dispose() = ()
+    override this.Dispose() : unit = ()
 
 [<Sealed>]
 type OsuSkinZipFileSystem(file: ZipArchive) =
@@ -100,4 +100,4 @@ type OsuSkinZipFileSystem(file: ZipArchive) =
         | true, zip_entry -> Ok(zip_entry.Open())
         | false, _ -> Error(sprintf "Zip entry (out of %i entries) not found: '%s'" entry_map.Count key)
 
-    override this.Dispose() = file.Dispose()
+    override this.Dispose() : unit = file.Dispose()

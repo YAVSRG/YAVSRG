@@ -17,7 +17,7 @@ type HudLayout(storage) as this =
             this.WriteJson(config, "hud.json")
         and get () = config
 
-    override this.ReloadFromDisk() =
+    override this.ReloadFromDisk() : unit =
         base.ReloadFromDisk()
 
         config <-
@@ -37,14 +37,14 @@ type HudLayout(storage) as this =
                 yield! this.ValidateTexture(texture_id, HudTextureRules.get this.Config texture_id)
         }
 
-    static member FromZipStream(stream: Stream) =
+    static member FromZipStream(stream: Stream) : HudLayout =
         new HudLayout(Embedded(new ZipArchive(stream)))
 
-    static member FromPath(path: string) =
+    static member FromPath(path: string) : Result<HudLayout, exn> =
         try
             new HudLayout(Folder path) |> Ok
         with err ->
             Error err
 
-    static member Exists(path: string) =
+    static member Exists(path: string) : bool =
         Directory.Exists(path) && File.Exists(Path.Combine(path, "hud.json"))

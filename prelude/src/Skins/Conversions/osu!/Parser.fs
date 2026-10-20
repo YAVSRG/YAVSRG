@@ -102,7 +102,7 @@ type General =
             SpinnerNoBlink = false
         }
 
-    static member FromMap(properties: Map<string, string>) =
+    static member FromMap(properties: Map<string, string>) : General =
         {
             Name = properties.StringOrDefault("Name", "")
             Author = properties.StringOrDefault("Author", "")
@@ -173,7 +173,7 @@ type Colours =
             StarBreakAdditive = Color.FromArgb(255, 182, 193)
         }
 
-    static member FromMap(properties: Map<string, string>) = Colours.Default // todo: parse the real info
+    static member FromMap(properties: Map<string, string>) : Colours = Colours.Default // todo: parse the real info
 
 type Fonts =
     {
@@ -195,7 +195,7 @@ type Fonts =
             ComboOverlap = -2
         }
 
-    static member FromMap(properties: Map<string, string>) =
+    static member FromMap(properties: Map<string, string>) : Fonts =
         {
             HitCirclePrefix = properties.StringOrDefault("HitCirclePrefix", "default")
             HitCircleOverlap = properties.IntOrDefault("HitCircleOverlap", -2)
@@ -215,7 +215,7 @@ type CatchTheBeat =
     static member Default =
         { HyperDash = Color.Red; HyperDashFruit = Color.Red; HyperDashAfterImage = Color.Red }
 
-    static member FromMap(properties: Map<string, string>) = CatchTheBeat.Default // todo: parse the real info
+    static member FromMap(properties: Map<string, string>) : CatchTheBeat = CatchTheBeat.Default // todo: parse the real info
 
 type Mania =
     {
@@ -345,7 +345,7 @@ type Mania =
             Hit300g = "mania-hit300g"
         }
 
-    static member FromMap(properties: Map<string, string>) =
+    static member FromMap(properties: Map<string, string>) : Mania =
         let keys = properties.IntOrDefault("Keys", 0)
 
         {
@@ -552,13 +552,13 @@ module SkinIni =
 
 type SkinIni with
 
-    static member FromStream(stream: Stream) =
+    static member FromStream(stream: Stream) : Result<SkinIni, string> =
         try
             Ok(SkinIni.from_stream stream)
         with err ->
             Error err.Message
 
-    static member FromFile(path: string) =
+    static member FromFile(path: string) : Result<SkinIni, string> =
         try
             use stream = File.OpenRead(path)
             Ok(SkinIni.from_stream stream)

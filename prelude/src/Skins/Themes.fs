@@ -47,7 +47,7 @@ type Theme(storage) as this =
             this.WriteJson(config, "theme.json")
         and get () = config
 
-    override this.ReloadFromDisk() =
+    override this.ReloadFromDisk() : unit =
         base.ReloadFromDisk()
 
         config <-
@@ -91,12 +91,12 @@ type Theme(storage) as this =
                 | _ -> ()
         }
 
-    static member FromZipStream(stream: Stream) =
+    static member FromZipStream(stream: Stream) : Theme =
         new Theme(Embedded(new ZipArchive(stream)))
 
-    static member FromPath(path: string) = new Theme(Folder path)
+    static member FromPath(path: string) : Theme = new Theme(Folder path)
 
-    static member FromFolderName(name: string) =
+    static member FromFolderName(name: string) : Theme =
         Theme.FromPath(get_game_folder(Path.Combine("Themes", name)))
 
 module Theme =

@@ -136,10 +136,10 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
     member this.OnEvent: IEvent<ScoringEvent> = on_event
 
     /// Throws an exception if used on a live/online replay
-    member this.Recreate(ruleset: Ruleset) =
+    member this.Recreate(ruleset: Ruleset) : ScoreProcessor =
         ScoreProcessor(ruleset, replay.GetFullReplay() |> StoredReplaySource, note_data, rate)
 
-    member this.Recreate() = this.Recreate(ruleset)
+    member this.Recreate() : ScoreProcessor = this.Recreate(ruleset)
 
     member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboChange * ScoringEventInner =
 
@@ -316,7 +316,7 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
             GhostTap {| Judgement = Some(judgement, points) |}
         | None -> NoChange, GhostTap {| Judgement = None |}
 
-    override this.HandleEvent(internal_event: GameplayEvent) =
+    override this.HandleEvent(internal_event: GameplayEvent) : unit =
         let combo_action, gameplay_action =
             match internal_event.Inner with
             | HIT(delta, is_missed) -> this.ProcessHit(delta, is_missed)

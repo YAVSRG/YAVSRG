@@ -7,7 +7,7 @@ module FileSystemServices =
 
     let delete_folder =
         { new Async.Queue<string, bool>() with
-            override this.Handle(path: string) =
+            override this.Handle(path: string) : Async<bool> =
                 async {
                     if Directory.Exists(path) then
                         Logging.Debug "Deleting folder '%s'" path
@@ -33,7 +33,7 @@ module FileSystemServices =
 
     let delete_file =
         { new Async.Queue<string, bool>() with
-            override this.Handle(path) =
+            override this.Handle(path: string) : Async<bool> =
                 async {
                     Logging.Debug "Deleting file '%s'" path
                     let mutable remaining_retries = 3

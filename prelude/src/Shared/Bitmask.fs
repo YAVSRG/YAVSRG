@@ -10,21 +10,21 @@ type Bitmask =
 
     member inline this.IsEmpty = this.Value = 0us
 
-    member inline this.Contains(key: int) = (1us <<< key) &&& this.Value > 0us
+    member inline this.Contains(key: int) : bool = (1us <<< key) &&& this.Value > 0us
 
-    member inline this.Add(key: int) =
+    member inline this.Add(key: int) : Bitmask =
         { Value = (1us <<< key) ||| this.Value }
 
-    member inline this.Remove(key: int) =
+    member inline this.Remove(key: int) : Bitmask =
         { Value = ~~~(1us <<< key) &&& this.Value }
 
-    member inline this.Toggle(key: int) =
+    member inline this.Toggle(key: int) : Bitmask =
         { Value = (1us <<< key) ^^^ this.Value }
 
-    member inline this.Subtract(bitmask: Bitmask) =
+    member inline this.Subtract(bitmask: Bitmask) : Bitmask =
         { Value = this.Value &&& ~~~bitmask.Value }
 
-    member inline this.Iter([<InlineIfLambda>] action: int -> unit) =
+    member inline this.Iter([<InlineIfLambda>] action: int -> unit) : unit =
         let mutable bits = this.Value
         let mutable i = 0
 
@@ -35,12 +35,12 @@ type Bitmask =
             i <- i + 1
             bits <- bits >>> 1
 
-    member inline this.Count =
+    member inline this.Count: int =
         let mutable count = 0
         this.Iter(fun _ -> count <- count + 1)
         count
 
-    member inline this.ToSeq() =
+    member inline this.ToSeq() : int seq =
         let mutable bits = this.Value
         let mutable i = 0
 
@@ -53,9 +53,9 @@ type Bitmask =
                 bits <- bits >>> 1
         }
 
-    static member inline FromSeq(keys: int seq) =
+    static member inline FromSeq(keys: int seq) : Bitmask =
         Seq.fold (fun (bitmask: Bitmask) (key: int) -> bitmask.Add(key)) Bitmask.Empty keys
 
     member inline this.ToInt16() : uint16 = this.Value
 
-    static member FromInt16(value: uint16) = { Value = value }
+    static member FromInt16(value: uint16) : Bitmask = { Value = value }

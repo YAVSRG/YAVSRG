@@ -96,10 +96,10 @@
     <Compile Include="Calculator\Patterns\LibraryPatternInfo.fs" />
     <Compile Include="Skins\Storage.fs" />
     <Compile Include="Skins\Themes.fs" />
-    <Compile Include="Skins\HUD\Config.fs" />
+    <Compile Include="Skins\HUD\HudConfig.fs" />
     <Compile Include="Skins\HUD\HudLayout.fs" />
     <Compile Include="Skins\Noteskins\Colors.fs" />
-    <Compile Include="Skins\Noteskins\Config.fs" />
+    <Compile Include="Skins\Noteskins\NoteskinConfig.fs" />
     <Compile Include="Skins\Noteskins\Noteskin.fs" />
     <Compile Include="Skins\Skin.fs" />
     <Compile Include="Skins\Repo.fs" />

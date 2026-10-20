@@ -165,9 +165,9 @@ type Filter =
         |> Array.ofSeq
         |> fun checks -> (fun (chart_meta: ChartMeta) -> Array.forall (fun f -> f chart_meta) checks)
 
-    member this.Apply(charts: ChartMeta seq) = Seq.filter this.Compile charts
+    member this.Apply(charts: ChartMeta seq) : ChartMeta seq = Seq.filter this.Compile charts
 
-    member this.Apply<'T>(charts: (ChartMeta * 'T) seq) = Seq.filter (fst >> this.Compile) charts
+    member this.Apply<'T>(charts: (ChartMeta * 'T) seq) : (ChartMeta * 'T) seq = Seq.filter (fst >> this.Compile) charts
 
     static member Build(parts: FilterPart list) : Filter =
         let mutable filter = Filter.Empty

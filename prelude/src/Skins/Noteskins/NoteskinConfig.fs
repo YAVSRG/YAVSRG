@@ -1,4 +1,4 @@
-namespace Prelude.Skins.Noteskins
+﻿namespace Prelude.Skins.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -347,11 +347,9 @@ module NoteskinTextureRules =
                 "stageleft", { IsRequired = _.EnableStageTextures; MustBeSquare = K false; MaxGridSize = K(1, 1) }
                 "stageright",
                 {
-                    IsRequired =
-                        fun config ->
-                            config.EnableStageTextures
-                            MustBeSquare = K false
-                            MaxGridSize = K(1, 1)
+                    IsRequired = _.EnableStageTextures
+                    MustBeSquare = K false
+                    MaxGridSize = K(1, 1)
                 }
             ]
 

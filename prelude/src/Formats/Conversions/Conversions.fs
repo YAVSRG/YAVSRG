@@ -44,7 +44,7 @@ type SkippedConversion =
         Reason: string
     }
 
-    override this.ToString() =
+    override this.ToString() : string =
         sprintf "%s -> %s" this.OriginalPath this.Reason
 
 type ConversionResult =

@@ -51,7 +51,7 @@ type ModdedChartInternal =
         SV: TimeArray<float32>
     }
 
-    static member OfChart(chart: Chart) =
+    static member OfChart(chart: Chart) : ModdedChartInternal =
         {
             Keys = chart.Keys
             Notes = chart.Notes

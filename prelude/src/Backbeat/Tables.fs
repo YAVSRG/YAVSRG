@@ -32,7 +32,7 @@ type TableInfo =
         LevelDisplayNames: Map<int, string>
     }
 
-    member this.LevelName(level: int) =
+    member this.LevelName(level: int) : string =
         Map.tryFind level this.LevelDisplayNames |> Option.defaultValue(level.ToString())
 
 [<Json.AutoCodec>]

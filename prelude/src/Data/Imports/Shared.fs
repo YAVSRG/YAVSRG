@@ -1,4 +1,4 @@
-namespace Prelude.Data.Imports
+﻿namespace Prelude.Data.Imports
 
 open System
 open System.Globalization
@@ -53,7 +53,7 @@ module Shared =
             """((^|\s)([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
         )
 
-    let detect_rate_mod (difficulty_name: string) : float32<rate> option =
+    let detect_rate_mod (difficulty_name: string) : Rate option =
         let m = RATE_REGEX.Match(difficulty_name)
 
         if m.Success then
@@ -150,10 +150,13 @@ module Shared =
 
     let import_queue =
         { new Async.Queue<Async<Result<ConversionResult, string>>, Result<ConversionResult, string>>() with
-            override this.Handle(task) = task
+            override this.Handle
+                (task: Async<Result<ConversionResult, string>>)
+                : Async<Result<ConversionResult, string>> =
+                task
         }
 
     let general_task_queue =
         { new Async.Queue<Async<unit>, unit>() with
-            override this.Handle(task) = task
+            override this.Handle(task: Async<unit>) : Async<unit> = task
         }

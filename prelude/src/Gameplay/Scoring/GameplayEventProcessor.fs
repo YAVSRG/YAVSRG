@@ -137,7 +137,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
                 tail_search_index <- tail_search_index + 1
 
-    member this.EnumerateRecentFrames() = replay.EnumerateRecentFrames()
+    member this.EnumerateRecentFrames() : ReplayFrame seq = replay.EnumerateRecentFrames()
     member this.Ruleset = ruleset
 
     member this.HoldState(index: int, k: int) : HoldState =

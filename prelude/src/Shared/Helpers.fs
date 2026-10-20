@@ -1,4 +1,4 @@
-namespace Prelude
+﻿namespace Prelude
 
 open System
 open System.IO
@@ -8,10 +8,11 @@ open Percyqaz.Common
 [<AutoOpen>]
 module Helpers =
 
-#if DEBUG
-#else
+    #if DEBUG
+    let DEV_MODE = true
+    #else
     let DEV_MODE = false
-#endif
+    #endif
 
     /// Takes a function and returns an equivalent function BUT if given the same input repeatedly it will reuse the previous value instead of recalculating
     /// Used to optimise repeated calls to chart calculations where you are likely to make several for one selected chart before changing to another

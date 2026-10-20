@@ -26,7 +26,7 @@ type StorageType =
     | Embedded of ZipArchive
     | Folder of string
 
-    override this.ToString() =
+    override this.ToString() : string =
         match this with
         | Embedded _ -> "[Embedded Assets]"
         | Folder f -> Path.GetFileName(f) + "/"
@@ -140,7 +140,7 @@ type Storage(storage: StorageType) =
             reraise()
         | _ -> reraise()
 
-    member this.DeleteFile([<ParamArray>] path: string array) =
+    member this.DeleteFile([<ParamArray>] path: string array) : unit =
         let p = Path.Combine(path)
 
         match storage with
@@ -151,7 +151,7 @@ type Storage(storage: StorageType) =
             if File.Exists(p) then
                 File.Delete(p)
 
-    member this.RenameFile(old_name: string, new_name: string, [<ParamArray>] path: string array) =
+    member this.RenameFile(old_name: string, new_name: string, [<ParamArray>] path: string array) : unit =
         let p = Path.Combine(path)
 
         match storage with
@@ -739,7 +739,7 @@ type Storage(storage: StorageType) =
         | Ok(_, _, is_grid) -> is_grid
         | _ -> false
 
-    member this.SplitTexture(name: string, [<ParamArray>] path: string array) =
+    member this.SplitTexture(name: string, [<ParamArray>] path: string array) : unit =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -768,7 +768,7 @@ type Storage(storage: StorageType) =
 
                 File.Delete(Path.Combine(f, Path.Combine(path), TextureFileName.to_grid name (columns, rows)))
 
-    member this.StitchTexture(name: string, [<ParamArray>] path: string array) =
+    member this.StitchTexture(name: string, [<ParamArray>] path: string array) : unit =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -1054,7 +1054,7 @@ type Storage(storage: StorageType) =
             false
 
     interface IDisposable with
-        member this.Dispose() =
+        member this.Dispose() : unit =
             match this.Source with
             | Embedded archive -> archive.Dispose()
             | Folder _ -> ()

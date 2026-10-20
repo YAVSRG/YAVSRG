@@ -37,7 +37,7 @@ type LampRequirement =
         | ComboBreaksAtMost n -> Int32.MaxValue, n
         | JudgementAtMost(j, n) -> j, n
 
-    member this.IsStricterThan(other: LampRequirement) = this.SortKey < other.SortKey
+    member this.IsStricterThan(other: LampRequirement) : bool = this.SortKey < other.SortKey
 
 [<Json.AutoCodec>]
 type Lamp = { Name: string; Requirement: LampRequirement; Color: Color }

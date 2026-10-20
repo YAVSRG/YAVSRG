@@ -31,7 +31,7 @@ type Skin(storage) as this =
             this.WriteJson(meta, "skin.json")
         and get () = meta
 
-    override this.ReloadFromDisk() =
+    override this.ReloadFromDisk() : unit =
         base.ReloadFromDisk()
 
         meta <-
@@ -59,7 +59,7 @@ type Skin(storage) as this =
     static member Exists(path: string) : bool =
         Directory.Exists(path) && File.Exists(Path.Combine(path, "skin.json"))
 
-    static member FromPath(path: string) =
+    static member FromPath(path: string) : Result<Skin, exn> =
         try
             new Skin(Folder path) |> Ok
         with err ->

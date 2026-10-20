@@ -259,7 +259,7 @@ type OsuDatabase =
         UserPermissions: int
     }
 
-    static member Read(br: BinaryReader) =
+    static member Read(br: BinaryReader) : OsuDatabase =
         let version = read_int br
 
         {
@@ -304,7 +304,7 @@ type OsuScoreDatabase_Score =
 
     member this.IsReplayFile = this.FilePath.IsSome
 
-    static member Read(file_path: string option, br: BinaryReader) =
+    static member Read(file_path: string option, br: BinaryReader) : OsuScoreDatabase_Score =
         {
             FilePath = file_path
             Mode = read_byte br
@@ -330,7 +330,7 @@ type OsuScoreDatabase_Score =
             OnlineScoreID = read_long br
         }
 
-    static member TryReadFile(file_path: string) =
+    static member TryReadFile(file_path: string) : OsuScoreDatabase_Score option =
         try
             use file = File.OpenRead(file_path)
             use br = new BinaryReader(file)
@@ -339,7 +339,7 @@ type OsuScoreDatabase_Score =
             Logging.Error "Error loading replay file '%s': %O" file_path err
             None
 
-    member this.Write(bw: BinaryWriter) =
+    member this.Write(bw: BinaryWriter) : unit =
         bw.Write(this.Mode)
         bw.Write(this.Version)
         write_string bw this.BeatmapHash
@@ -372,7 +372,7 @@ type OsuScoreDatabase_Beatmap =
         Scores: OsuScoreDatabase_Score array
     }
 
-    static member Read(br: BinaryReader) =
+    static member Read(br: BinaryReader) : OsuScoreDatabase_Beatmap =
         { Hash = read_string br; Scores = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Score.Read(None, br)) }
 
 type OsuScoreDatabase =
@@ -381,5 +381,5 @@ type OsuScoreDatabase =
         Beatmaps: OsuScoreDatabase_Beatmap array
     }
 
-    static member Read(br: BinaryReader) =
+    static member Read(br: BinaryReader) : OsuScoreDatabase =
         { Version = read_int br; Beatmaps = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Beatmap.Read(br)) }

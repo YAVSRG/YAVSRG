@@ -13,7 +13,7 @@ type CollectionEntry =
         mutable Hash: string
     }
 
-    static member OfChart(chart_meta: ChartMeta) = { Hash = chart_meta.Hash }
+    static member OfChart(chart_meta: ChartMeta) : CollectionEntry = { Hash = chart_meta.Hash }
 
 [<Json.AutoCodec>]
 type Folder =
@@ -24,7 +24,7 @@ type Folder =
 
     static member Default = { Charts = ResizeArray<CollectionEntry>(); Icon = Setting.simple "" }
 
-    static member Create(icon: string) =
+    static member Create(icon: string) : Folder =
         { Charts = ResizeArray<CollectionEntry>(); Icon = Setting.simple icon }
 
     member this.Add(chart: ChartMeta) : bool =
@@ -51,7 +51,7 @@ type PlaylistEntryInfo =
         Rate: Setting.Bounded<Rate>
     }
 
-    static member Create(rate, mods) =
+    static member Create(rate: Rate, mods: ModState) : PlaylistEntryInfo =
         { Mods = Setting.simple mods; Rate = Setting.rate rate }
 
     static member Default = PlaylistEntryInfo.Create(1.0f<rate>, Map.empty)
@@ -68,22 +68,22 @@ type Playlist =
     static member Default =
         { Charts = ResizeArray<CollectionEntry * PlaylistEntryInfo>(); Icon = Setting.simple "" }
 
-    static member Create(icon: string) =
+    static member Create(icon: string) : Playlist =
         { Charts = ResizeArray<CollectionEntry * PlaylistEntryInfo>(); Icon = Setting.simple icon }
 
-    member this.Add(chart: ChartMeta, rate: Rate, mods: ModState) =
+    member this.Add(chart: ChartMeta, rate: Rate, mods: ModState) : bool =
         let entry = CollectionEntry.OfChart(chart)
         let plEntry = PlaylistEntryInfo.Create(rate, mods)
         this.Charts.Add(entry, plEntry)
         true
 
-    member this.RemoveSingle(chart: ChartMeta) =
+    member this.RemoveSingle(chart: ChartMeta) : bool =
         let entry = CollectionEntry.OfChart(chart)
         let found = this.Charts.FindAll(fun (e, _) -> e = entry)
 
         if Seq.length found = 1 then found |> Seq.exactlyOne |> this.Charts.Remove else false
 
-    member this.RemoveAt(index: int) =
+    member this.RemoveAt(index: int) : bool =
         try
             this.Charts.RemoveAt(index)
             true
@@ -91,7 +91,7 @@ type Playlist =
             Logging.Error "Error removing chart from playlist: %O" err
             false
 
-    member this.MoveChartUp(index: int) =
+    member this.MoveChartUp(index: int) : bool =
         if index < 1 then
             false
         else
@@ -101,7 +101,7 @@ type Playlist =
             this.Charts.Insert(index - 1, item)
             true
 
-    member this.MoveChartDown(index: int) =
+    member this.MoveChartDown(index: int) : bool =
         if index > this.Charts.Count - 2 then
             false
         else
@@ -131,9 +131,9 @@ type Collections =
         { Folders = Dictionary(); Playlists = Dictionary(); Likes = Set.empty }
 
     member this.EnumerateLikes: string seq = this.Likes :> seq<string>
-    member this.Like(id: string) = this.Likes <- this.Likes.Add(id)
-    member this.Unlike(id: string) = this.Likes <- this.Likes.Remove(id)
-    member this.IsLiked(id: string) = this.Likes.Contains(id)
+    member this.Like(id: string) : unit = this.Likes <- this.Likes.Add(id)
+    member this.Unlike(id: string) : unit = this.Likes <- this.Likes.Remove(id)
+    member this.IsLiked(id: string) : bool = this.Likes.Contains(id)
 
     member this.List: (string * Collection) seq =
         seq {

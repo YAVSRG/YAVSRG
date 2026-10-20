@@ -25,7 +25,7 @@ module WebServices =
             client
 
         { new Async.Queue<string, WebResult<string>>() with
-            override this.Handle(url: string) =
+            override this.Handle(url: string) : Async<WebResult<string>> =
                 async {
                     match! download_string_client.GetAsync(url) |> Async.AwaitTask |> Async.Catch with
                     | Choice1Of2 http_response ->
@@ -43,7 +43,7 @@ module WebServices =
         let download_image_client = new HttpClient()
 
         { new Async.Queue<string, Bitmap option>() with
-            override this.Handle(url: string) =
+            override this.Handle(url: string) : Async<Bitmap option> =
                 async {
                     match! Async.AwaitTask(download_image_client.GetStreamAsync(url)) |> Async.Catch with
                     | Choice1Of2 stream -> return! Bitmap.from_stream_async true stream

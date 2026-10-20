@@ -1,4 +1,4 @@
-namespace Prelude
+﻿namespace Prelude
 
 open System.IO
 open System.Drawing
@@ -8,18 +8,18 @@ open Percyqaz.Common
 type private SettingCodec<'T, 'Config>() =
     inherit Json.Codec<Setting<'T, 'Config>>()
 
-    override this.To(ctx: Json.Context) =
+    override this.To(ctx: Json.Context) : _ =
         let cdc = ctx.GetCodec<'T>()
         fun o -> cdc.To(o.Value)
 
-    override this.From(ctx: Json.Context) =
+    override this.From(ctx: Json.Context) : _ =
         let cdc = ctx.GetCodec<'T>()
 
         fun o json ->
             o.Value <- cdc.From o.Value json
             o
 
-    override this.Default(ctx: Json.Context) =
+    override this.Default(ctx: Json.Context) : _ =
         let cdc = ctx.GetCodec<'T>()
 
         fun () ->
@@ -30,18 +30,18 @@ type private SettingCodec<'T, 'Config>() =
 type private ColorCodec() =
     inherit Json.Codec<Color>()
 
-    override this.To(ctx: Json.Context) =
+    override this.To(ctx: Json.Context) : _ -> JSON =
         let cdc = ctx.GetCodec<byte * byte * byte * byte>()
         fun col -> cdc.To(col.A, col.R, col.G, col.B)
 
-    override this.From(ctx: Json.Context) =
+    override this.From(ctx: Json.Context) : _ =
         let cdc = ctx.GetCodec<byte * byte * byte * byte>()
 
         fun _ json ->
             let a, r, g, b = cdc.FromDefault(json)
             Color.FromArgb(int a, int r, int g, int b)
 
-    override this.Default(_: Json.Context) = fun () -> Color.White
+    override this.Default(_: Json.Context) : _ = fun () -> Color.White
 
 [<AutoOpen>]
 module Json =

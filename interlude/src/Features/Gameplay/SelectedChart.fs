@@ -390,7 +390,7 @@ module SelectedChart =
             )
         )
 
-    let set_rate_and_mods (rate: float32<rate>, mods: ModState) =
+    let set_rate_and_mods (rate: Rate, mods: ModState) =
         _rate.Set(rate)
         _selected_mods.Set(mods)
 

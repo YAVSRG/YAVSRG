@@ -1,4 +1,4 @@
-namespace Prelude.Data.OsuClientInterop
+﻿namespace Prelude.Data.OsuClientInterop
 
 open System
 open System.IO
@@ -126,7 +126,7 @@ module OsuReplay =
         (osu_replay: OsuReplay)
         (chart: Chart)
         (original_osu_file_first_note: Time)
-        (original_osu_file_rate: float32<rate>)
+        (original_osu_file_rate: Rate)
         : Result<Score, string> =
         match Mods.to_interlude_rate_and_mods osu_replay.ModsUsed with
         | None -> Error "Invalid mods used in replay"

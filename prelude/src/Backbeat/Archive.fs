@@ -18,7 +18,7 @@ type VerifiedArtists =
         Aliases: Dictionary<string, string list>
     }
     // all-lowercase string map to correct stylised artist name, if exists
-    member this.FixerMapping() =
+    member this.FixerMapping() : Dictionary<string, string> =
         let d = Dictionary<string, string>()
 
         for a in this.Artists.Keys do
@@ -34,7 +34,7 @@ type VerifiedArtists =
 
         d
     // case-sensitive mapping of what strings map to what parsed artist
-    member this.ParserMapping() =
+    member this.ParserMapping() : Dictionary<string, string> =
         let d = Dictionary<string, string>()
 
         for a in this.Artists.Keys do
@@ -78,7 +78,7 @@ type Song =
 
     member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
 
-    member this.MergeWithIncoming(song: Song) =
+    member this.MergeWithIncoming(song: Song) : Song =
         { this with
             Source =
                 match this.Source with
@@ -113,7 +113,7 @@ type Chart =
 
     member this.FormattedCreators = String.concat ", " this.Creators
 
-    member this.MergeWithIncoming(chart: Chart) =
+    member this.MergeWithIncoming(chart: Chart) : Chart =
         { this with
             Subtitle =
                 match this.Subtitle with
