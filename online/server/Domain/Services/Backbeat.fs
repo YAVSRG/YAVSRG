@@ -67,20 +67,21 @@ module Backbeat =
                         }
                     ]
                 LevelDisplayNames =
-                    Map.ofSeq
-                    <| seq {
-                        for i = 0 to 9 do
-                            yield i, sprintf "R-%02i" i
+                    Map.ofSeq(
+                        seq {
+                            for i = 0 to 9 do
+                                yield i, sprintf "R-%02i" i
 
-                        for i = 10 to 19 do
-                            yield i, sprintf "A-%02i" i
+                            for i = 10 to 19 do
+                                yield i, sprintf "A-%02i" i
 
-                        for i = 20 to 29 do
-                            yield i, sprintf "E-%02i" i
+                            for i = 20 to 29 do
+                                yield i, sprintf "E-%02i" i
 
-                        for i = 30 to 39 do
-                            yield i, sprintf "X-%02i" i
-                    }
+                            for i = 30 to 39 do
+                                yield i, sprintf "X-%02i" i
+                        }
+                    )
             }
 
         // table ids must be lowercase

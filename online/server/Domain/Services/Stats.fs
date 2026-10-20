@@ -1,4 +1,4 @@
-namespace Interlude.Web.Server.Domain.Services
+﻿namespace Interlude.Web.Server.Domain.Services
 
 open Percyqaz.Common
 open Prelude.Data.Stats
@@ -15,11 +15,8 @@ module Stats =
 
         if incoming.Month <> month then
             Error "Stats month does not match server month"
-        else if
-
-            incoming.NetworkId <> user_id
-        then
-            Error <| sprintf "Stats data is for user id #%i" incoming.NetworkId
+        elif incoming.NetworkId <> user_id then
+            Error(sprintf "Stats data is for user id #%i" incoming.NetworkId)
         else
 
         let time_since_sync = float(now - all_time_stats.LastSync)

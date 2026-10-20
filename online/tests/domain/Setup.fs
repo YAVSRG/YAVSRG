@@ -10,7 +10,7 @@ type Setup() =
 
     [<OneTimeSetUp>]
     member _.SetupInMemoryDatabase() =
-        keep_in_memory_db_alive <- Some <| Database.startup_unit_tests()
+        keep_in_memory_db_alive <- Some(Database.startup_unit_tests())
 
     [<OneTimeTearDown>]
     member _.DropInMemoryDatabase() =

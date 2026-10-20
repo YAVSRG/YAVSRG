@@ -94,48 +94,52 @@ module Friends =
     let MAX_FRIENDS = 50
 
     let add (user_id: int64, friend_id: int64) : Result<unit, string> =
-        lock(UPDATE_LOCK_OBJ)
-        <| fun () ->
-            if user_id <> friend_id then
+        lock
+            (UPDATE_LOCK_OBJ)
+            (fun () ->
+                if user_id <> friend_id then
 
-                let new_following = Set.add friend_id (get_following_ids user_id)
+                    let new_following = Set.add friend_id (get_following_ids user_id)
 
-                if Set.count new_following > MAX_FRIENDS then
-                    Error(sprintf "Max friend limit is %i" MAX_FRIENDS)
+                    if Set.count new_following > MAX_FRIENDS then
+                        Error(sprintf "Max friend limit is %i" MAX_FRIENDS)
 
+                    else
+                        UPDATE_FOLLOWING_FOLLOWERS.Execute
+                            {
+                                UserId = user_id
+                                UserNewFollowing = Set.add friend_id (get_following_ids user_id)
+                                FriendId = friend_id
+                                FriendNewFollowers = Set.add user_id (get_followers_ids friend_id)
+                            }
+                            core_db
+                        |> expect
+                        |> ignore
+
+                        Ok()
                 else
+                    Error("Cannot add yourself as a friend")
+            )
+
+    let remove (user_id: int64, friend_id: int64) =
+        lock
+            (UPDATE_LOCK_OBJ)
+            (fun () ->
+                if user_id = friend_id then
+                    ()
+                else
+
                     UPDATE_FOLLOWING_FOLLOWERS.Execute
                         {
                             UserId = user_id
-                            UserNewFollowing = Set.add friend_id (get_following_ids user_id)
+                            UserNewFollowing = Set.remove friend_id (get_following_ids user_id)
                             FriendId = friend_id
-                            FriendNewFollowers = Set.add user_id (get_followers_ids friend_id)
+                            FriendNewFollowers = Set.remove user_id (get_followers_ids friend_id)
                         }
                         core_db
                     |> expect
                     |> ignore
-
-                    Ok()
-            else
-                Error("Cannot add yourself as a friend")
-
-    let remove (user_id: int64, friend_id: int64) =
-        lock(UPDATE_LOCK_OBJ)
-        <| fun () ->
-            if user_id = friend_id then
-                ()
-            else
-
-                UPDATE_FOLLOWING_FOLLOWERS.Execute
-                    {
-                        UserId = user_id
-                        UserNewFollowing = Set.remove friend_id (get_following_ids user_id)
-                        FriendId = friend_id
-                        FriendNewFollowers = Set.remove user_id (get_followers_ids friend_id)
-                    }
-                    core_db
-                |> expect
-                |> ignore
+            )
 
     let private GET_FOLLOWING_FOLLOWERS_IDS: Query<int64, Set<int64> * Set<int64>> =
         {
@@ -167,14 +171,16 @@ module Friends =
         get_following_ids user_id |> Array.ofSeq |> User.by_ids
 
     let on_user_deleted (user_id: int64) =
-        lock(UPDATE_LOCK_OBJ)
-        <| fun () ->
-            for following_id in get_following_ids user_id do
-                remove(user_id, following_id)
+        lock
+            (UPDATE_LOCK_OBJ)
+            (fun () ->
+                for following_id in get_following_ids user_id do
+                    remove(user_id, following_id)
 
-            Logging.Info("Removed all friends of deleted user")
+                Logging.Info("Removed all friends of deleted user")
 
-            for follower_id in get_followers_ids user_id do
-                remove(follower_id, user_id)
+                for follower_id in get_followers_ids user_id do
+                    remove(follower_id, user_id)
 
-            Logging.Info("Unfriending deleted user from everyone else")
+                Logging.Info("Unfriending deleted user from everyone else")
+            )
