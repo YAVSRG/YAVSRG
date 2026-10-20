@@ -79,7 +79,7 @@ type StaticWidget(node_type) =
     let mutable pos = Position.DEFAULT
 
     override this.Position
-        with set (value) =
+        with set (value: Position) =
             pos <- value
 
             if this.Initialised then
@@ -89,7 +89,7 @@ type StaticWidget(node_type) =
         this.Bounds <- Position.calculate pos this.Parent.Bounds
         this.VisibleBounds <- this.Bounds.IntersectWith(this.Parent.VisibleBounds)
 
-    override this.Update(elapsed_ms: float, moved: bool) : unit =
+    override this.Update(_elapsed_ms: float, moved: bool) : unit =
         if moved then
             this.UpdateBounds()
 

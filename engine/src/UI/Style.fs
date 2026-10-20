@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -92,7 +92,7 @@ type PaletteColor =
         White: float32
     }
 
-    member this.Lerp (other: PaletteColor) (amount: float32) =
+    member this.Lerp(other: PaletteColor, amount: float32) : PaletteColor =
         {
             Alpha = lerp amount (float32 this.Alpha) (float32 other.Alpha) |> int
             Brightness = lerp amount this.Brightness other.Brightness
@@ -147,7 +147,7 @@ module Palette =
 
     let transition (f: Animation.Fade) (a: PaletteColor) (b: PaletteColor) =
         fun () ->
-            let p = a.Lerp b f.Value
+            let p = a.Lerp(b, f.Value)
             color(p.Alpha, p.Brightness, p.White)
 
     let text (a: unit -> Color) (b: unit -> Color) = fun () -> (a(), b())
