@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Windowing
+namespace Percyqaz.Flux.Windowing
 
 open System
 open System.Threading
@@ -23,13 +23,16 @@ type private Strategy =
 module GameThread =
 
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
-    let mutable private ui_initialiser: unit -> UIEntryPoint = fun () -> Unchecked.defaultof<_>
+
+    let mutable private ui_initialiser: unit -> UIEntryPoint =
+        fun () -> Unchecked.defaultof<_>
+
     let mutable private loading_icon: Bitmap option = None
 
     let ACTION_QUEUE = ThreadActionQueue()
-    let is_game_thread() = ACTION_QUEUE.IsCurrent()
-    let defer (action: unit -> unit) : unit = ACTION_QUEUE.Defer action
-    let on_game_thread (action: unit -> unit) : unit = ACTION_QUEUE.EnsureCurrent action
+    let is_game_thread () = ACTION_QUEUE.IsCurrent()
+    let defer (action: unit -> unit) : unit = ACTION_QUEUE.Defer(action)
+    let on_game_thread (action: unit -> unit) : unit = ACTION_QUEUE.EnsureCurrent(action)
 
     let private after_init_ev = Event<unit>()
     let after_init = after_init_ev.Publish
@@ -50,7 +53,8 @@ module GameThread =
     let mutable private strategy = Unlimited
     let mutable private looping = true
 
-    let private now () = total_frame_timer.Elapsed.TotalMilliseconds
+    let private now () =
+        total_frame_timer.Elapsed.TotalMilliseconds
 
     (*
         Global variables (to be refactored)
@@ -71,7 +75,7 @@ module GameThread =
     let frame_compensation () =
         if strategy <> Unlimited && anti_jitter && Song.IsPlaying then
             let audio_cmp = Song.FrameCompensation / Song.Rate
-            let visual_cmp = float32 (estimated_next_frame - now ()) * 1.0f<ms / rate>
+            let visual_cmp = float32(estimated_next_frame - now()) * 1.0f<ms / rate>
             audio_cmp + visual_cmp
         else
             0.0f<ms / rate>
@@ -81,22 +85,24 @@ module GameThread =
     *)
 
     let mutable private fatal_error = false
-    let has_fatal_error () =
-        fatal_error
+    let has_fatal_error () = fatal_error
 
     let internal framebuffer_resized framebuffer viewport =
         assert is_game_thread()
         Render.framebuffer_resized framebuffer viewport
         resized <- true
 
-    let internal change_mode (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>) =
+    let internal change_mode
+        (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>)
+        =
         assert is_game_thread()
         uses_compositor <- not entire_monitor
+
         strategy <-
             match frame_limit with
             | FrameLimit.Custom ->
                 GLFW.SwapInterval(0)
-                FrameCap (1000.0 / float refresh_rate)
+                FrameCap(1000.0 / float refresh_rate)
 
             | FrameLimit.Smart ->
                 // On windows: smart cap = do some cool stuff for frame times that outperforms vsync
@@ -107,7 +113,12 @@ module GameThread =
                         Unlimited
                     else
                         GLFW.SwapInterval(0)
-                        FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor) (GLFW.GetWin32Monitor monitor)
+
+                        FrameTimeStrategies.VBlankThread.switch
+                            (1000.0 / float refresh_rate)
+                            (GLFW.GetWin32Adapter(monitor))
+                            (GLFW.GetWin32Monitor(monitor))
+
                         if entire_monitor then WindowsVblankSync else WindowsDwmFlush
                 // On non-windows: smart cap = vsync
                 else
@@ -128,47 +139,55 @@ module GameThread =
 
         | FrameCap frame_time ->
             estimated_next_frame <- start_of_frame + frame_time
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, start_of_frame + frame_time)
+            FrameTimeStrategies.sleep_accurate(total_frame_timer, start_of_frame + frame_time)
 
         | WindowsVblankSync ->
-            let last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
+            let last_vblank, est_refresh_period =
+                FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
+
             estimated_next_frame <- last_vblank + est_refresh_period
 
             let time_taken_to_render = frame_is_ready - start_of_frame
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, now() - time_taken_to_render + est_refresh_period / framerate_multiplier)
+
+            FrameTimeStrategies.sleep_accurate(
+                total_frame_timer,
+                now() - time_taken_to_render + est_refresh_period / framerate_multiplier
+            )
 
         | WindowsDwmFlush ->
             FrameTimeStrategies.DwmFlush() |> ignore
 
-            let last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
+            let last_vblank, est_refresh_period =
+                FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
+
             estimated_next_frame <- last_vblank + est_refresh_period
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
 
         // Update
-        start_of_frame <- now ()
+        start_of_frame <- now()
         ACTION_QUEUE.RunQueue()
-        Input.begin_frame_events ()
+        Input.begin_frame_events()
         Audio.update elapsed_ms
         ui_root.Update(elapsed_ms, resized)
         resized <- false
-        Input.finish_frame_events ()
-        update_time <- now () - start_of_frame
+        Input.finish_frame_events()
+        update_time <- now() - start_of_frame
 
         // Draw
-        let before_draw = now ()
-        Render.start ()
+        let before_draw = now()
+        Render.start()
 
         if Render._framebuffer_height > 0 then
             ui_root.Draw()
 
-        Render.finish ()
-        frame_is_ready <- now ()
+        Render.finish()
+        frame_is_ready <- now()
         draw_time <- frame_is_ready - before_draw
 
         GLFW.SwapBuffers(window)
-        real_next_frame <- now ()
+        real_next_frame <- now()
 
         // Performance profiling
         fps_count <- fps_count + 1
@@ -194,7 +213,8 @@ module GameThread =
                 let root = ui_initialiser()
                 root.Init()
                 Ok(root)
-            with fatal_err -> Error fatal_err
+            with fatal_err ->
+                Error fatal_err
         with
         | Error fatal_err ->
             fatal_error <- true
@@ -207,18 +227,18 @@ module GameThread =
         after_init_ev.Trigger()
         fps_timer.Start()
 
-        Input.begin_frame_events ()
-        Input.finish_frame_events ()
+        Input.begin_frame_events()
+        Input.finish_frame_events()
 
         try
-            while looping && not (GLFW.WindowShouldClose window) do
+            while looping && not(GLFW.WindowShouldClose(window)) do
                 dispatch_frame ui_root
         with fatal_err ->
             fatal_error <- true
             Logging.Critical "Fatal crash in game thread: %O" fatal_err
             GLFW.SetWindowShouldClose(window, true)
 
-        FrameTimeStrategies.VBlankThread.stop ()
+        FrameTimeStrategies.VBlankThread.stop()
 
     let private thread = Thread(main_loop)
 
@@ -226,15 +246,14 @@ module GameThread =
         Initialisation
     *)
 
-    let internal init(_window: nativeptr<Window>, icon: Bitmap option, init_thunk: unit -> UIEntryPoint) =
+    let internal init (_window: nativeptr<Window>, icon: Bitmap option, init_thunk: unit -> UIEntryPoint) =
         ACTION_QUEUE.Bind(thread.ManagedThreadId)
         window <- _window
         ui_initialiser <- init_thunk
         loading_icon <- icon
 
-    let internal start() =
-        thread.Start()
+    let internal start () = thread.Start()
 
-    let internal stop() =
+    let internal stop () =
         looping <- false
         thread.Join()

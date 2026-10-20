@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System.Runtime.CompilerServices
 open Percyqaz.Flux.Graphics
@@ -41,10 +41,7 @@ type Widget(node_type: NodeType) =
         _parent <- Some parent
 
     override this.FocusTree: ISelection list =
-        if not this.NodeType._IsNone then
-            this :: this.Parent.FocusTree
-        else
-            this.Parent.FocusTree
+        if not this.NodeType._IsNone then this :: this.Parent.FocusTree else this.Parent.FocusTree
 
     member this.Focus(by_mouse: bool) =
         if this.Focusable then
@@ -67,14 +64,12 @@ type Widget(node_type: NodeType) =
     override this.OnDeselected _ = selected <- false
 
     override this.ToString() =
-        if _parent.IsNone then "*" else _parent.Value.ToString()
-        + " > "
-        + this.GetType().Name
+        (if _parent.IsNone then "*" else _parent.Value.ToString()) + " > " + this.GetType().Name
 
 [<Extension>]
 type WidgetExtensions =
     [<Extension>]
-    static member Position (w: #Widget, position: Position) : #Widget =
+    static member Position(w: #Widget, position: Position) : #Widget =
         w.Position <- position
         w
 
@@ -93,14 +88,14 @@ type StaticWidget(node_type) =
 
     member private this.UpdateBounds() =
         this.Bounds <- Position.calculate pos this.Parent.Bounds
-        this.VisibleBounds <- this.Bounds.IntersectWith this.Parent.VisibleBounds
+        this.VisibleBounds <- this.Bounds.IntersectWith(this.Parent.VisibleBounds)
 
     override this.Update(elapsed_ms, moved) =
         if moved then
             this.UpdateBounds()
 
     override this.Init(parent: Widget) =
-        base.Init parent
+        base.Init(parent)
         this.UpdateBounds()
 
 [<Sealed>]

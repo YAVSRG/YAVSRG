@@ -47,8 +47,7 @@ module DynamicFlowContainer =
             | Some i ->
                 let mutable index = (i + children.Count - 1) % children.Count
 
-                while index <> i
-                      && (not children.[index].Visible || not children.[index].Widget.Focusable) do
+                while index <> i && (not children.[index].Visible || not children.[index].Widget.Focusable) do
                     index <- (index + children.Count - 1) % children.Count
 
                 last_selected <- index
@@ -60,8 +59,7 @@ module DynamicFlowContainer =
             | Some i ->
                 let mutable index = (i + 1) % children.Count
 
-                while index <> i
-                      && (not children.[index].Visible || not children.[index].Widget.Focusable) do
+                while index <> i && (not children.[index].Visible || not children.[index].Widget.Focusable) do
                     index <- (index + 1) % children.Count
 
                 last_selected <- index
@@ -76,7 +74,7 @@ module DynamicFlowContainer =
             | None -> ()
 
         override this.OnUnfocus(by_mouse: bool) =
-            base.OnUnfocus by_mouse
+            base.OnUnfocus(by_mouse)
 
             match this.WhoIsFocused with
             | Some i -> last_selected <- i
@@ -106,8 +104,14 @@ module DynamicFlowContainer =
         member val AllowNavigation = true with get, set
 
         member this.Clear() =
-            assert(GameThread.is_game_thread())
-            this.Iter(fun c -> match c :> obj with :? IResize as r -> r.OnSizeChanged <- ignore | _ -> ())
+            assert (GameThread.is_game_thread())
+
+            this.Iter(fun c ->
+                match c :> obj with
+                | :? IResize as r -> r.OnSizeChanged <- ignore
+                | _ -> ()
+            )
+
             children.Clear()
 
         override this.Draw() =
@@ -129,7 +133,7 @@ module DynamicFlowContainer =
 
                 if refresh then
                     refresh <- false
-                    this.FlowContent children
+                    this.FlowContent(children)
                     true
                 else
                     moved
@@ -143,21 +147,22 @@ module DynamicFlowContainer =
 
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
-        member this.Add(child: 'T) = (this :> IContainer<'T>).Add child
-        member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove child
+        member this.Add(child: 'T) = (this :> IContainer<'T>).Add(child)
+        member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove(child)
 
         override this.Init(parent: Widget) =
-            base.Init parent
-            this.FlowContent children
+            base.Init(parent)
+            this.FlowContent(children)
 
             for { Widget = child } in children do
-                child.Init this
+                child.Init(this)
+
                 match child :> obj with
                 | :? IResize as r -> r.OnSizeChanged <- fun () -> refresh <- true
                 | _ -> ()
 
         member this.Iter(f: 'T -> unit) =
-            assert(GameThread.is_game_thread())
+            assert (GameThread.is_game_thread())
 
             for { Widget = c } in children do
                 f c
@@ -165,34 +170,34 @@ module DynamicFlowContainer =
         interface IContainer<'T> with
 
             member this.Add(child: 'T) =
-                assert(GameThread.is_game_thread())
+                assert (GameThread.is_game_thread())
 
-                children.Add
-                    {
-                        Widget = child
-                        Visible = filter child
-                    }
+                children.Add({ Widget = child; Visible = filter child })
 
                 match sort with
                 | Some comp -> children.Sort(fun { Widget = a } { Widget = b } -> comp a b)
                 | None -> ()
 
                 if this.Initialised then
-                    child.Init this
+                    child.Init(this)
+
                     match child :> obj with
                     | :? IResize as r -> r.OnSizeChanged <- fun () -> refresh <- true
                     | _ -> ()
+
                     refresh <- true
 
             member this.Remove(child: 'T) : bool =
-                assert(GameThread.is_game_thread())
+                assert (GameThread.is_game_thread())
 
                 match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
                 | Some x ->
-                    children.Remove x |> ignore
+                    children.Remove(x) |> ignore
+
                     match child :> obj with
                     | :? IResize as r -> r.OnSizeChanged <- ignore
                     | _ -> ()
+
                     refresh <- true
                     true
                 | None -> false
@@ -217,7 +222,7 @@ module DynamicFlowContainer =
 
             if b <> content_height then
                 content_height <- b
-                size_change ()
+                size_change()
 
         override this.Navigate() =
             if (%%"up").Pressed() then
@@ -229,7 +234,7 @@ module DynamicFlowContainer =
             if (%%"select").Pressed() then
                 this.SelectFocusedChild()
 
-        override this.Init(parent) = base.Init parent
+        override this.Init(parent) = base.Init(parent)
 
         interface IHeight with
             member this.Height = content_height
@@ -258,7 +263,7 @@ module DynamicFlowContainer =
 
             if r <> content_width then
                 content_width <- r
-                size_change ()
+                size_change()
 
         override this.Navigate() =
             if (%%"left").Pressed() then
@@ -305,7 +310,7 @@ module DynamicFlowContainer =
 
                 if l <> content_width then
                     content_width <- r
-                    size_change ()
+                    size_change()
 
         override this.Navigate() =
             if (%%"left").Pressed() then
@@ -328,6 +333,8 @@ module DynamicFlowContainer =
 type DynamicFlowContainerExtensions =
 
     [<Extension>]
-    static member Spacing(container: #DynamicFlowContainer.Base<'T>, spacing: float32) : #DynamicFlowContainer.Base<'T> =
+    static member Spacing
+        (container: #DynamicFlowContainer.Base<'T>, spacing: float32)
+        : #DynamicFlowContainer.Base<'T> =
         container.Spacing <- spacing
         container

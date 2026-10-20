@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Windowing
+namespace Percyqaz.Flux.Windowing
 
 open System.Threading
 
@@ -17,21 +17,26 @@ open System.Threading
 type ThreadActionQueue() =
 
     let mutable managed_thread_id = -1
-    let mutable action_queue : (unit -> unit) list = []
+    let mutable action_queue: (unit -> unit) list = []
 
-    member internal this.Bind(id: int) : unit =
-        managed_thread_id <- id
+    member internal this.Bind(id: int) : unit = managed_thread_id <- id
 
-    member internal this.BindToCurrent() : unit = this.Bind(Thread.CurrentThread.ManagedThreadId)
+    member internal this.BindToCurrent() : unit =
+        this.Bind(Thread.CurrentThread.ManagedThreadId)
 
     member internal this.RunQueue() : unit =
         assert this.IsCurrent()
-        lock this (fun () ->
-            while not (List.isEmpty action_queue) do
-                let actions = action_queue
-                action_queue <- []
-                (for action in actions do action())
-        )
+
+        lock
+            this
+            (fun () ->
+                while not(List.isEmpty action_queue) do
+                    let actions = action_queue
+                    action_queue <- []
+
+                    (for action in actions do
+                        action())
+            )
 
     member this.IsCurrent() : bool =
         Thread.CurrentThread.ManagedThreadId = managed_thread_id
@@ -40,4 +45,4 @@ type ThreadActionQueue() =
         lock this (fun () -> action_queue <- action_queue @ [ action ])
 
     member this.EnsureCurrent(action: unit -> unit) =
-        if this.IsCurrent() then action () else this.Defer action
+        if this.IsCurrent() then action() else this.Defer(action)

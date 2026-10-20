@@ -4,8 +4,6 @@ online
 interlude
 !interlude/src/Features
 !interlude/src/UI
-engine
-!engine/src/Audio
 libraries
 prelude/src
 prelude/playground

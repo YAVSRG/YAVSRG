@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Graphics
@@ -20,7 +20,8 @@ type Root() =
     override this.FocusTree = []
 
     override this.Update(elapsed_ms, moved) =
-        Palette.accent_color.Update elapsed_ms
+        Palette.accent_color.Update(elapsed_ms)
+
         if moved then
             this.Bounds <- Render._bounds
             this.VisibleBounds <- Render._bounds

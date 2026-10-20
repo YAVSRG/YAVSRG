@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Windowing
+namespace Percyqaz.Flux.Windowing
 
 open System
 open System.Diagnostics
@@ -13,7 +13,7 @@ module WindowsKey =
 
     [<DllImport("user32.dll", CharSet = CharSet.Auto)>]
     extern bool private UnhookWindowsHookEx(IntPtr hhk)
-    
+
     [<DllImport("user32.dll", CharSet = CharSet.Auto)>]
     extern IntPtr private CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam)
 
@@ -28,14 +28,17 @@ module WindowsKey =
 
     let private hook_callback (nCode: int) (wParam: IntPtr) (lParam: IntPtr) : IntPtr =
         let vkCode = Marshal.ReadInt32(lParam)
+
         if nCode >= 0 && wParam = WM_KEYDOWN && (vkCode = VK_LWIN || vkCode = VK_RWIN) then
             1n
-        else 
+        else
             CallNextHookEx(hook, nCode, wParam, lParam)
+
     let private hook_callback_delegate = LowLevelKeyboardProc(hook_callback)
 
     let disable () : unit =
         assert OperatingSystem.IsWindows()
+
         if hook = -1n then
             use current_process = Process.GetCurrentProcess()
             use current_module = current_process.MainModule
@@ -43,6 +46,6 @@ module WindowsKey =
             hook <- SetWindowsHookEx(13, hook_callback_delegate, hMod, 0u)
 
     let enable () : unit =
-        if hook <> -1n then 
+        if hook <> -1n then
             UnhookWindowsHookEx(hook) |> ignore
             hook <- -1n

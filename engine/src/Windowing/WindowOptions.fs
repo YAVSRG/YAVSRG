@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Windowing
+namespace Percyqaz.Flux.Windowing
 
 type WindowType =
     | Windowed = 0
@@ -8,6 +8,7 @@ type WindowType =
     | FullscreenLetterbox = 4
 
 type WindowedResolution = (int * int) * (float32 * float32)
+
 module WindowedResolution =
 
     let DEFAULT: WindowedResolution = (1024, 768), (0.5f, 0.5f)
@@ -38,12 +39,7 @@ module WindowedResolution =
         |]
 
 [<Struct>]
-type FullscreenVideoMode =
-    {
-        Width: int
-        Height: int
-        RefreshRate: int
-    }
+type FullscreenVideoMode = { Width: int; Height: int; RefreshRate: int }
 
 type FrameLimit =
     | Unlimited = 0

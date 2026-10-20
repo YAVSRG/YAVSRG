@@ -13,7 +13,7 @@ module FlowContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>(item_size: float32) as this =
-        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
+        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map(fun x -> x :> ISelection)))
 
         let mutable size_change = ignore
         let mutable filter: 'T -> bool = K true
@@ -47,26 +47,24 @@ module FlowContainer =
             | Some i ->
                 let mutable index = (i + children.Count - 1) % children.Count
 
-                while index <> i
-                      && (not children.[index].Visible || not children.[index].Widget.Focusable) do
+                while index <> i && (not children.[index].Visible || not children.[index].Widget.Focusable) do
                     index <- (index + children.Count - 1) % children.Count
 
                 last_selected <- index
                 children.[index].Widget.Focus false
-            | None -> this.WhoShouldFocus.Value.Focus false
+            | None -> this.WhoShouldFocus.Value.Focus(false)
 
         member this.Next() =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + 1) % children.Count
 
-                while index <> i
-                      && (not children.[index].Visible || not children.[index].Widget.Focusable) do
+                while index <> i && (not children.[index].Visible || not children.[index].Widget.Focusable) do
                     index <- (index + 1) % children.Count
 
                 last_selected <- index
                 children.[index].Widget.Focus false
-            | None -> this.WhoShouldFocus.Value.Focus false
+            | None -> this.WhoShouldFocus.Value.Focus(false)
 
         member this.SelectFocusedChild() =
             match this.WhoIsFocused with
@@ -80,7 +78,7 @@ module FlowContainer =
             | Some i -> last_selected <- i
             | None -> ()
 
-            base.OnUnfocus by_mouse
+            base.OnUnfocus(by_mouse)
 
         abstract member Navigate: unit -> unit
 
@@ -118,11 +116,11 @@ module FlowContainer =
         member val EnableNavigation = true with get, set
 
         member this.ContentSize =
-            let count = children |> Seq.where (_.Visible) |> Seq.length
+            let count = children |> Seq.where(_.Visible) |> Seq.length
             float32 count * item_size + (float32 count - 1.0f) * spacing
 
         member this.Clear() =
-            assert(GameThread.is_game_thread())
+            assert (GameThread.is_game_thread())
             children.Clear()
             refresh <- true
             size_change()
@@ -140,7 +138,7 @@ module FlowContainer =
             let moved =
                 if refresh then
                     refresh <- false
-                    this.FlowContent children
+                    this.FlowContent(children)
                     true
                 else
                     moved
@@ -154,18 +152,18 @@ module FlowContainer =
 
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
-        member this.Add(child: 'T) = (this :> IContainer<'T>).Add child
-        member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove child
+        member this.Add(child: 'T) = (this :> IContainer<'T>).Add(child)
+        member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove(child)
 
         override this.Init(parent: Widget) =
-            base.Init parent
-            this.FlowContent children
+            base.Init(parent)
+            this.FlowContent(children)
 
             for { Widget = c } in children do
-                c.Init this
+                c.Init(this)
 
         member this.Iter(f: 'T -> unit) =
-            assert(GameThread.is_game_thread())
+            assert (GameThread.is_game_thread())
 
             for { Widget = c } in children do
                 f c
@@ -173,30 +171,26 @@ module FlowContainer =
         interface IContainer<'T> with
 
             member this.Add(child: 'T) : unit =
-                assert(GameThread.is_game_thread())
+                assert (GameThread.is_game_thread())
 
-                children.Add
-                    {
-                        Widget = child
-                        Visible = filter child
-                    }
+                children.Add({ Widget = child; Visible = filter child })
 
                 match sort with
                 | Some comp -> children.Sort(fun { Widget = a } { Widget = b } -> comp a b)
                 | None -> ()
 
                 if this.Initialised then
-                    child.Init this
+                    child.Init(this)
                     refresh <- true
 
                 size_change()
 
             member this.Remove(child: 'T) : bool =
-                assert(GameThread.is_game_thread())
+                assert (GameThread.is_game_thread())
 
                 match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
                 | Some x ->
-                    children.Remove x |> ignore
+                    children.Remove(x) |> ignore
                     refresh <- true
                     size_change()
                     true
@@ -272,6 +266,7 @@ module FlowContainer =
                             Right = 1.0f %- r
                             Bottom = Position.MAX
                         }
+
                     r <- r + this.ItemSize + this.Spacing
 
         override this.Navigate() =
@@ -301,8 +296,7 @@ type FlowContainerExtensions =
         container
 
     [<Extension>]
-    static member Filter(container: #FlowContainer.Base<'T>, filter: 'T -> bool) : unit =
-        container.Filter <- filter
+    static member Filter(container: #FlowContainer.Base<'T>, filter: 'T -> bool) : unit = container.Filter <- filter
 
     [<Extension>]
     static member WithFilter(container: #FlowContainer.Base<'T>, filter: 'T -> bool) : #FlowContainer.Base<'T> =
@@ -310,8 +304,7 @@ type FlowContainerExtensions =
         container
 
     [<Extension>]
-    static member Sort(container: #FlowContainer.Base<'T>, cmp: 'T -> 'T -> int) : unit =
-        container.Sort <- cmp
+    static member Sort(container: #FlowContainer.Base<'T>, cmp: 'T -> 'T -> int) : unit = container.Sort <- cmp
 
     [<Extension>]
     static member WithSort(container: #FlowContainer.Base<'T>, cmp: 'T -> 'T -> int) : #FlowContainer.Base<'T> =

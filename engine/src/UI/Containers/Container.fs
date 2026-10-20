@@ -20,7 +20,13 @@ type Container(node_type: NodeType) =
             c.Draw()
 
     override this.Update(elapsed_ms, moved) =
-        let moved = if position_changed then position_changed <- false; true else moved
+        let moved =
+            if position_changed then
+                position_changed <- false
+                true
+            else
+                moved
+
         base.Update(elapsed_ms, moved)
 
         // children are updated in reverse order
@@ -28,27 +34,29 @@ type Container(node_type: NodeType) =
         for i = children.Count - 1 downto 0 do
             children.[i].Update(elapsed_ms, moved)
 
-    member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add child
-    member this.Remove(child: Widget) : bool = (this :> IContainer<Widget>).Remove child
+    member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add(child)
+
+    member this.Remove(child: Widget) : bool =
+        (this :> IContainer<Widget>).Remove(child)
 
     override this.Init(parent: Widget) =
-        base.Init parent
+        base.Init(parent)
 
         for c in children do
-            c.Init this
+            c.Init(this)
 
     static member Create(child: Widget) =
-        Container(NodeType.Container(K (Some child))).With(child)
+        Container(NodeType.Container(K(Some child))).With(child)
 
     interface IContainer<Widget> with
 
-        member this.Add (child: Widget) : unit =
-            assert(GameThread.is_game_thread())
-            children.Add child
+        member this.Add(child: Widget) : unit =
+            assert (GameThread.is_game_thread())
+            children.Add(child)
 
             if this.Initialised then
-                child.Init this
+                child.Init(this)
 
-        member this.Remove (child: Widget) : bool =
-            assert(GameThread.is_game_thread())
-            children.Remove child
+        member this.Remove(child: Widget) : bool =
+            assert (GameThread.is_game_thread())
+            children.Remove(child)

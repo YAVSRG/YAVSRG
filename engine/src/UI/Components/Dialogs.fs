@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System.Drawing
 open Percyqaz.Flux.Input
@@ -19,14 +19,14 @@ module Dialog =
 
     let mutable private current: Dialog option = None
 
-    let fade = Animation.Fade 0.0f
+    let fade = Animation.Fade(0.0f)
 
     type Display() =
         inherit Overlay(NodeType.None)
 
         override this.Draw() =
             if fade.Value > 0.0f then
-                Render.rect this.Bounds (Color.FromArgb(int (225f * fade.Value), 35, 35, 35))
+                Render.rect this.Bounds (Color.FromArgb(int(225f * fade.Value), 35, 35, 35))
 
                 match current with
                 | Some d -> d.Draw()
@@ -34,7 +34,7 @@ module Dialog =
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
-            fade.Update elapsed_ms
+            fade.Update(elapsed_ms)
 
             match current with
             | Some d ->
@@ -44,7 +44,7 @@ module Dialog =
                     current <- None
                     fade.Target <- 0.0f
                 else
-                    Input.finish_frame_events ()
+                    Input.finish_frame_events()
             | None -> ()
 
     let display = Display()
@@ -52,11 +52,11 @@ module Dialog =
     let show (d: Dialog) =
         match current with
         | Some existing ->
-            d.Init display
+            d.Init(display)
             d.Close()
         | None ->
             current <- Some d
-            d.Init display
+            d.Init(display)
             fade.Target <- 1.0f
 
     let exists () = current.IsSome

@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Graphics
+namespace Percyqaz.Flux.Graphics
 
 open System
 open System.Drawing
@@ -28,7 +28,7 @@ module Render =
     let mutable internal _height = snd DEFAULT_SCREEN |> float32
 
     let mutable internal _bounds = Rect.Zero
-    let mutable private _batch : Batch = Unchecked.defaultof<_>
+    let mutable private _batch: Batch = Unchecked.defaultof<_>
 
     let private create_flipped_projection (width: float32, height: float32) : Matrix4 =
         Matrix4.Identity
@@ -57,21 +57,23 @@ module Render =
     /// </summary>
     /// <remarks>The current pool size is 6. Exceeding this will crash the game.</remarks>
     type FBO =
-        internal {
-            sprite: Sprite
-            fbo_id: int
-            fbo_index: int
-        }
+        internal
+            {
+                sprite: Sprite
+                fbo_id: int
+                fbo_index: int
+            }
+
         /// The sprite representation of this FBO, to be used in drawing
         member this.Sprite = this.sprite
 
         /// Binds this FBO, so drawing goes to its buffer instead of the screen.
         /// Must not be called if already bound.
         member this.Bind(clear: bool) : unit =
-            _batch.Draw ()
+            _batch.Draw()
 
             if List.isEmpty fbo_stack then
-                Shader.set_uniform_mat4 (Shader.projection_loc, create_projection(_width, _height))
+                Shader.set_uniform_mat4(Shader.projection_loc, create_projection(_width, _height))
                 GL.Viewport(0, 0, _framebuffer_width, _framebuffer_height)
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
@@ -86,12 +88,12 @@ module Render =
         /// Unbinds this FBO, so drawing goes to the screen and it can be used as a sprite.
         /// Must not be called if not already bound.
         member this.Unbind() : unit =
-            _batch.Draw ()
+            _batch.Draw()
             fbo_stack <- List.tail fbo_stack
 
             if List.isEmpty fbo_stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
-                Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
+                Shader.set_uniform_mat4(Shader.projection_loc, create_flipped_projection(_width, _height))
                 GL.Viewport(_viewport_left, _viewport_top, _viewport_width, _viewport_height)
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
@@ -183,6 +185,7 @@ module Render =
                 0,
                 1
             )
+
             check_gl_error()
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
@@ -196,7 +199,7 @@ module Render =
     /// Retrieves the width of the screen in virtual pixels.<br/>
     /// Virtual pixels are scaled, preserving aspect ratio but always keeping the screen at a virtual 1080 pixels tall.
     /// </summary>
-    let width() : float32 = _width
+    let width () : float32 = _width
 
     /// <summary>
     /// Retrieves the height of the screen in virtual pixels.<br/>
@@ -205,14 +208,14 @@ module Render =
     /// <remarks>
     /// This function therefore always returns 1080.0 - A future feature may come to customise virtual pixel rules
     /// </remarks>
-    let height() : float32 = _height
+    let height () : float32 = _height
 
     /// <summary>
     /// Retrieves the bounding box of the screen in virtual pixels.<br/>
     /// Virtual pixels are scaled, preserving aspect ratio but always keeping the screen at a virtual 1080 pixels tall.
     /// Equivalent to <c>Rect.Box(0.0f, 0.0f, width(), height())</c>.
     /// </summary>
-    let bounds() : Rect = _bounds
+    let bounds () : Rect = _bounds
 
     /// <summary>
     /// Gets the real dimensions of the framebuffer, as screen pixels.<br/>
@@ -220,14 +223,14 @@ module Render =
     /// This is not necessarily the dimensions of the game UI, as user could be using letterboxing.<br/><br/>
     /// For the viewport area of the game use <c>viewport_size()</c>
     /// </summary>
-    let framebuffer_size() : int * int = _framebuffer_width, _framebuffer_height
+    let framebuffer_size () : int * int = _framebuffer_width, _framebuffer_height
 
     /// <summary>
     /// Gets the real dimensions of the viewport, as screen pixels.<br/>
     /// This is the dimensions of the part of the monitor the game is rendering on.<br/><br/>
     /// This is not necessarily the dimensions of the window, as this does account for the window border/decorations OR for letterboxing<br/>
     /// </summary>
-    let viewport_size() : int * int = _viewport_width, _viewport_height
+    let viewport_size () : int * int = _viewport_width, _viewport_height
 
     /// <summary>
     /// Gets and binds an <see cref="FBO"/> from the pool.<br/>
@@ -236,7 +239,7 @@ module Render =
     /// </summary>
     let borrow_fbo () : FBO =
         seq { 0 .. (FBO_POOL_SIZE - 1) }
-        |> Seq.tryFind (fun i -> not in_use.[i])
+        |> Seq.tryFind(fun i -> not in_use.[i])
         |> function
             | None -> failwithf "Ran out of FBOs! (%i max) - Some are likely not being disposed after use" FBO_POOL_SIZE
             | Some i ->
@@ -271,14 +274,9 @@ module Render =
 
                 in_use.[i] <- true
 
-                let fbo =
-                    {
-                        sprite = sprite
-                        fbo_id = fbo_ids.[i]
-                        fbo_index = i
-                    }
+                let fbo = { sprite = sprite; fbo_id = fbo_ids.[i]; fbo_index = i }
 
-                fbo.Bind true
+                fbo.Bind(true)
                 fbo
 
     let mutable private stencil_depth = 0
@@ -293,14 +291,14 @@ module Render =
     /// </summary>
     /// <remarks>To create a stencil layer without drawing anything on-screen, use transparent rectangles and quads with no alpha masking.</remarks>
     let stencil_create (use_alpha_masking: bool) : unit =
-        _batch.Draw ()
+        _batch.Draw()
 
         if stencil_depth = 0 then
             GL.Enable(EnableCap.StencilTest)
             GL.Clear(ClearBufferMask.StencilBufferBit)
             GL.StencilMask(0xFF)
             GL.ColorMask(false, false, false, false)
-            Shader.set_uniform_i32 (Shader.alpha_masking_loc, (if use_alpha_masking then 1 else 0))
+            Shader.set_uniform_i32(Shader.alpha_masking_loc, (if use_alpha_masking then 1 else 0))
 
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
@@ -314,7 +312,7 @@ module Render =
     /// <see cref="stencil_begin_finish"/> should be called next to finish using the stencil and return to normal drawing.
     /// </summary>
     let stencil_begin_draw () : unit =
-        _batch.Draw ()
+        _batch.Draw()
 
         GL.ColorMask(true, true, true, true)
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
@@ -328,7 +326,7 @@ module Render =
     /// <see cref="stencil_begin_finish"/> should be called next to finish using the stencil and return to normal drawing.
     /// </summary>
     let stencil_finish () : unit =
-        _batch.Draw ()
+        _batch.Draw()
 
         stencil_depth <- stencil_depth - 1
 
@@ -336,7 +334,7 @@ module Render =
             GL.Clear(ClearBufferMask.StencilBufferBit)
             GL.Disable(EnableCap.StencilTest)
             GL.StencilMask(0x00)
-            Shader.set_uniform_i32 (Shader.alpha_masking_loc, 0)
+            Shader.set_uniform_i32(Shader.alpha_masking_loc, 0)
         else
             GL.StencilFunc(StencilFunction.Lequal, stencil_depth, 0xFF)
 
@@ -350,14 +348,16 @@ module Render =
     /// The previous multiplier is returned so it can be restored with <see cref="alpha_multiplier_restore"/>.
     /// </summary>
     let alpha_multiplier_begin (multiplier: float32) : float32 =
-        assert(multiplier >= 0.0f && multiplier <= 1.0f)
+        assert (multiplier >= 0.0f && multiplier <= 1.0f)
+
         if multiplier <> alpha_mult then
-            _batch.Draw ()
-            Shader.set_uniform_f32 (Shader.alpha_mult_loc, multiplier)
+            _batch.Draw()
+            Shader.set_uniform_f32(Shader.alpha_mult_loc, multiplier)
             let previous_mult = alpha_mult
             alpha_mult <- multiplier
             previous_mult
-        else multiplier
+        else
+            multiplier
 
     /// <summary>
     /// Applies an alpha multiplier to all subsequent draw calls.<br/>
@@ -365,10 +365,11 @@ module Render =
     /// Restore should be used to revert a multiplier previously used, and each rendered frame should end with this multiplier reset to 1.0
     /// </summary>
     let alpha_multiplier_restore (multiplier: float32) : unit =
-        assert(multiplier >= 0.0f && multiplier <= 1.0f)
+        assert (multiplier >= 0.0f && multiplier <= 1.0f)
+
         if multiplier <> alpha_mult then
-            _batch.Draw ()
-            Shader.set_uniform_f32 (Shader.alpha_mult_loc, multiplier)
+            _batch.Draw()
+            Shader.set_uniform_f32(Shader.alpha_mult_loc, multiplier)
             alpha_mult <- multiplier
 
     /// <summary>
@@ -383,13 +384,24 @@ module Render =
         _batch.Vertex(q.BottomRight, Vector2.Zero, colors.BottomRight, 0)
         _batch.Vertex(q.BottomLeft, Vector2.Zero, colors.BottomLeft, 0)
 
-    let inline quad (q: Quad) (color: Color) : unit =
-        quad_c q color.AsQuad
+    let inline quad (q: Quad) (color: Color) : unit = quad_c q color.AsQuad
 
-    let inline quad_vecs (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (color: Color) : unit =
+    let inline quad_vecs
+        (top_left: Vector2)
+        (top_right: Vector2)
+        (bottom_right: Vector2)
+        (bottom_left: Vector2)
+        (color: Color)
+        : unit =
         quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) color.AsQuad
 
-    let inline quad_vecs_c (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (colors: QuadColors) : unit =
+    let inline quad_vecs_c
+        (top_left: Vector2)
+        (top_right: Vector2)
+        (bottom_right: Vector2)
+        (bottom_left: Vector2)
+        (colors: QuadColors)
+        : unit =
         quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) colors
 
     let inline quad_points
@@ -413,8 +425,8 @@ module Render =
     /// <summary>
     /// Draws a textured quad to the screen.
     /// </summary>
-    let tex_quad (q: Quad) (colors: QuadColors) ({ Texture = t; Layer = layer; UV = uv } : QuadTexture) : unit =
-        _batch.Texture t
+    let tex_quad (q: Quad) (colors: QuadColors) ({ Texture = t; Layer = layer; UV = uv }: QuadTexture) : unit =
+        _batch.Texture(t)
         _batch.Vertex(q.TopLeft, uv.TopLeft, colors.TopLeft, layer)
         _batch.Vertex(q.TopRight, uv.TopRight, colors.TopRight, layer)
         _batch.Vertex(q.BottomRight, uv.BottomRight, colors.BottomRight, layer)
@@ -431,22 +443,32 @@ module Render =
     /// <summary>
     /// Draws an untextured rectangle to the screen.
     /// </summary>
-    let inline rect (r: Rect) (color: Color) : unit =
-        quad_c r.AsQuad color.AsQuad
+    let inline rect (r: Rect) (color: Color) : unit = quad_c r.AsQuad color.AsQuad
 
-    let inline rect_c (r: Rect) (colors: QuadColors) : unit =
-        quad_c r.AsQuad colors
+    let inline rect_c (r: Rect) (colors: QuadColors) : unit = quad_c r.AsQuad colors
 
     let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (color: Color) : unit =
         quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) color.AsQuad
 
-    let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (colors: QuadColors) : unit =
+    let inline rect_edges_c
+        (left: float32)
+        (top: float32)
+        (right: float32)
+        (bottom: float32)
+        (colors: QuadColors)
+        : unit =
         quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) colors
 
     let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (color: Color) : unit =
         quad_c (Rect.FromSize(left, top, width, height).AsQuad) color.AsQuad
 
-    let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (colors: QuadColors) : unit =
+    let inline rect_size_c
+        (left: float32)
+        (top: float32)
+        (right: float32)
+        (bottom: float32)
+        (colors: QuadColors)
+        : unit =
         quad_c (Rect.FromSize(left, top, right, bottom).AsQuad) colors
 
     /// <summary>
@@ -464,9 +486,10 @@ module Render =
 
     let internal framebuffer_resized
         (framebuffer_width: int, framebuffer_height: int)
-        ((viewport_width: int, viewport_height: int), (viewport_offset_x: float32, viewport_offset_y: float32)) : unit =
-        assert(viewport_width <> 0 && viewport_height <> 0)
-        assert(framebuffer_width >= viewport_width && framebuffer_height >= viewport_height)
+        ((viewport_width: int, viewport_height: int), (viewport_offset_x: float32, viewport_offset_y: float32))
+        : unit =
+        assert (viewport_width <> 0 && viewport_height <> 0)
+        assert (framebuffer_width >= viewport_width && framebuffer_height >= viewport_height)
 
         _framebuffer_width <- framebuffer_width
         _framebuffer_height <- framebuffer_height
@@ -475,13 +498,18 @@ module Render =
         _viewport_height <- viewport_height
 
         _viewport_left <-
-            float32 (framebuffer_width - viewport_width) * viewport_offset_x
-            |> round |> int
-            |> max 0 |> min (framebuffer_width - viewport_width)
+            float32(framebuffer_width - viewport_width) * viewport_offset_x
+            |> round
+            |> int
+            |> max 0
+            |> min(framebuffer_width - viewport_width)
+
         _viewport_top <-
-            float32 (framebuffer_height - viewport_height) * (1.0f - viewport_offset_y) // in OpenGL 0 = bottom of screen not top but I prefer 0 = top
-            |> round |> int
-            |> max 0 |> min (framebuffer_height - viewport_height)
+            float32(framebuffer_height - viewport_height) * (1.0f - viewport_offset_y) // in OpenGL 0 = bottom of screen not top but I prefer 0 = top
+            |> round
+            |> int
+            |> max 0
+            |> min(framebuffer_height - viewport_height)
 
         GL.Viewport(_viewport_left, _viewport_top, _viewport_width, _viewport_height)
         check_gl_error()
@@ -489,21 +517,21 @@ module Render =
         _width <- (width / height) * 1080.0f
         _height <- 1080.0f
 
-        Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
+        Shader.set_uniform_mat4(Shader.projection_loc, create_flipped_projection(_width, _height))
 
         _bounds <- Rect.FromSize(0.0f, 0.0f, _width, _height)
 
-        initialise_fbos ()
+        initialise_fbos()
 
-    let internal start () : unit=
+    let internal start () : unit =
         GL.Clear(ClearBufferMask.ColorBufferBit)
-        _batch.Start ()
+        _batch.Start()
         check_gl_error()
 
     let internal finish () : unit =
-        _batch.Finish ()
-        assert(stencil_depth = 0)
-        assert(alpha_mult = 1.0f)
+        _batch.Finish()
+        assert (stencil_depth = 0)
+        assert (alpha_mult = 1.0f)
         GL.Flush()
         check_gl_error()
 
@@ -512,7 +540,14 @@ module Render =
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Multisample)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
-        GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
+
+        GL.BlendFuncSeparate(
+            BlendingFactorSrc.SrcAlpha,
+            BlendingFactorDest.OneMinusSrcAlpha,
+            BlendingFactorSrc.One,
+            BlendingFactorDest.One
+        )
+
         GL.ClearStencil(0x00)
         check_gl_error()
 
@@ -520,6 +555,7 @@ module Render =
 
         let vw, vh = fst viewport
         let fw, fh = framebuffer
+
         if vw <= 0 || vh <= 0 || fw <= 0 || fh <= 0 then
             framebuffer_resized DEFAULT_SCREEN (DEFAULT_SCREEN, (0.5f, 0.5f))
         else
@@ -539,18 +575,15 @@ module Render =
         | AMD = 2
         | NVIDIA = 3
 
-    let internal detect_gpu_vendor() : GpuVendor =
+    let internal detect_gpu_vendor () : GpuVendor =
         let renderer = GL.GetString(StringName.Renderer)
-        if renderer.Contains("Intel", StringComparison.InvariantCultureIgnoreCase) then
-            GpuVendor.Intel
-        elif renderer.Contains("AMD", StringComparison.InvariantCultureIgnoreCase) then
-            GpuVendor.AMD
-        elif renderer.Contains("NVIDIA", StringComparison.InvariantCultureIgnoreCase) then
-            GpuVendor.NVIDIA
-        else
-            GpuVendor.Unknown
 
-    let debug_info() : string =
+        if renderer.Contains("Intel", StringComparison.InvariantCultureIgnoreCase) then GpuVendor.Intel
+        elif renderer.Contains("AMD", StringComparison.InvariantCultureIgnoreCase) then GpuVendor.AMD
+        elif renderer.Contains("NVIDIA", StringComparison.InvariantCultureIgnoreCase) then GpuVendor.NVIDIA
+        else GpuVendor.Unknown
+
+    let debug_info () : string =
 
         let glfw_version =
             let mutable major = 0
@@ -586,9 +619,9 @@ Texture limits: %s
 OS: %s
 Process: %s"""
             glfw_version
-            (GL.GetString StringName.Version)
-            (GL.GetString StringName.Vendor)
-            (GL.GetString StringName.Renderer)
+            (GL.GetString(StringName.Version))
+            (GL.GetString(StringName.Vendor))
+            (GL.GetString(StringName.Renderer))
             (detect_gpu_vendor())
             texture_units
             Environment.OSVersion.VersionString
@@ -601,13 +634,26 @@ Process: %s"""
         if _batch.active then
             _batch.Draw()
 
-        let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(_viewport_width * _viewport_height * 4)
+        let data =
+            System.Runtime.InteropServices.Marshal.AllocHGlobal(_viewport_width * _viewport_height * 4)
 
-        GL.ReadPixels(_viewport_left, _viewport_top, _viewport_width, _viewport_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
+        GL.ReadPixels(
+            _viewport_left,
+            _viewport_top,
+            _viewport_width,
+            _viewport_height,
+            PixelFormat.Rgba,
+            PixelType.UnsignedByte,
+            data
+        )
 
         let image: Image<Rgba32> =
             Image<Rgba32>
-                .LoadPixelData(Span<byte>(data.ToPointer(), (_viewport_width * _viewport_height * 4)), _viewport_width, _viewport_height)
+                .LoadPixelData(
+                    Span<byte>(data.ToPointer(), (_viewport_width * _viewport_height * 4)),
+                    _viewport_width,
+                    _viewport_height
+                )
 
         image.Mutate(fun i -> i.Flip(FlipMode.Vertical) |> ignore)
         image

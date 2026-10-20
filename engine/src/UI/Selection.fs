@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Input
 
@@ -19,7 +19,7 @@ type ISelection(node_type: NodeType) =
         match node_type with
         | NodeType.None -> false
         | NodeType.Container f ->
-            match f () with
+            match f() with
             | Some child -> child.Focusable
             | None -> false
         | _ -> true
@@ -30,6 +30,7 @@ and [<RequireQualifiedAccess>] NodeType =
     | FocusTrap
     | Container of (unit -> ISelection option)
     | Button of (unit -> unit)
+
     member this._IsNone =
         match this with
         | None -> true
@@ -53,7 +54,7 @@ module Selection =
         if
             by_mouse
             && (
-                match get_selected_element () with
+                match get_selected_element() with
                 | Some x when
                     List.tryHead tree <> Some x
                     && (
@@ -78,7 +79,7 @@ module Selection =
         let mutable ys = ys
         let mutable difference_found = false
 
-        while not (difference_found || xs.IsEmpty || ys.IsEmpty) do
+        while not(difference_found || xs.IsEmpty || ys.IsEmpty) do
             if xs.Head = ys.Head && by_mouse = focused_by_mouse then
                 xs <- List.tail xs
                 ys <- List.tail ys
@@ -86,21 +87,22 @@ module Selection =
                 difference_found <- true
 
         for x in List.rev xs do
-            x.OnUnfocus by_mouse
+            x.OnUnfocus(by_mouse)
 
         for y in ys do
-            y.OnFocus by_mouse
+            y.OnFocus(by_mouse)
+
         focused_by_mouse <- by_mouse
 
     let rec private focus_tree (by_mouse: bool) (tree: ISelection list) =
 
-        if not (check_clamp by_mouse tree) then
+        if not(check_clamp by_mouse tree) then
             ()
         else
 
         if leaf_is_selected then
             match List.tryHead current_tree with
-            | Some w -> w.OnDeselected by_mouse
+            | Some w -> w.OnDeselected(by_mouse)
             | None -> ()
 
             leaf_is_selected <- false
@@ -109,20 +111,20 @@ module Selection =
         current_tree <- tree
 
     let rec private select_tree (by_mouse: bool) (tree: ISelection list) =
-        if not (check_clamp by_mouse tree) then
+        if not(check_clamp by_mouse tree) then
             ()
         else
 
         if tree <> current_tree && leaf_is_selected then
             match List.tryHead current_tree with
-            | Some w -> w.OnDeselected by_mouse
+            | Some w -> w.OnDeselected(by_mouse)
             | None -> ()
 
         diff by_mouse (List.rev current_tree) (List.rev tree)
 
         if tree <> current_tree || not leaf_is_selected then
             match List.tryHead tree with
-            | Some w -> w.OnSelected by_mouse
+            | Some w -> w.OnSelected(by_mouse)
             | None -> ()
 
         leaf_is_selected <- true
@@ -134,7 +136,7 @@ module Selection =
         | NodeType.Leaf -> focus_tree by_mouse item.FocusTree
         | NodeType.FocusTrap -> focus_tree by_mouse item.FocusTree
         | NodeType.Container f ->
-            match f () with
+            match f() with
             | Some child -> focus by_mouse child
             | None -> focus_tree by_mouse item.FocusTree
         | NodeType.Button _ -> focus_tree by_mouse item.FocusTree
@@ -145,12 +147,12 @@ module Selection =
         | NodeType.Leaf -> select_tree by_mouse item.FocusTree
         | NodeType.FocusTrap -> select_tree by_mouse item.FocusTree
         | NodeType.Container f ->
-            match f () with
+            match f() with
             | Some child -> select by_mouse child
             | None -> select_tree by_mouse item.FocusTree
         | NodeType.Button a ->
             focus_tree by_mouse item.FocusTree
-            a ()
+            a()
 
     let rec clamp_to (item: ISelection) = current_clamp_tree <- item.FocusTree
 
@@ -163,7 +165,7 @@ module Selection =
             match current_tree with
             | [] -> ()
             | head :: rest ->
-                head.OnUnfocus by_mouse
+                head.OnUnfocus(by_mouse)
                 current_tree <- rest
                 focused_by_mouse <- by_mouse
 
@@ -183,18 +185,13 @@ module Selection =
 // todo: finish it
 // todo: or delete it
 
-type DragAndDropEvent<'T> =
-    {
-        Origin: float32 * float32
-        Target: float32 * float32
-        Payload: 'T
-    }
+type DragAndDropEvent<'T> = { Origin: float32 * float32; Target: float32 * float32; Payload: 'T }
 
 type IDropzone<'T> =
     abstract member Drop: DragAndDropEvent<'T> -> unit
 
 type DragAndDropAction<'T>(payload: 'T) =
-    let origin = Mouse.pos ()
+    let origin = Mouse.pos()
 
     let mutable _acceptor: IDropzone<'T> option = None
 
@@ -207,14 +204,9 @@ type DragAndDropAction<'T>(payload: 'T) =
     member this.Drop() =
         match _acceptor with
         | Some a ->
-            let target = Mouse.pos ()
+            let target = Mouse.pos()
 
-            a.Drop
-                {
-                    Origin = origin
-                    Target = target
-                    Payload = payload
-                }
+            a.Drop({ Origin = origin; Target = target; Payload = payload })
         | None -> ()
 
 module DragAndDrop =

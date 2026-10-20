@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System
 open System.Drawing
@@ -35,12 +35,13 @@ module Animation =
             with get () =
                 if time_remaining > 0.0 then
                     lerp (float32 <| Math.Pow(POWER, duration - time_remaining)) end_value start_value
-                else end_value
+                else
+                    end_value
             and set (v) =
                 start_value <- v
                 time_remaining <- duration
 
-        member this.Alpha = int (MathF.Round(255.0f * this.Value))
+        member this.Alpha = int(MathF.Round(255.0f * this.Value))
 
         member this.Target
             with get () = end_value
@@ -86,10 +87,10 @@ module Animation =
                 a.Value <- float32 color.A
 
         override this.Update(elapsed_ms) =
-            r.Update elapsed_ms
-            g.Update elapsed_ms
-            b.Update elapsed_ms
-            a.Update elapsed_ms
+            r.Update(elapsed_ms)
+            g.Update(elapsed_ms)
+            b.Update(elapsed_ms)
+            a.Update(elapsed_ms)
 
         override this.Complete = false
 
@@ -119,12 +120,12 @@ module Animation =
 
     type Action(action) =
         inherit Animation()
-        override this.Update(_) = action ()
+        override this.Update(_) = action()
         override this.Complete = true
 
     type ActionLoop(action) =
         inherit Animation()
-        override this.Update(_) = action ()
+        override this.Update(_) = action()
         override this.Complete = false
 
     type Delay(total_ms) =
@@ -138,10 +139,7 @@ module Animation =
         member this.Progress = this.Time / this.Interval
 
         override this.Update(elapsed_ms) =
-            if frameskip then
-                frameskip <- false
-            else
-                elapsed <- elapsed + elapsed_ms
+            if frameskip then frameskip <- false else elapsed <- elapsed + elapsed_ms
 
         override this.Complete = elapsed >= this.Interval
 
@@ -156,12 +154,7 @@ module Animation =
         member this.Add(a: Animation) =
             lock
                 this
-                (fun () ->
-                    if looping then
-                        add_after_loop <- a :: add_after_loop
-                    else
-                        animations <- a :: animations
-                )
+                (fun () -> if looping then add_after_loop <- a :: add_after_loop else animations <- a :: animations)
 
         override this.Complete = animations.IsEmpty
 
@@ -171,7 +164,7 @@ module Animation =
                 | [] -> []
                 | x :: xs ->
                     let f = loop xs in
-                    x.Update elapsed_ms
+                    x.Update(elapsed_ms)
                     if x.Complete then f else x :: f
 
             if not this.Complete then
@@ -182,7 +175,7 @@ module Animation =
                     (fun () ->
                         animations <- loop animations
 
-                        if not (List.isEmpty add_after_loop) then
+                        if not(List.isEmpty add_after_loop) then
                             animations <- add_after_loop @ animations
                             add_after_loop <- []
                     )
@@ -198,7 +191,7 @@ module Animation =
         override this.Update(elapsed_ms) =
             if animations.Count > 0 then
                 let a = animations.Peek()
-                a.Update elapsed_ms
+                a.Update(elapsed_ms)
 
                 if a.Complete then
                     animations.Dequeue() |> ignore
@@ -207,7 +200,7 @@ module Animation =
         let g = Group()
 
         for a in xs do
-            g.Add a
+            g.Add(a)
 
         g
 
@@ -215,6 +208,6 @@ module Animation =
         let s = Sequence()
 
         for a in xs do
-            s.Add a
+            s.Add(a)
 
         s

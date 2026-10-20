@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Input
+namespace Percyqaz.Flux.Input
 
 open System.Collections.Generic
 open OpenTK.Windowing.GraphicsLibraryFramework
@@ -30,7 +30,7 @@ module Hotkeys =
     let inline set (id: string) (value: Bind) = hotkeys.[id] <- value
 
     let reset (id: string) =
-        if defaults.ContainsKey id then
+        if defaults.ContainsKey(id) then
             hotkeys.[id] <- defaults.[id]
         else
             Logging.Warn "Cannot reset hotkey '%s', no default exists" id
@@ -41,7 +41,7 @@ module Hotkeys =
 
     let import (d: Dictionary<string, Bind>) =
         for k in d.Keys do
-            if (hotkeys.Remove k) then
+            if (hotkeys.Remove(k)) then
                 hotkeys.Add(k, d.[k])
 
         hotkeys

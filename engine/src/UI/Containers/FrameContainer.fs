@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System.Drawing
 open System.Runtime.CompilerServices
@@ -28,7 +28,7 @@ type FrameContainer(node_type: NodeType) =
         base.Draw()
 
     static member Create(child: Widget) =
-        FrameContainer(NodeType.Container(K (Some child))).With(child)
+        FrameContainer(NodeType.Container(K(Some child))).With(child)
 
 type FrameContainerExtensions() =
 

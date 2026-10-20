@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 /// Container whose content can be swapped for other widgets
 type SwapContainer(current: Widget) as this =
@@ -16,20 +16,17 @@ type SwapContainer(current: Widget) as this =
             current <- child
 
             if this.Initialised then
-                if not child.Initialised then
-                    child.Init this
-                else
-                    assert (child.Parent = this)
+                if not child.Initialised then child.Init(this) else assert (child.Parent = this)
 
             if old_child.Focused then
-                child.Focus false
+                child.Focus(false)
 
             swapped_last_frame <- true
 
     override this.Init(parent) =
-        base.Init parent
+        base.Init(parent)
 
-        current.Init this
+        current.Init(this)
 
     override this.Draw() = current.Draw()
 

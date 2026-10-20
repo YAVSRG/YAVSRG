@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Input
+namespace Percyqaz.Flux.Input
 
 open System
 open OpenTK
@@ -20,18 +20,18 @@ type Bind =
     override this.ToString() =
         match this with
         | Dummy -> "NONE"
-        | Key(k, m) -> Bind.ModifierString m + Bind.FormatKey k
+        | Key(k, m) -> Bind.ModifierString(m) + Bind.FormatKey(k)
         | Mouse b -> "M" + b.ToString()
 
     member this.WithModifiers(ctrl: bool, alt: bool, shift: bool) : Bind =
         match this with
         | Dummy -> Dummy
-        | Key (k, _) -> Key (k, (ctrl, alt, shift))
+        | Key(k, _) -> Key(k, (ctrl, alt, shift))
         | Mouse b -> Mouse b
 
     member this.IsKeyWithAnyModifiers(k: Keys) : bool =
         match this with
-        | Key (k1, _) when k1 = k -> true
+        | Key(k1, _) when k1 = k -> true
         | _ -> false
 
     static member private FormatKey(k: Keys) : string =
@@ -78,9 +78,7 @@ type Bind =
         | _ -> k.ToString()
 
     static member private ModifierString(ctrl: bool, alt: bool, shift: bool) : string =
-        (if ctrl then "Ctrl + " else "")
-        + (if alt then "Alt + " else "")
-        + (if shift then "Shift + " else "")
+        (if ctrl then "Ctrl + " else "") + (if alt then "Alt + " else "") + (if shift then "Shift + " else "")
 
     static member internal IsModifier(key: Keys) : bool =
         key = Keys.LeftShift
@@ -146,99 +144,145 @@ module internal InputThread =
     let mutable private held_mouse_buttons = Set.empty<MouseButton>
 
     let mutable private typing = false
-    let mutable private typing_buffered_input : InputEvent voption = ValueNone
+    let mutable private typing_buffered_input: InputEvent voption = ValueNone
     let mutable internal glfw_polls_since_fetch = 0
 
     let private LOCK_OBJ = Object()
 
     let private char_callback (_: nativeptr<Window>) (char: uint32) : unit =
         if typing then
-            lock LOCK_OBJ (fun () ->
-                typed_text <- typed_text + Char.ConvertFromUtf32(int32 char)
-                typing_buffered_input <- ValueNone
-            )
-    let private char_callback_d = GLFWCallbacks.CharCallback char_callback
+            lock
+                LOCK_OBJ
+                (fun () ->
+                    typed_text <- typed_text + Char.ConvertFromUtf32(int32 char)
+                    typing_buffered_input <- ValueNone
+                )
+
+    let private char_callback_d = GLFWCallbacks.CharCallback(char_callback)
 
     let private cursor_pos_callback (window: nativeptr<Window>) (x: float) (y: float) : unit =
-        lock LOCK_OBJ (fun () ->
-            let pc_x = (float32 x - float32 Render._viewport_left) / float32 Render._viewport_width
-            mouse_x <- Math.Clamp(Render._width * pc_x, 0.0f, Render._width)
+        lock
+            LOCK_OBJ
+            (fun () ->
+                let pc_x =
+                    (float32 x - float32 Render._viewport_left) / float32 Render._viewport_width
 
-            let pc_y = (float32 y - float32 Render._viewport_top) / float32 Render._viewport_height
-            mouse_y <- Math.Clamp(Render._height * pc_y, 0.0f, Render._height)
+                mouse_x <- Math.Clamp(Render._width * pc_x, 0.0f, Render._width)
 
-            let was_in_bounds = cursor_in_bounds
-            cursor_in_bounds <- pc_x >= 0.0f && pc_y >= 0.0f && pc_x <= 1.0f && pc_y <= 1.0f
-            if cursor_in_bounds <> was_in_bounds && hide_cursor then
-                GLFW.SetInputMode(window, CursorStateAttribute.Cursor, if cursor_in_bounds then CursorModeValue.CursorHidden else CursorModeValue.CursorNormal)
-        )
-    let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
+                let pc_y =
+                    (float32 y - float32 Render._viewport_top) / float32 Render._viewport_height
+
+                mouse_y <- Math.Clamp(Render._height * pc_y, 0.0f, Render._height)
+
+                let was_in_bounds = cursor_in_bounds
+                cursor_in_bounds <- pc_x >= 0.0f && pc_y >= 0.0f && pc_x <= 1.0f && pc_y <= 1.0f
+
+                if cursor_in_bounds <> was_in_bounds && hide_cursor then
+                    GLFW.SetInputMode(
+                        window,
+                        CursorStateAttribute.Cursor,
+                        if cursor_in_bounds then CursorModeValue.CursorHidden else CursorModeValue.CursorNormal
+                    )
+            )
+
+    let private cursor_pos_callback_d =
+        GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
 
     let private scroll_callback (_: nativeptr<Window>) (_offset_x: float) (offset_y: float) : unit =
-        lock LOCK_OBJ (fun () ->
-            mouse_z <- mouse_z + float32 offset_y
-        )
+        lock LOCK_OBJ (fun () -> mouse_z <- mouse_z + float32 offset_y)
+
     let private scroll_callback_d = GLFWCallbacks.ScrollCallback(scroll_callback)
 
-    let private key_callback (_: nativeptr<Window>) (key: Keys) (_scancode: int) (action: InputAction) (modifiers: KeyModifiers) : unit =
+    let private key_callback
+        (_: nativeptr<Window>)
+        (key: Keys)
+        (_scancode: int)
+        (action: InputAction)
+        (modifiers: KeyModifiers)
+        : unit =
         let event =
             {
                 Bind =
                     (key,
-                        (
-                            modifiers &&& KeyModifiers.Control = KeyModifiers.Control,
-                            modifiers &&& KeyModifiers.Alt = KeyModifiers.Alt,
-                            modifiers &&& KeyModifiers.Shift = KeyModifiers.Shift
-                        )
-                    ) |> Bind.Key
+                     (modifiers &&& KeyModifiers.Control = KeyModifiers.Control,
+                      modifiers &&& KeyModifiers.Alt = KeyModifiers.Alt,
+                      modifiers &&& KeyModifiers.Shift = KeyModifiers.Shift))
+                    |> Bind.Key
                 Action = action
                 GLFWTimestamp = GLFW.GetTime()
                 AudioPosition = Song.PositionInputEngine()
             }
-        lock LOCK_OBJ (fun () ->
-            if typing then
-                typing_buffered_input <- ValueSome event
-            else
-                events_buffer <- List.append events_buffer [ event ]
 
-            if action = InputAction.Release then
-                if key = Keys.LeftControl || key = Keys.RightControl then ctrl <- false
-                elif key = Keys.LeftAlt || key = Keys.RightAlt then alt <- false
-                elif key = Keys.LeftShift || key = Keys.RightShift then shift <- false
+        lock
+            LOCK_OBJ
+            (fun () ->
+                if typing then
+                    typing_buffered_input <- ValueSome event
+                else
+                    events_buffer <- List.append events_buffer [ event ]
 
-                held_keys <- Set.remove key held_keys
+                if action = InputAction.Release then
+                    if key = Keys.LeftControl || key = Keys.RightControl then
+                        ctrl <- false
+                    elif key = Keys.LeftAlt || key = Keys.RightAlt then
+                        alt <- false
+                    elif key = Keys.LeftShift || key = Keys.RightShift then
+                        shift <- false
 
-            elif action = InputAction.Press then
-                if key = Keys.LeftControl || key = Keys.RightControl then ctrl <- true
-                elif key = Keys.LeftAlt || key = Keys.RightAlt then alt <- true
-                elif key = Keys.LeftShift || key = Keys.RightShift then shift <- true
+                    held_keys <- Set.remove key held_keys
 
-                held_keys <- Set.add key held_keys
-        )
+                elif action = InputAction.Press then
+                    if key = Keys.LeftControl || key = Keys.RightControl then
+                        ctrl <- true
+                    elif key = Keys.LeftAlt || key = Keys.RightAlt then
+                        alt <- true
+                    elif key = Keys.LeftShift || key = Keys.RightShift then
+                        shift <- true
+
+                    held_keys <- Set.add key held_keys
+            )
+
     let private key_callback_d = GLFWCallbacks.KeyCallback(key_callback)
 
-    let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (_modifiers: KeyModifiers) : unit =
+    let private mouse_button_callback
+        (_: nativeptr<Window>)
+        (button: MouseButton)
+        (action: InputAction)
+        (_modifiers: KeyModifiers)
+        : unit =
         let event =
             {
-                Bind = Bind.Mouse button
+                Bind = Bind.Mouse(button)
                 Action = action
                 GLFWTimestamp = GLFW.GetTime()
                 AudioPosition = Song.PositionInputEngine()
             }
-        lock LOCK_OBJ (fun () ->
-            events_buffer <- List.append events_buffer [ event ]
-            if action = InputAction.Release then
-                held_mouse_buttons <- Set.remove button held_mouse_buttons
-            elif action = InputAction.Press then
-                held_mouse_buttons <- Set.add button held_mouse_buttons
-        )
-    let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
+
+        lock
+            LOCK_OBJ
+            (fun () ->
+                events_buffer <- List.append events_buffer [ event ]
+
+                if action = InputAction.Release then
+                    held_mouse_buttons <- Set.remove button held_mouse_buttons
+                elif action = InputAction.Press then
+                    held_mouse_buttons <- Set.add button held_mouse_buttons
+            )
+
+    let private mouse_button_callback_d =
+        GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
 
     let enable_typing (v: bool) : unit =
-        lock LOCK_OBJ (fun () -> typing <- v; typing_buffered_input <- ValueNone)
+        lock
+            LOCK_OBJ
+            (fun () ->
+                typing <- v
+                typing_buffered_input <- ValueNone
+            )
 
     let set_cursor_hidden (b: bool) (window: nativeptr<Window>) : unit =
         hide_cursor <- b
+
         if not b then
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
         elif OperatingSystem.IsMacOS() && GLFW.RawMouseMotionSupported() then
@@ -248,7 +292,7 @@ module internal InputThread =
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
 
     let init (window: nativeptr<Window>) : unit =
-        GLFW.SetInputMode(window, LockKeyModAttribute.LockKeyMods, true);
+        GLFW.SetInputMode(window, LockKeyModAttribute.LockKeyMods, true)
         GLFW.SetCharCallback(window, char_callback_d) |> ignore
         GLFW.SetKeyCallback(window, key_callback_d) |> ignore
         GLFW.SetMouseButtonCallback(window, mouse_button_callback_d) |> ignore
@@ -284,7 +328,8 @@ module internal InputThread =
                                 else
                                     events_buffer
                             | _ -> events_buffer
-                        else events_buffer
+                        else
+                            events_buffer
 
                     events_buffer <- []
                     typed_text <- ""
@@ -317,7 +362,7 @@ module Input =
         match input_listener with
         | InputListener.Text(_, on_remove) ->
             InputThread.enable_typing false
-            on_remove ()
+            on_remove()
         | InputListener.Bind _
         | InputListener.None -> ()
 
@@ -328,7 +373,7 @@ module Input =
     /// `mouse_cancel` set to true will cause the listener to automatically disconnect itself when the mouse is moved too much
     /// `on_remove` is called when the text listening mode is exited
     let listen_to_text (text: Setting<string>, mouse_cancel: bool, on_remove: unit -> unit) : unit =
-        remove_listener ()
+        remove_listener()
         input_listener <- InputListener.Text(text, on_remove)
         InputThread.enable_typing true
         input_listener_mouse_cancel <- if mouse_cancel then 0f else -infinityf
@@ -337,11 +382,10 @@ module Input =
     /// The next key (including modifiers) pressed will be passed to `callback` as a Bind
     /// Then the listener is removed
     let listen_to_next_key (callback: Bind -> unit) : unit =
-        remove_listener ()
-        input_listener <- InputListener.Bind callback
+        remove_listener()
+        input_listener <- InputListener.Bind(callback)
 
-    let key_held_any_modifiers (key: Keys) : bool =
-        this_frame.HeldKeys.Contains key
+    let key_held_any_modifiers (key: Keys) : bool = this_frame.HeldKeys.Contains(key)
 
     let pop_key_any_modifiers (key: Keys, action: InputAction) : (bool * bool * bool) voption =
         let mutable out = ValueNone
@@ -351,7 +395,7 @@ module Input =
             | [] -> []
             | event :: xs when event.Action = action ->
                 match event.Bind with
-                | Bind.Key (k, modifiers) when k = key ->
+                | Bind.Key(k, modifiers) when k = key ->
                     out <- ValueSome modifiers
                     xs
                 | _ -> event :: f xs
@@ -415,7 +459,8 @@ module Input =
         events_this_frame <- search events_this_frame
         out
 
-    let button_pressed_recently () : bool = GLFW.GetTime() - last_input_event < 0.100
+    let button_pressed_recently () : bool =
+        GLFW.GetTime() - last_input_event < 0.100
 
     let held (bind: Bind) : bool =
         if this_frame_finished then
@@ -429,10 +474,8 @@ module Input =
         | Bind.Key(Keys.RightAlt, _) -> this_frame.Alt
         | Bind.Key(Keys.LeftShift, _)
         | Bind.Key(Keys.RightShift, _) -> this_frame.Shift
-        | Bind.Key(k, m) ->
-            this_frame.HeldKeys.Contains k
-            && m = (this_frame.Ctrl, this_frame.Alt, this_frame.Shift)
-        | Bind.Mouse m -> this_frame.HeldMouseButtons.Contains m
+        | Bind.Key(k, m) -> this_frame.HeldKeys.Contains(k) && m = (this_frame.Ctrl, this_frame.Alt, this_frame.Shift)
+        | Bind.Mouse m -> this_frame.HeldMouseButtons.Contains(m)
         | Bind.Dummy -> false
 
     let private DELETE_CHARACTER = Bind.mk Keys.Backspace
@@ -448,10 +491,17 @@ module Input =
             if this_frame.TypedText <> "" then
                 text.Value <- text.Value + this_frame.TypedText
 
-            if text.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputAction.Press) || pop_matching(DELETE_CHARACTER, InputAction.Repeat)) then
+            if
+                text.Value.Length > 0
+                && (pop_matching(DELETE_CHARACTER, InputAction.Press)
+                    || pop_matching(DELETE_CHARACTER, InputAction.Repeat))
+            then
                 Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) text
 
-            elif text.Value.Length > 0 && (pop_matching(DELETE_WORD, InputAction.Press) || pop_matching(DELETE_WORD, InputAction.Repeat)) then
+            elif
+                text.Value.Length > 0
+                && (pop_matching(DELETE_WORD, InputAction.Press) || pop_matching(DELETE_WORD, InputAction.Repeat))
+            then
                 text.Value <-
                     let parts = text.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
@@ -468,28 +518,28 @@ module Input =
                           ""
 
             if input_listener_mouse_cancel > 200f then
-                remove_listener ()
+                remove_listener()
 
         | InputListener.Bind callback ->
             match pop_any InputAction.Press with
             | ValueSome bind ->
                 match bind with
                 | Bind.Key(key, _) ->
-                    if Bind.IsModifier key then
+                    if Bind.IsModifier(key) then
                         ()
                     else
-                        remove_listener ()
+                        remove_listener()
                         callback bind
                 | _ ->
-                    remove_listener ()
+                    remove_listener()
                     callback bind
             | ValueNone ->
                 match pop_any InputAction.Release with
                 | ValueSome bind ->
                     match bind with
                     | Bind.Key(key, _) ->
-                        if Bind.IsModifier key then
-                            remove_listener ()
+                        if Bind.IsModifier(key) then
+                            remove_listener()
                             callback bind
                     | _ -> ()
                 | ValueNone -> ()
@@ -500,15 +550,12 @@ module Input =
     /// This makes the data available during the next game frame for UI to query
     let begin_frame_events () : unit =
         last_frame <- this_frame
-        InputThread.fetch (&events_this_frame, &this_frame)
+        InputThread.fetch(&events_this_frame, &this_frame)
 
         if Object.ReferenceEquals(null, last_frame) then
             last_frame <- this_frame
 
-        if
-            (this_frame.MouseX <> last_frame.MouseX)
-            || (this_frame.MouseY <> last_frame.MouseY)
-        then
+        if (this_frame.MouseX <> last_frame.MouseX) || (this_frame.MouseY <> last_frame.MouseY) then
             last_time_mouse_moved <- GLFW.GetTime()
 
         if events_this_frame <> [] then
@@ -516,13 +563,13 @@ module Input =
 
         scrolled_this_frame <- this_frame.MouseZ - last_frame.MouseZ
         this_frame_finished <- false
-        update_input_listener ()
+        update_input_listener()
 
     let finish_frame_events () : unit =
         input_listener_mouse_cancel <-
             input_listener_mouse_cancel
-            + abs (this_frame.MouseX - last_frame.MouseX)
-            + abs (this_frame.MouseY - last_frame.MouseY)
+            + abs(this_frame.MouseX - last_frame.MouseX)
+            + abs(this_frame.MouseY - last_frame.MouseY)
 
         last_frame <- this_frame
         events_this_frame <- []
@@ -548,8 +595,8 @@ module Mouse =
     /// Used to hide the game cursor and restore the real one if your mouse leaves the letterboxing area
     let in_bounds () : bool = Input.this_frame.CursorInBounds
 
-    let x () : float32 = fst (pos ())
-    let y () : float32 = snd (pos ())
+    let x () : float32 = fst(pos())
+    let y () : float32 = snd(pos())
 
     /// Get how much the mouse wheel was scrolled since last frame
     /// Once called, the caller is now the **sole owner** of this scrolling and subsequent calls will get 0 until next frame
@@ -561,21 +608,22 @@ module Mouse =
         v
 
     let private clicked (mouse_button: MouseButton) : bool =
-        Input.pop_matching(Bind.Mouse mouse_button, InputAction.Press)
+        Input.pop_matching(Bind.Mouse(mouse_button), InputAction.Press)
 
     let left_clicked () : bool = clicked LEFT
     let right_clicked () : bool = clicked RIGHT
     let middle_clicked () : bool = clicked MIDDLE
 
-    let held (mouse_button: MouseButton) : bool = Input.held (Bind.Mouse mouse_button)
+    let held (mouse_button: MouseButton) : bool = Input.held(Bind.Mouse(mouse_button))
 
     let released (mouse_button: MouseButton) : bool =
-        Input.pop_matching(Bind.Mouse mouse_button, InputAction.Release)
+        Input.pop_matching(Bind.Mouse(mouse_button), InputAction.Release)
 
-    let moved_recently () : bool = GLFW.GetTime() - Input.last_time_mouse_moved < 0.100
+    let moved_recently () : bool =
+        GLFW.GetTime() - Input.last_time_mouse_moved < 0.100
 
     let hover (r: Rect) : bool =
-        not Input.this_frame_finished && r.Contains(pos ())
+        not Input.this_frame_finished && r.Contains(pos())
 
 type Bind with
     member this.Held() =
@@ -593,9 +641,7 @@ type Bind with
     member this.PressedOrRepeated() =
         match this with
         | Key _
-        | Mouse _ ->
-            Input.pop_matching(this, InputAction.Press)
-            || Input.pop_matching(this, InputAction.Repeat)
+        | Mouse _ -> Input.pop_matching(this, InputAction.Press) || Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
     member this.Pressed() =

@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Input
 
@@ -10,7 +10,7 @@ type HotkeyListener(hotkey: Hotkey, action: unit -> unit) =
         base.Update(elapsed_ms, moved)
 
         if (%%hotkey).Pressed() then
-            action ()
+            action()
 
     override this.Draw() = ()
 
@@ -27,7 +27,7 @@ type HotkeyHoldAction(hotkey: Hotkey, on_tap: unit -> unit, on_hold: unit -> uni
         base.Update(elapsed_ms, moved)
 
         if (%%hotkey).Pressed() then
-            on_tap ()
+            on_tap()
             hold_time_remaining <- HOLD_TIME_MS
 
         if (%%hotkey).Held() then
@@ -35,6 +35,6 @@ type HotkeyHoldAction(hotkey: Hotkey, on_tap: unit -> unit, on_hold: unit -> uni
                 hold_time_remaining <- hold_time_remaining - elapsed_ms
 
                 if hold_time_remaining < 0 then
-                    on_hold ()
+                    on_hold()
 
     override this.Draw() = ()
