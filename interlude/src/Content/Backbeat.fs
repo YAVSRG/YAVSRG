@@ -1,4 +1,4 @@
-﻿namespace Interlude.Content
+namespace Interlude.Content
 
 open Percyqaz.Common
 open Prelude
@@ -16,7 +16,7 @@ module Backbeat =
                     | Some _ -> return true
                     | None ->
 
-                    let mutable identified_chart : Charts.Identify.Response option = None
+                    let mutable identified_chart: Charts.Identify.Response option = None
                     do! Charts.Identify.get_async(chart_id, fun _res -> identified_chart <- _res)
 
                     match identified_chart with
@@ -27,8 +27,10 @@ module Backbeat =
                     | None -> return false
                     | Some found ->
 
-                    match! OnlineImports.cdn_install (folder_name, chart_id, found.Chart, found.Song, Content.Charts) with
-                    | Ok () ->
+                    match!
+                        OnlineImports.cdn_install(folder_name, chart_id, found.Chart, found.Song, Content.Charts)
+                    with
+                    | Ok() ->
                         Content.TriggerChartAdded()
                         return true
                     | Error reason ->

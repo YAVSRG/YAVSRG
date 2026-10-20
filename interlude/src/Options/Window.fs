@@ -1,4 +1,4 @@
-﻿namespace Interlude.Options
+namespace Interlude.Options
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -13,7 +13,7 @@ type WindowSettings =
         WindowedResolution: Setting<WindowedResolution>
         FullscreenVideoMode: Setting<FullscreenVideoMode>
         RenderMode: Setting<FrameLimit>
-        CustomFrameLimit : Setting.Bounded<int>
+        CustomFrameLimit: Setting.Bounded<int>
         SmartCapAntiJitter: Setting<bool>
         SmartCapFramerateMultiplier: Setting<float>
         SmartCapTearlinePosition: Setting.Bounded<float>
@@ -29,13 +29,7 @@ type WindowSettings =
             WorkingDirectory = ""
             WindowMode = Setting.simple WindowType.BorderlessNoTaskbar
             WindowedResolution = Setting.simple WindowedResolution.DEFAULT
-            FullscreenVideoMode =
-                Setting.simple
-                    {
-                        Width = 1920
-                        Height = 1080
-                        RefreshRate = 60
-                    }
+            FullscreenVideoMode = Setting.simple { Width = 1920; Height = 1080; RefreshRate = 60 }
             RenderMode = Setting.simple FrameLimit.Smart
             CustomFrameLimit = Setting.bounded (30, 5000) 1000
             SmartCapAntiJitter = Setting.simple false
@@ -48,7 +42,7 @@ type WindowSettings =
             MSAASamples = Setting.simple 4
         }
 
-    member this.ToOptions : WindowOptions =
+    member this.ToOptions: WindowOptions =
         {
             WindowMode = this.WindowMode.Value
             WindowedResolution = this.WindowedResolution.Value
@@ -66,6 +60,6 @@ type WindowSettings =
             MSAASamples = this.MSAASamples.Value
         }
 
-    member this.Apply () =
+    member this.Apply() =
         let as_options = this.ToOptions
-        WindowThread.defer (fun () -> WindowThread.apply_config as_options)
+        WindowThread.defer(fun () -> WindowThread.apply_config as_options)

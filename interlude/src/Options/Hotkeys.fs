@@ -1,4 +1,4 @@
-﻿namespace Interlude.Options
+namespace Interlude.Options
 
 open System.Collections.Generic
 open Percyqaz.Flux.Input
@@ -21,7 +21,7 @@ module Hotkeys =
         Hotkeys.register "next_group" (mk Keys.PageDown)
         Hotkeys.register "start" (mk Keys.Home)
         Hotkeys.register "end" (mk Keys.End)
-        Hotkeys.register "pause_music" (Bind.Mouse MouseButton.Middle)
+        Hotkeys.register "pause_music" (Bind.Mouse(MouseButton.Middle))
 
         Hotkeys.register "import" (ctrl Keys.I)
         Hotkeys.register "options" (ctrl Keys.O)

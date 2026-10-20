@@ -1,4 +1,4 @@
-﻿namespace Interlude.Content
+namespace Interlude.Content
 
 open System
 open System.IO
@@ -36,7 +36,7 @@ module Rulesets =
         let path = get_game_folder "Rulesets"
         let default_path = Path.Combine(path, DEFAULT_ID + ".ruleset")
 
-        if not (File.Exists default_path) then
+        if not(File.Exists(default_path)) then
             JSON.ToFile (default_path, true) DEFAULT_RULESET
 
         for f in Directory.GetFiles(path) do
@@ -50,10 +50,10 @@ module Rulesets =
                     | Error reason -> Logging.Error "Error validating ruleset '%s': %s" id reason
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
-        if not (loaded.ContainsKey DEFAULT_ID) then
+        if not(loaded.ContainsKey(DEFAULT_ID)) then
             loaded.Add(DEFAULT_ID, DEFAULT_RULESET)
 
-        if not (loaded.ContainsKey _selected_id.Value) then
+        if not(loaded.ContainsKey(_selected_id.Value)) then
             Logging.Warn "Ruleset '%s' not found, switching to default" _selected_id.Value
             _selected_id.Value <- DEFAULT_ID
 
@@ -61,14 +61,14 @@ module Rulesets =
         current_hash <- Ruleset.hash current
 
     let init () =
-        load ()
+        load()
         initialised <- true
 
-    let selected_id : Setting<string> =
+    let selected_id: Setting<string> =
         Setting.make
             (fun new_id ->
                 if initialised then
-                    if not (loaded.ContainsKey new_id) then
+                    if not(loaded.ContainsKey(new_id)) then
                         Logging.Warn "Ruleset '%s' not found, switching to default" new_id
                         _selected_id.Value <- DEFAULT_ID
                     else
@@ -76,7 +76,7 @@ module Rulesets =
 
                     current <- loaded.[_selected_id.Value]
                     current_hash <- Ruleset.hash current
-                    on_changed_ev.Trigger current
+                    on_changed_ev.Trigger(current)
                 else
                     _selected_id.Value <- new_id
             )
@@ -85,7 +85,7 @@ module Rulesets =
     let by_id (id: string) : Ruleset = loaded.[id]
 
     let by_hash (hash: string) : Ruleset option =
-        loaded.Values |> Seq.tryFind (fun rs -> Ruleset.hash rs = hash)
+        loaded.Values |> Seq.tryFind(fun rs -> Ruleset.hash rs = hash)
 
     /// Each ruleset and its file ID, sorted alphabetically
     let list () : (string * Ruleset) seq =
@@ -93,24 +93,34 @@ module Rulesets =
             for k in loaded.Keys do
                 yield (k, loaded.[k])
         }
-        |> Seq.sortBy (fun (_, rs) -> rs.Name.ToLowerInvariant())
+        |> Seq.sortBy(fun (_, rs) -> rs.Name.ToLowerInvariant())
 
-    let exists (id: string) : bool = loaded.ContainsKey id
+    let exists (id: string) : bool = loaded.ContainsKey(id)
 
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
     let install (ruleset: Ruleset) : unit =
 
-        let new_id : string =
+        let new_id: string =
             ruleset.Name
-            |> Seq.filter (function '\'' | '_' | '.' | ' ' -> true | c -> Char.IsAsciiLetterOrDigit c)
+            |> Seq.filter(
+                function
+                | '\''
+                | '_'
+                | '.'
+                | ' ' -> true
+                | c -> Char.IsAsciiLetterOrDigit(c)
+            )
             |> Array.ofSeq
             |> String
             |> fun s -> s.ToLowerInvariant()
-            |> fun s -> s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
+            |> fun s ->
+                s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+                |> String.concat "-"
 
-        let new_id = if exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
+        let new_id =
+            if exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
 
-        assert(not (loaded.ContainsKey new_id))
+        assert (not(loaded.ContainsKey(new_id)))
 
         loaded.Add(new_id, ruleset)
 
@@ -119,20 +129,34 @@ module Rulesets =
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     let update (existing_id: string) (ruleset: Ruleset) : unit =
 
-        let new_id : string =
+        let new_id: string =
             ruleset.Name
-            |> Seq.filter (function '\'' | '_' | '.' | ' ' -> true | c -> Char.IsAsciiLetterOrDigit c)
+            |> Seq.filter(
+                function
+                | '\''
+                | '_'
+                | '.'
+                | ' ' -> true
+                | c -> Char.IsAsciiLetterOrDigit(c)
+            )
             |> Array.ofSeq
             |> String
             |> fun s -> s.ToLowerInvariant()
-            |> fun s -> s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
+            |> fun s ->
+                s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+                |> String.concat "-"
 
-        let new_id = if new_id <> existing_id && exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
+        let new_id =
+            if new_id <> existing_id && exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
 
         let new_id =
             try
                 if new_id <> existing_id then
-                    File.Move(Path.Combine(get_game_folder "Rulesets", existing_id + ".ruleset"), Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
+                    File.Move(
+                        Path.Combine(get_game_folder "Rulesets", existing_id + ".ruleset"),
+                        Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset")
+                    )
+
                 new_id
             with err ->
                 Logging.Error "Failed to move ruleset file from '%s' to '%s': %O" existing_id new_id err
@@ -145,7 +169,7 @@ module Rulesets =
                 _selected_id.Value <- new_id
                 current <- ruleset
                 current_hash <- Ruleset.hash current
-                on_changed_ev.Trigger current
+                on_changed_ev.Trigger(current)
 
             JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
 
@@ -153,9 +177,9 @@ module Rulesets =
         if id <> DEFAULT_ID && exists id then
             try
                 File.Delete(Path.Combine(get_game_folder "Rulesets", id + ".ruleset"))
-                loaded.Remove id
-            with
-            | :? IOException as err ->
+                loaded.Remove(id)
+            with :? IOException as err ->
                 Logging.Error "IO error deleting ruleset: %O" err
                 false
-        else false
+        else
+            false

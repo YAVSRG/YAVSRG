@@ -1,10 +1,8 @@
 **/bin
 **/obj
 online
+backbeat
 engine/tests
-interlude
-!interlude/src/Features
-!interlude/src/UI
 libraries
 prelude/src/Shared/Helpers.fs
 prelude/src/Calculator

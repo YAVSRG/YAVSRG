@@ -1,4 +1,4 @@
-﻿namespace Interlude.Content
+namespace Interlude.Content
 
 open Prelude.Data.Library
 open Prelude.Data.Stats
@@ -12,9 +12,10 @@ module private Data =
         stats <- Stats.FromUserDatabase(library.UserData)
 
     let deinit () : unit =
-        if not (isNull (stats :> obj)) then
+        if not(isNull(stats :> obj)) then
             stats.Save()
-        if not (isNull (library :> obj)) then
+
+        if not(isNull(library :> obj)) then
             library.Save()
 
     let charts_updated_ev = Event<unit>()
