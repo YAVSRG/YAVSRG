@@ -1,4 +1,4 @@
-namespace Interlude.Web.Tests.Domain.Core
+﻿namespace Interlude.Web.Tests.Domain.Core
 
 open NUnit.Framework
 
@@ -54,27 +54,27 @@ module TablesTests =
         TableRating.set user_id3 "TableB" 0.0
         TableRating.set user_id4 "TableA" 11.0
 
-        let leaderboardA = TableRating.leaderboard "TableA"
+        let leaderboard_a = TableRating.leaderboard "TableA"
 
-        Assert.AreEqual(3, leaderboardA.Length)
+        Assert.AreEqual(3, leaderboard_a.Length)
 
-        Assert.AreEqual(user_id3, leaderboardA.[0].UserId)
-        Assert.AreEqual(user_id4, leaderboardA.[1].UserId)
-        Assert.AreEqual(user_id1, leaderboardA.[2].UserId)
+        Assert.AreEqual(user_id3, leaderboard_a.[0].UserId)
+        Assert.AreEqual(user_id4, leaderboard_a.[1].UserId)
+        Assert.AreEqual(user_id1, leaderboard_a.[2].UserId)
 
-        Assert.AreEqual(100.0, leaderboardA.[0].Rating)
-        Assert.AreEqual(11.0, leaderboardA.[1].Rating)
-        Assert.AreEqual(10.0, leaderboardA.[2].Rating)
+        Assert.AreEqual(100.0, leaderboard_a.[0].Rating)
+        Assert.AreEqual(11.0, leaderboard_a.[1].Rating)
+        Assert.AreEqual(10.0, leaderboard_a.[2].Rating)
 
-        let leaderboardB = TableRating.leaderboard "TableB"
+        let leaderboard_b = TableRating.leaderboard "TableB"
 
-        Assert.AreEqual(2, leaderboardB.Length)
+        Assert.AreEqual(2, leaderboard_b.Length)
 
-        Assert.AreEqual(user_id2, leaderboardB.[0].UserId)
-        Assert.AreEqual(user_id3, leaderboardB.[1].UserId)
+        Assert.AreEqual(user_id2, leaderboard_b.[0].UserId)
+        Assert.AreEqual(user_id3, leaderboard_b.[1].UserId)
 
-        Assert.AreEqual(5.0, leaderboardB.[0].Rating)
-        Assert.AreEqual(0.0, leaderboardB.[1].Rating)
+        Assert.AreEqual(5.0, leaderboard_b.[0].Rating)
+        Assert.AreEqual(0.0, leaderboard_b.[1].Rating)
 
     [<Test>]
     let TableRating_EmptyLeaderboard () =
