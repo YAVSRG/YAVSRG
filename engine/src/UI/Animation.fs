@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.UI
+﻿namespace Percyqaz.Flux.UI
 
 open System
 open System.Drawing
@@ -34,10 +34,10 @@ module Animation =
         member this.Value
             with get () =
                 if time_remaining > 0.0 then
-                    lerp (float32 <| Math.Pow(POWER, duration - time_remaining)) end_value start_value
+                    lerp (float32(Math.Pow(POWER, duration - time_remaining))) end_value start_value
                 else
                     end_value
-            and set (v) =
+            and set (v: float32) =
                 start_value <- v
                 time_remaining <- duration
 
@@ -45,20 +45,20 @@ module Animation =
 
         member this.Target
             with get () = end_value
-            and set (t) =
+            and set (t: float32) =
                 start_value <- this.Value
                 end_value <- t
                 time_remaining <- duration
 
         member this.Moving = time_remaining > 0.0
 
-        override this.Update(elapsed_ms: float) =
+        override this.Update(elapsed_ms: float) : unit =
             if time_remaining > 0.0 then
                 time_remaining <- time_remaining - elapsed_ms
 
         override this.Complete = false
 
-        member this.Snap() =
+        member this.Snap() : unit =
             start_value <- end_value
             time_remaining <- 0.0
 
@@ -86,7 +86,7 @@ module Animation =
                 b.Value <- float32 color.B
                 a.Value <- float32 color.A
 
-        override this.Update(elapsed_ms) =
+        override this.Update(elapsed_ms: float) : unit =
             r.Update(elapsed_ms)
             g.Update(elapsed_ms)
             b.Update(elapsed_ms)
@@ -94,12 +94,12 @@ module Animation =
 
         override this.Complete = false
 
-    type Counter(milliseconds) =
+    type Counter(milliseconds: float) =
         inherit Animation()
         let mutable elapsed = 0.0
         let mutable loops = 0
 
-        override this.Update(elapsed_ms) =
+        override this.Update(elapsed_ms: float) : unit =
             elapsed <- elapsed + elapsed_ms
 
             while elapsed >= this.Interval do
@@ -112,33 +112,33 @@ module Animation =
         member this.Loops = loops
         member this.Progress = this.Time / this.Interval
 
-        member this.Reset() =
+        member this.Reset() : unit =
             elapsed <- 0.0
             loops <- 0
 
     // TERMINATING ANIMATIONS - These animations can "complete" after a condition and are deleted afterwards
 
-    type Action(action) =
+    type Action(action: unit -> unit) =
         inherit Animation()
-        override this.Update(_) = action()
+        override this.Update(_elapsed_ms: float) : unit = action()
         override this.Complete = true
 
-    type ActionLoop(action) =
+    type ActionLoop(action: unit -> unit) =
         inherit Animation()
-        override this.Update(_) = action()
+        override this.Update(_elapsed_ms: float) : unit = action()
         override this.Complete = false
 
-    type Delay(total_ms) =
+    type Delay(total_ms: float) =
         inherit Animation()
         let mutable elapsed = 0.0
         let mutable frameskip = false
         member val Interval = total_ms with get, set
         member this.Time = min elapsed this.Interval
-        member this.FrameSkip() = frameskip <- true
-        member this.Reset() = elapsed <- 0.0
+        member this.FrameSkip() : unit = frameskip <- true
+        member this.Reset() : unit = elapsed <- 0.0
         member this.Progress = this.Time / this.Interval
 
-        override this.Update(elapsed_ms) =
+        override this.Update(elapsed_ms: float) : unit =
             if frameskip then frameskip <- false else elapsed <- elapsed + elapsed_ms
 
         override this.Complete = elapsed >= this.Interval
@@ -151,14 +151,14 @@ module Animation =
         let mutable looping = false
         let mutable add_after_loop = []
 
-        member this.Add(a: Animation) =
+        member this.Add(a: Animation) : unit =
             lock
                 this
                 (fun () -> if looping then add_after_loop <- a :: add_after_loop else animations <- a :: animations)
 
         override this.Complete = animations.IsEmpty
 
-        override this.Update(elapsed_ms) =
+        override this.Update(elapsed_ms: float) : unit =
             let rec loop (xs: Animation list) =
                 match xs with
                 | [] -> []
@@ -184,11 +184,11 @@ module Animation =
 
     type Sequence() =
         inherit Animation()
-        let animations: Queue<Animation> = new Queue<Animation>()
-        member this.Add(a: Animation) = animations.Enqueue(a)
+        let animations: Queue<Animation> = Queue<Animation>()
+        member this.Add(a: Animation) : unit = animations.Enqueue(a)
         override this.Complete = animations.Count = 0
 
-        override this.Update(elapsed_ms) =
+        override this.Update(elapsed_ms: float) : unit =
             if animations.Count > 0 then
                 let a = animations.Peek()
                 a.Update(elapsed_ms)
@@ -196,7 +196,7 @@ module Animation =
                 if a.Complete then
                     animations.Dequeue() |> ignore
 
-    let fork (xs: Animation seq) =
+    let fork (xs: Animation seq) : Group =
         let g = Group()
 
         for a in xs do
@@ -204,7 +204,7 @@ module Animation =
 
         g
 
-    let seq (xs: Animation seq) =
+    let seq (xs: Animation seq) : Sequence =
         let s = Sequence()
 
         for a in xs do

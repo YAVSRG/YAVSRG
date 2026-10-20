@@ -316,12 +316,12 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
             | _ -> char_lookup_sm
 
         fun (c: int32) ->
-            if not <| target.ContainsKey(c) then
-                render_char c
+            if not(target.ContainsKey(c)) then
+                render_char(c)
 
             target.[c]
 
-    member this.Dispose() =
+    member this.Dispose() : unit =
         char_lookup_sm.Values |> Seq.iter(Sprite.destroy >> ignore)
         char_lookup_md.Values |> Seq.iter(Sprite.destroy >> ignore)
         char_lookup_lg.Values |> Seq.iter(Sprite.destroy >> ignore)

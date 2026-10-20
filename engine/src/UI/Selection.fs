@@ -195,13 +195,13 @@ type DragAndDropAction<'T>(payload: 'T) =
 
     let mutable _acceptor: IDropzone<'T> option = None
 
-    member this.Accept(acceptor: IDropzone<'T>) = _acceptor <- Some acceptor
+    member this.Accept(acceptor: IDropzone<'T>) : unit = _acceptor <- Some acceptor
 
-    member this.Unaccept(acceptor: IDropzone<'T>) =
+    member this.Unaccept(acceptor: IDropzone<'T>) : unit =
         if _acceptor.IsSome && _acceptor.Value = acceptor then
             _acceptor <- None
 
-    member this.Drop() =
+    member this.Drop() : unit =
         match _acceptor with
         | Some a ->
             let target = Mouse.pos()

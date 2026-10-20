@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Windowing
 
@@ -52,7 +52,7 @@ type private SlideablePosition(pos: Position) =
             bottom_offset.Target <- fst pos.Bottom
             bottom_anchor.Target <- snd pos.Bottom
 
-    member this.Snap() =
+    member this.Snap() : unit =
         left_offset.Snap()
         left_anchor.Snap()
         top_offset.Snap()
@@ -62,7 +62,7 @@ type private SlideablePosition(pos: Position) =
         bottom_offset.Snap()
         bottom_anchor.Snap()
 
-    member this.Update(elapsed_ms) =
+    member this.Update(elapsed_ms: float) : unit =
         if this.Moving then
             anim.Update(elapsed_ms)
 
@@ -82,21 +82,21 @@ type SlideContainer(node_type) =
 
     member this.Moving = pos.Moving
 
-    member this.SnapPosition() =
+    member this.SnapPosition() : unit =
         pos.Snap()
 
         if this.Initialised then
             snapped_last_frame <- true
 
-    member private this.UpdateBounds() =
+    member private this.UpdateBounds() : unit =
         this.Bounds <- Position.calculate pos.Position this.Parent.Bounds
         this.VisibleBounds <- this.Bounds.IntersectWith(this.Parent.VisibleBounds)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         for c in children do
             c.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         pos.Update(elapsed_ms)
 
         let moved =
@@ -114,12 +114,12 @@ type SlideContainer(node_type) =
         for i = children.Count - 1 downto 0 do
             children.[i].Update(elapsed_ms, moved)
 
-    member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add(child)
+    member this.Add(child: #Widget) : unit = (this :> IContainer<Widget>).Add(child)
 
     member this.Remove(child: Widget) : bool =
         (this :> IContainer<Widget>).Remove(child)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
         this.UpdateBounds()
 

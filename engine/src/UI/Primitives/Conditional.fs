@@ -9,15 +9,15 @@ type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
 
     let mutable moved_store = false
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
         child.Init(this)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if condition() then
             child.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if condition() then

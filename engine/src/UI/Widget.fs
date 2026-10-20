@@ -43,15 +43,15 @@ type Widget(node_type: NodeType) =
     override this.FocusTree: ISelection list =
         if not this.NodeType._IsNone then this :: this.Parent.FocusTree else this.Parent.FocusTree
 
-    member this.Focus(by_mouse: bool) =
+    member this.Focus(by_mouse: bool) : unit =
         if this.Focusable then
             Selection.focus by_mouse this
 
-    member this.Select(by_mouse: bool) =
+    member this.Select(by_mouse: bool) : unit =
         if this.Focusable then
             Selection.select by_mouse this
 
-    override this.OnFocus by_mouse =
+    override this.OnFocus(by_mouse: bool) : unit =
         if not focused then
             focused <- true
             focused_by_mouse <- by_mouse
@@ -63,7 +63,7 @@ type Widget(node_type: NodeType) =
     override this.OnSelected _ = selected <- true
     override this.OnDeselected _ = selected <- false
 
-    override this.ToString() =
+    override this.ToString() : string =
         (if _parent.IsNone then "*" else _parent.Value.ToString()) + " > " + this.GetType().Name
 
 [<Extension>]
@@ -86,15 +86,15 @@ type StaticWidget(node_type) =
             if this.Initialised then
                 this.UpdateBounds()
 
-    member private this.UpdateBounds() =
+    member private this.UpdateBounds() : unit =
         this.Bounds <- Position.calculate pos this.Parent.Bounds
         this.VisibleBounds <- this.Bounds.IntersectWith(this.Parent.VisibleBounds)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         if moved then
             this.UpdateBounds()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
         this.UpdateBounds()
 
@@ -102,4 +102,4 @@ type StaticWidget(node_type) =
 type Dummy(nt) =
     inherit StaticWidget(nt)
     new() = Dummy(NodeType.None)
-    override this.Draw() = ()
+    override this.Draw() : unit = ()

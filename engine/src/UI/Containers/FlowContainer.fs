@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System
 open System.Runtime.CompilerServices
@@ -42,7 +42,7 @@ module FlowContainer =
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 
-        member this.Previous() =
+        member this.Previous() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + children.Count - 1) % children.Count
@@ -54,7 +54,7 @@ module FlowContainer =
                 children.[index].Widget.Focus false
             | None -> this.WhoShouldFocus.Value.Focus(false)
 
-        member this.Next() =
+        member this.Next() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + 1) % children.Count
@@ -66,14 +66,14 @@ module FlowContainer =
                 children.[index].Widget.Focus false
             | None -> this.WhoShouldFocus.Value.Focus(false)
 
-        member this.SelectFocusedChild() =
+        member this.SelectFocusedChild() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 last_selected <- i
                 children.[i].Widget.Select false
             | None -> ()
 
-        override this.OnUnfocus(by_mouse: bool) =
+        override this.OnUnfocus(by_mouse: bool) : unit =
             match this.WhoIsFocused with
             | Some i -> last_selected <- i
             | None -> ()
@@ -119,20 +119,20 @@ module FlowContainer =
             let count = children |> Seq.where(_.Visible) |> Seq.length
             float32 count * item_size + (float32 count - 1.0f) * spacing
 
-        member this.Clear() =
+        member this.Clear() : unit =
             assert (GameThread.is_game_thread())
             children.Clear()
             refresh <- true
             size_change()
 
-        override this.Draw() =
+        override this.Draw() : unit =
             for i = children.Count - 1 downto 0 do
                 let { Widget = c; Visible = visible } = children.[i]
 
                 if visible && (this.Floating || c.VisibleBounds.Visible) then
                     c.Draw()
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved || refresh)
 
             let moved =
@@ -152,17 +152,17 @@ module FlowContainer =
 
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
-        member this.Add(child: 'T) = (this :> IContainer<'T>).Add(child)
+        member this.Add(child: 'T) : unit = (this :> IContainer<'T>).Add(child)
         member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove(child)
 
-        override this.Init(parent: Widget) =
+        override this.Init(parent: Widget) : unit =
             base.Init(parent)
             this.FlowContent(children)
 
             for { Widget = c } in children do
                 c.Init(this)
 
-        member this.Iter(f: 'T -> unit) =
+        member this.Iter(f: 'T -> unit) : unit =
             assert (GameThread.is_game_thread())
 
             for { Widget = c } in children do
@@ -212,7 +212,7 @@ module FlowContainer =
                     c.Position <- Position.SliceT(t, this.ItemSize)
                     t <- t + this.ItemSize + this.Spacing
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if (%%"up").Pressed() then
                 this.Previous()
 
@@ -237,7 +237,7 @@ module FlowContainer =
                     c.Position <- Position.SliceL(l, this.ItemSize)
                     l <- l + this.ItemSize + this.Spacing
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if (%%"left").Pressed() then
                 this.Previous()
 
@@ -269,7 +269,7 @@ module FlowContainer =
 
                     r <- r + this.ItemSize + this.Spacing
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if (%%"left").Pressed() then
                 this.Next()
 

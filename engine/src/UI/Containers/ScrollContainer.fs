@@ -23,7 +23,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
 
     member this.PositionPercent = scroll_pos.Value / (content_height - this.Bounds.Height)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         scroll_pos.Target <- Math.Max(0.0f, Math.Min(scroll_pos.Target, content_height - this.Bounds.Height))
         scroll_pos.Update(elapsed_ms)
@@ -67,7 +67,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
         else
             child.Update(elapsed_ms, moved)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if content_height > 0.0f then
             Render.stencil_create(false)
             Render.rect this.Bounds Color.Transparent
@@ -75,7 +75,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
             child.Draw()
             Render.stencil_finish()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
         child.Position <- Position.Shrink(this.Margin)
         child.Init(this)
@@ -88,7 +88,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
 
         child.Position <- Position.SliceT(content_height).Translate(0.0f, -scroll_pos.Value).Shrink(this.Margin)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
 
         if Selection.get_focused_element() <> Some child then
@@ -96,10 +96,10 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
 
     member this.RemainingScrollAnimation = scroll_pos.Target - scroll_pos.Value
 
-    member this.Scroll(amount: float32) =
+    member this.Scroll(amount: float32) : unit =
         scroll_pos.Target <- Math.Max(0.0f, Math.Min(scroll_pos.Target + amount, content_height - this.Bounds.Height))
 
-    member this.ScrollTo(widget: Widget) =
+    member this.ScrollTo(widget: Widget) : unit =
         let target = widget.Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
 
         if target.Bottom > this.Bounds.Bottom && target.Top > this.Bounds.CenterY then

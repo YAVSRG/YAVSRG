@@ -12,7 +12,7 @@ type FrameContainer(node_type: NodeType) =
     member val Fill = !%Palette.DARK with get, set
     member val Border = !%Palette.LIGHT with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let border = this.Border()
 
         if border.A > 0uy then
@@ -27,7 +27,7 @@ type FrameContainer(node_type: NodeType) =
 
         base.Draw()
 
-    static member Create(child: Widget) =
+    static member Create(child: Widget) : FrameContainer =
         FrameContainer(NodeType.Container(K(Some child))).With(child)
 
 type FrameContainerExtensions() =

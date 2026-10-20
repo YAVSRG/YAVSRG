@@ -62,7 +62,7 @@ type Position with
     member inline this.TranslateY amount =
         { this with Top = this.Top ^+ amount; Bottom = this.Bottom ^+ amount }
 
-    member inline this.Translate(x, y) =
+    member inline this.Translate(x: float32, y: float32) : Position =
         {
             Left = this.Left ^+ x
             Top = this.Top ^+ y
@@ -88,7 +88,7 @@ type Position with
     member inline this.ShrinkY amount =
         { this with Top = this.Top ^+ amount; Bottom = this.Bottom ^- amount }
 
-    member inline this.Shrink(x, y) = this.ShrinkX(x).ShrinkY(y)
+    member inline this.Shrink(x: float32, y: float32) : Position = this.ShrinkX(x).ShrinkY(y)
     member inline this.Shrink amount = this.Shrink(amount, amount)
 
     member inline this.ShrinkPercentL percent =
@@ -115,7 +115,7 @@ type Position with
             Bottom = Position.lerp percent this.Bottom this.Top
         }
 
-    member inline this.ShrinkPercent(percent_x, percent_y) =
+    member inline this.ShrinkPercent(percent_x: float32, percent_y: float32) : Position =
         this.ShrinkPercentX(percent_x).ShrinkPercentY(percent_y)
 
     member inline this.ShrinkPercent percent =
@@ -128,7 +128,7 @@ type Position with
     member inline this.ExpandB amount = this.ShrinkB(-amount)
     member inline this.ExpandX amount = this.ShrinkX(-amount)
     member inline this.ExpandY amount = this.ShrinkY(-amount)
-    member inline this.Expand(x, y) = this.Shrink(-x, -y)
+    member inline this.Expand(x: float32, y: float32) : Position = this.Shrink(-x, -y)
     member inline this.Expand amount = this.Shrink(-amount)
 
     member inline this.ExpandPercentL percent = this.ShrinkPercentL(-percent)
@@ -138,7 +138,7 @@ type Position with
     member inline this.ExpandPercentX percent = this.ShrinkPercentX(-percent)
     member inline this.ExpandPercentY percent = this.ShrinkPercentY(-percent)
 
-    member inline this.ExpandPercent(percent_x, percent_y) =
+    member inline this.ExpandPercent(percent_x: float32, percent_y: float32) : Position =
         this.ShrinkPercent(percent_x, percent_y)
 
     member inline this.ExpandPercent percent = this.ShrinkPercent(-percent)
@@ -147,25 +147,25 @@ type Position with
     member inline this.SliceL thickness =
         { this with Right = this.Left ^+ thickness }
 
-    member inline this.SliceL(start, thickness) =
+    member inline this.SliceL(start: float32, thickness: float32) : Position =
         { this with Left = this.Left ^+ start; Right = this.Left ^+ start + thickness }
 
     member inline this.SliceT thickness =
         { this with Bottom = this.Top ^+ thickness }
 
-    member inline this.SliceT(start, thickness) =
+    member inline this.SliceT(start: float32, thickness: float32) : Position =
         { this with Top = this.Top ^+ start; Bottom = this.Top ^+ start + thickness }
 
     member inline this.SliceR thickness =
         { this with Left = this.Right ^- thickness }
 
-    member inline this.SliceR(start, thickness) =
+    member inline this.SliceR(start: float32, thickness: float32) : Position =
         { this with Right = this.Right ^- start; Left = this.Right ^- (start + thickness) }
 
     member inline this.SliceB thickness =
         { this with Top = this.Bottom ^- thickness }
 
-    member inline this.SliceB(start, thickness) =
+    member inline this.SliceB(start: float32, thickness: float32) : Position =
         { this with Bottom = this.Bottom ^- start; Top = this.Bottom ^- (start + thickness) }
 
     member inline this.SliceX thickness =
@@ -179,25 +179,25 @@ type Position with
     member inline this.SlicePercentL percent =
         { this with Right = Position.lerp percent this.Left this.Right }
 
-    member inline this.SlicePercentL(start: float32, thickness: float32) =
+    member inline this.SlicePercentL(start: float32, thickness: float32) : Position =
         this.ShrinkPercentL(start).SlicePercentL(thickness / (1.0f - start))
 
     member inline this.SlicePercentT percent =
         { this with Bottom = Position.lerp percent this.Top this.Bottom }
 
-    member inline this.SlicePercentT(start: float32, thickness: float32) =
+    member inline this.SlicePercentT(start: float32, thickness: float32) : Position =
         this.ShrinkPercentT(start).SlicePercentT(thickness / (1.0f - start))
 
     member inline this.SlicePercentR percent =
         { this with Left = Position.lerp percent this.Right this.Left }
 
-    member inline this.SlicePercentR(start: float32, thickness: float32) =
+    member inline this.SlicePercentR(start: float32, thickness: float32) : Position =
         this.ShrinkPercentR(start).SlicePercentR(thickness / (1.0f - start))
 
     member inline this.SlicePercentB percent =
         { this with Top = Position.lerp percent this.Bottom this.Top }
 
-    member inline this.SlicePercentB(start: float32, thickness: float32) =
+    member inline this.SlicePercentB(start: float32, thickness: float32) : Position =
         this.ShrinkPercentB(start).SlicePercentB(thickness / (1.0f - start))
 
     member inline this.SlicePercentX percent =
@@ -273,7 +273,7 @@ type Position with
     static member inline ExpandB amount = Position.DEFAULT.ExpandB(amount)
     static member inline ExpandX amount = Position.DEFAULT.ExpandX(amount)
     static member inline ExpandY amount = Position.DEFAULT.ExpandY(amount)
-    static member inline Expand(x, y) = Position.DEFAULT.Expand(x, y)
+    static member inline Expand(x: float32, y: float32) : Position = Position.DEFAULT.Expand(x, y)
     static member inline Expand amount = Position.DEFAULT.Expand(amount, amount)
 
     static member inline ExpandPercentL percent =
@@ -300,7 +300,7 @@ type Position with
     static member inline ShrinkB amount = Position.DEFAULT.ShrinkB(amount)
     static member inline ShrinkX amount = Position.DEFAULT.ShrinkX(amount)
     static member inline ShrinkY amount = Position.DEFAULT.ShrinkY(amount)
-    static member inline Shrink(x, y) = Position.DEFAULT.Shrink(x, y)
+    static member inline Shrink(x: float32, y: float32) : Position = Position.DEFAULT.Shrink(x, y)
     static member inline Shrink amount = Position.DEFAULT.Shrink(amount, amount)
 
     static member inline ShrinkPercentL percent =
@@ -323,22 +323,22 @@ type Position with
 
     static member inline SliceL thickness = Position.DEFAULT.SliceL(thickness)
 
-    static member inline SliceL(start, thickness) =
+    static member inline SliceL(start: float32, thickness: float32) : Position =
         Position.DEFAULT.SliceL(start, thickness)
 
     static member inline SliceT thickness = Position.DEFAULT.SliceT(thickness)
 
-    static member inline SliceT(start, thickness) =
+    static member inline SliceT(start: float32, thickness: float32) : Position =
         Position.DEFAULT.SliceT(start, thickness)
 
     static member inline SliceR thickness = Position.DEFAULT.SliceR(thickness)
 
-    static member inline SliceR(start, thickness) =
+    static member inline SliceR(start: float32, thickness: float32) : Position =
         Position.DEFAULT.SliceR(start, thickness)
 
     static member inline SliceB thickness = Position.DEFAULT.SliceB(thickness)
 
-    static member inline SliceB(start, thickness) =
+    static member inline SliceB(start: float32, thickness: float32) : Position =
         Position.DEFAULT.SliceB(start, thickness)
 
     static member inline SliceX thickness = Position.DEFAULT.SliceX(thickness)
@@ -347,25 +347,25 @@ type Position with
     static member inline SlicePercentL percent =
         { Position.DEFAULT with Right = percent %+ 0.0f }
 
-    static member inline SlicePercentL(start, thickness) =
+    static member inline SlicePercentL(start: float32, thickness: float32) : Position =
         { Position.DEFAULT with Left = start %+ 0.0f; Right = (start + thickness) %+ 0.0f }
 
     static member inline SlicePercentT percent =
         { Position.DEFAULT with Bottom = percent %+ 0.0f }
 
-    static member inline SlicePercentT(start, thickness) =
+    static member inline SlicePercentT(start: float32, thickness: float32) : Position =
         { Position.DEFAULT with Top = start %+ 0.0f; Bottom = (start + thickness) %+ 0.0f }
 
     static member inline SlicePercentR percent =
         { Position.DEFAULT with Left = (1.0f - percent) %+ 0.0f }
 
-    static member inline SlicePercentR(start, thickness) =
+    static member inline SlicePercentR(start: float32, thickness: float32) : Position =
         { Position.DEFAULT with Left = (1.0f - start - thickness) %+ 0.0f; Right = (1.0f - start) %+ 0.0f }
 
     static member inline SlicePercentB percent =
         { Position.DEFAULT with Top = (1.0f - percent) %+ 0.0f }
 
-    static member inline SlicePercentB(start, thickness) =
+    static member inline SlicePercentB(start: float32, thickness: float32) : Position =
         { Position.DEFAULT with Top = (1.0f - start - thickness) %+ 0.0f; Bottom = (1.0f - start) %+ 0.0f }
 
     static member inline SlicePercentX percent =
@@ -396,7 +396,9 @@ type Position with
 
     static member inline GridY(position: int, rows: int) : Position = Position.DEFAULT.GridY(position, rows)
 
-    static member Box(anchorx, anchory, x, y, width, height) =
+    static member Box
+        (anchorx: float32, anchory: float32, x: float32, y: float32, width: float32, height: float32)
+        : Position =
         {
             Left = anchorx %+ x
             Top = anchory %+ y

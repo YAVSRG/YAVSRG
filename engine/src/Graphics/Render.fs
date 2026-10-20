@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.Graphics
+﻿namespace Percyqaz.Flux.Graphics
 
 open System
 open System.Drawing
@@ -99,7 +99,7 @@ module Render =
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
 
         interface IDisposable with
-            override this.Dispose() = in_use.[this.fbo_index] <- false
+            override this.Dispose() : unit = in_use.[this.fbo_index] <- false
 
     let private initialise_fbos () : unit =
         for i in 0 .. (FBO_POOL_SIZE - 1) do
@@ -438,7 +438,7 @@ module Render =
     /// Draws a rectangular sprite to the screen.
     /// </summary>
     let inline sprite (r: Rect) (color: Color) (s: Sprite) : unit =
-        tex_quad r.AsQuad color.AsQuad <| Sprite.pick_texture (0, 0) s
+        tex_quad r.AsQuad color.AsQuad (Sprite.pick_texture (0, 0) s)
 
     /// <summary>
     /// Draws an untextured rectangle to the screen.

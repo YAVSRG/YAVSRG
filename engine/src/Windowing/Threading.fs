@@ -44,5 +44,5 @@ type ThreadActionQueue() =
     member this.Defer(action: unit -> unit) : unit =
         lock this (fun () -> action_queue <- action_queue @ [ action ])
 
-    member this.EnsureCurrent(action: unit -> unit) =
+    member this.EnsureCurrent(action: unit -> unit) : unit =
         if this.IsCurrent() then action() else this.Defer(action)

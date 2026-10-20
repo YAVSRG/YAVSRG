@@ -14,10 +14,10 @@ type Text(text_func: unit -> string) =
     member val Align: float32 = Alignment.CENTER with get, set
     member val Color: unit -> Color * Color = K Colors.text with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
         Text.fill_b(Style.font, text_func(), this.Bounds, this.Color(), this.Align)
 
-    override this.Init(parent: Widget) = base.Init(parent)
+    override this.Init(parent: Widget) : unit = base.Init(parent)
 
 [<Extension>]
 type TextExtensions =

@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -15,11 +15,11 @@ type Container(node_type: NodeType) =
             base.set_Position value
             position_changed <- true
 
-    override this.Draw() =
+    override this.Draw() : unit =
         for c in children do
             c.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         let moved =
             if position_changed then
                 position_changed <- false
@@ -34,18 +34,18 @@ type Container(node_type: NodeType) =
         for i = children.Count - 1 downto 0 do
             children.[i].Update(elapsed_ms, moved)
 
-    member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add(child)
+    member this.Add(child: #Widget) : unit = (this :> IContainer<Widget>).Add(child)
 
     member this.Remove(child: Widget) : bool =
         (this :> IContainer<Widget>).Remove(child)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
 
         for c in children do
             c.Init(this)
 
-    static member Create(child: Widget) =
+    static member Create(child: Widget) : Container =
         Container(NodeType.Container(K(Some child))).With(child)
 
     interface IContainer<Widget> with

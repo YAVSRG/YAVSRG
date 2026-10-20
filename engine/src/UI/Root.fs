@@ -10,7 +10,7 @@ type Root() =
     override this.Position
         with set (value) = failwith "root position is tied to the bounds of the screen"
 
-    override this.Init(parent: Widget) = failwith "call .Init() instead"
+    override this.Init(parent: Widget) : unit = failwith "call .Init() instead"
     abstract member Init: unit -> unit
 
     default this.Init() =
@@ -19,7 +19,7 @@ type Root() =
 
     override this.FocusTree = []
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         Palette.accent_color.Update(elapsed_ms)
 
         if moved then
@@ -27,6 +27,6 @@ type Root() =
             this.VisibleBounds <- Render._bounds
 
     interface UIEntryPoint with
-        member this.Init() = this.Init()
-        member this.Update(elapsed_ms, moved) = this.Update(elapsed_ms, moved)
-        member this.Draw() = this.Draw()
+        member this.Init() : unit = this.Init()
+        member this.Update(elapsed_ms: float, moved: bool) : unit = this.Update(elapsed_ms, moved)
+        member this.Draw() : unit = this.Draw()

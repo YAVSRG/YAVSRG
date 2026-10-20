@@ -1,6 +1,7 @@
 **/bin
 **/obj
 online
+engine/tests
 interlude
 !interlude/src/Features
 !interlude/src/UI

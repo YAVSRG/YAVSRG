@@ -24,7 +24,7 @@ module Dialog =
     type Display() =
         inherit Overlay(NodeType.None)
 
-        override this.Draw() =
+        override this.Draw() : unit =
             if fade.Value > 0.0f then
                 Render.rect this.Bounds (Color.FromArgb(int(225f * fade.Value), 35, 35, 35))
 
@@ -32,7 +32,7 @@ module Dialog =
                 | Some d -> d.Draw()
                 | None -> ()
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
             fade.Update(elapsed_ms)
 
@@ -67,4 +67,4 @@ module Dialog =
         | None -> ()
 
 type Dialog with
-    member this.Show() = Dialog.show this
+    member this.Show() : unit = Dialog.show this

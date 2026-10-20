@@ -10,7 +10,7 @@ type Image(sprite: Sprite) =
     member val Sprite: Sprite = sprite with get, set
     member val StretchToFill: bool = true with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if this.StretchToFill then
             Render.sprite this.Bounds Color.White this.Sprite
         else

@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System.Linq
 open System.Runtime.CompilerServices
@@ -27,7 +27,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     let mutable size_change = ignore
     let mutable content_height = 0.0f
 
-    member this.Clear() =
+    member this.Clear() : unit =
         assert (GameThread.is_game_thread())
         children.Clear()
 
@@ -64,7 +64,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
     override this.Focusable = if children.Count = 0 then false else base.Focusable
 
-    member this.PackContent() =
+    member this.PackContent() : unit =
         let spacing_x, spacing_y = this.Spacing
 
         let width =
@@ -99,7 +99,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             content_height <- height
             size_change()
 
-    member private this.Up() =
+    member private this.Up() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -130,7 +130,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             | None -> ()
         | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    member private this.Down() =
+    member private this.Down() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -161,7 +161,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             | None -> ()
         | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    member private this.Left() =
+    member private this.Left() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -191,7 +191,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             | None -> ()
         | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    member private this.Right() =
+    member private this.Right() : unit =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
@@ -221,14 +221,14 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             | None -> ()
         | None -> this.WhoShouldFocus.Value.Focus(false)
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         base.Init(parent)
         this.PackContent()
 
         for c in children do
             c.Widget.Init(this)
 
-    member private this.CanUp() =
+    member private this.CanUp() : bool =
         if this.WrapNavigation then
             true
         else
@@ -242,7 +242,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    member private this.CanDown() =
+    member private this.CanDown() : bool =
         if this.WrapNavigation then
             true
         else
@@ -256,7 +256,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    member private this.CanLeft() =
+    member private this.CanLeft() : bool =
         if this.WrapNavigation then
             true
         else
@@ -270,7 +270,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    member private this.CanRight() =
+    member private this.CanRight() : bool =
         if this.WrapNavigation then
             true
         else
@@ -284,7 +284,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> true
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved || refresh)
 
         let moved =
@@ -320,12 +320,12 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                     children.[i].Widget.Select false
                 | None -> ()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         for { Widget = c; Visible = visible } in children do
             if visible && (this.Floating || c.VisibleBounds.Visible) then
                 c.Draw()
 
-    member this.Add(child: 'T) = (this :> IContainer<'T>).Add(child)
+    member this.Add(child: 'T) : unit = (this :> IContainer<'T>).Add(child)
     member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove(child)
 
     interface IHeight with

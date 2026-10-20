@@ -56,7 +56,7 @@ type DebugOverlay() =
     let mutable pps_count = 0
     let mutable pps_ts = 0L
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         if dump_debug.Pressed() then
@@ -97,7 +97,7 @@ type DebugOverlay() =
             pps_count <- 0
             pps_ts <- Stopwatch.GetTimestamp()
 
-    override this.Draw() =
+    override this.Draw() : unit =
         if enable then
             Render.rect_c (this.Bounds.SliceL(600.0f)) (Quad.gradient_left_to_right Colors.black.O3 Colors.black.O0)
 

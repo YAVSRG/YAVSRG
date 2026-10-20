@@ -18,7 +18,7 @@ type MouseListener() =
     /// Setting `Floating` to true will turn this behaviour off so the entire bounding box is interactable, all the time
     member val Floating: bool = false with get, set
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         let was_hovering = hover
         hover <- Mouse.hover(if this.Floating then this.Bounds else this.VisibleBounds)
@@ -34,7 +34,7 @@ type MouseListener() =
             if Mouse.right_clicked() then
                 this.OnRightClick()
 
-    override this.Draw() = ()
+    override this.Draw() : unit = ()
 
 [<Extension>]
 type MouseListenerExtensions =

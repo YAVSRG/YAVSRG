@@ -12,7 +12,7 @@ type Frame() =
     member val Fill: unit -> Color = !%Palette.DARK with get, set
     member val Border: unit -> Color = !%Palette.LIGHT with get, set
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let border = this.Border()
 
         if border.A > 0uy then

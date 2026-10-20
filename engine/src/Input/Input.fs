@@ -1,4 +1,4 @@
-namespace Percyqaz.Flux.Input
+﻿namespace Percyqaz.Flux.Input
 
 open System
 open OpenTK
@@ -17,7 +17,7 @@ type Bind =
     | Key of Keys * modifiers: (bool * bool * bool)
     | Mouse of MouseButton
 
-    override this.ToString() =
+    override this.ToString() : string =
         match this with
         | Dummy -> "NONE"
         | Key(k, m) -> Bind.ModifierString(m) + Bind.FormatKey(k)
@@ -626,31 +626,31 @@ module Mouse =
         not Input.this_frame_finished && r.Contains(pos())
 
 type Bind with
-    member this.Held() =
+    member this.Held() : bool =
         match this with
         | Key _
         | Mouse _ -> Input.held this
         | _ -> false
 
-    member this.Repeated() =
+    member this.Repeated() : bool =
         match this with
         | Key _
         | Mouse _ -> Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
-    member this.PressedOrRepeated() =
+    member this.PressedOrRepeated() : bool =
         match this with
         | Key _
         | Mouse _ -> Input.pop_matching(this, InputAction.Press) || Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
-    member this.Pressed() =
+    member this.Pressed() : bool =
         match this with
         | Key _
         | Mouse _ -> Input.pop_matching(this, InputAction.Press)
         | _ -> false
 
-    member this.Released() =
+    member this.Released() : bool =
         match this with
         | Key _
         | Mouse _ -> Input.pop_matching(this, InputAction.Release)

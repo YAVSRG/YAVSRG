@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System
 open System.Runtime.CompilerServices
@@ -42,7 +42,7 @@ module DynamicFlowContainer =
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 
-        member this.Previous() =
+        member this.Previous() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + children.Count - 1) % children.Count
@@ -54,7 +54,7 @@ module DynamicFlowContainer =
                 children.[index].Widget.Focus false
             | None -> ()
 
-        member this.Next() =
+        member this.Next() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + 1) % children.Count
@@ -66,14 +66,14 @@ module DynamicFlowContainer =
                 children.[index].Widget.Focus false
             | None -> ()
 
-        member this.SelectFocusedChild() =
+        member this.SelectFocusedChild() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 last_selected <- i
                 children.[i].Widget.Select false
             | None -> ()
 
-        override this.OnUnfocus(by_mouse: bool) =
+        override this.OnUnfocus(by_mouse: bool) : unit =
             base.OnUnfocus(by_mouse)
 
             match this.WhoIsFocused with
@@ -103,7 +103,7 @@ module DynamicFlowContainer =
         member val Floating = false with get, set
         member val AllowNavigation = true with get, set
 
-        member this.Clear() =
+        member this.Clear() : unit =
             assert (GameThread.is_game_thread())
 
             this.Iter(fun c ->
@@ -114,14 +114,14 @@ module DynamicFlowContainer =
 
             children.Clear()
 
-        override this.Draw() =
+        override this.Draw() : unit =
             for i = children.Count - 1 downto 0 do
                 let { Widget = c; Visible = visible } = children.[i]
 
                 if visible && (this.Floating || c.VisibleBounds.Visible) then
                     c.Draw()
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved || refresh)
 
             let moved =
@@ -147,10 +147,10 @@ module DynamicFlowContainer =
 
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
-        member this.Add(child: 'T) = (this :> IContainer<'T>).Add(child)
+        member this.Add(child: 'T) : unit = (this :> IContainer<'T>).Add(child)
         member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove(child)
 
-        override this.Init(parent: Widget) =
+        override this.Init(parent: Widget) : unit =
             base.Init(parent)
             this.FlowContent(children)
 
@@ -161,7 +161,7 @@ module DynamicFlowContainer =
                 | :? IResize as r -> r.OnSizeChanged <- fun () -> refresh <- true
                 | _ -> ()
 
-        member this.Iter(f: 'T -> unit) =
+        member this.Iter(f: 'T -> unit) : unit =
             assert (GameThread.is_game_thread())
 
             for { Widget = c } in children do
@@ -169,7 +169,7 @@ module DynamicFlowContainer =
 
         interface IContainer<'T> with
 
-            member this.Add(child: 'T) =
+            member this.Add(child: 'T) : unit =
                 assert (GameThread.is_game_thread())
 
                 children.Add({ Widget = child; Visible = filter child })
@@ -224,7 +224,7 @@ module DynamicFlowContainer =
                 content_height <- b
                 size_change()
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if (%%"up").Pressed() then
                 this.Previous()
 
@@ -234,7 +234,7 @@ module DynamicFlowContainer =
             if (%%"select").Pressed() then
                 this.SelectFocusedChild()
 
-        override this.Init(parent) = base.Init(parent)
+        override this.Init(parent: Widget) : unit = base.Init(parent)
 
         interface IHeight with
             member this.Height = content_height
@@ -265,7 +265,7 @@ module DynamicFlowContainer =
                 content_width <- r
                 size_change()
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if (%%"left").Pressed() then
                 this.Previous()
 
@@ -312,7 +312,7 @@ module DynamicFlowContainer =
                     content_width <- r
                     size_change()
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if (%%"left").Pressed() then
                 this.Next()
 
