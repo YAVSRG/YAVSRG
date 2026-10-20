@@ -1,4 +1,4 @@
-namespace Interlude.Options
+﻿namespace Interlude.Options
 
 open System.IO
 open System.Collections.Generic
@@ -97,7 +97,7 @@ type LanecoverOptions =
         Color: Setting<Color>
     }
 
-    member this.LoadPreset(p: LanecoverPresetOptions) =
+    member this.LoadPreset(p: LanecoverPresetOptions) : unit =
         this.Enabled.Set(p.Enabled)
         this.DrawUnderReceptors.Set(p.DrawUnderReceptors)
         this.Sudden.Set(p.Sudden)

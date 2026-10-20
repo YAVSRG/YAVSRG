@@ -1,4 +1,4 @@
-namespace Interlude.Content
+﻿namespace Interlude.Content
 
 open System
 open System.IO
@@ -18,7 +18,7 @@ module Themes =
     let private DEFAULT_ID = "*default"
 
     let private DEFAULT: Theme =
-        Theme.FromZipStream <| EmbeddedResource.GetStream("default.zip")
+        Theme.FromZipStream(EmbeddedResource.GetStream("default.zip"))
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Theme>()
@@ -32,7 +32,7 @@ module Themes =
         loaded.Clear()
         loaded.Add("*default", DEFAULT)
 
-        for source in Directory.EnumerateDirectories(get_game_folder "Themes") do
+        for source in Directory.EnumerateDirectories(get_game_folder("Themes")) do
             let id = Path.GetFileName(source)
 
             try

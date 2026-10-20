@@ -39,7 +39,7 @@ type private LoadedSkin =
         { Skin = skin; Icon = sprite }
 
     interface IDisposable with
-        member this.Dispose() =
+        member this.Dispose() : unit =
             match this.Icon with
             | Some s -> Sprite.destroy s |> ignore
             | None -> ()
@@ -110,7 +110,7 @@ type private LoadedNoteskin =
 
     /// `force_reload` false: Load textures from disk if not loaded, otherwise fast-swap the existing data in
     /// `force_reload` true: Always reload textures from disk
-    member this.Active(force_reload: bool) =
+    member this.Active(force_reload: bool) : unit =
         let atlas, sprites =
             match this.Textures with
             | Some(atlas, sprites) when not force_reload -> (atlas, sprites)
@@ -121,13 +121,13 @@ type private LoadedNoteskin =
         for texture_id, sprite in sprites do
             Sprites.add false texture_id sprite
 
-    member this.Inactive() =
+    member this.Inactive() : unit =
         match this.Textures with
         | None -> ()
         | Some(atlas, _) -> Texture.unclaim_texture_unit atlas
 
     interface IDisposable with
-        member this.Dispose() =
+        member this.Dispose() : unit =
             if not this.Noteskin.IsEmbedded then
                 (this.Noteskin :> IDisposable).Dispose()
 
@@ -203,7 +203,7 @@ type private LoadedHUD =
 
     /// `force_reload` false: Load textures from disk if not loaded, otherwise fast-swap the existing data in
     /// `force_reload` true: Always reload textures from disk
-    member this.Active(force_reload: bool) =
+    member this.Active(force_reload: bool) : unit =
         let atlas, sprites =
             match this.Textures with
             | Some(atlas, sprites) when not force_reload -> (atlas, sprites)
@@ -214,13 +214,13 @@ type private LoadedHUD =
         for texture_id, sprite in sprites do
             Sprites.add false texture_id sprite
 
-    member this.Inactive() =
+    member this.Inactive() : unit =
         match this.Textures with
         | None -> ()
         | Some(atlas, _) -> Texture.unclaim_texture_unit atlas
 
     interface IDisposable with
-        member this.Dispose() =
+        member this.Dispose() : unit =
             (this.HUD :> IDisposable).Dispose()
 
             match this.Textures with

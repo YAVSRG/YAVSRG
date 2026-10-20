@@ -1,4 +1,4 @@
-namespace Interlude.Options
+﻿namespace Interlude.Options
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -60,6 +60,6 @@ type WindowSettings =
             MSAASamples = this.MSAASamples.Value
         }
 
-    member this.Apply() =
+    member this.Apply() : unit =
         let as_options = this.ToOptions
         WindowThread.defer(fun () -> WindowThread.apply_config as_options)
