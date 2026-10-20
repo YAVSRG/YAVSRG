@@ -21,21 +21,21 @@ type FuzzSession(name: string, handle_packet: Downstream -> unit) =
 
     let buffer = ref Empty
 
-    override this.OnDisconnected() =
+    override this.OnDisconnected() : unit =
         Logging.Debug "Fuzz client (%s) disconnected" name
 
-    override this.OnReceived(data: byte array, offset: int64, size: int64) = ()
+    override this.OnReceived(data: byte array, offset: int64, size: int64) : unit = ()
     //try
     //    Buffer.handle (buffer, data, offset, size, Downstream.Read >> handle_packet)
     //with err ->
     //    Logging.Error "Internal error processing socket data: %O" err
     //    this.Disconnect() |> ignore
 
-    override this.OnError(error: SocketError) =
+    override this.OnError(error: SocketError) : unit =
         Logging.Error "Fuzz session (%s) socket error: %O" name error
 
-    member this.SendPacket(packet: Upstream) =
+    member this.SendPacket(packet: Upstream) : unit =
         let packet_with_header = Buffer.packet_bytes(packet.Write())
         this.SendAsync(packet_with_header) |> ignore
 
-    member this.SendRaw(bytes: byte array) = this.SendAsync(bytes) |> ignore
+    member this.SendRaw(bytes: byte array) : unit = this.SendAsync(bytes) |> ignore

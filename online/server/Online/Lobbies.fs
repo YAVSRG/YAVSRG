@@ -43,16 +43,16 @@ type Player =
             PlayComplete = false
         }
 
-    member this.StartPlay() =
+    member this.StartPlay() : unit =
         this.Status <- LobbyPlayerStatus.Playing
         this.CurrentChartTime <- -10000f
         this.CurrentPlayBuffer <- new MemoryStream()
         this.PlayPacketsReceived <- 0
         this.PlayComplete <- false
 
-    member this.FinishPlay() = this.PlayComplete <- true
+    member this.FinishPlay() : unit = this.PlayComplete <- true
 
-    member this.ReceivePlayPacket(id: PlayerId, timestamp: float32, data: byte array) =
+    member this.ReceivePlayPacket(id: PlayerId, timestamp: float32, data: byte array) : unit =
         if this.Status <> LobbyPlayerStatus.Playing || this.PlayComplete then
             malice id "Sent play packet while not playing"
         elif data.Length % REPLAY_FRAME_SIZE_BYTES > 0 then
@@ -69,7 +69,7 @@ type Player =
             then
                 malice id "Too much data sent too often"
 
-    member this.GetReplay() =
+    member this.GetReplay() : float32 * byte array =
         this.CurrentChartTime, this.CurrentPlayBuffer.ToArray()
 
 type Lobby =
@@ -86,7 +86,7 @@ type Lobby =
 
     static member CountdownDurationSeconds = 5
 
-    static member Create(playerId, username, name) =
+    static member Create(playerId: PlayerId, username: string, name: string) : Lobby =
         {
             Owner = playerId
             Settings = { LobbySettings.Default with Name = name }

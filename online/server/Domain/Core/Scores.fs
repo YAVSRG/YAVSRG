@@ -22,7 +22,7 @@ type Score =
         ReplayId: int64 option
     }
 
-    member this.WithReplay(replay_id) = { this with ReplayId = Some replay_id }
+    member this.WithReplay(replay_id: int64) : Score = { this with ReplayId = Some replay_id }
 
 module Score =
 
@@ -84,7 +84,7 @@ module Score =
             accuracy: float,
             grade: int,
             lamp: int
-        ) =
+        ) : Score =
         {
             UserId = user_id
             ChartId = chart_id

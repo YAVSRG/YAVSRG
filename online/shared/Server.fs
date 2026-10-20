@@ -1,4 +1,4 @@
-namespace Interlude.Web.Shared
+﻿namespace Interlude.Web.Shared
 
 open System
 open System.Net.Sockets
@@ -22,17 +22,17 @@ module Server =
 
         let buffer = ref Empty
 
-        override this.OnConnected() =
+        override this.OnConnected() : unit =
             config.Handle_Connect(this.Id)
             Logging.Debug "%O :: %O :: %O" DateTime.UtcNow this.Id this.Socket.RemoteEndPoint
 
-        override this.OnDisconnected() = config.Handle_Disconnect(this.Id)
+        override this.OnDisconnected() : unit = config.Handle_Disconnect(this.Id)
 
-        override this.OnError(error: SocketError) =
+        override this.OnError(error: SocketError) : unit =
             if error <> SocketError.NotConnected then
                 Logging.Error "Socket error in session %O: %O" this.Id error
 
-        override this.OnReceived(data: byte array, offset, size) =
+        override this.OnReceived(data: byte array, offset: int64, size: int64) : unit =
             try
                 Buffer.handle(
                     buffer,
@@ -45,11 +45,11 @@ module Server =
                 Logging.Error "Internal error processing socket data: %O" err
                 this.ProtocolDisconnect("Internal error")
 
-        member this.SendPacket(packet: Downstream) =
+        member this.SendPacket(packet: Downstream) : int64 =
             let packet_with_header = Buffer.packet_bytes(packet.Write())
             this.Send(packet_with_header)
 
-        member this.ProtocolDisconnect(reason: string) =
+        member this.ProtocolDisconnect(reason: string) : unit =
             this.SendPacket(Downstream.DISCONNECT(reason)) |> ignore
             this.Disconnect() |> ignore
 
@@ -64,9 +64,9 @@ module Server =
                 OptionTcpKeepAliveRetryCount = 1
             )
 
-        override this.CreateSession() = new Session(this, config)
+        override this.CreateSession() : SslSession = new Session(this, config)
 
-        override this.OnError(error: SocketError) =
+        override this.OnError(error: SocketError) : unit =
             Logging.Error "Error in TCP server: %O" error
 
     let mutable private server = Unchecked.defaultof<Listener>

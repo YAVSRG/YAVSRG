@@ -12,11 +12,11 @@ type InvalidTimestampsClient(token: string) =
 
     member this.Status = status
 
-    override this.OnConnected() = status <- Connected
+    override this.OnConnected() : unit = status <- Connected
 
-    override this.OnDisconnected() = status <- Disconnected
+    override this.OnDisconnected() : unit = status <- Disconnected
 
-    override this.OnPacketReceived(packet: Downstream) =
+    override this.OnPacketReceived(packet: Downstream) : unit =
         match packet with
         | Downstream.HANDSHAKE_SUCCESS -> this.Send(Upstream.LOGIN(token))
         | Downstream.LOGIN_SUCCESS username ->

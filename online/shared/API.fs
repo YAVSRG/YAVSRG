@@ -1,4 +1,4 @@
-namespace Interlude.Web.Shared
+﻿namespace Interlude.Web.Shared
 
 open System
 open System.Web
@@ -17,10 +17,10 @@ module HttpResponseExtensions =
         member this.ReplyJson<'T>(data: 'T) =
             this.MakeGetResponse(JSON.ToString(data), "application/json") |> ignore
 
-        member this.ReplyRedirect(url: string) =
+        member this.ReplyRedirect(url: string) : unit =
             this.Clear().SetBegin(303).SetHeader("Location", url).SetBody() |> ignore
 
-        member this.ReplyError(code: int, reason: string) =
+        member this.ReplyError(code: int, reason: string) : unit =
             this
                 .Clear()
                 .SetBegin(code)
@@ -53,7 +53,7 @@ module API =
     type private Session(server: HttpsServer, config: Config) =
         inherit HttpsSession(server)
 
-        override this.OnReceivedRequest(request: HttpRequest) =
+        override this.OnReceivedRequest(request: HttpRequest) : unit =
             let uri = Uri(base_uri, request.Url)
 
             let query_params =
@@ -104,19 +104,19 @@ module API =
             with e ->
                 Logging.Critical "Error handling HTTP request %O: %O" request e
 
-        override this.OnReceivedRequestError(_: HttpRequest, error: string) =
+        override this.OnReceivedRequestError(_: HttpRequest, error: string) : unit =
             Logging.Error "Error handling HTTP request: %s" error
 
-        override this.OnError(error: SocketError) =
+        override this.OnError(error: SocketError) : unit =
             if error <> SocketError.NotConnected then
                 Logging.Error "Socket error in HTTP session %O: %O" this.Id error
 
     type private Listener(config: Config) =
         inherit HttpsServer(config.SSLContext, IPAddress.Any, config.Port)
 
-        override this.CreateSession() = new Session(this, config)
+        override this.CreateSession() : SslSession = new Session(this, config)
 
-        override this.OnError(error: SocketError) =
+        override this.OnError(error: SocketError) : unit =
             Logging.Error "Error in HTTP server: %O" error
 
     module Server =
@@ -144,7 +144,7 @@ module API =
 
         let private queue =
             { new Async.Queue<HttpClient -> Async<unit>, unit>() with
-                override this.Handle(action) = async { do! action client }
+                override this.Handle(action: HttpClient -> Async<unit>) : Async<unit> = async { do! action client }
             }
 
         let authenticate (token: string) =

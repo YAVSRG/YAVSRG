@@ -569,7 +569,7 @@ module Stats =
             | Chordstream
             | Stream
 
-            override this.ToString() =
+            override this.ToString() : string =
                 match this with
                 | Playtime -> "playtime"
                 | Combined -> "combined"

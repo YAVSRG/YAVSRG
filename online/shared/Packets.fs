@@ -34,7 +34,7 @@ module Packets =
             Mods: (string * int64) array
         }
 
-        member this.Write(bw: BinaryWriter) =
+        member this.Write(bw: BinaryWriter) : unit =
             bw.Write(this.Hash)
             bw.Write(this.Artist)
             bw.Write(this.Title)
@@ -46,7 +46,7 @@ module Packets =
                 bw.Write(id)
                 bw.Write(state)
 
-        static member Read(br: BinaryReader) =
+        static member Read(br: BinaryReader) : LobbyChart =
             {
                 Hash = br.ReadString()
                 Artist = br.ReadString()
@@ -63,12 +63,12 @@ module Packets =
             AutomaticRoundCountdown: bool
         }
 
-        member this.Write(bw: BinaryWriter) =
+        member this.Write(bw: BinaryWriter) : unit =
             bw.Write(this.Name)
             bw.Write(this.HostRotation)
             bw.Write(this.AutomaticRoundCountdown)
 
-        static member Read(br: BinaryReader) =
+        static member Read(br: BinaryReader) : LobbySettings =
             { Name = br.ReadString(); HostRotation = br.ReadBoolean(); AutomaticRoundCountdown = br.ReadBoolean() }
 
         static member Default =
@@ -82,13 +82,13 @@ module Packets =
             CurrentlyPlaying: string option
         }
 
-        member this.Write(bw: BinaryWriter) =
+        member this.Write(bw: BinaryWriter) : unit =
             bw.Write(this.Id.ToByteArray())
             bw.Write(this.Name)
             bw.Write(this.Players)
             bw.Write(Option.defaultValue "" this.CurrentlyPlaying)
 
-        static member Read(br: BinaryReader) =
+        static member Read(br: BinaryReader) : LobbyInfo =
             {
                 Id = Guid(br.ReadBytes(16))
                 Name = br.ReadString()
