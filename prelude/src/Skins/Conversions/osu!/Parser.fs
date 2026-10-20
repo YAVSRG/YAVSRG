@@ -154,10 +154,10 @@ type Colours =
 
     static member Default: Colours =
         {
-            Combo1 = Some <| Color.FromArgb(255, 192, 0)
-            Combo2 = Some <| Color.FromArgb(0, 202, 0)
-            Combo3 = Some <| Color.FromArgb(18, 124, 255)
-            Combo4 = Some <| Color.FromArgb(242, 24, 57)
+            Combo1 = Some(Color.FromArgb(255, 192, 0))
+            Combo2 = Some(Color.FromArgb(0, 202, 0))
+            Combo3 = Some(Color.FromArgb(18, 124, 255))
+            Combo4 = Some(Color.FromArgb(242, 24, 57))
             Combo5 = None
             Combo6 = None
             Combo7 = None

@@ -95,7 +95,7 @@ module Table =
                 let table_points =
                     match grade_achieved with
                     | None -> None
-                    | Some i -> Some <| points table.Info (chart.Level, i)
+                    | Some i -> Some(points table.Info (chart.Level, i))
 
                 yield chart.Level, chart.Hash, grade_achieved, table_points
         }

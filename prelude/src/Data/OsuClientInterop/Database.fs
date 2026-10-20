@@ -326,7 +326,7 @@ type OsuScoreDatabase_Score =
             Timestamp = read_long br |> timestamp_0001_to_1601
             CompressedReplayBytes =
                 let length = read_int br
-                if length < 0 then None else Some <| br.ReadBytes(length)
+                if length < 0 then None else Some(br.ReadBytes(length))
             OnlineScoreID = read_long br
         }
 

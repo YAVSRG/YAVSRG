@@ -118,7 +118,7 @@ module OsuReplay =
             ModsUsed = mods
             LifeBarGraph = ""
             Timestamp = DateTime.UtcNow.ToFileTimeUtc()
-            CompressedReplayBytes = Some <| output.ToArray()
+            CompressedReplayBytes = Some(output.ToArray())
             OnlineScoreID = 0
         }
 

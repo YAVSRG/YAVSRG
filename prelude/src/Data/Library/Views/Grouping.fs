@@ -15,7 +15,7 @@ module Grouping =
     let modes: IDictionary<string, GroupMethod> =
         dict
             [
-                "none", Normal <| (fun (_, _) -> 0, "No grouping")
+                "none", Normal(fun (_, _) -> 0, "No grouping")
                 "pack", Packs
                 "collection", Collections
                 "level", Levels
@@ -24,11 +24,11 @@ module Grouping =
                 "date_installed", Normal format_date_added
                 "grade", Normal grade_achieved
                 "lamp", Normal lamp_achieved
-                "title", Normal <| (fun (c, _) -> 0, first_character c.Title)
-                "artist", Normal <| (fun (c, _) -> 0, first_character c.Artist)
-                "creator", Normal <| (fun (c, _) -> 0, first_character c.Creator)
-                "keymode", Normal <| (fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
-                "patterns", Normal <| (fun (c, _) -> 0, c.Patterns.Category)
+                "title", Normal(fun (c, _) -> 0, first_character c.Title)
+                "artist", Normal(fun (c, _) -> 0, first_character c.Artist)
+                "creator", Normal(fun (c, _) -> 0, first_character c.Creator)
+                "keymode", Normal(fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
+                "patterns", Normal(fun (c, _) -> 0, c.Patterns.Category)
             ]
 
 type Group = { Charts: (ChartMeta * LibraryContext) array; Context: LibraryGroupContext }

@@ -27,7 +27,7 @@ module Patterns =
             }
             |> Seq.chunkBySize 1000
             |> Seq.iter(fun chunk ->
-                lock chart_db.LockObject <| fun () -> DbCharts.update_calculated_data chunk chart_db.Database
+                lock chart_db.LockObject (fun () -> DbCharts.update_calculated_data chunk chart_db.Database)
             )
 
             progress Complete

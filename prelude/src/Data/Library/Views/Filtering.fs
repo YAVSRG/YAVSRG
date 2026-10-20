@@ -25,10 +25,10 @@ module FilterParts =
         between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy)
 
     let private word = string |>> String
-    let private quoted = quoted_string |>> fun s -> String <| s.ToLowerInvariant()
+    let private quoted = quoted_string |>> fun s -> String(s.ToLowerInvariant())
 
     let private antiquoted =
-        pchar '!' >>. quoted_string |>> fun s -> NotString <| s.ToLowerInvariant()
+        pchar '!' >>. quoted_string |>> fun s -> NotString(s.ToLowerInvariant())
 
     let private equals =
         string .>>. (pchar '=' >>. (string <|> quoted_string))

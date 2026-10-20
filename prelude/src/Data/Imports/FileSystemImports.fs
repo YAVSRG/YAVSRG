@@ -84,7 +84,7 @@ module FileSystemImports =
             for i, song_folder in Array.indexed song_folders do
                 let! result = convert_song_folder(song_folder, config, library)
                 results <- ConversionResult.Combine result results
-                progress <| Processing(i + 1, song_folders.Length)
+                progress(Processing(i + 1, song_folders.Length))
 
             return results
         }
@@ -138,7 +138,7 @@ module FileSystemImports =
                                     :: results.SkippedCharts
                             }
 
-                progress <| Processing(i + 1, files.Length)
+                progress(Processing(i + 1, files.Length))
 
             return results
         }
