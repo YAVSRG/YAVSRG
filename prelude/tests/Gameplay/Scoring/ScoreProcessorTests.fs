@@ -13,7 +13,7 @@ open Prelude.Tests.Helpers
 
 module ScoreProcessorTests =
 
-    let RULESET = SC.create 4
+    let RULESET = SC.create(4)
 
     [<Test>]
     let BasicEndToEnd () =
@@ -475,7 +475,7 @@ module ScoreProcessorTests =
             Assert.AreEqual(1.0, result.Accuracy)
             Assert.AreEqual(0, result.ComboBreaks)
 
-        ensure_perfect_on_ruleset(SC.create 4)
+        ensure_perfect_on_ruleset(SC.create(4))
         ensure_perfect_on_ruleset(OsuMania.create 10.0f OsuMania.NoMod)
         ensure_perfect_on_ruleset(Wife3.create 4)
 

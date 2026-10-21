@@ -9,7 +9,7 @@ open Prelude.Tests.Helpers
 
 module GameplayEventProcessorTests =
 
-    let RULESET = SC.create 4
+    let RULESET = SC.create(4)
 
     [<Test>]
     let BasicEndToEnd () =

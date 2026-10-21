@@ -30,7 +30,7 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
         match Rulesets.get_native_ruleset score_info.ChartMeta.Origins with
         | Some ruleset ->
             // Use user's version (custom colors, names, etc) if available
-            Rulesets.by_hash(Ruleset.hash ruleset) |> Option.defaultValue ruleset |> set_ruleset_direct
+            Rulesets.by_hash(ruleset.CalculateHash()) |> Option.defaultValue ruleset |> set_ruleset_direct
             Style.click.Play()
         | None ->
             Notifications.system_feedback(

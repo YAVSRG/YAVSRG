@@ -12,8 +12,8 @@ let test() =
     Directory.SetCurrentDirectory("C:/Interlude/dev") // this is my interlude install location
     let library = Library.Load()
 
-    let sc_j4 = SC.create 4
-    let sc_j4_id = Ruleset.hash sc_j4
+    let sc_j4 = SC.create(4)
+    let sc_j4_id = sc_j4.CalculateHash()
 
     let ctx : LibraryViewContext =
         {

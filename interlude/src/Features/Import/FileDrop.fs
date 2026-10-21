@@ -70,16 +70,7 @@ module FileDrop =
             with err ->
                 Logging.Error "Error moving/importing dropped skin: %O" err
 
-        | _ when Path.GetExtension(path).Equals(".ruleset", System.StringComparison.OrdinalIgnoreCase) ->
-            try
-                let destination = Path.Combine(get_game_folder "Rulesets", Path.GetFileName(path))
-
-                if not (Path.GetFullPath(path).Equals(Path.GetFullPath(destination), System.StringComparison.OrdinalIgnoreCase)) then
-                    File.Move(path, destination)
-
-                Rulesets.load()
-            with err ->
-                Logging.Error "Error moving/importing dropped ruleset: %O" err
+        | _ when Path.GetExtension(path).ToLower() = ".ruleset" -> Rulesets.install_from_file(path)
 
         | OsuSkinArchive ->
             Menu.Exit()

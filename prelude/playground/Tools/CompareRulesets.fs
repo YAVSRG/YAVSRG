@@ -37,7 +37,7 @@ let multi_compare (base_ruleset: Ruleset) (compare_to: Ruleset) =
 
 let main() =
 
-    let sc_4 = SC.create 4
+    let sc_4 = SC.create(4)
     let osu_8 = OsuMania.create 8.0f OsuMania.NoMod
     let osu_5 = OsuMania.create 5.0f OsuMania.NoMod
     let wife_4 = Wife3.create 4

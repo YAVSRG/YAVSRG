@@ -19,7 +19,7 @@ module LibraryActions =
 
     let recalculate_pbs () : unit =
         let rulesets =
-            Rulesets.list() |> Seq.map(fun (_, rs) -> Ruleset.hash rs, rs) |> Array.ofSeq
+            Rulesets.list() |> Seq.map(fun (_, rs) -> rs.CalculateHash(), rs) |> Array.ofSeq
 
         let task_tracking = TaskTracking.add %"library.recalculate_personal_bests"
 
