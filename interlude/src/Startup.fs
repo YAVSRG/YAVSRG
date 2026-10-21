@@ -28,7 +28,6 @@ module Startup =
         Content.Init()
 
         let post_init_thunk () =
-
             Content.LoadData()
             Printerlude.init instance
             StatsSync.init()
@@ -37,11 +36,7 @@ module Startup =
             Network.init()
             DiscordRPC.init()
             Interlude.Updates.check_for_updates()
-            // todo: look into linux file drop issues
-            WindowThread.on_file_drop.Add(fun paths ->
-                FileDrop.handle_many paths
-            )
-
+            WindowThread.on_file_drop.Add(FileDrop.handle_many)
             deinit_required <- true
 
         Screen.init

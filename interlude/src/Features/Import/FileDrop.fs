@@ -117,16 +117,16 @@ module FileDrop =
                     Notifications.error(%"notification.import_failed", reason)
             )
 
-    let max_paths = 20
+    let MAX_ITEMS_ALLOWED = 20
 
     let handle_many (paths: string array) : unit =
         assert GameThread.is_game_thread()
 
-        if paths.Length > max_paths then
+        if paths.Length > MAX_ITEMS_ALLOWED then
             Notifications.error(
                 %"notification.import_limit.title",
-                [ max_paths.ToString() ] %> "notification.import_limit.body"
+                [ MAX_ITEMS_ALLOWED.ToString() ] %> "notification.import_limit.body"
             )
         else
             for path in paths do
-                handle path
+                handle(path)

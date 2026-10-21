@@ -39,7 +39,7 @@ type ImportsPage() =
                     null,
                     "osz,osu,qp,qua,zip,sm,osk,isk,osr,ruleset",
                     function
-                    | FileDialogMultipleResult.Ok paths -> FileDrop.handle_many paths
+                    | FileDialogMultipleResult.Ok paths -> FileDrop.handle_many(paths)
                     | FileDialogMultipleResult.Cancelled -> ()
                     | FileDialogMultipleResult.Error -> () // error toast
                 )
@@ -53,7 +53,7 @@ type ImportsPage() =
                 FileDialog.pick_folder(
                     null,
                     function
-                    | FileDialogResult.Ok path -> FileDrop.handle path
+                    | FileDialogResult.Ok path -> FileDrop.handle(path)
                     | FileDialogResult.Cancelled -> ()
                     | FileDialogResult.Error -> () // error toast
                 )
