@@ -105,6 +105,17 @@ module DbChartsTests =
         conn.Dispose()
 
     [<Test>]
+    let RoundTrip_Deleted_Background () =
+        let db, conn = InMemoryDatabase.Create()
+        let chart_meta = { TEST_CHART_META with Background = AssetLocation.Deleted }
+
+        DbCharts.save chart_meta TEST_CHART db
+
+        Assert.AreEqual(Some chart_meta, DbCharts.get_meta chart_meta.Hash db)
+
+        conn.Dispose()
+
+    [<Test>]
     let RoundTrip_Meta_With_NaN () =
         let db, conn = InMemoryDatabase.Create()
 

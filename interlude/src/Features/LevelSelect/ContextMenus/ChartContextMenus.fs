@@ -249,6 +249,7 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
 
         match chart_meta.Background with
         | AssetLocation.Missing -> ()
+        | AssetLocation.Deleted -> ()
         | _ ->
             content.Add(
                 PageButton(

@@ -137,7 +137,11 @@ module OnlineImports =
                         return Error(sprintf "Hash mismatch: '%s' expected vs '%s' actual" hash actual_hash)
                     else
 
-                    if not(chart_db.AssetStorage.Contains(chart.BackgroundHash)) then
+                    let background_was_deleted =
+                        chart_db.GetChartMeta(actual_hash)
+                        |> Option.exists(fun chart_meta -> chart_meta.Background = AssetLocation.Deleted)
+
+                    if not background_was_deleted && not(chart_db.AssetStorage.Contains(chart.BackgroundHash)) then
 
                         let bg_path = Path.Combine(get_game_folder "Downloads", chart.BackgroundHash)
 

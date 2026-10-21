@@ -283,7 +283,7 @@ module OsuConverterTests =
         Assert.AreEqual("4860B4B8254E5C89D293361D168203103F91BE9F2B2294F9693BB82705565BCC", converted.Chart.Hash())
 
         let chart_meta =
-            ChartMeta.CreateFromImport(Timestamp.now(), converted, K AssetLocation.Missing)
+            ChartMeta.CreateFromImport(Timestamp.now(), converted, K AssetLocation.Missing, false)
 
         let exported_beatmap =
             OsuExport.convert { HP = 8; OD = 8 } converted.Chart chart_meta

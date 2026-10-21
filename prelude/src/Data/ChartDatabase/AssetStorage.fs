@@ -13,12 +13,14 @@ type AssetLocation =
     | Absolute of string
     | Hash of string
     | Missing
+    | Deleted
     // todo: remove this hard-coded path logic and go through a member on AssetStorage of ChartDatabase instead
     member this.Path: string option =
         match this with
         | Absolute p -> Some p
         | Hash h -> Path.Combine(get_game_folder "Songs", ".assets", h.Substring(0, 2), h) |> Some
-        | Missing -> None
+        | Missing
+        | Deleted -> None
 
 [<AbstractClass>]
 type AssetStorage() =
@@ -28,16 +30,16 @@ type AssetStorage() =
     abstract member GetPath: string -> string
     abstract member Enumerate: unit -> string seq
 
+    static member HashFile(file_path: string) : string =
+        use stream = File.OpenRead(file_path)
+        SHA256.HashData(stream) |> BitConverter.ToString |> _.Replace("-", "")
+
 type FileSystemAssetStorage(assets_path: string) =
     inherit AssetStorage()
 
     override this.Add(file_path: string) : string =
 
-        let inline compute_asset_hash (file_path: string) : string =
-            use stream = File.OpenRead(file_path)
-            SHA256.HashData(stream) |> BitConverter.ToString |> _.Replace("-", "")
-
-        let hash = compute_asset_hash(file_path)
+        let hash = AssetStorage.HashFile(file_path)
 
         let target_folder = Path.Combine(assets_path, hash.Substring(0, 2))
         let target_path = Path.Combine(target_folder, hash)

@@ -385,5 +385,5 @@ module DbCharts =
                 )
         }
 
-    let update_background (hash: string, background: AssetLocation) (db: Database) : unit =
-        UPDATE_BACKGROUND.Execute (hash, background) db |> expect |> ignore
+    let update_background_batch (updates: (string * AssetLocation) seq) (db: Database) : unit =
+        UPDATE_BACKGROUND.Batch updates db |> expect |> ignore

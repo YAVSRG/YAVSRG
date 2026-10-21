@@ -111,8 +111,15 @@ type ChartDatabase =
             (fun () ->
                 seq {
                     for import_chart in imported_charts do
-                        let incoming_meta = ChartMeta.CreateFromImport(now, import_chart, import_asset)
                         let incoming_chart = import_chart.Chart
+                        let existing_chart_meta = this.GetChartMeta(incoming_chart.Hash())
+
+                        let preserve_deleted_background =
+                            existing_chart_meta
+                            |> Option.exists(fun chart_meta -> chart_meta.Background = AssetLocation.Deleted)
+
+                        let incoming_meta =
+                            ChartMeta.CreateFromImport(now, import_chart, import_asset, preserve_deleted_background)
 
                         store_original(import_chart.LoadedFromPath, incoming_meta.Hash)
 
@@ -149,15 +156,48 @@ type ChartDatabase =
         lock
             this.LockObject
             (fun () ->
-                match chart_meta.Background with
-                | AssetLocation.Hash hash -> this.AssetStorage.Remove(hash) |> ignore
-                | AssetLocation.Absolute _ -> ()
-                | AssetLocation.Missing -> ()
+                let try_background_hash (background: AssetLocation) : string option =
+                    match background with
+                    | AssetLocation.Hash hash -> Some hash
+                    | AssetLocation.Absolute path when File.Exists(path) ->
+                        try
+                            Some(AssetStorage.HashFile(path))
+                        with _ ->
+                            None
+                    | AssetLocation.Absolute _
+                    | AssetLocation.Missing
+                    | AssetLocation.Deleted -> None
 
-                if chart_meta.Background <> AssetLocation.Missing then
-                    let updated_chart_meta = { chart_meta with Background = AssetLocation.Missing }
-                    this.Cache.[chart_meta.Hash] <- updated_chart_meta
-                    DbCharts.update_background (chart_meta.Hash, AssetLocation.Missing) this.Database
+                match try_background_hash(chart_meta.Background) with
+                | None ->
+                    match chart_meta.Background with
+                    | AssetLocation.Absolute _ ->
+                        let updated_chart_meta = { chart_meta with Background = AssetLocation.Deleted }
+                        this.Cache.[chart_meta.Hash] <- updated_chart_meta
+
+                        DbCharts.update_background_batch [ chart_meta.Hash, AssetLocation.Deleted ] this.Database
+                    | _ -> ()
+                | Some background_hash ->
+                    let all_chart_metas = DbCharts.fast_load this.Database |> Array.ofSeq
+
+                    let shares_background (candidate: ChartMeta) : bool =
+                        try_background_hash(candidate.Background) = Some background_hash
+
+                    let updated_chart_metas =
+                        all_chart_metas
+                        |> Array.filter shares_background
+                        |> Array.map(fun meta -> { meta with Background = AssetLocation.Deleted })
+
+                    for meta in updated_chart_metas do
+                        this.Cache.[meta.Hash] <- meta
+
+                    if this.AssetStorage.Contains(background_hash) then
+                        this.AssetStorage.Remove(background_hash) |> ignore
+
+                    if updated_chart_metas.Length > 0 then
+                        DbCharts.update_background_batch
+                            (updated_chart_metas |> Seq.map(fun meta -> meta.Hash, AssetLocation.Deleted))
+                            this.Database
             )
 
     member private this.ChangePacks(chart_meta: ChartMeta, packs: Set<string>) : unit =
