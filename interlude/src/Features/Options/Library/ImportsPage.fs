@@ -37,7 +37,7 @@ type ImportsPage() =
             fun () ->
                 FileDialog.pick_file(
                     null,
-                    "osz,osu,qp,qua,zip,sm;osk,isk;osr;ruleset",
+                    "osz,osu,qp,qua,zip,sm,osk,isk,osr,ruleset",
                     function
                     | FileDialogResult.Ok path -> FileDrop.handle path
                     | FileDialogResult.Cancelled -> ()
