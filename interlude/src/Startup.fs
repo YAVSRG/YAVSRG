@@ -37,13 +37,9 @@ module Startup =
             Network.init()
             DiscordRPC.init()
             Interlude.Updates.check_for_updates()
-            // todo: tell the user why multi-drop is not supported
             // todo: look into linux file drop issues
             WindowThread.on_file_drop.Add(fun paths ->
-                if paths.Length <> 1 then
-                    Logging.Error("Multiple file drops not supported")
-                else
-                    FileDrop.handle paths.[0]
+                FileDrop.handle_many paths
             )
 
             deinit_required <- true
