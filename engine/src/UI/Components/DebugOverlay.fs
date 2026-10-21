@@ -49,6 +49,7 @@ type DebugOverlay() =
             DebugGraph.Create(Color.Green, fun () -> GameThread.visual_latency_hi)
             DebugGraph.Create(Color.Blue.O2, fun () -> float(Song.DebugTimelineDrift())).Enabled()
             DebugGraph.Create(Color.Purple.O2, fun () -> float(Song.FrameCompensation) * 4.0).DuringDraw().Enabled()
+            DebugGraph.Create(Color.Pink.O2, fun () -> float(Input.this_frame.Polls)).Enabled()
         |]
 
     let mutable fps = 0.0
