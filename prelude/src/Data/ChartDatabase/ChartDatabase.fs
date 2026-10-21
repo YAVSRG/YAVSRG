@@ -100,6 +100,22 @@ type ChartDatabase =
                         let incoming_meta = ChartMeta.CreateFromImport(now, import_chart, import_asset)
                         let incoming_chart = import_chart.Chart
 
+                        if File.Exists(import_chart.LoadedFromPath) then
+                            let extension = Path.GetExtension(import_chart.LoadedFromPath).ToLowerInvariant()
+
+                            if not(System.String.IsNullOrEmpty(extension)) then
+                                let hash = incoming_meta.Hash.ToUpperInvariant()
+
+                                let origins_folder =
+                                    Path.Combine(get_game_folder "Songs", ".origins", hash.Substring(0, 2))
+
+                                Directory.CreateDirectory(origins_folder) |> ignore
+
+                                let origin_path = Path.Combine(origins_folder, hash + extension)
+
+                                if not(File.Exists(origin_path)) then
+                                    File.Copy(import_chart.LoadedFromPath, origin_path)
+
                         let accepted_chart, accepted_meta =
                             merge_incoming_chart_with_existing(incoming_chart, incoming_meta)
 
