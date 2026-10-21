@@ -37,17 +37,14 @@ module Rulesets =
         let default_path = Path.Combine(path, DEFAULT_ID + ".ruleset")
 
         if not(File.Exists(default_path)) then
-            JSON.ToFile (default_path, true) DEFAULT_RULESET
+            DEFAULT_RULESET.WriteToFile(default_path)
 
         for f in Directory.GetFiles(path) do
             if Path.GetExtension(f).ToLower() = ".ruleset" then
                 let id = Path.GetFileNameWithoutExtension(f)
 
-                match JSON.FromFile<Ruleset>(f) with
-                | Ok rs ->
-                    match Ruleset.check rs with
-                    | Ok rs -> loaded.Add(id, rs)
-                    | Error reason -> Logging.Error "Error validating ruleset '%s': %s" id reason
+                match Ruleset.TryFromFile(f) with
+                | Ok rs -> loaded.Add(id, rs)
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         if not(loaded.ContainsKey(DEFAULT_ID)) then
@@ -58,7 +55,7 @@ module Rulesets =
             _selected_id.Value <- DEFAULT_ID
 
         current <- loaded.[_selected_id.Value]
-        current_hash <- Ruleset.hash current
+        current_hash <- current.CalculateHash()
 
     let init () =
         load()
@@ -75,17 +72,33 @@ module Rulesets =
                         _selected_id.Value <- new_id
 
                     current <- loaded.[_selected_id.Value]
-                    current_hash <- Ruleset.hash current
+                    current_hash <- current.CalculateHash()
                     on_changed_ev.Trigger(current)
                 else
                     _selected_id.Value <- new_id
             )
             (fun () -> _selected_id.Value)
 
+    let get_filename (ruleset: Ruleset) : string =
+        ruleset.Name
+        |> Seq.filter(
+            function
+            | '\''
+            | '_'
+            | '.'
+            | ' ' -> true
+            | c -> Char.IsAsciiLetterOrDigit(c)
+        )
+        |> Array.ofSeq
+        |> String
+        |> _.ToLowerInvariant()
+        |> fun s ->
+            s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
+
     let by_id (id: string) : Ruleset = loaded.[id]
 
     let by_hash (hash: string) : Ruleset option =
-        loaded.Values |> Seq.tryFind(fun rs -> Ruleset.hash rs = hash)
+        loaded.Values |> Seq.tryFind(fun rs -> rs.CalculateHash() = hash)
 
     /// Each ruleset and its file ID, sorted alphabetically
     let list () : (string * Ruleset) seq =
@@ -99,52 +112,31 @@ module Rulesets =
 
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
     let install (ruleset: Ruleset) : unit =
-
-        let new_id: string =
-            ruleset.Name
-            |> Seq.filter(
-                function
-                | '\''
-                | '_'
-                | '.'
-                | ' ' -> true
-                | c -> Char.IsAsciiLetterOrDigit(c)
-            )
-            |> Array.ofSeq
-            |> String
-            |> fun s -> s.ToLowerInvariant()
-            |> fun s ->
-                s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-                |> String.concat "-"
+        let new_id: string = get_filename(ruleset)
 
         let new_id =
             if exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
 
-        assert (not(loaded.ContainsKey(new_id)))
-
+        assert not(loaded.ContainsKey(new_id))
         loaded.Add(new_id, ruleset)
+        ruleset.WriteToFile(Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
 
-        JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
+    let install_from_file (path: string) : bool =
+        if Path.GetDirectoryName(path) = get_game_folder "Rulesets" then
+            Logging.Debug("User tried to import a ruleset that was already in the Rulesets folder")
+            false
+        else
+            match Ruleset.TryFromFile(path) with
+            | Ok rs ->
+                install(rs)
+                true
+            | Error reason ->
+                Logging.Error "Ruleset import failed: %s" reason
+                false
 
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     let update (existing_id: string) (ruleset: Ruleset) : unit =
-
-        let new_id: string =
-            ruleset.Name
-            |> Seq.filter(
-                function
-                | '\''
-                | '_'
-                | '.'
-                | ' ' -> true
-                | c -> Char.IsAsciiLetterOrDigit(c)
-            )
-            |> Array.ofSeq
-            |> String
-            |> fun s -> s.ToLowerInvariant()
-            |> fun s ->
-                s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-                |> String.concat "-"
+        let new_id: string = get_filename(ruleset)
 
         let new_id =
             if new_id <> existing_id && exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
@@ -168,10 +160,10 @@ module Rulesets =
             if _selected_id.Value = existing_id then
                 _selected_id.Value <- new_id
                 current <- ruleset
-                current_hash <- Ruleset.hash current
+                current_hash <- current.CalculateHash()
                 on_changed_ev.Trigger(current)
 
-            JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
+            ruleset.WriteToFile(Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
 
     let delete (id: string) : bool =
         if id <> DEFAULT_ID && exists id then

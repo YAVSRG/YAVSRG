@@ -8,9 +8,9 @@ module RulesetValidationTests =
 
     [<Test>]
     let SCJ4_Valid () =
-        let ruleset = SC.create 4
+        let ruleset = SC.create(4)
 
-        match Ruleset.check ruleset with
+        match ruleset.Validate() with
         | Ok _ -> Assert.Pass()
         | Error reason -> Assert.Fail(reason)
 
@@ -20,12 +20,12 @@ module RulesetValidationTests =
         for judge = 2 to 9 do
             let ruleset = SC.create judge
 
-            match Ruleset.check ruleset with
+            match ruleset.Validate() with
             | Ok _ ->
                 printfn "%s: valid" ruleset.Name
                 printfn " Note windows: %A" ruleset.NoteWindows
                 printfn " Release windows: %A" ruleset.ReleaseWindows
-                printfn " Hash: %s" (Ruleset.hash ruleset)
+                printfn " Hash: %s" (ruleset.CalculateHash())
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
@@ -36,12 +36,12 @@ module RulesetValidationTests =
         for judge in Quaver.Judgement.LIST do
             let ruleset = Quaver.create judge
 
-            match Ruleset.check ruleset with
+            match ruleset.Validate() with
             | Ok _ ->
                 printfn "%s: valid" ruleset.Name
                 printfn " Note windows: %A" ruleset.NoteWindows
                 printfn " Release windows: %A" ruleset.ReleaseWindows
-                printfn " Hash: %s" (Ruleset.hash ruleset)
+                printfn " Hash: %s" (ruleset.CalculateHash())
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
@@ -50,7 +50,7 @@ module RulesetValidationTests =
     let OsuOd8_Valid () =
         let ruleset = OsuMania.create 8.0f OsuMania.Mode.NoMod
 
-        match Ruleset.check ruleset with
+        match ruleset.Validate() with
         | Ok _ -> Assert.Pass()
         | Error reason -> Assert.Fail(reason)
 
@@ -64,12 +64,12 @@ module RulesetValidationTests =
 
                 let ruleset = OsuMania.create od mode
 
-                match Ruleset.check ruleset with
+                match ruleset.Validate() with
                 | Ok _ ->
                     printfn "%s: valid" ruleset.Name
                     printfn " Note windows: %A" ruleset.NoteWindows
                     printfn " Release windows: %A" ruleset.ReleaseWindows
-                    printfn " Hash: %s" (Ruleset.hash ruleset)
+                    printfn " Hash: %s" (ruleset.CalculateHash())
                 | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
@@ -78,7 +78,7 @@ module RulesetValidationTests =
     let Wife3_J4_Valid () =
         let ruleset = Wife3.create 4
 
-        match Ruleset.check ruleset with
+        match ruleset.Validate() with
         | Ok _ -> Assert.Pass()
         | Error reason -> Assert.Fail(reason)
 
@@ -89,24 +89,24 @@ module RulesetValidationTests =
 
             let ruleset = Wife3.create judge
 
-            match Ruleset.check ruleset with
+            match ruleset.Validate() with
             | Ok _ ->
                 printfn "%s: valid" ruleset.Name
                 printfn " Note windows: %A" ruleset.NoteWindows
                 printfn " Release windows: %A" ruleset.ReleaseWindows
-                printfn " Hash: %s" (Ruleset.hash ruleset)
+                printfn " Hash: %s" (ruleset.CalculateHash())
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
 
-    let VALID_RULESET = SC.create 4
+    let VALID_RULESET = SC.create(4)
 
     [<Test>]
     let Judgements_Required () =
 
         let invalid_ruleset = { VALID_RULESET with Judgements = [||] }
 
-        match Ruleset.check invalid_ruleset with
+        match invalid_ruleset.Validate() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -133,7 +133,7 @@ module RulesetValidationTests =
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
-        match Ruleset.check invalid_ruleset with
+        match invalid_ruleset.Validate() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -160,7 +160,7 @@ module RulesetValidationTests =
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
-        match Ruleset.check invalid_ruleset with
+        match invalid_ruleset.Validate() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -187,7 +187,7 @@ module RulesetValidationTests =
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
-        match Ruleset.check invalid_ruleset with
+        match invalid_ruleset.Validate() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -214,7 +214,7 @@ module RulesetValidationTests =
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
-        match Ruleset.check invalid_ruleset with
+        match invalid_ruleset.Validate() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -241,6 +241,6 @@ module RulesetValidationTests =
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
-        match Ruleset.check invalid_ruleset with
+        match invalid_ruleset.Validate() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)

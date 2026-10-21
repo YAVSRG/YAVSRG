@@ -16,15 +16,15 @@ type RulesetEditorPage(id: string, original: Ruleset) =
         Setting.simple original
         |> Setting.trigger(fun rs ->
             validation_message.Current <-
-                match Ruleset.check rs with
+                match rs.Validate() with
                 | Ok _ -> Dummy() :> Widget
                 | Error reason ->
                     CalloutCard(
-                        (Callout.Normal
+                        Callout.Normal
                             .Icon(Icons.ALERT_OCTAGON)
                             .Title(%"rulesets.edit.validation_error.title")
                             .Body(reason)
-                            .Body(%"rulesets.edit.validation_error.body")),
+                            .Body(%"rulesets.edit.validation_error.body"),
                         Colors.red_accent,
                         Colors.red.O3
                     )

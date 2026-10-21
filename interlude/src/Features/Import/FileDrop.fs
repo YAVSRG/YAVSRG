@@ -70,6 +70,12 @@ module FileDrop =
             with err ->
                 Logging.Error "Error moving/importing dropped skin: %O" err
 
+        | _ when Path.GetExtension(path).ToLower() = ".ruleset" ->
+            if Rulesets.install_from_file(path) then
+                Notifications.action_feedback(Icons.CHECK, %"notification.install_ruleset", "")
+            else
+                Notifications.error(%"notification.install_ruleset_failed", "")
+
         | OsuSkinArchive ->
             Menu.Exit()
             import_osu_skin_zip(path)
@@ -84,7 +90,6 @@ module FileDrop =
             | None -> Notifications.error(%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import
-
             if Directory.Exists(path) && Path.GetFileName(path) = "Songs" then
                 Menu.Exit()
                 ConfirmUnlinkedImportPage(path).Show()

@@ -5,8 +5,8 @@ open Prelude.Charts
 [<AutoOpen>]
 module DefaultRuleset =
 
-    let SC_J4 = SC.create 4
-    let SC_J4_HASH = Ruleset.hash SC_J4
+    let SC_J4 = SC.create(4)
+    let SC_J4_HASH = SC_J4.CalculateHash()
 
 module Rulesets =
 

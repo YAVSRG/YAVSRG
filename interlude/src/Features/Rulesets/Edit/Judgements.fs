@@ -79,11 +79,11 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
             container.Add(judgement_controls(i, j))
 
     and duplicate_judgement (i: int) : unit =
-        ruleset.Set(Ruleset.duplicate_judgement i ruleset.Value)
+        ruleset.Set(ruleset.Value.WithDuplicatedJudgement(i))
         GameThread.defer refresh
 
     and delete_judgement (i: int) : unit =
-        ruleset.Set(Ruleset.remove_judgement i ruleset.Value)
+        ruleset.Set(ruleset.Value.WithoutJudgement(i))
         refresh()
 
     override this.Content() : Widget =
