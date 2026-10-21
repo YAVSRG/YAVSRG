@@ -121,14 +121,18 @@ module Rulesets =
         loaded.Add(new_id, ruleset)
         ruleset.WriteToFile(Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
 
-    let install_from_file (path: string) : unit =
-
+    let install_from_file (path: string) : bool =
         if Path.GetDirectoryName(path) = get_game_folder "Rulesets" then
             Logging.Debug("User tried to import a ruleset that was already in the Rulesets folder")
+            false
         else
             match Ruleset.TryFromFile(path) with
-            | Ok rs -> install(rs)
-            | Error reason -> Logging.Error "Ruleset import failed: %s" reason
+            | Ok rs ->
+                install(rs)
+                true
+            | Error reason ->
+                Logging.Error "Ruleset import failed: %s" reason
+                false
 
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     let update (existing_id: string) (ruleset: Ruleset) : unit =
