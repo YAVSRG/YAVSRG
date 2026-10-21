@@ -145,6 +145,21 @@ type ChartDatabase =
                 DbCharts.delete_batch (Seq.map _.Hash chart_metas) this.Database |> ignore
             )
 
+    member this.DeleteBackground(chart_meta: ChartMeta) : unit =
+        lock
+            this.LockObject
+            (fun () ->
+                match chart_meta.Background with
+                | AssetLocation.Hash hash -> this.AssetStorage.Remove(hash) |> ignore
+                | AssetLocation.Absolute _ -> ()
+                | AssetLocation.Missing -> ()
+
+                if chart_meta.Background <> AssetLocation.Missing then
+                    let updated_chart_meta = { chart_meta with Background = AssetLocation.Missing }
+                    this.Cache.[chart_meta.Hash] <- updated_chart_meta
+                    DbCharts.update_background (chart_meta.Hash, AssetLocation.Missing) this.Database
+            )
+
     member private this.ChangePacks(chart_meta: ChartMeta, packs: Set<string>) : unit =
         lock
             this.LockObject
