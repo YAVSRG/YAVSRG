@@ -58,14 +58,16 @@ type SongPlayer() =
     let mutable state: CurrentSongState = PlayingWithoutAudio
 
     let mutable estimated_bass_delay = 37.0f<ms / rate>
-
     let mutable actual_bass_delay = 37.0f<ms / rate>
+    let mutable playback_start: int64 = Stopwatch.GetTimestamp()
+
     let mutable time_at_start_of_frame = 0.0f<ms>
     let mutable compensation_at_start_of_frame = estimated_bass_delay
 
     let delay_callback =
         fun delay ->
             actual_bass_delay <- delay
+            playback_start <- Stopwatch.GetTimestamp()
             state <- PlayingWithAudio
 
     let mutable rate = 1.0f<rate>
@@ -102,10 +104,10 @@ type SongPlayer() =
             let target_compensation = actual_bass_delay - estimated_bass_delay
 
             let run_time =
-                float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate>
+                float32(Stopwatch.GetElapsedTime(playback_start).TotalMilliseconds) * 1.0f<ms / rate>
 
             let multiplier =
-                min 1.0f ((run_time - actual_bass_delay) / (500.0f * abs target_compensation))
+                min 1.0f ((run_time - actual_bass_delay) / (250.0f * abs target_compensation))
 
             compensation_at_start_of_frame <- estimated_bass_delay + multiplier * target_compensation
         | PlayingWithoutAudio ->
@@ -327,7 +329,7 @@ type SongPlayer() =
     member internal this.DebugActualBassDelay = actual_bass_delay
 
     member internal this.DebugTimelineDrift() : Time =
-        if song.ID = 0 then
+        if song.ID = 0 || state = PlayingWithoutAudio then
             0.0f<ms>
         else
             let bass_reported_time = song.CurrentPosition()
