@@ -303,8 +303,9 @@ type SongPlayer() =
                     this.PlayFrom(0.0f<ms>)
             | SongFinishAction.Wait -> song.Pause() |> ignore
             | SongFinishAction.Custom action ->
-                song.Playing <- false
-                action()
+                if song.Playing then
+                    song.Playing <- false
+                    action()
 
         this.MarkStartOfFrame() // Update time_at_start_of_frame, compensation_at_start_of_frame
         update_low_pass_filter_slide(elapsed_ms)
@@ -313,7 +314,7 @@ type SongPlayer() =
         if state.IsPlayingWithoutAudio && not song.Playing && song.ShouldPlayAt(time_at_start_of_frame) then
             song.PlayFrom(time_at_start_of_frame, delay_callback)
 
-        elif song.Playing && time_at_start_of_frame > song.Duration then
+        elif time_at_start_of_frame > song.Duration then
             on_song_finished()
 
 
