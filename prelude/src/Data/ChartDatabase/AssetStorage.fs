@@ -22,6 +22,13 @@ type AssetLocation =
         | Missing
         | Deleted -> None
 
+    member this.HasPath: bool =
+        match this with
+        | Absolute _
+        | Hash _ -> true
+        | Missing
+        | Deleted -> false
+
 [<AbstractClass>]
 type AssetStorage() =
     abstract member Add: string -> string
@@ -30,16 +37,16 @@ type AssetStorage() =
     abstract member GetPath: string -> string
     abstract member Enumerate: unit -> string seq
 
-    static member HashFile(file_path: string) : string =
-        use stream = File.OpenRead(file_path)
-        SHA256.HashData(stream) |> BitConverter.ToString |> _.Replace("-", "")
-
 type FileSystemAssetStorage(assets_path: string) =
     inherit AssetStorage()
 
     override this.Add(file_path: string) : string =
 
-        let hash = AssetStorage.HashFile(file_path)
+        let inline compute_asset_hash (file_path: string) : string =
+            use stream = File.OpenRead(file_path)
+            SHA256.HashData(stream) |> BitConverter.ToString |> _.Replace("-", "")
+
+        let hash = compute_asset_hash(file_path)
 
         let target_folder = Path.Combine(assets_path, hash.Substring(0, 2))
         let target_path = Path.Combine(target_folder, hash)

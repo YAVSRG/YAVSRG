@@ -153,51 +153,37 @@ type ChartDatabase =
             )
 
     member this.DeleteBackground(chart_meta: ChartMeta) : unit =
+        assert this.FastLoaded
+
         lock
             this.LockObject
             (fun () ->
-                let try_background_hash (background: AssetLocation) : string option =
-                    match background with
-                    | AssetLocation.Hash hash -> Some hash
-                    | AssetLocation.Absolute path when File.Exists(path) ->
-                        try
-                            Some(AssetStorage.HashFile(path))
-                        with _ ->
-                            None
-                    | AssetLocation.Absolute _
-                    | AssetLocation.Missing
-                    | AssetLocation.Deleted -> None
+                let remove_bg_file (hash: string) : unit =
+                    if this.AssetStorage.Contains(hash) then
+                        this.AssetStorage.Remove(hash) |> ignore
 
-                match try_background_hash(chart_meta.Background) with
-                | None ->
-                    match chart_meta.Background with
-                    | AssetLocation.Absolute _ ->
-                        let updated_chart_meta = { chart_meta with Background = AssetLocation.Deleted }
-                        this.Cache.[chart_meta.Hash] <- updated_chart_meta
+                let remove_bg_from_database (bg: AssetLocation) : unit =
+                    assert bg.HasPath
 
-                        DbCharts.update_background_batch [ chart_meta.Hash, AssetLocation.Deleted ] this.Database
-                    | _ -> ()
-                | Some background_hash ->
-                    let all_chart_metas = DbCharts.fast_load this.Database |> Array.ofSeq
+                    let charts_sharing_bg =
+                        this.Cache.Values |> Seq.filter(fun chart_meta -> chart_meta.Background = bg) |> Array.ofSeq
 
-                    let shares_background (candidate: ChartMeta) : bool =
-                        try_background_hash(candidate.Background) = Some background_hash
+                    Logging.Debug "Deleting background from %i charts that use it" charts_sharing_bg.Length
 
-                    let updated_chart_metas =
-                        all_chart_metas
-                        |> Array.filter shares_background
-                        |> Array.map(fun meta -> { meta with Background = AssetLocation.Deleted })
+                    for chart_meta in charts_sharing_bg do
+                        this.Cache.[chart_meta.Hash] <- { chart_meta with Background = AssetLocation.Deleted }
 
-                    for meta in updated_chart_metas do
-                        this.Cache.[meta.Hash] <- meta
+                    DbCharts.update_background_batch
+                        (charts_sharing_bg |> Seq.map(fun meta -> meta.Hash, AssetLocation.Deleted))
+                        this.Database
 
-                    if this.AssetStorage.Contains(background_hash) then
-                        this.AssetStorage.Remove(background_hash) |> ignore
-
-                    if updated_chart_metas.Length > 0 then
-                        DbCharts.update_background_batch
-                            (updated_chart_metas |> Seq.map(fun meta -> meta.Hash, AssetLocation.Deleted))
-                            this.Database
+                match chart_meta.Background with
+                | AssetLocation.Deleted
+                | AssetLocation.Missing -> ()
+                | AssetLocation.Hash hash as bg_to_delete ->
+                    remove_bg_file(hash)
+                    remove_bg_from_database(bg_to_delete)
+                | AssetLocation.Absolute _ as bg_to_delete -> remove_bg_from_database(bg_to_delete)
             )
 
     member private this.ChangePacks(chart_meta: ChartMeta, packs: Set<string>) : unit =
