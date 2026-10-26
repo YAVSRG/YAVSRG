@@ -255,8 +255,11 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
                         ConfirmPage(
                             %"chart.delete_background.confirm",
                             fun () ->
+                                if Some chart_meta = SelectedChart.CACHE_DATA then
+                                    Background.load(None)
+
                                 Content.Charts.DeleteBackground(chart_meta)
-                                Background.load(None)
+                                LevelSelect.refresh_all()
                                 Menu.Back()
                         )
                             .Show()
