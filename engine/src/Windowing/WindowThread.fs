@@ -443,11 +443,14 @@ module WindowThread =
             ACTION_QUEUE.RunQueue()
 
             while GLFW.GetTimerValue() < next_poll do
-                sw.SpinOnce()
+                sw.SpinOnce(-1)
 
-            next_poll <- next_poll + polling_interval
-            InputThread.glfw_polls_since_fetch <- InputThread.glfw_polls_since_fetch + 1
             GLFW.PollEvents()
+
+            while GLFW.GetTimerValue() > next_poll do
+                next_poll <- next_poll + polling_interval
+
+            InputThread.glfw_polls_since_fetch <- InputThread.glfw_polls_since_fetch + 1
 
         WindowsKey.enable()
         GameThread.stop()
@@ -462,7 +465,7 @@ module WindowThread =
         GLFW.PostEmptyEvent()
 
     let debug_info () : string =
-        assert (not(NativePtr.isNullPtr window))
+        assert not(NativePtr.isNullPtr window)
         assert is_window_thread()
 
         let monitor = Monitors.GetMonitorFromWindow(window)
