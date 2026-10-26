@@ -46,7 +46,7 @@ type ChartDatabase =
                 | None -> if this.FastLoaded then None else fetch_chart_meta()
             )
 
-    member this.Import(imported_charts: ImportChart seq) : unit =
+    member this.Import(imported_charts: ImportChart seq) : string array =
 
         let already_moved = Dictionary<string, string>()
 
@@ -106,6 +106,8 @@ type ChartDatabase =
 
         let now = Timestamp.now()
 
+        let successful_hashes = ResizeArray<string>()
+
         lock
             this.LockObject
             (fun () ->
@@ -119,10 +121,13 @@ type ChartDatabase =
                             merge_incoming_chart_with_existing(incoming_chart, incoming_meta)
 
                         this.Cache.[accepted_meta.Hash] <- accepted_meta
+                        successful_hashes.Add(accepted_meta.Hash)
                         yield accepted_meta, accepted_chart
                 }
                 |> fun charts -> DbCharts.save_batch charts this.Database
             )
+
+        successful_hashes.ToArray()
 
     member this.Delete(chart_meta: ChartMeta) : unit =
         lock

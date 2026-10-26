@@ -65,7 +65,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                         %> "notification.install_song.body"
                     )
 
-                    Content.TriggerChartAdded()
+                    Content.TriggerChartAdded(result.FirstConvertedChart)
                     progress <- 1.0f
                     status <- Installed
                 | Error reason ->

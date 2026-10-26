@@ -52,7 +52,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
                     %> "notification.import_success.body"
                 )
 
-                Content.TriggerChartAdded()
+                Content.TriggerChartAdded(result.FirstConvertedChart)
 
                 if also_import_scores.Value then
                     GameThread.defer(fun () -> Mounts.import_osu_scores(mount, false))

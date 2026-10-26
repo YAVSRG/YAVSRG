@@ -24,7 +24,7 @@ type private EditMountPage
         setting.Value <- None
         queued_import <- -1
         Mount.delete_linked_charts(mount, Content.Charts)
-        Content.TriggerChartAdded()
+        Content.TriggerChartAdded(None)
         Notifications.action_feedback(Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
         Menu.Back()
 
@@ -58,7 +58,7 @@ type private EditMountPage
                         %> "notification.import_success.body"
                     )
 
-                    Content.TriggerChartAdded()
+                    Content.TriggerChartAdded(result.FirstConvertedChart)
                 | Error reason ->
                     Logging.Error "Error importing %s: %s" setting.Value.Value.SourceFolder reason
                     Notifications.error(%"notification.import_failed", reason)

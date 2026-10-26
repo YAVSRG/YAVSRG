@@ -44,5 +44,5 @@ type Content =
 
     static member OnChartAdded = Data.charts_updated
 
-    static member TriggerChartAdded() : unit =
-        GameThread.on_game_thread Data.charts_updated_ev.Trigger
+    static member TriggerChartAdded(hash: string option) : unit =
+        GameThread.on_game_thread(fun () -> Data.charts_updated_ev.Trigger(hash))

@@ -42,7 +42,7 @@ type ConfirmUnlinkedImportPage(path: string) =
                                         %> "notification.import_success.body"
                                     )
 
-                                    Content.TriggerChartAdded()
+                                    Content.TriggerChartAdded(result.FirstConvertedChart)
                                 | Error reason ->
                                     Logging.Error "Error importing %s: %s" path reason
                                     Notifications.error(%"notification.import_failed", reason)

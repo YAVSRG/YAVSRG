@@ -3,6 +3,7 @@ namespace Interlude.Features.Import
 open System.IO
 open System.Text.RegularExpressions
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.Imports
@@ -111,7 +112,7 @@ module FileDrop =
                         %> "notification.import_success.body"
                     )
 
-                    Content.TriggerChartAdded()
+                    Content.TriggerChartAdded(result.FirstConvertedChart)
                 | Error reason ->
                     Logging.Error "Error importing %s: %s" path reason
                     Notifications.error(%"notification.import_failed", reason)
