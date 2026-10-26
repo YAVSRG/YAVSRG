@@ -2,6 +2,7 @@ namespace Percyqaz.Flux.Audio
 
 open System
 open System.Diagnostics
+open ManagedBass
 open Percyqaz.Common
 
 [<RequireQualifiedAccess>]
@@ -56,12 +57,11 @@ type SongPlayer() =
     let mutable timer_position: Time = 0.0f<ms>
     let mutable state: CurrentSongState = PlayingWithoutAudio
 
-    [<Literal>]
-    let ASSUMED_BASS_DELAY = 37.0f<ms / rate>
+    let mutable estimated_bass_delay = 37.0f<ms / rate>
 
     let mutable actual_bass_delay = 37.0f<ms / rate>
     let mutable time_at_start_of_frame = 0.0f<ms>
-    let mutable compensation_at_start_of_frame = ASSUMED_BASS_DELAY
+    let mutable compensation_at_start_of_frame = estimated_bass_delay
 
     let delay_callback =
         fun delay ->
@@ -99,20 +99,20 @@ type SongPlayer() =
     member private this.MarkStartOfFrame() : unit =
         match state with
         | PlayingWithAudio ->
-            let target_compensation = actual_bass_delay - ASSUMED_BASS_DELAY
+            let target_compensation = actual_bass_delay - estimated_bass_delay
 
             let run_time =
                 float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate>
 
             let multiplier =
-                min 1.0f ((run_time - actual_bass_delay) / (1000.0f * abs target_compensation))
+                min 1.0f ((run_time - actual_bass_delay) / (500.0f * abs target_compensation))
 
-            compensation_at_start_of_frame <- ASSUMED_BASS_DELAY + multiplier * target_compensation
+            compensation_at_start_of_frame <- estimated_bass_delay + multiplier * target_compensation
         | PlayingWithoutAudio ->
             let run_time =
                 float32(Stopwatch.GetElapsedTime(timer_start).TotalMilliseconds) * 1.0f<ms / rate>
 
-            compensation_at_start_of_frame <- min run_time ASSUMED_BASS_DELAY
+            compensation_at_start_of_frame <- min run_time estimated_bass_delay
         | Paused -> compensation_at_start_of_frame <- 0.0f<ms / rate>
 
         time_at_start_of_frame <- this.PositionRealtime()
@@ -231,6 +231,10 @@ type SongPlayer() =
         let was_paused = state = Paused
         state <- Paused
         song <- new_song
+
+        match Bass.GetInfo() with
+        | false, _ -> estimated_bass_delay <- 37.5f<ms / rate>
+        | true, info -> estimated_bass_delay <- 20.0f<ms / rate> + float32 info.Latency * 1.0f<ms / rate>
 
         match after_load with
         | SongLoadAction.PlayFromPreview ->
