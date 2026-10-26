@@ -134,7 +134,7 @@ type MainMenuScreen() =
 
         if prev = ScreenType.SplashScreen then
 
-            if Data.Maintenance.Patterns.recalculate_needed Content.Charts then
+            if Data.Maintenance.RecalculatePatternsTask.RecalculationNeeded(Content.Charts) then
                 Library.LibraryActions.recalculate_patterns()
 
             if Content.Stats.NotesHit = 0 then

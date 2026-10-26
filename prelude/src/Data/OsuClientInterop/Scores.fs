@@ -123,18 +123,16 @@ module Scores =
             result.Maps
             result.NewScores
 
-        progress Complete
         result
 
     let import_osu_scores_async
         (osu_root_folder: string, library: Library, progress: ProgressCallback)
-        : Async<ScoreImportResult> =
+        : Async<Result<ScoreImportResult, string>> =
         // todo: make the IO operations actually benefit from async
         async {
             try
-                return import_osu_scores(osu_root_folder, library, progress)
+                return Ok(import_osu_scores(osu_root_folder, library, progress))
             with err ->
                 Logging.Error "Unhandled exception while importing osu! scores: %O" err
-                progress Faulted
-                return { Scores = 0; NewScores = 0; Maps = 0 }
+                return Error err.Message
         }

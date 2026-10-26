@@ -10,49 +10,14 @@ open Prelude.Data.Imports
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
-type TrackedTask(label: string) =
-    let mutable progress: TaskProgress = Generic %"import.waiting"
-
-    let start = Timestamp.now()
-
-    let mutable completed = ValueNone
-
-    do Logging.Debug "Queuing task '%s'" label
-
-    member this.Progress
-        with get () = lock this (fun () -> progress)
-        and set v =
-            lock
-                this
-                (fun () ->
-                    progress <- v
-
-                    match progress with
-                    | Faulted
-                    | Complete ->
-                        let now = Timestamp.now()
-
-                        Logging.Debug
-                            "Task '%s' complete after %s (including time waiting for its turn)"
-                            label
-                            (format_duration_ms(now - start))
-
-                        completed <- ValueSome now
-                    | _ -> ()
-                )
-
-    member val StartedAt: int64 = start
-    member this.CompletedAt: int64 voption = lock this (fun () -> completed)
-    member this.Label = label
-
 module TaskTracking =
 
-    let private list = ResizeArray<TrackedTask>()
+    let private list = ResizeArray<TaskContext>()
 
-    let add (label: string) : TrackedTask =
+    let add (label: string) : TaskContext =
         assert GameThread.is_game_thread()
 
-        let status = TrackedTask(label)
+        let status = TaskContext(label)
         list.Add(status)
         status
 
@@ -63,18 +28,18 @@ module TaskTracking =
     let HEIGHT = 45.0f
     let SPACING = 15.0f
 
-    let rec private fmt_progress (progress: TaskProgress) : string * Color =
+    let rec private fmt_progress (progress: TaskStatus) : string * Color =
         match progress with
-        | Generic status -> status, Colors.grey_2
-        | Downloading percent -> sprintf "%s %.0f%%" Icons.DOWNLOAD (percent * 100.0f), Colors.grey_1
-        | Processing(count, total) -> sprintf "%s %i / %i" Icons.DATABASE count total, Colors.grey_1
-        | Complete -> Icons.CHECK, Colors.green_accent
-        | Faulted -> Icons.ALERT_CIRCLE, Colors.red_accent
-        | Nested(label, count, total, inner) ->
-            let text, color = fmt_progress inner
+        | InProgress(Generic status) -> status, Colors.grey_2
+        | InProgress(Downloading percent) -> sprintf "%s %.0f%%" Icons.DOWNLOAD (percent * 100.0f), Colors.grey_1
+        | InProgress(Processing(count, total)) -> sprintf "%s %i / %i" Icons.DATABASE count total, Colors.grey_1
+        | InProgress(Nested(label, count, total, inner)) ->
+            let text, color = fmt_progress(InProgress inner)
             sprintf "%s (%i / %i) | %s" label count total text, color
+        | Completed -> Icons.CHECK, Colors.green_accent
+        | Faulted -> Icons.ALERT_CIRCLE, Colors.red_accent
 
-    let private draw_task (now: int64, opacity: float32, x: float32, y: float32, task: TrackedTask) : float32 =
+    let private draw_task (now: int64, opacity: float32, x: float32, y: float32, task: TaskContext) : float32 =
         let fade_in_out =
             match task.CompletedAt with
             | ValueSome time ->
@@ -95,7 +60,7 @@ module TaskTracking =
         Render.border Style.PADDING bounds (Colors.cyan_accent.O4a(alpha))
         Render.rect bounds (Colors.cyan_shadow.O4a(alpha))
 
-        let progress = task.Progress
+        let status = task.Status
 
         let top_text = task.Label
 
@@ -107,7 +72,7 @@ module TaskTracking =
             Alignment.LEFT
         )
 
-        let bottom_text, bottom_text_color = fmt_progress progress
+        let bottom_text, bottom_text_color = fmt_progress status
 
         Text.fill_b(
             Style.font,
@@ -119,19 +84,19 @@ module TaskTracking =
 
         let bar_bounds = bounds.SliceB(15.0f).Shrink(5.0f)
 
-        match progress with
-        | Generic _ -> Render.rect bar_bounds (Colors.shadow_2.O4a(alpha))
-        | Downloading p ->
+        match status with
+        | InProgress(Generic _) -> Render.rect bar_bounds (Colors.shadow_2.O4a(alpha))
+        | InProgress(Downloading p) ->
             Render.rect bar_bounds (Colors.shadow_2.O4a(alpha))
             Render.rect (bar_bounds.SlicePercentL(p)) (Colors.cyan.O4a(alpha))
-        | Processing(i, total) ->
+        | InProgress(Processing(i, total)) ->
             Render.rect bar_bounds (Colors.cyan.O4a(alpha))
             Render.rect (bar_bounds.SlicePercentL(float32 i / float32 total)) (Colors.green_accent.O4a(alpha))
-        | Complete -> Render.rect bar_bounds (Colors.green_accent.O4a(alpha))
+        | InProgress(Nested(_, i, total, _)) ->
+            Render.rect bar_bounds (Colors.cyan.O4a(alpha))
+            Render.rect (bar_bounds.SlicePercentL(float32 i / float32 total)) (Colors.green_accent.O4a(alpha))
+        | Completed -> Render.rect bar_bounds (Colors.green_accent.O4a(alpha))
         | Faulted -> Render.rect bar_bounds (Colors.red_accent.O4a(alpha))
-        | Nested(_, i, total, _) ->
-            Render.rect bar_bounds (Colors.cyan.O4a(alpha))
-            Render.rect (bar_bounds.SlicePercentL(float32 i / float32 total)) (Colors.green_accent.O4a(alpha))
 
         y + (HEIGHT + SPACING) * fade_in_out
 
@@ -164,15 +129,15 @@ module TaskTracking =
         || general_task_queue.Status <> Async.QueueStatus.Idle
         || TableDownloader.download_service.Status <> Async.QueueStatus.Idle
 
-    let current_progress () : TaskProgress =
+    let current_progress () : TaskStatus =
         list
-        |> Seq.map _.Progress
+        |> Seq.map _.Status
         |> Seq.tryPick(
             function
-            | Complete -> None
+            | Completed -> None
             | otherwise -> Some otherwise
         )
-        |> Option.defaultValue Complete
+        |> Option.defaultValue Completed
 
 /// Displayed below the import button when a task is in progress
 type TaskProgressMiniBar() =
@@ -193,18 +158,16 @@ type TaskProgressMiniBar() =
         if alpha > 0 then
 
             match TaskTracking.current_progress() with
-            | Downloading p ->
+            | InProgress(Downloading p) ->
                 Render.rect this.Bounds (Colors.shadow_2.O4a(alpha))
                 Render.rect (this.Bounds.SlicePercentL(p)) (Colors.cyan.O4a(alpha))
-            | Processing(i, total) ->
+            | InProgress(Processing(i, total)) ->
                 Render.rect this.Bounds (Colors.cyan.O4a(alpha))
                 Render.rect (this.Bounds.SlicePercentL(float32 i / float32 total)) (Colors.green_accent.O4a(alpha))
-            | Complete -> Render.rect this.Bounds (Colors.green_accent.O4a(alpha))
-            | Faulted -> Render.rect this.Bounds (Colors.red_accent.O4a(alpha))
-            | Nested(_, i, total, _) ->
+            | InProgress(Nested(_, i, total, _)) ->
                 Render.rect this.Bounds (Colors.cyan.O4a(alpha))
                 Render.rect (this.Bounds.SlicePercentL(float32 i / float32 total)) (Colors.green_accent.O4a(alpha))
-            | Generic _ ->
+            | InProgress(Generic _) ->
                 let tick_width = this.Bounds.Width * 0.2f
 
                 let pos =
@@ -216,3 +179,5 @@ type TaskProgressMiniBar() =
                     (this.Bounds.Left + min this.Bounds.Width (pos + tick_width))
                     this.Bounds.Bottom
                     (Colors.white.O4a(alpha))
+            | Completed -> Render.rect this.Bounds (Colors.green_accent.O4a(alpha))
+            | Faulted -> Render.rect this.Bounds (Colors.red_accent.O4a(alpha))

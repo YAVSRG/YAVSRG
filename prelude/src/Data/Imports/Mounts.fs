@@ -53,7 +53,6 @@ module Mount =
 
                     log_conversion result
                     source.LastImported <- Some DateTime.UtcNow
-                    progress Complete
                     return Ok result
 
                 | Library ->
@@ -76,11 +75,9 @@ module Mount =
 
                     log_conversion results
                     source.LastImported <- Some DateTime.UtcNow
-                    progress Complete
                     return Ok results
             with err ->
                 Logging.Error "Unexpected exception while importing '%s': %O" source.SourceFolder err
-                progress Faulted
                 return Error err.Message
         }
 

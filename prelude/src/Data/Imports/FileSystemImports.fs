@@ -198,7 +198,6 @@ module FileSystemImports =
                             )
 
                         log_conversion result
-                        progress Complete
                         return Ok result
                     | ChartArchive _ ->
                         let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
@@ -210,9 +209,7 @@ module FileSystemImports =
                             let! result = auto_detect_import(dir, library, progress)
                             FileSystemServices.delete_folder.Request(dir, ignore)
                             return result
-                    | _ ->
-                        progress Faulted
-                        return Error "File type not recognised as importable"
+                    | _ -> return Error "File type not recognised as importable"
                 | _ ->
                     match path with
                     | SongFolder ext ->
@@ -226,12 +223,10 @@ module FileSystemImports =
                             convert_song_folder(path, ConversionOptions.Pack(folder_name, None, Copy), library)
 
                         log_conversion result
-                        progress Complete
                         return Ok result
                     | FolderOfOszs ->
                         let! result = convert_folder_of_oszs(path, library, progress)
                         log_conversion result
-                        progress Complete
                         return Ok result
                     | PackFolder ->
                         let folder_name =
@@ -251,7 +246,6 @@ module FileSystemImports =
                             )
 
                         log_conversion result
-                        progress Complete
                         return Ok result
                     | FolderOfPacks ->
                         let mutable results = ConversionResult.Empty
@@ -271,13 +265,9 @@ module FileSystemImports =
                             results <- results.CombineWith(result)
 
                         log_conversion results
-                        progress Complete
                         return Ok results
-                    | _ ->
-                        progress Faulted
-                        return Error "No importable folder structure detected"
+                    | _ -> return Error "No importable folder structure detected"
             with err ->
                 Logging.Error "Unexpected exception while importing '%s': %O" path err
-                progress Faulted
                 return Error err.Message
         }

@@ -41,7 +41,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                     | Data.Downloading percent -> progress <- percent
                     | _ -> ()
 
-                    task_tracking.Progress <- p
+                    task_tracking.set_Progress p
 
             let task =
                 OnlineImports.download_osu_set(

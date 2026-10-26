@@ -22,7 +22,7 @@ module PersonalBests =
         (rulesets: (string * Ruleset) array, merge_with_existing: bool, library: Library, progress: ProgressCallback)
         =
         if rulesets.Length = 0 then
-            async { progress Complete }
+            async { }
         else
 
         async {
@@ -64,5 +64,4 @@ module PersonalBests =
                 progress(Processing(i + 1, charts.Length))
 
             library.UserData.SaveChanges()
-            progress Complete
         }

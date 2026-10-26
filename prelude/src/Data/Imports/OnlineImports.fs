@@ -36,22 +36,17 @@ module OnlineImports =
                     Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
 
                 match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
-                | false ->
-                    progress Faulted
-                    return Error "Download failure"
+                | false -> return Error "Download failure"
                 | true ->
                     match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, progress) with
                     | Ok result ->
                         FileSystemServices.delete_file.Request(target, ignore)
-                        progress Complete
                         return Ok result
                     | Error reason ->
                         FileSystemServices.delete_file.Request(target, ignore)
-                        progress Faulted
                         return Error reason
             with err ->
                 Logging.Error "Unexpected exception while downloading '%s': %O" name err
-                progress Faulted
                 return Error err.Message
         }
 
@@ -64,26 +59,23 @@ module OnlineImports =
                     Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
 
                 match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
-                | false ->
-                    progress Faulted
-                    return Error "Download failure"
+                | false -> return Error "Download failure"
                 | true ->
                     match! FileSystemImports.auto_detect_import(target, library, progress) with
                     | Ok result ->
                         FileSystemServices.delete_file.Request(target, ignore)
-                        progress Complete
                         return Ok result
                     | Error reason ->
                         FileSystemServices.delete_file.Request(target, ignore)
-                        progress Faulted
                         return Error reason
             with err ->
                 Logging.Error "Unexpected exception while downloading '%s': %O" url err
-                progress Faulted
                 return Error err.Message
         }
 
-    let download_by_origin (origin: ChartOrigin, library: Library, progress: ProgressCallback) =
+    let download_by_origin
+        (origin: ChartOrigin, library: Library, progress: ProgressCallback)
+        : Async<Result<ConversionResult, string>> =
         async {
             match origin with
 
@@ -92,15 +84,11 @@ module OnlineImports =
                 let url = sprintf "https://catboy.best/d/%in" osu.BeatmapSetId
                 return! download_osu_set(url, library, progress)
 
-            | ChartOrigin.Quaver _ ->
-                progress Faulted
-                return Error "No mirror exists for Quaver"
+            | ChartOrigin.Quaver _ -> return Error "No mirror exists for Quaver"
 
             | ChartOrigin.Etterna(pack: string) ->
                 match! etterna_download_url pack with
-                | Error reason ->
-                    progress Faulted
-                    return Error(sprintf "Error getting URL from EtternaOnline for '%s': %s" pack reason)
+                | Error reason -> return Error(sprintf "Error getting URL from EtternaOnline for '%s': %s" pack reason)
                 | Ok url -> return! download_etterna_pack(pack, url, library, progress)
         }
 
@@ -188,6 +176,7 @@ module OnlineImports =
                             }
                         ]
                     )
+                    |> ignore
 
                     return Ok()
             with err ->

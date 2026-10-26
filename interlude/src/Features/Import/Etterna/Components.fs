@@ -44,7 +44,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                     | Data.Downloading percent -> progress <- percent
                     | _ -> ()
 
-                    task_tracking.Progress <- p
+                    task_tracking.set_Progress p
 
             let task =
                 OnlineImports.download_etterna_pack(data.name, data.download, Content.Library, progress_callback)

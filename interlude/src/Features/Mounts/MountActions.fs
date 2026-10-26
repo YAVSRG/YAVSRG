@@ -137,13 +137,15 @@ module Mounts =
                 )
 
             async {
-                let! result = import_task
-
-                Notifications.task_feedback(
-                    Icons.FOLDER_PLUS,
-                    %"notification.score_import_success",
-                    [ result.NewScores.ToString(); result.Maps.ToString() ] %> "notification.score_import_success.body"
-                )
+                match! import_task with
+                | Ok result ->
+                    Notifications.task_feedback(
+                        Icons.FOLDER_PLUS,
+                        %"notification.score_import_success",
+                        [ result.NewScores.ToString(); result.Maps.ToString() ]
+                        %> "notification.score_import_success.body"
+                    )
+                | Error _ -> ()
             }
 
         general_task_queue.Request(task, ignore)
