@@ -74,12 +74,8 @@ type ChartMeta =
             false
 
     static member CreateFromImport
-        (
-            timestamp: int64,
-            import_chart: ImportChart,
-            handle_asset: ImportAsset -> AssetLocation,
-            preserve_deleted_background: bool
-        ) : ChartMeta =
+        (timestamp: int64, import_chart: ImportChart, handle_asset: ImportAsset -> AssetLocation)
+        : ChartMeta =
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
 
@@ -98,12 +94,7 @@ type ChartMeta =
             Source = Option.map truncate import_chart.Header.Source
             Creator = truncate import_chart.Header.Creator
             Tags = import_chart.Header.Tags // todo: consider just removing tags ?
-
-            Background =
-                if preserve_deleted_background then
-                    AssetLocation.Deleted
-                else
-                    handle_asset import_chart.Header.BackgroundFile
+            Background = handle_asset import_chart.Header.BackgroundFile
             Audio = handle_asset import_chart.Header.AudioFile
             PreviewTime = import_chart.Header.PreviewTime
 

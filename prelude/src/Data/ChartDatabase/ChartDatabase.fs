@@ -111,16 +111,8 @@ type ChartDatabase =
             (fun () ->
                 seq {
                     for import_chart in imported_charts do
+                        let incoming_meta = ChartMeta.CreateFromImport(now, import_chart, import_asset)
                         let incoming_chart = import_chart.Chart
-                        let existing_chart_meta = this.GetChartMeta(incoming_chart.Hash())
-
-                        let preserve_deleted_background =
-                            existing_chart_meta
-                            |> Option.exists(fun chart_meta -> chart_meta.Background = AssetLocation.Deleted)
-
-                        let incoming_meta =
-                            ChartMeta.CreateFromImport(now, import_chart, import_asset, preserve_deleted_background)
-
                         store_original(import_chart.LoadedFromPath, incoming_meta.Hash)
 
                         let accepted_chart, accepted_meta =
