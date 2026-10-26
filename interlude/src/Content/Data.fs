@@ -18,5 +18,5 @@ module private Data =
         if not(isNull(library :> obj)) then
             library.Save()
 
-    let charts_updated_ev = Event<unit>()
+    let charts_updated_ev = Event<string option>()
     let charts_updated = charts_updated_ev.Publish

@@ -77,8 +77,9 @@ module FileDrop =
                 Notifications.error(%"notification.install_ruleset_failed", "")
 
         | OsuSkinArchive ->
-            Menu.Exit()
-            import_osu_skin_zip(path)
+            if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
+                Menu.Exit()
+                import_osu_skin_zip(path)
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match OsuReplay.TryReadFile(path) with
@@ -111,7 +112,7 @@ module FileDrop =
                         %> "notification.import_success.body"
                     )
 
-                    Content.TriggerChartAdded()
+                    Content.TriggerChartAdded(result.FirstConvertedChart)
                 | Error reason ->
                     Logging.Error "Error importing %s: %s" path reason
                     Notifications.error(%"notification.import_failed", reason)

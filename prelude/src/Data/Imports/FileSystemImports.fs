@@ -52,11 +52,10 @@ module FileSystemImports =
                     | _ -> None
                 )
 
-            library.Charts.Import(charts)
-
             return
                 {
                     ConvertedCharts = success_count
+                    FirstConvertedChart = library.Charts.Import(charts) |> Array.tryHead
                     SkippedCharts =
                         filtered
                         |> List.choose(
@@ -83,7 +82,7 @@ module FileSystemImports =
 
             for i, song_folder in Array.indexed song_folders do
                 let! result = convert_song_folder(song_folder, config, library)
-                results <- ConversionResult.Combine result results
+                results <- results.CombineWith(result)
                 progress(Processing(i + 1, song_folders.Length))
 
             return results
@@ -124,7 +123,7 @@ module FileSystemImports =
                         ZipFile.ExtractToDirectory(osz, extracted_folder)
                         let! result = convert_song_folder(extracted_folder, config, library)
                         FileSystemServices.delete_folder.Request(extracted_folder, ignore)
-                        results <- ConversionResult.Combine result results
+                        results <- results.CombineWith(result)
                     with err ->
                         Logging.Error "Unexpected error in '%s': %O" extracted_folder err
 
@@ -167,7 +166,7 @@ module FileSystemImports =
                                 progress
                             )
 
-                        results <- ConversionResult.Combine result results
+                        results <- results.CombineWith(result)
 
                     FileSystemServices.delete_folder.Request(dir, ignore)
                     return Ok results
@@ -269,7 +268,7 @@ module FileSystemImports =
                                     (fun p -> Nested(pack_name, i + 1, pack_folders.Length, p)) >> progress
                                 )
 
-                            results <- ConversionResult.Combine result results
+                            results <- results.CombineWith(result)
 
                         log_conversion results
                         progress Complete

@@ -64,7 +64,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                         %> "notification.install_pack.body"
                     )
 
-                    Content.TriggerChartAdded()
+                    Content.TriggerChartAdded(result.FirstConvertedChart)
                     progress <- 1.0f
                     status <- Installed
                 | Error reason ->

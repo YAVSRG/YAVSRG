@@ -39,7 +39,11 @@ type ImportsPage() =
                     null,
                     "osz,osu,qp,qua,zip,sm,osk,isk,osr,ruleset",
                     function
-                    | FileDialogMultipleResult.Ok paths -> FileDrop.handle_many(paths)
+                    | FileDialogMultipleResult.Ok paths ->
+                        if Screen.current_type = ScreenType.LevelSelect then
+                            Menu.Exit()
+
+                        FileDrop.handle_many(paths)
                     | FileDialogMultipleResult.Cancelled -> ()
                     | FileDialogMultipleResult.Error -> () // error toast
                 )

@@ -50,15 +50,17 @@ type SkippedConversion =
 type ConversionResult =
     {
         ConvertedCharts: int
+        FirstConvertedChart: string option
         SkippedCharts: SkippedConversion list
     }
 
-    static member Empty = { ConvertedCharts = 0; SkippedCharts = [] }
+    static member Empty = { ConvertedCharts = 0; FirstConvertedChart = None; SkippedCharts = [] }
 
-    static member Combine (res1: ConversionResult) (res2: ConversionResult) =
+    member this.CombineWith(other: ConversionResult) : ConversionResult =
         {
-            ConvertedCharts = res1.ConvertedCharts + res2.ConvertedCharts
-            SkippedCharts = res1.SkippedCharts @ res2.SkippedCharts
+            ConvertedCharts = this.ConvertedCharts + other.ConvertedCharts
+            FirstConvertedChart = this.FirstConvertedChart |> Option.orElse other.FirstConvertedChart
+            SkippedCharts = this.SkippedCharts @ other.SkippedCharts
         }
 
 exception ConversionSkipException of Reason: string

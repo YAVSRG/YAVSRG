@@ -31,7 +31,7 @@ module Backbeat =
                         OnlineImports.cdn_install(folder_name, chart_id, found.Chart, found.Song, Content.Charts)
                     with
                     | Ok() ->
-                        Content.TriggerChartAdded()
+                        Content.TriggerChartAdded(None)
                         return true
                     | Error reason ->
                         Logging.Error "Error downloading '%s' from CDN: %s" chart_id reason

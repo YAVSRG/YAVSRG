@@ -72,7 +72,7 @@ module Mount =
                                 (fun p -> Nested(pack_name, i + 1, pack_folders.Length, p)) >> progress
                             )
 
-                        results <- ConversionResult.Combine result results
+                        results <- results.CombineWith(result)
 
                     log_conversion results
                     source.LastImported <- Some DateTime.UtcNow

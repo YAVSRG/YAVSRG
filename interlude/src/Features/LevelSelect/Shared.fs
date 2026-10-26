@@ -1,6 +1,7 @@
 namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.UserDatabase
@@ -30,9 +31,16 @@ module LevelSelect =
     let on_refresh_details = refresh_details_event.Publish
 
     do
-        Content.OnChartAdded.Add(fun () ->
+        Content.OnChartAdded.Add(fun hash ->
             if Screen.current_type = ScreenType.LevelSelect then
                 refresh_all()
+
+                match hash with
+                | Some imported_chart when not(Transitions.in_progress()) && not(Dialog.exists()) ->
+                    match Content.Charts.GetChartMeta(imported_chart) with
+                    | Some chart_meta -> SelectedChart.change(chart_meta, LibraryContext.None, true)
+                    | None -> ()
+                | _ -> ()
         )
 
         CollectionActions.collection_modified.Add(fun () ->

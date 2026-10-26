@@ -114,7 +114,7 @@ module LobbySelectedChart =
             last_seen_loaded_chart <- Some info
         )
 
-        Content.OnChartAdded.Add(fun () ->
+        Content.OnChartAdded.Add(fun _ ->
             match Network.lobby with
             | Some lobby ->
                 if Screen.current_type = ScreenType.Lobby && not(is_loaded_or_loading()) then
