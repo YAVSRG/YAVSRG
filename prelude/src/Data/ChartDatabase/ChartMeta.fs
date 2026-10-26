@@ -56,7 +56,8 @@ type ChartMeta =
                 Source = existing.Source |> Option.orElse this.Source
                 Packs = Set.union this.Packs existing.Packs
                 Origins = Set.union this.Origins existing.Origins
-                Background = this.Background
+                Background =
+                    if existing.Background = AssetLocation.Deleted then AssetLocation.Deleted else this.Background
             },
             true
         else
@@ -67,6 +68,8 @@ type ChartMeta =
                 Source = this.Source |> Option.orElse existing.Source
                 Packs = Set.union this.Packs existing.Packs
                 Origins = Set.union this.Origins existing.Origins
+                Background =
+                    if existing.Background = AssetLocation.Deleted then AssetLocation.Deleted else this.Background
             },
             false
 
@@ -91,7 +94,6 @@ type ChartMeta =
             Source = Option.map truncate import_chart.Header.Source
             Creator = truncate import_chart.Header.Creator
             Tags = import_chart.Header.Tags // todo: consider just removing tags ?
-
             Background = handle_asset import_chart.Header.BackgroundFile
             Audio = handle_asset import_chart.Header.AudioFile
             PreviewTime = import_chart.Header.PreviewTime

@@ -368,3 +368,22 @@ module DbCharts =
 
     let update_packs_batch (chunk: (string * Set<string>) seq) (db: Database) =
         UPDATE_PACKS.Batch chunk db |> expect |> ignore
+
+    let private UPDATE_BACKGROUND: NonQuery<string * AssetLocation> =
+        {
+            SQL =
+                """
+                UPDATE charts
+                SET Background = json(@Background)
+                WHERE Id = @Hash;
+                """
+            Parameters = [ "@Hash", SqliteType.Text, -1; "@Background", SqliteType.Text, -1 ]
+            FillParameters =
+                (fun p (hash, background) ->
+                    p.String(hash)
+                    p.Json JSON background
+                )
+        }
+
+    let update_background_batch (updates: (string * AssetLocation) seq) (db: Database) : unit =
+        UPDATE_BACKGROUND.Batch updates db |> expect |> ignore

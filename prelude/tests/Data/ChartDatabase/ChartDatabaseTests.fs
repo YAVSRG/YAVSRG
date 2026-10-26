@@ -1,7 +1,9 @@
 namespace Prelude.Tests.Data.ChartDatabase
 
+open System.Linq
 open NUnit.Framework
 open Percyqaz.Common
+open Prelude.Charts
 open Prelude.Formats.Osu
 open Prelude.Formats.Conversions
 open Prelude.Data.ChartDatabase
@@ -17,10 +19,10 @@ module ChartDatabaseTests =
     let TEST_OSU_FILE = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
 
     let TEST_IMPORT =
-        (OsuConverter.convert
+        OsuConverter.convert
             TEST_OSU_FILE
             { Options = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH }
-         |> expect)
+        |> expect
 
     [<Test>]
     let BasicRoundTrip () =
@@ -50,5 +52,52 @@ module ChartDatabaseTests =
 
         ensure_delete_succeeded(imported_chart)
         ensure_delete_succeeded(imported_chart)
+
+        conn.Dispose()
+
+    [<Test>]
+    let DeleteBackground_PreservedAfterReimport () =
+        let db, conn = InMemoryDatabase.CreateIsolated()
+
+        let chart_db =
+            ChartDatabase.CreateFullyLoaded(db, VirtualAssetStorage("mock_data_path.dat"))
+
+        // First import: Background hash present, audio not
+        chart_db.Import(
+            [
+                { TEST_IMPORT with
+                    Header.BackgroundFile = ImportAsset.Download("BACKGROUND")
+                    Header.AudioFile = ImportAsset.Missing
+                }
+            ]
+        )
+
+        Assert.AreEqual(1, chart_db.Entries.Count)
+        let entry = chart_db.Entries.First()
+        Assert.True(entry.Background.IsHash)
+        Assert.True(entry.Audio.IsMissing)
+
+        // Delete: Audio missing, background deleted
+        chart_db.DeleteBackground(entry)
+
+        Assert.AreEqual(1, chart_db.Entries.Count)
+        let entry = chart_db.Entries.First()
+        Assert.True(entry.Background.IsDeleted)
+        Assert.True(entry.Audio.IsMissing)
+
+        // Reimport: Background and audio both present; Background stays deleted; Audio accepts new non-missing asset
+        chart_db.Import(
+            [
+                { TEST_IMPORT with
+                    Header.BackgroundFile = ImportAsset.Download("BACKGROUND")
+                    Header.AudioFile = ImportAsset.Download("AUDIO")
+                }
+            ]
+        )
+
+        Assert.AreEqual(1, chart_db.Entries.Count)
+        let entry = chart_db.Entries.First()
+        Assert.True(entry.Background.IsDeleted)
+        Assert.True(entry.Audio.IsHash)
 
         conn.Dispose()

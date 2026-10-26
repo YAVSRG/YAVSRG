@@ -31,7 +31,9 @@ module Vacuum =
 
                 match entry.Background with
                 | AssetLocation.Hash hash -> unused_asset_hashes.Remove(hash) |> ignore
-                | _ -> ()
+                | AssetLocation.Absolute _
+                | AssetLocation.Missing
+                | AssetLocation.Deleted -> ()
 
             if delete_missing_audio && to_delete.Count > 0 then
                 progress(Generic "Deleting charts without audio")

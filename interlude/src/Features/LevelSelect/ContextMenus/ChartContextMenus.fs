@@ -2,6 +2,7 @@ namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
@@ -244,6 +245,27 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
                             | _ -> ()
                     )
                     .Icon(Icons.UPLOAD)
+            )
+
+        if chart_meta.Background.HasPath then
+            content.Add(
+                PageButton(
+                    %"chart.delete_background",
+                    fun () ->
+                        ConfirmPage(
+                            %"chart.delete_background.confirm",
+                            fun () ->
+                                if Some chart_meta = SelectedChart.CACHE_DATA then
+                                    Background.load(None)
+
+                                Content.Charts.DeleteBackground(chart_meta)
+                                LevelSelect.refresh_all()
+                                Menu.Back()
+                        )
+                            .Show()
+                )
+                    .TextColor(Colors.red_accent)
+                    .Icon(Icons.TRASH)
             )
 
         content.With(

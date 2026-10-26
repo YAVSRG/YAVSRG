@@ -131,9 +131,9 @@ module Upload =
         | _ -> async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
     let create_backbeat_data (chart_meta: ChartMeta) (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
-        if chart_meta.Audio = AssetLocation.Missing then
+        if not chart_meta.Audio.HasPath then
             Error "Missing audio file"
-        elif chart_meta.Background = AssetLocation.Missing then
+        elif not chart_meta.Background.HasPath then
             Error "Missing background image"
         else
 

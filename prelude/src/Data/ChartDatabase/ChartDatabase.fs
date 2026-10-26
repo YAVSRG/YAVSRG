@@ -113,7 +113,6 @@ type ChartDatabase =
                     for import_chart in imported_charts do
                         let incoming_meta = ChartMeta.CreateFromImport(now, import_chart, import_asset)
                         let incoming_chart = import_chart.Chart
-
                         store_original(import_chart.LoadedFromPath, incoming_meta.Hash)
 
                         let accepted_chart, accepted_meta =
@@ -143,6 +142,40 @@ type ChartDatabase =
                     this.Cache.Remove(chart_meta.Hash) |> ignore
 
                 DbCharts.delete_batch (Seq.map _.Hash chart_metas) this.Database |> ignore
+            )
+
+    member this.DeleteBackground(chart_meta: ChartMeta) : unit =
+        assert this.FastLoaded
+
+        lock
+            this.LockObject
+            (fun () ->
+                let remove_bg_file (hash: string) : unit =
+                    if this.AssetStorage.Contains(hash) then
+                        this.AssetStorage.Remove(hash) |> ignore
+
+                let remove_bg_from_database (bg: AssetLocation) : unit =
+                    assert bg.HasPath
+
+                    let charts_sharing_bg =
+                        this.Cache.Values |> Seq.filter(fun chart_meta -> chart_meta.Background = bg) |> Array.ofSeq
+
+                    Logging.Debug "Deleting background from %i charts that use it" charts_sharing_bg.Length
+
+                    for chart_meta in charts_sharing_bg do
+                        this.Cache.[chart_meta.Hash] <- { chart_meta with Background = AssetLocation.Deleted }
+
+                    DbCharts.update_background_batch
+                        (charts_sharing_bg |> Seq.map(fun meta -> meta.Hash, AssetLocation.Deleted))
+                        this.Database
+
+                match chart_meta.Background with
+                | AssetLocation.Deleted
+                | AssetLocation.Missing -> ()
+                | AssetLocation.Hash hash as bg_to_delete ->
+                    remove_bg_file(hash)
+                    remove_bg_from_database(bg_to_delete)
+                | AssetLocation.Absolute _ as bg_to_delete -> remove_bg_from_database(bg_to_delete)
             )
 
     member private this.ChangePacks(chart_meta: ChartMeta, packs: Set<string>) : unit =
