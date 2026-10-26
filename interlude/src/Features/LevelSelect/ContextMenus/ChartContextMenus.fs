@@ -247,10 +247,7 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
                     .Icon(Icons.UPLOAD)
             )
 
-        match chart_meta.Background with
-        | AssetLocation.Missing -> ()
-        | AssetLocation.Deleted -> ()
-        | _ ->
+        if chart_meta.Background.HasPath then
             content.Add(
                 PageButton(
                     %"chart.delete_background",
@@ -259,7 +256,7 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
                             %"chart.delete_background.confirm",
                             fun () ->
                                 Content.Charts.DeleteBackground(chart_meta)
-                                LevelSelect.refresh_all()
+                                Background.load(None)
                                 Menu.Back()
                         )
                             .Show()
