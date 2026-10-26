@@ -249,9 +249,6 @@ module Tables =
         let get (table: string, callback: Response option -> unit) =
             Client.get<Response>(snd ROUTE + "?table=" + table, callback)
 
-        let get_section (table: string, section: string, callback: Response option -> unit) =
-            Client.get<Response>(snd ROUTE + "?table=" + table + "&section=" + section, callback)
-
     module Suggestions =
 
         /// requires login token as Authorization header
