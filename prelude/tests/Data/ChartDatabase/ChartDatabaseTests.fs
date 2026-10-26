@@ -32,7 +32,7 @@ module ChartDatabaseTests =
             ChartDatabase.CreateLazyLoaded(db, VirtualAssetStorage("mock_data_path.dat"))
 
         let inline ensure_import_succeeded () : ChartMeta =
-            chart_db.Import([ TEST_IMPORT ])
+            chart_db.Import([ TEST_IMPORT ]) |> ignore
 
             let charts_in_database = DbCharts.fast_load(db) |> Array.ofSeq
             Assert.AreEqual(1, chart_db.Entries.Count)
@@ -71,6 +71,7 @@ module ChartDatabaseTests =
                 }
             ]
         )
+        |> ignore
 
         Assert.AreEqual(1, chart_db.Entries.Count)
         let entry = chart_db.Entries.First()
@@ -94,6 +95,7 @@ module ChartDatabaseTests =
                 }
             ]
         )
+        |> ignore
 
         Assert.AreEqual(1, chart_db.Entries.Count)
         let entry = chart_db.Entries.First()
