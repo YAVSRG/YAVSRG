@@ -3,7 +3,6 @@ namespace Interlude.Features.Import
 open System.IO
 open System.Text.RegularExpressions
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.Imports
@@ -78,8 +77,9 @@ module FileDrop =
                 Notifications.error(%"notification.install_ruleset_failed", "")
 
         | OsuSkinArchive ->
-            Menu.Exit()
-            import_osu_skin_zip(path)
+            if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
+                Menu.Exit()
+                import_osu_skin_zip(path)
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match OsuReplay.TryReadFile(path) with
