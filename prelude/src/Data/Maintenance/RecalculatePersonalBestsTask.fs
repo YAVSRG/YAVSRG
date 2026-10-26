@@ -8,19 +8,10 @@ open Prelude.Data.UserDatabase
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
 
-module PersonalBests =
+type RecalculatePersonalBestsTask(library: Library, rulesets: (string * Ruleset) array, merge_with_existing: bool) =
+    inherit BackgroundTask<unit>()
 
-    type RecalculateRequest =
-        {
-            ChartDatabase: ChartDatabase
-            UserDatabase: UserDatabase
-            Rulesets: (string * Ruleset) array
-            MergeWithExisting: bool
-        }
-
-    let recalculate
-        (rulesets: (string * Ruleset) array, merge_with_existing: bool, library: Library, progress: ProgressCallback)
-        =
+    override this.Run(ctx: ITaskContext) : Async<unit> =
         if rulesets.Length = 0 then
             async { }
         else
@@ -61,7 +52,7 @@ module PersonalBests =
                     if new_bests <> existing_bests then
                         data.PersonalBests <- new_bests
 
-                progress(Processing(i + 1, charts.Length))
+                ctx.Progress(i + 1, charts.Length)
 
             library.UserData.SaveChanges()
         }

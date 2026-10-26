@@ -164,7 +164,7 @@
     <Compile Include="Data\Stats\StatsSync.fs" />
     <Compile Include="Data\Maintenance\RecalculatePatternsTask.fs" />
     <Compile Include="Data\Maintenance\VacuumTask.fs" />
-    <Compile Include="Data\Maintenance\PersonalBests.fs" />
+    <Compile Include="Data\Maintenance\RecalculatePersonalBestsTask.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
     <Compile Include="Data\OsuClientInterop\Scores.fs" />

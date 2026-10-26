@@ -21,20 +21,16 @@ module LibraryActions =
         let rulesets =
             Rulesets.list() |> Seq.map(fun (_, rs) -> rs.CalculateHash(), rs) |> Array.ofSeq
 
-        let task_tracking = TaskTracking.add %"library.recalculate_personal_bests"
-
-        let task =
-            PersonalBests.recalculate(rulesets, false, Content.Library, task_tracking.set_Progress)
-
-        general_task_queue.Request(
-            task,
-            fun () ->
+        RecalculatePersonalBestsTask(Content.Library, rulesets, false)
+            .Track(TaskTracking.add %"library.recalculate_personal_bests")
+            .WithCallback(fun () ->
                 Notifications.system_feedback(
                     Icons.ALERT_OCTAGON,
                     %"notification.score_recalculation_complete.title",
                     ""
                 )
-        )
+            )
+            .Queue(general_task_queue)
 
         Notifications.system_feedback(
             Icons.ALERT_OCTAGON,
