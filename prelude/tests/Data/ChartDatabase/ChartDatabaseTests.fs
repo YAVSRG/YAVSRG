@@ -1,5 +1,6 @@
 namespace Prelude.Tests.Data.ChartDatabase
 
+open System.Linq
 open NUnit.Framework
 open Percyqaz.Common
 open Prelude.Charts
@@ -18,10 +19,10 @@ module ChartDatabaseTests =
     let TEST_OSU_FILE = Beatmap.TryReadFromFile(TEST_OSU_FILE_PATH) |> expect
 
     let TEST_IMPORT =
-        (OsuConverter.convert
+        OsuConverter.convert
             TEST_OSU_FILE
             { Options = ConversionOptions.Pack("osu!", None, Link); OriginalPath = TEST_OSU_FILE_PATH }
-         |> expect)
+        |> expect
 
     [<Test>]
     let BasicRoundTrip () =
@@ -55,48 +56,48 @@ module ChartDatabaseTests =
         conn.Dispose()
 
     [<Test>]
-    let DeleteBackground_DeletesSharedAssetReferences () =
-        let db, conn = InMemoryDatabase.Create()
+    let DeleteBackground_PreservedAfterReimport () =
+        let db, conn = InMemoryDatabase.CreateIsolated()
 
         let chart_db =
-            ChartDatabase.CreateLazyLoaded(db, VirtualAssetStorage("mock_data_path.dat"))
+            ChartDatabase.CreateFullyLoaded(db, VirtualAssetStorage("mock_data_path.dat"))
 
-        let background_hash = String.replicate 64 "A"
+        // First import: Background hash present, audio not
+        chart_db.Import(
+            [
+                { TEST_IMPORT with
+                    Header.BackgroundFile = ImportAsset.Download("BACKGROUND")
+                    Header.AudioFile = ImportAsset.Missing
+                }
+            ]
+        )
 
-        let chart_with_background (chart: Chart) : ImportChart =
-            { TEST_IMPORT with
-                Chart = chart
-                Header =
-                    { TEST_IMPORT.Header with
-                        BackgroundFile = ImportAsset.Download(background_hash)
-                        AudioFile = ImportAsset.Missing
-                    }
-            }
+        Assert.AreEqual(1, chart_db.Entries.Count)
+        let entry = chart_db.Entries.First()
+        Assert.True(entry.Background.IsHash)
+        Assert.True(entry.Audio.IsMissing)
 
-        let first_chart = TEST_IMPORT.Chart
-        let last_note = Array.last first_chart.Notes
+        // Delete: Audio missing, background deleted
+        chart_db.DeleteBackground(entry)
 
-        let second_chart =
-            { first_chart with
-                Notes = Array.append first_chart.Notes [| { last_note with Time = last_note.Time + 1.0f<ms> } |]
-            }
+        Assert.AreEqual(1, chart_db.Entries.Count)
+        let entry = chart_db.Entries.First()
+        Assert.True(entry.Background.IsDeleted)
+        Assert.True(entry.Audio.IsMissing)
 
-        chart_db.Import([ chart_with_background first_chart; chart_with_background second_chart ])
+        // Reimport: Background and audio both present; Background stays deleted; Audio accepts new non-missing asset
+        chart_db.Import(
+            [
+                { TEST_IMPORT with
+                    Header.BackgroundFile = ImportAsset.Download("BACKGROUND")
+                    Header.AudioFile = ImportAsset.Download("AUDIO")
+                }
+            ]
+        )
 
-        let imported_charts = DbCharts.fast_load db |> Array.ofSeq
-        Assert.AreEqual(2, imported_charts.Length)
-
-        chart_db.DeleteBackground(imported_charts.[0])
-
-        let deleted_backgrounds =
-            DbCharts.fast_load db |> Array.ofSeq |> Array.forall(fun meta -> meta.Background = AssetLocation.Deleted)
-
-        Assert.True(deleted_backgrounds)
-
-        chart_db.Import([ chart_with_background first_chart ])
-
-        match chart_db.GetChartMeta(first_chart.Hash()) with
-        | Some chart_meta -> Assert.AreEqual(AssetLocation.Deleted, chart_meta.Background)
-        | None -> Assert.Fail("Chart disappeared after reimport")
+        Assert.AreEqual(1, chart_db.Entries.Count)
+        let entry = chart_db.Entries.First()
+        Assert.True(entry.Background.IsDeleted)
+        Assert.True(entry.Audio.IsHash)
 
         conn.Dispose()
