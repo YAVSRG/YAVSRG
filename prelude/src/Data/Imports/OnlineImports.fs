@@ -38,7 +38,7 @@ module OnlineImports =
                 match! WebServices.download_file.RequestAsync((url, target, ctx.DownloadProgress)) with
                 | false -> return Error "Download failure"
                 | true ->
-                    match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, ctx.set_Progress) with
+                    match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, ctx) with
                     | Ok result ->
                         FileSystemServices.delete_file.Request(target, ignore)
                         return Ok result

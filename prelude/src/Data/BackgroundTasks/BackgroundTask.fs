@@ -38,5 +38,3 @@ type AsyncExtensions =
 
     [<Extension>]
     static member Queue(task: Async<'T>, queue: Async.Queue<Async<'T>, unit>) : unit = queue.Request(task, ignore)
-
-type ProgressCallback = TaskProgress -> unit

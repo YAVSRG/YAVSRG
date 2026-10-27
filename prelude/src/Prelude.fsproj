@@ -166,7 +166,7 @@
     <Compile Include="Data\BackgroundTasks\QueueServices.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
-    <Compile Include="Data\OsuClientInterop\Scores.fs" />
+    <Compile Include="Data\OsuClientInterop\ImportOsuScoresTask.fs" />
     <Compile Include="Data\Imports\RateFiltering.fs" />
     <Compile Include="Data\Imports\FileSystemImports.fs" />
     <Compile Include="Data\Imports\FileSystemImportTask.fs" />

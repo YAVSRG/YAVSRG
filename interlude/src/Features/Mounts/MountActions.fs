@@ -138,18 +138,10 @@ module Mounts =
 
     let import_osu_scores (osu_mount: MountedChartSource, notify_start: bool) : unit =
 
-        let task_tracking = TaskTracking.add %"mount.import_osu_scores"
-
-        let task =
-            let import_task =
-                Scores.import_osu_scores_async(
-                    Path.GetDirectoryName(osu_mount.SourceFolder),
-                    Content.Library,
-                    task_tracking.set_Progress
-                )
-
-            async {
-                match! import_task with
+        ImportOsuScoresTask(Path.GetDirectoryName(osu_mount.SourceFolder), Content.Library)
+            .Track(TaskTracking.add %"mount.import_osu_scores")
+            .WithCallback(
+                function
                 | Ok result ->
                     Notifications.task_feedback(
                         Icons.FOLDER_PLUS,
@@ -158,9 +150,8 @@ module Mounts =
                         %> "notification.score_import_success.body"
                     )
                 | Error _ -> ()
-            }
-
-        general_task_queue.Request(task, ignore)
+            )
+            .Queue(general_task_queue)
 
         if notify_start then
             Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.score_import_queued", "")

@@ -72,7 +72,7 @@ type FileSystemImportTask(path: string, library: Library) =
                     result.LogInfo()
                     return Some result
                 | FolderOfOszs ->
-                    let! result = FileSystemImports.convert_folder_of_oszs(path, library, ctx.set_Progress)
+                    let! result = FileSystemImports.convert_folder_of_oszs(path, library, ctx)
                     result.LogInfo()
                     return Some result
                 | PackFolder ->
@@ -89,7 +89,7 @@ type FileSystemImportTask(path: string, library: Library) =
                             path,
                             ConversionOptions.Pack(folder_name, None, Copy),
                             library,
-                            ctx.set_Progress
+                            ctx
                         )
 
                     result.LogInfo()
@@ -106,7 +106,7 @@ type FileSystemImportTask(path: string, library: Library) =
                                 pack_folder,
                                 ConversionOptions.Pack(pack_name, None, Copy),
                                 library,
-                                ctx.Subtask(pack_name, i + 1, pack_folders.Length).set_Progress
+                                ctx.Subtask(pack_name, i + 1, pack_folders.Length)
                             )
 
                         results <- results.CombineWith(result)

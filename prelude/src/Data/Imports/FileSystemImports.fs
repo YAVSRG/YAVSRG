@@ -94,7 +94,7 @@ module FileSystemImports =
         }
 
     let internal convert_pack_folder
-        (path: string, config: ConversionOptions, library: Library, progress: ProgressCallback)
+        (path: string, config: ConversionOptions, library: Library, ctx: ITaskContext)
         : Async<ConversionResult> =
         async {
             let mutable results = ConversionResult.Empty
@@ -110,13 +110,13 @@ module FileSystemImports =
             for i, song_folder in Array.indexed song_folders do
                 let! result = convert_song_folder(song_folder, config, library)
                 results <- results.CombineWith(result)
-                progress(Processing(i + 1, song_folders.Length))
+                ctx.Progress(i + 1, song_folders.Length)
 
             return results
         }
 
     let internal convert_folder_of_oszs
-        (folder_of_oszs: string, library: Library, progress: ProgressCallback)
+        (folder_of_oszs: string, library: Library, ctx: ITaskContext)
         : Async<ConversionResult> =
         async {
             let config = ConversionOptions.Pack(Path.GetFileName(folder_of_oszs), None, Copy)
@@ -164,13 +164,13 @@ module FileSystemImports =
                                     :: results.SkippedCharts
                             }
 
-                progress(Processing(i + 1, files.Length))
+                ctx.Progress(i + 1, files.Length)
 
             return results
         }
 
     let internal convert_stepmania_pack_zip
-        (path: string, pack_name: string, library: Library, progress: ProgressCallback)
+        (path: string, pack_name: string, library: Library, ctx: ITaskContext)
         : Async<Result<ConversionResult, string>> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
@@ -190,7 +190,7 @@ module FileSystemImports =
                                 pack_folder,
                                 ConversionOptions.EtternaPack(pack_name, None, Copy),
                                 library,
-                                progress
+                                ctx
                             )
 
                         results <- results.CombineWith(result)

@@ -20,8 +20,7 @@ type MountedImportTask(source: MountedChartSource, library: Library, since: Date
                 let config =
                     ConversionOptions.Pack(packname, since, if source.CopyAssetFiles then Copy else Link)
 
-                let! result =
-                    FileSystemImports.convert_pack_folder(source.SourceFolder, config, library, ctx.set_Progress)
+                let! result = FileSystemImports.convert_pack_folder(source.SourceFolder, config, library, ctx)
 
                 result.LogInfo()
                 source.LastImported <- Some DateTime.UtcNow
@@ -40,7 +39,7 @@ type MountedImportTask(source: MountedChartSource, library: Library, since: Date
                             pack_folder,
                             ConversionOptions.Pack(pack_name, since, if source.CopyAssetFiles then Copy else Link),
                             library,
-                            ctx.Subtask(pack_name, i + 1, pack_folders.Length).set_Progress
+                            ctx.Subtask(pack_name, i + 1, pack_folders.Length)
                         )
 
                     results <- results.CombineWith(result)
