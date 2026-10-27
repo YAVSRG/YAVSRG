@@ -1,12 +1,8 @@
 namespace Prelude.Data.Imports
 
-open System
-open System.Globalization
 open System.IO
 open System.IO.Compression
-open System.Text.RegularExpressions
 open Percyqaz.Common
-open Prelude
 open Prelude.Charts
 open Prelude.Formats.Conversions
 open Prelude.Data
@@ -16,81 +12,6 @@ open Prelude.Formats.Quaver
 open Prelude.Formats.StepMania
 
 module FileSystemImports =
-
-    let private RATE_REGEX =
-        Regex(
-            """((^|\s)([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
-        )
-
-    let detect_rate_mod (difficulty_name: string) : Rate option =
-        let m = RATE_REGEX.Match(difficulty_name)
-
-        if m.Success then
-            let r = m.Value.Trim([| ' '; 'x'; ']' |]).Replace(',', '.')
-
-            match Single.TryParse(r, CultureInfo.InvariantCulture) with
-            | true, r when r >= float32 LOWEST_SUPPORTED_RATE && r <= float32 HIGHEST_SUPPORTED_RATE ->
-                Some(r * 1.0f<rate>)
-            | _ -> None
-        else
-            None
-
-    let filter_rates
-        (results: Result<ImportChart, SkippedConversion> list)
-        : Result<ImportChart, SkippedConversion> list =
-
-        let find_matching_1x (import: ImportChart, rate: Rate) =
-            results
-            |> List.tryPick(
-                function
-                | Ok { Chart = original; Header = header } ->
-                    let original_duration = original.LastNote - original.FirstNote
-                    let incoming_duration = import.Chart.LastNote - import.Chart.FirstNote
-                    let relative_rate = original_duration / incoming_duration * 1.0f<rate>
-
-                    if
-                        abs(rate - relative_rate) < 0.025f<rate>
-                        && Chart.notecount original = Chart.notecount import.Chart
-                    then
-                        match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
-                        | Some(ChartOrigin.Osu osu) ->
-                            Some(
-                                header,
-                                ChartOrigin.Osu(
-                                    { osu with SourceRate = rate; FirstNoteOffset = import.Chart.FirstNote }
-                                )
-                            )
-                        | _ -> None
-                    else
-                        None
-                | _ -> None
-            )
-
-        results
-        |> List.map(
-            function
-            | Ok import ->
-                match detect_rate_mod import.Header.DiffName with
-                | Some rate ->
-                    match find_matching_1x(import, rate) with
-                    | Some(h, alt_rate_origin) ->
-                        h.Origins <- h.Origins.Add(alt_rate_origin)
-
-                        Error
-                            {
-                                OriginalPath = import.LoadedFromPath
-                                Reason = sprintf "Skipping %.2fx rate of another map" rate
-                            }
-                    | None ->
-                        Logging.Debug
-                            "%s: Looks like %.2fx rate, but didn't find a 1.0x version in the same folder, so keeping it"
-                            import.LoadedFromPath
-                            rate
-
-                        Ok import
-                | None -> Ok import
-            | Error skipped_conversion -> Error skipped_conversion
-        )
 
     let convert_chart_file (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> list =
         let inline parse_error (message: string) =
@@ -145,8 +66,7 @@ module FileSystemImports =
                 )
                 |> List.ofSeq
 
-            let filtered = filter_rates results
-
+            let filtered = RateFiltering.apply(results)
             let mutable success_count = 0
 
             let charts =
@@ -280,101 +200,4 @@ module FileSystemImports =
                 | _ ->
                     FileSystemServices.delete_folder.Request(dir, ignore)
                     return Error "Extracted zip does not match the usual structure for a StepMania pack"
-        }
-
-    let rec auto_detect_import
-        (path: string, library: Library, progress: ProgressCallback)
-        : Async<Result<ConversionResult, string>> =
-        async {
-            try
-                match File.GetAttributes(path) &&& FileAttributes.Directory |> int with
-                | 0 ->
-                    match path with
-                    | ChartFile ext ->
-                        let folder_name =
-                            match ext with
-                            | ".osu" -> "osu!"
-                            | ".qua" -> "Quaver"
-                            | _ -> "Singles"
-
-                        let! result =
-                            convert_song_folder(
-                                Path.GetDirectoryName(path),
-                                ConversionOptions.Pack(folder_name, None, Copy),
-                                library
-                            )
-
-                        result.LogInfo()
-                        return Ok result
-                    | ChartArchive _ ->
-                        let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
-
-                        if Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not then
-                            return Error(sprintf "Target extraction folder (%s) already exists" dir)
-                        else
-                            ZipFile.ExtractToDirectory(path, dir)
-                            let! result = auto_detect_import(dir, library, progress)
-                            FileSystemServices.delete_folder.Request(dir, ignore)
-                            return result
-                    | _ -> return Error "File type not recognised as importable"
-                | _ ->
-                    match path with
-                    | SongFolder ext ->
-                        let folder_name =
-                            match ext with
-                            | ".osu" -> "osu!"
-                            | ".qua" -> "Quaver"
-                            | _ -> "Singles"
-
-                        let! result =
-                            convert_song_folder(path, ConversionOptions.Pack(folder_name, None, Copy), library)
-
-                        result.LogInfo()
-                        return Ok result
-                    | FolderOfOszs ->
-                        let! result = convert_folder_of_oszs(path, library, progress)
-                        result.LogInfo()
-                        return Ok result
-                    | PackFolder ->
-                        let folder_name =
-                            match Path.GetFileName(path) with
-                            | "Songs" ->
-                                if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!"
-                                elif path |> Path.GetDirectoryName |> Path.GetFileName = "Quaver" then "Quaver"
-                                else "Songs"
-                            | s -> s
-
-                        let! result =
-                            convert_pack_folder(
-                                path,
-                                ConversionOptions.Pack(folder_name, None, Copy),
-                                library,
-                                progress
-                            )
-
-                        result.LogInfo()
-                        return Ok result
-                    | FolderOfPacks ->
-                        let mutable results = ConversionResult.Empty
-                        let pack_folders = Directory.GetDirectories(path)
-
-                        for i, pack_folder in Array.indexed pack_folders do
-                            let pack_name = Path.GetFileName(pack_folder)
-
-                            let! result =
-                                convert_pack_folder(
-                                    pack_folder,
-                                    ConversionOptions.Pack(pack_name, None, Copy),
-                                    library,
-                                    (fun p -> Nested(pack_name, i + 1, pack_folders.Length, p)) >> progress
-                                )
-
-                            results <- results.CombineWith(result)
-
-                        results.LogInfo()
-                        return Ok results
-                    | _ -> return Error "No importable folder structure detected"
-            with err ->
-                Logging.Error "Unexpected exception while importing '%s': %O" path err
-                return Error err.Message
         }

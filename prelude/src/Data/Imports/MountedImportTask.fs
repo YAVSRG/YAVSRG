@@ -8,7 +8,7 @@ open Prelude.Formats.Conversions
 open Prelude.Data
 open Prelude.Data.Library
 
-type MountImportTask(source: MountedChartSource, library: Library, since: DateTime option) =
+type MountedImportTask(source: MountedChartSource, library: Library, since: DateTime option) =
     inherit BackgroundTask<ConversionResult>()
 
     override this.Run(ctx: ITaskContext) : Async<ConversionResult> =
@@ -59,8 +59,8 @@ type MountImportTask(source: MountedChartSource, library: Library, since: DateTi
                 (date.ToString("yyyy-MM-dd HH:mm:ss"))
         | None -> ()
 
-        MountImportTask(source, library, source.LastImported)
+        MountedImportTask(source, library, source.LastImported)
 
     [<Extension>]
     static member ImportAllCharts(source: MountedChartSource, library: Library) : BackgroundTask<ConversionResult> =
-        MountImportTask(source, library, None)
+        MountedImportTask(source, library, None)

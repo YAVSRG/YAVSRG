@@ -1,6 +1,5 @@
 namespace Prelude.Data
 
-open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Prelude
 
@@ -26,6 +25,8 @@ type TaskContext(label: string) =
 
     let mutable completed_at = ValueNone
     let mutable status = InProgress(Generic(%"import.waiting"))
+
+    let progress_ev = Event<TaskProgress>()
 
     do Logging.Debug "Queuing task '%s'" label
 
@@ -53,3 +54,36 @@ type TaskContext(label: string) =
     member val StartedAt: int64 = Timestamp.now()
     member this.CompletedAt: int64 voption = lock this (fun () -> completed_at)
     member this.Label: string = label
+
+    member this.SubscribeProgress(callback: TaskProgress -> unit) : TaskContext =
+        progress_ev.Publish.Add(callback)
+        this
+
+    member this.SubscribeDownloadProgress(callback: float32 -> unit) : TaskContext =
+        this.SubscribeProgress(
+            function
+            | Downloading pc -> callback pc
+            | _ -> ()
+        )
+
+    member this.LogProgress() : TaskContext =
+        let mutable download_step = -1
+
+        this.SubscribeProgress(
+            function
+            | Generic status -> Logging.Warn "%s: %s" label status
+            | Downloading p ->
+                let t = p / 0.1f |> floor |> int
+
+                if t > download_step then
+                    download_step <- t
+
+                    Logging.Info
+                        "%s: [%s%s] %.0f%%"
+                        label
+                        (String.replicate download_step "#")
+                        (String.replicate (max 0 (10 - download_step)) "-")
+                        (p * 100.0f)
+            | Processing(i, count) -> Logging.Info "%s: %i / %i" label i count
+            | Nested(nlabel, i, count, inner) -> Logging.Info "%s: %s %i/%i [%A]" label nlabel i count inner
+        )

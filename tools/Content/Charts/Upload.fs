@@ -252,7 +252,7 @@ module Upload =
         OnlineImports.download_by_origin(
             ChartOrigin.Etterna(pack_name),
             interlude_library,
-            TaskProgress_.log_progress_bar pack_name
+            TaskContext(pack_name).LogProgress()
         )
         |> Async.RunSynchronously
 

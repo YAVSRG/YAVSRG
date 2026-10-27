@@ -5,6 +5,7 @@ open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
+open Prelude.Data
 open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
 open Prelude.Formats.Conversions
@@ -109,28 +110,19 @@ module FileDrop =
                 Menu.Exit()
                 ConfirmUnlinkedImportPage(path).Show()
             else
-
-            let task_tracking = TaskTracking.add(Path.GetFileName(path))
-
-            let task =
-                FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
-
-            import_queue.Request(
-                task,
-                function
-                | Ok result ->
-                    Notifications.task_feedback(
-                        Icons.CHECK,
-                        %"notification.import_success",
-                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
-                        %> "notification.import_success.body"
+                FileSystemImportTask(path, Content.Library)
+                    .Track(TaskTracking.add(Path.GetFileName(path)))
+                    .WithCallback(
+                        function
+                        | Ok(Some result) -> conversion_result_callback(Ok(result))
+                        | Ok(None) ->
+                            Notifications.error(
+                                %"notification.import_failed",
+                                %"notification.import_failed.not_importable"
+                            )
+                        | Error(reason) -> conversion_result_callback(Error(reason))
                     )
-
-                    Content.TriggerChartAdded(result.FirstConvertedChart)
-                | Error reason ->
-                    Logging.Error "Error importing %s: %s" path reason
-                    Notifications.error(%"notification.import_failed", reason)
-            )
+                    .Queue(import_queue_new)
 
     let MAX_ITEMS_ALLOWED = 20
 

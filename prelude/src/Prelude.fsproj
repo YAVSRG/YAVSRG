@@ -163,13 +163,15 @@
     <Compile Include="Data\BackgroundTasks\WebServices.fs" />
     <Compile Include="Data\BackgroundTasks\ImageServices.fs" />
     <Compile Include="Data\BackgroundTasks\FileSystemServices.fs" />
+    <Compile Include="Data\BackgroundTasks\QueueServices.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
     <Compile Include="Data\OsuClientInterop\Scores.fs" />
-    <Compile Include="Data\Imports\Shared.fs" />
+    <Compile Include="Data\Imports\RateFiltering.fs" />
     <Compile Include="Data\Imports\FileSystemImports.fs" />
+    <Compile Include="Data\Imports\FileSystemImportTask.fs" />
     <Compile Include="Data\Imports\MountedChartSource.fs" />
-    <Compile Include="Data\Imports\MountedImports.fs" />
+    <Compile Include="Data\Imports\MountedImportTask.fs" />
     <Compile Include="Data\Imports\OnlineImports.fs" />
     <Compile Include="Data\Maintenance\RecalculatePatternsTask.fs" />
     <Compile Include="Data\Maintenance\VacuumTask.fs" />

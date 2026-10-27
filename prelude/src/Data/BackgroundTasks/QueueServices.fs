@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Prelude.Formats.Conversions
 
 [<AutoOpen>]
-module Shared =
+module QueueServices =
 
     let import_queue =
         { new Async.Queue<Async<Result<ConversionResult, string>>, Result<ConversionResult, string>>() with

@@ -33,21 +33,13 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
     let download () =
         if status = NotDownloaded || status = DownloadFailed then
 
-            let task_tracking = TaskTracking.add data.title
-
-            let progress_callback =
-                fun p ->
-                    match p with
-                    | Data.Downloading percent -> progress <- percent
-                    | _ -> ()
-
-                    task_tracking.set_Progress p
+            progress <- 0.0f
 
             let task =
                 OnlineImports.download_osu_set(
                     sprintf "https://catboy.best/d/%in" data.id,
                     Content.Library,
-                    progress_callback
+                    TaskTracking.add(data.title).SubscribeDownloadProgress(fun percent -> progress <- percent)
                 )
 
             import_queue.Request(

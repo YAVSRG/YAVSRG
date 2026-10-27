@@ -28,17 +28,17 @@ module OnlineImports =
         }
 
     let download_etterna_pack
-        (name: string, url: string, library: Library, progress: ProgressCallback)
+        (name: string, url: string, library: Library, ctx: ITaskContext)
         : Async<Result<ConversionResult, string>> =
         async {
             try
                 let target =
                     Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
 
-                match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
+                match! WebServices.download_file.RequestAsync((url, target, ctx.DownloadProgress)) with
                 | false -> return Error "Download failure"
                 | true ->
-                    match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, progress) with
+                    match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, ctx.set_Progress) with
                     | Ok result ->
                         FileSystemServices.delete_file.Request(target, ignore)
                         return Ok result
@@ -50,31 +50,29 @@ module OnlineImports =
                 return Error err.Message
         }
 
-    let download_osu_set
-        (url: string, library: Library, progress: ProgressCallback)
-        : Async<Result<ConversionResult, string>> =
+    let download_osu_set (url: string, library: Library, ctx: ITaskContext) : Async<Result<ConversionResult, string>> =
         async {
             try
                 let target =
                     Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
 
-                match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
+                match! WebServices.download_file.RequestAsync((url, target, ctx.DownloadProgress)) with
                 | false -> return Error "Download failure"
                 | true ->
-                    match! FileSystemImports.auto_detect_import(target, library, progress) with
-                    | Ok result ->
+                    match! FileSystemImportTask(target, library).Run(ctx) with
+                    | Some result ->
                         FileSystemServices.delete_file.Request(target, ignore)
                         return Ok result
-                    | Error reason ->
+                    | None ->
                         FileSystemServices.delete_file.Request(target, ignore)
-                        return Error reason
+                        return Error "Downloaded .osz was not importable!"
             with err ->
                 Logging.Error "Unexpected exception while downloading '%s': %O" url err
                 return Error err.Message
         }
 
     let download_by_origin
-        (origin: ChartOrigin, library: Library, progress: ProgressCallback)
+        (origin: ChartOrigin, library: Library, ctx: ITaskContext)
         : Async<Result<ConversionResult, string>> =
         async {
             match origin with
@@ -82,14 +80,14 @@ module OnlineImports =
             | ChartOrigin.Osu osu ->
                 // todo: download via md5 if available
                 let url = sprintf "https://catboy.best/d/%in" osu.BeatmapSetId
-                return! download_osu_set(url, library, progress)
+                return! download_osu_set(url, library, ctx)
 
             | ChartOrigin.Quaver _ -> return Error "No mirror exists for Quaver"
 
             | ChartOrigin.Etterna(pack: string) ->
                 match! etterna_download_url pack with
                 | Error reason -> return Error(sprintf "Error getting URL from EtternaOnline for '%s': %s" pack reason)
-                | Ok url -> return! download_etterna_pack(pack, url, library, progress)
+                | Ok url -> return! download_etterna_pack(pack, url, library, ctx)
         }
 
     open Prelude.Backbeat.Archive
