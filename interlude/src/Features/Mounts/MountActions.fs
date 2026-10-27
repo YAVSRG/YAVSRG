@@ -114,7 +114,7 @@ module Mounts =
                                 | Ok _ -> ()
                                 | Error _ -> ()
                             )
-                            .Queue(import_queue_new)
+                            .Queue(import_queue)
                 else
                     Logging.Warn
                         "%s Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."

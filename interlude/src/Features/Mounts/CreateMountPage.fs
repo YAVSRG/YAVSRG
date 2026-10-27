@@ -46,7 +46,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
                 if result.IsOk && also_import_scores.Value then
                     GameThread.defer(fun () -> Mounts.import_osu_scores(mount, false))
             )
-            .Queue(import_queue_new)
+            .Queue(import_queue)
 
         Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.import_queued", "")
         Menu.Back()

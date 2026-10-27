@@ -60,7 +60,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                         Notifications.error(%"notification.install_song_failed", data.title)
                         status <- DownloadFailed
                 )
-                .Queue(import_queue_new)
+                .Queue(import_queue)
 
             status <- Downloading
 

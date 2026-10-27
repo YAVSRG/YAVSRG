@@ -39,14 +39,14 @@ type private EditMountPage
                 .ImportNewCharts(Content.Library)
                 .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.import"))
                 .WithCallback(FileDrop.conversion_result_callback)
-                .Queue(import_queue_new)
+                .Queue(import_queue)
 
         elif queued_import = 2 then
             setting.Value.Value
                 .ImportAllCharts(Content.Library)
                 .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.importall"))
                 .WithCallback(FileDrop.conversion_result_callback)
-                .Queue(import_queue_new)
+                .Queue(import_queue)
 
     override this.Content() : Widget =
         this.OnClose(this.SaveChangesAndImport)

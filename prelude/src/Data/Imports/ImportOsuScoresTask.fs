@@ -1,4 +1,4 @@
-namespace Prelude.Data.OsuClientInterop
+namespace Prelude.Data.Imports
 
 open System.IO
 open System.Text
@@ -8,6 +8,7 @@ open Prelude.Charts
 open Prelude.Data
 open Prelude.Data.UserDatabase
 open Prelude.Data.Library
+open Prelude.Data.OsuClientInterop
 
 [<Struct>]
 type ScoreImportResult =

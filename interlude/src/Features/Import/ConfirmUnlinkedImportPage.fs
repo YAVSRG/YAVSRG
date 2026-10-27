@@ -53,7 +53,7 @@ type ConfirmUnlinkedImportPage(path: string) =
                                         )
                                     | Error(reason) -> conversion_result_callback(Error(reason))
                                 )
-                                .Queue(import_queue_new)
+                                .Queue(import_queue)
 
                             Menu.Back()
                     )

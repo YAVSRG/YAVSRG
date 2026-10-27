@@ -62,7 +62,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                         Notifications.error(%"notification.install_pack_failed", data.name)
                         status <- DownloadFailed
                 )
-                .Queue(import_queue_new)
+                .Queue(import_queue)
 
             status <- Downloading
 
