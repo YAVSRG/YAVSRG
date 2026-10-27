@@ -7,6 +7,7 @@ open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
+open Prelude.Formats.Conversions
 open Prelude.Skins.Conversions
 open Prelude.Skins.Conversions.Osu
 open Interlude.UI
@@ -15,6 +16,19 @@ open Interlude.Features.Import.Etterna
 open Interlude.Features.Import.Osu
 
 module FileDrop =
+
+    let conversion_result_callback (result: Result<ConversionResult, string>) : unit =
+        match result with
+        | Ok result ->
+            Notifications.task_feedback(
+                Icons.CHECK,
+                %"notification.import_success",
+                [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                %> "notification.import_success.body"
+            )
+
+            Content.TriggerChartAdded(result.FirstConvertedChart)
+        | Error reason -> Notifications.error(%"notification.import_failed", reason)
 
     let import_stepmania_noteskin (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")

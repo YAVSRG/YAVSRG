@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Prelude
+open Prelude.Data
 open Prelude.Formats.Conversions
 open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
@@ -97,8 +98,16 @@ module Mounts =
                 if Directory.Exists(mount.SourceFolder) then
                     if mount.ImportOnStartup then
                         Logging.Info "Checking for new %s songs to import.." name
-                        let task = Mount.import_new(mount, Content.Library, ignore)
-                        import_queue.Request(task, ignore)
+
+                        mount
+                            .ImportNewCharts(Content.Library)
+                            .Track(TaskTracking.add(sprintf "%s: %s" name %"mount.importall")) // create tracking that isn't listed
+                            .WithCallback(
+                                function
+                                | Ok _ -> ()
+                                | Error _ -> ()
+                            )
+                            .Queue(import_queue_new)
                 else
                     Logging.Warn
                         "%s Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."

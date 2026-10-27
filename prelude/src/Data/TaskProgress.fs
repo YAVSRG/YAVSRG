@@ -18,6 +18,9 @@ type ITaskContext() =
     member this.DownloadProgress(percentage: float32) : unit = this.Progress(Downloading(percentage))
     member this.Progress(count: int, total: int) : unit = this.Progress(Processing(count, total))
 
+    // temp
+    member this.set_Progress p = this.Progress(p)
+
 type TaskContext(label: string) =
     inherit ITaskContext()
 
@@ -27,7 +30,7 @@ type TaskContext(label: string) =
     do Logging.Debug "Queuing task '%s'" label
 
     member this.Status
-        with get () = lock this (fun () -> status)
+        with get (): TaskStatus = lock this (fun () -> status)
         and private set (v: TaskStatus) = lock this (fun () -> status <- v)
 
     override this.Progress(p: TaskProgress) : unit =
@@ -49,10 +52,7 @@ type TaskContext(label: string) =
 
     member val StartedAt: int64 = Timestamp.now()
     member this.CompletedAt: int64 voption = lock this (fun () -> completed_at)
-    member this.Label = label
-
-    // temp
-    member this.set_Progress p = this.Status <- InProgress(p)
+    member this.Label: string = label
 
 [<AbstractClass>]
 type BackgroundTask<'T>() =
@@ -66,17 +66,11 @@ type BackgroundTask<'T>() =
                 return Ok(result)
             | Choice2Of2 exn ->
                 ctx.Faulted()
+                Logging.Error "Unexpected exception during '%s': %O" ctx.Label exn
                 return Error(exn.Message)
         }
 
 type AsyncExtensions =
-
-    [<Extension>]
-    static member WithCallback(task: Async<'T>, callback: 'T -> unit) : Async<unit> =
-        async {
-            let! result = task
-            callback(result)
-        }
 
     [<Extension>]
     static member WithCallback(task: Async<Result<'T, _>>, callback: 'T -> unit) : Async<unit> =
@@ -84,6 +78,13 @@ type AsyncExtensions =
             match! task with
             | Ok result -> callback(result)
             | Error _ -> ()
+        }
+
+    [<Extension>]
+    static member WithCallback(task: Async<'T>, callback: 'T -> unit) : Async<unit> =
+        async {
+            let! result = task
+            callback(result)
         }
 
     [<Extension>]

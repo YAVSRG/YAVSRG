@@ -170,7 +170,8 @@
     <Compile Include="Data\OsuClientInterop\Scores.fs" />
     <Compile Include="Data\Imports\Shared.fs" />
     <Compile Include="Data\Imports\FileSystemImports.fs" />
-    <Compile Include="Data\Imports\Mounts.fs" />
+    <Compile Include="Data\Imports\MountedChartSource.fs" />
+    <Compile Include="Data\Imports\MountedImports.fs" />
     <Compile Include="Data\Imports\OnlineImports.fs" />
     <Compile Include="Data\Exports\OsuExport.fs" />
     <Compile Include="Data\Exports\Exports.fs" />
