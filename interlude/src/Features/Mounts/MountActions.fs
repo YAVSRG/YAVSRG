@@ -5,10 +5,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Data
 open Prelude.Formats.Conversions
 open Prelude.Data.Imports
-open Prelude.Data.OsuClientInterop
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI

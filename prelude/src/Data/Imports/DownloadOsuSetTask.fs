@@ -4,7 +4,7 @@ open System
 open System.IO
 open Prelude
 open Prelude.Formats.Conversions
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.Library
 
 type DownloadOsuSetTask(url: string, library: Library) =

@@ -5,7 +5,7 @@ open System.Net.Http
 open Prelude
 open Prelude.Charts
 open Prelude.Formats.Conversions
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
 open Prelude.Backbeat.Archive

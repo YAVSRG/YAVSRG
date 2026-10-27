@@ -4,7 +4,7 @@ open System
 open System.IO
 open Prelude
 open Prelude.Formats.Conversions
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.Library
 
 type DownloadEtternaPackTask(name: string, url: string, library: Library) =

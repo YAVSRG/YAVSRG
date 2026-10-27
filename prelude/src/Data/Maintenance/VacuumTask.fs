@@ -3,7 +3,7 @@ namespace Prelude.Data.Maintenance
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.ChartDatabase
 
 type VacuumTask(delete_missing_audio: bool, chart_db: ChartDatabase) =

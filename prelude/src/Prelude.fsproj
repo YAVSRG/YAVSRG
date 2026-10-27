@@ -159,6 +159,7 @@
     <Compile Include="Data\Stats\StatsSync.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
+    <Compile Include="Data\Imports\BackgroundTasks\AsyncExtensions.fs" />
     <Compile Include="Data\Imports\BackgroundTasks\TaskStatus.fs" />
     <Compile Include="Data\Imports\BackgroundTasks\TaskContext.fs" />
     <Compile Include="Data\Imports\BackgroundTasks\BackgroundTask.fs" />

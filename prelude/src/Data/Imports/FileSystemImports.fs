@@ -5,7 +5,7 @@ open System.IO.Compression
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Formats.Conversions
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.Library
 open Prelude.Formats.Osu
 open Prelude.Formats.Quaver

@@ -3,7 +3,7 @@ namespace Prelude.Data.Maintenance
 open Percyqaz.Common
 open Prelude.Mods
 open Prelude.Gameplay.Rulesets
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.UserDatabase
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Library

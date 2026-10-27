@@ -5,7 +5,6 @@ open System.Net.Http
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Data
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Imports
 open Interlude.Web.Shared

@@ -5,7 +5,7 @@ open System.IO
 open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Prelude.Formats.Conversions
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.Library
 
 type MountedImportTask(source: MountedChartSource, library: Library, since: DateTime option) =

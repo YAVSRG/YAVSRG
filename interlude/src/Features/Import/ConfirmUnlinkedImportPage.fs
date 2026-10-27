@@ -3,7 +3,6 @@ namespace Interlude.Features.Import
 open System.IO
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data
 open Prelude.Data.Imports
 open Interlude.UI
 open Interlude.Content

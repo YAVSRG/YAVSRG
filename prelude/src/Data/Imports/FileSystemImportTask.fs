@@ -3,7 +3,7 @@ namespace Prelude.Data.Imports
 open System.IO
 open System.IO.Compression
 open Prelude.Formats.Conversions
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.Library
 
 type FileSystemImportTask(path: string, library: Library) =

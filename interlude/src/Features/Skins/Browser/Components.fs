@@ -7,7 +7,7 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.Repo
-open Prelude.Data
+open Prelude.Data.Imports
 open Interlude.UI
 open Interlude.Content
 

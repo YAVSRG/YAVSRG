@@ -2,7 +2,6 @@ namespace Interlude.Features.OptionsMenu.Library
 
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data
 open Prelude.Data.Library
 open Prelude.Data.Imports
 open Prelude.Data.Maintenance

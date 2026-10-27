@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.ChartDatabase
 
 type RecalculatePatternsTask(chart_db: ChartDatabase) =

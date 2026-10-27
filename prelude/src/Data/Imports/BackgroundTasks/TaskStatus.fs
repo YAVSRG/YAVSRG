@@ -1,6 +1,4 @@
-namespace Prelude.Data
-
-// todo: Prelude.Data.Imports namespace ?
+namespace Prelude.Data.Imports
 
 type TaskProgress =
     | Generic of label: string
