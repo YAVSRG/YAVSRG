@@ -1,24 +1,16 @@
 namespace Interlude.Features.Import
 
 open Percyqaz.Common
+open Percyqaz.Flux.Input
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Imports
 open Interlude.UI
-open Interlude.Features.Tables.Browser
 
-module TaskTracking =
-
-    let private list = ResizeArray<TaskContext>()
-
-    let add (label: string) : TaskContext =
-        assert GameThread.is_game_thread()
-
-        let status = TaskContext(label)
-        list.Add(status)
-        status
+type BackgroundTaskList(import_button: Widget) =
+    inherit StaticWidget(NodeType.None)
 
     let DELAY_AFTER_COMPLETE = 3000L
     let FADE_TIME = 300L
@@ -27,7 +19,7 @@ module TaskTracking =
     let HEIGHT = 45.0f
     let SPACING = 15.0f
 
-    let rec private fmt_progress (progress: TaskStatus) : string * Color =
+    let rec fmt_progress (progress: TaskStatus) : string * Color =
         match progress with
         | InProgress(Generic status) -> status, Colors.grey_2
         | InProgress(Downloading percent) -> sprintf "%s %.0f%%" Icons.DOWNLOAD (percent * 100.0f), Colors.grey_1
@@ -38,14 +30,26 @@ module TaskTracking =
         | Completed -> Icons.CHECK, Colors.green_accent
         | Faulted -> Icons.ALERT_CIRCLE, Colors.red_accent
 
-    let private draw_task (now: int64, opacity: float32, x: float32, y: float32, task: TaskContext) : float32 =
+    let fade = Animation.Fade(0.0f)
+
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
+        base.Update(elapsed_ms, moved)
+
+        if Mouse.hover(import_button.Bounds) && TaskTracking.in_progress() then
+            fade.Target <- 1.0f
+        else
+            fade.Target <- 0.0f
+
+        fade.Update(elapsed_ms)
+
+    member private this.DrawTask(now: int64, opacity: float32, x: float32, y: float32, task: TaskContext) : float32 =
         let fade_in_out =
             match task.CompletedAt with
             | ValueSome time ->
                 let time_ago = now - time
 
                 if time_ago > DELAY_AFTER_COMPLETE + FADE_TIME then
-                    GameThread.defer(fun () -> list.Remove(task) |> ignore)
+                    GameThread.defer(fun () -> TaskTracking.list.Remove(task) |> ignore)
 
                 1.0f - (float32(time_ago - DELAY_AFTER_COMPLETE) / float32 FADE_TIME |> max 0.0f |> min 1.0f)
             | ValueNone ->
@@ -60,7 +64,6 @@ module TaskTracking =
         Render.rect bounds (Colors.cyan_shadow.O4a(alpha))
 
         let status = task.Status
-
         let top_text = task.Label
 
         Text.fill_b(
@@ -99,7 +102,7 @@ module TaskTracking =
 
         y + (HEIGHT + SPACING) * fade_in_out
 
-    let draw (bounds: Rect, opacity: float32) : unit =
+    member private this.DrawTaskList(bounds: Rect, opacity: float32) : unit =
         let now = Timestamp.now()
 
         let bounds =
@@ -108,75 +111,24 @@ module TaskTracking =
 
         let a = int(255.0f * opacity)
         Render.rect (bounds.SlicePercentT(opacity)) (Colors.shadow_2.O3a(a))
+        Render.border Style.PADDING (bounds.SlicePercentT(opacity)) (Colors.cyan_accent.O4a(a))
 
         let x = bounds.Left + (bounds.Width - WIDTH) * 0.5f
         let mutable y = bounds.Top + 70.0f
 
         Text.fill_b(
             Style.font,
-            sprintf "%s: %i" %"imports.queued" list.Count,
+            sprintf "%s: %i" %"imports.queued" TaskTracking.list.Count,
             bounds.SliceT(60.0f).Shrink(5.0f),
             (Colors.white.O4a(a), Colors.shadow_2.O4a(a)),
             Alignment.CENTER
         )
 
-        for task in list do
-            y <- draw_task(now, opacity, x, y, task)
-
-    let in_progress () : bool =
-        import_queue.Status <> Async.QueueStatus.Idle
-        || general_task_queue.Status <> Async.QueueStatus.Idle
-        || TableDownloader.download_service.Status <> Async.QueueStatus.Idle
-
-    let current_progress () : TaskStatus =
-        list
-        |> Seq.map _.Status
-        |> Seq.tryPick(
-            function
-            | Completed -> None
-            | otherwise -> Some otherwise
-        )
-        |> Option.defaultValue Completed
-
-/// Displayed below the import button when a task is in progress
-type TaskProgressMiniBar() =
-    inherit StaticWidget(NodeType.None)
-
-    let animation = Animation.Counter(1500.0)
-    let fade = Animation.Fade(0.0f)
-
-    override this.Update(elapsed_ms: float, moved: bool) : unit =
-        base.Update(elapsed_ms, moved)
-        animation.Update(elapsed_ms)
-        fade.Target <- if TaskTracking.in_progress() then 1.0f else 0.0f
-        fade.Update(elapsed_ms)
+        for task in TaskTracking.list do
+            y <- this.DrawTask(now, opacity, x, y, task)
 
     override this.Draw() : unit =
         let alpha = fade.Alpha
 
         if alpha > 0 then
-
-            match TaskTracking.current_progress() with
-            | InProgress(Downloading p) ->
-                Render.rect this.Bounds (Colors.shadow_2.O4a(alpha))
-                Render.rect (this.Bounds.SlicePercentL(p)) (Colors.cyan.O4a(alpha))
-            | InProgress(Processing(i, total)) ->
-                Render.rect this.Bounds (Colors.cyan.O4a(alpha))
-                Render.rect (this.Bounds.SlicePercentL(float32 i / float32 total)) (Colors.green_accent.O4a(alpha))
-            | InProgress(Nested(_, i, total, _)) ->
-                Render.rect this.Bounds (Colors.cyan.O4a(alpha))
-                Render.rect (this.Bounds.SlicePercentL(float32 i / float32 total)) (Colors.green_accent.O4a(alpha))
-            | InProgress(Generic _) ->
-                let tick_width = this.Bounds.Width * 0.2f
-
-                let pos =
-                    -tick_width + (this.Bounds.Width + tick_width) * float32 animation.Progress
-
-                Render.rect_edges
-                    (this.Bounds.Left + max 0.0f pos)
-                    this.Bounds.Top
-                    (this.Bounds.Left + min this.Bounds.Width (pos + tick_width))
-                    this.Bounds.Bottom
-                    (Colors.white.O4a(alpha))
-            | Completed -> Render.rect this.Bounds (Colors.green_accent.O4a(alpha))
-            | Faulted -> Render.rect this.Bounds (Colors.red_accent.O4a(alpha))
+            this.DrawTaskList(this.Bounds.ShrinkY(Toolbar.HEIGHT).SlicePercentL(0.4f).Shrink(Style.PADDING), fade.Value)

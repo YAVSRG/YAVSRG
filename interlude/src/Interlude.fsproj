@@ -10,9 +10,9 @@
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <DebugType>embedded</DebugType>
-	<PublishTrimmed>True</PublishTrimmed>
-	<TrimMode>partial</TrimMode>
-	<CETCompat>false</CETCompat>
+    <PublishTrimmed>True</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <CETCompat>false</CETCompat>
   </PropertyGroup>
   <PropertyGroup>
     <Optimize>True</Optimize>
@@ -72,6 +72,9 @@
     <Compile Include="UI\Menu\Controls.fs" />
     <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="UI\Menu\ColorPicker.fs" />
+    <Compile Include="Features\BackgroundTasks\BackgroundTaskTracking.fs" />
+    <Compile Include="Features\BackgroundTasks\BackgroundTaskProgressBar.fs" />
+    <Compile Include="Features\BackgroundTasks\BackgroundTaskList.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\WikiState.fs" />
     <Compile Include="Features\Wiki\WikiBrowserPage.fs" />
@@ -134,7 +137,6 @@
     <Compile Include="Features\Score\BottomBanner.fs" />
     <Compile Include="Features\Score\Confetti.fs" />
     <Compile Include="Features\Score\ScoreScreen.fs" />
-    <Compile Include="Features\Import\TaskTracking.fs" />
     <Compile Include="Features\Import\osu!\ImportOsuNoteskinPage.fs" />
     <Compile Include="Features\Import\osu!\OsuSkinsListPage.fs" />
     <Compile Include="Features\Import\osu!\Replays.fs" />
