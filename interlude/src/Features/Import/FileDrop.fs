@@ -67,6 +67,7 @@ module FileDrop =
             try
                 File.Copy(path, Path.Combine(get_game_folder "Skins", Path.GetFileName(path)))
                 Skins.load()
+                Notifications.action_feedback(Icons.IMAGE, %"notification.install_skin", "")
             with err ->
                 Logging.Error "Error moving/importing dropped skin: %O" err
 

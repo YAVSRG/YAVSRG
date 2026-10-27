@@ -243,9 +243,6 @@
     <Compile Include="Features\Skins\EditNoteskin\NoteSettingsPage.fs" />
     <Compile Include="Features\Skins\EditNoteskin\AnimationSettingsPage.fs" />
     <Compile Include="Features\Skins\EditNoteskin\EditNoteskinPage.fs" />
-    <Compile Include="Features\Skins\Browser\Thumbnails.fs" />
-    <Compile Include="Features\Skins\Browser\Components.fs" />
-    <Compile Include="Features\Skins\Browser\Browser.fs" />
     <Compile Include="Features\Skins\SelectSkin.fs" />
     <Compile Include="Features\LevelSelect\LevelSelectHistory.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
