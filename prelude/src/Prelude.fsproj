@@ -162,9 +162,6 @@
     <Compile Include="Data\Stats\TotalStats.fs" />
     <Compile Include="Data\Stats\Stats.fs" />
     <Compile Include="Data\Stats\StatsSync.fs" />
-    <Compile Include="Data\Maintenance\RecalculatePatternsTask.fs" />
-    <Compile Include="Data\Maintenance\VacuumTask.fs" />
-    <Compile Include="Data\Maintenance\RecalculatePersonalBestsTask.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
     <Compile Include="Data\OsuClientInterop\Scores.fs" />
@@ -173,6 +170,9 @@
     <Compile Include="Data\Imports\MountedChartSource.fs" />
     <Compile Include="Data\Imports\MountedImports.fs" />
     <Compile Include="Data\Imports\OnlineImports.fs" />
+    <Compile Include="Data\Maintenance\RecalculatePatternsTask.fs" />
+    <Compile Include="Data\Maintenance\VacuumTask.fs" />
+    <Compile Include="Data\Maintenance\RecalculatePersonalBestsTask.fs" />
     <Compile Include="Data\Exports\OsuExport.fs" />
     <Compile Include="Data\Exports\Exports.fs" />
   </ItemGroup>
