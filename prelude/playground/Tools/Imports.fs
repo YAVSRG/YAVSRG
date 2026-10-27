@@ -14,7 +14,7 @@ let main () =
         for file in Directory.EnumerateFiles song do
             if file.ToLower().EndsWith(".osu") then
                 for converted in
-                    convert_chart_file
+                    FileSystemImports.convert_chart_file
                         {
                             OriginalPath = file
                             Options = ConversionOptions.Pack("osu!", None, Link)

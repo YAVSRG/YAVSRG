@@ -28,7 +28,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         )
 
     let detected_rate =
-        detect_rate_mod replay.FilePath.Value |> Option.defaultValue 1.0f<rate>
+        FileSystemImports.detect_rate_mod replay.FilePath.Value |> Option.defaultValue 1.0f<rate>
 
     let rate = Setting.rate detected_rate
 
