@@ -10,7 +10,7 @@ let main () =
 
     Logging.Info "Running converter on all osu! songs ..."
 
-    for song in Directory.EnumerateDirectories OSU_SONG_FOLDER do
+    for song in Directory.EnumerateDirectories MountedChartSource.DEFAULT_OSU_SONGS_LOCATION do
         for file in Directory.EnumerateFiles song do
             if file.ToLower().EndsWith(".osu") then
                 for converted in

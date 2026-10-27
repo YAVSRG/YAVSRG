@@ -5,7 +5,7 @@ open Prelude.Data.Imports
 open Prelude.Formats.Osu
 
 let main() =
-    for folder in Directory.EnumerateDirectories(OSU_SONG_FOLDER) do
+    for folder in Directory.EnumerateDirectories(MountedChartSource.DEFAULT_OSU_SONGS_LOCATION) do
         for file in Directory.EnumerateFiles(folder) do
             if file.ToLowerInvariant().EndsWith(".osu") then
                 File.Copy(file, "C:/Users/percy/Desktop/compare_original.osu", true)

@@ -15,25 +15,6 @@ open Prelude.Formats.Conversions
 [<AutoOpen>]
 module Shared =
 
-    let OSU_SONG_FOLDER =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs")
-
-    let STEPMANIA_PACK_FOLDER =
-        Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Stepmania 5", "Songs")
-
-    let ETTERNA_PACK_FOLDER =
-        Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Etterna", "Songs")
-
-    let QUAVER_SONG_FOLDER =
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-            "Steam",
-            "steamapps",
-            "common",
-            "Quaver",
-            "Songs"
-        )
-
     let log_conversion (result: ConversionResult) =
         let skipped = result.SkippedCharts.Length
 

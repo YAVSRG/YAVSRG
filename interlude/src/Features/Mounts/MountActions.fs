@@ -35,6 +35,13 @@ type MountedGameType =
         | Etterna -> Color.FromArgb(0xFF_8F60F6)
         | Stepmania -> Color.FromArgb(0xFF_FF703C)
 
+    member this.DefaultSongsLocation: string =
+        match this with
+        | MountedGameType.Osu -> MountedChartSource.DEFAULT_OSU_SONGS_LOCATION
+        | MountedGameType.Quaver -> MountedChartSource.DEFAULT_QUAVER_SONGS_LOCATION
+        | MountedGameType.Stepmania -> MountedChartSource.DEFAULT_STEPMANIA_SONGS_LOCATION
+        | MountedGameType.Etterna -> MountedChartSource.DEFAULT_ETTERNA_SONGS_LOCATION
+
 type private MountFolderPickerPage(game: MountedGameType, callback: string -> unit) =
     inherit Page()
 
@@ -121,17 +128,13 @@ module Mounts =
         import_mount_if_auto_enabled(options.EtternaMount, "Etterna", %"notification.mount_moved.etterna")
         import_mount_if_auto_enabled(options.StepmaniaMount, "Stepmania", %"notification.mount_moved.stepmania")
 
-    let private auto_detect_location (game: MountedGameType) : string =
-        match game with
-        | MountedGameType.Osu -> OSU_SONG_FOLDER
-        | MountedGameType.Quaver -> QUAVER_SONG_FOLDER
-        | MountedGameType.Stepmania -> STEPMANIA_PACK_FOLDER
-        | MountedGameType.Etterna -> ETTERNA_PACK_FOLDER
-
     let detect_or_drop_folder (game: MountedGameType) (callback: string -> unit) =
-        let location = auto_detect_location game
+        let default_location = game.DefaultSongsLocation
 
-        if Directory.Exists(location) then callback location else MountFolderPickerPage(game, callback).Show()
+        if Directory.Exists(default_location) then
+            callback(default_location)
+        else
+            MountFolderPickerPage(game, callback).Show()
 
     let import_osu_scores (osu_mount: MountedChartSource, notify_start: bool) : unit =
 

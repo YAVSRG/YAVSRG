@@ -3,9 +3,6 @@ namespace Prelude.Data.Imports
 open System
 open System.IO
 open Percyqaz.Data
-open Percyqaz.Common
-open Prelude.Formats.Conversions
-open Prelude.Data
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
 
@@ -46,3 +43,22 @@ type MountedChartSource =
     member this.DeleteLinkedCharts(chart_db: ChartDatabase) : unit =
         let charts = this.FindLinkedCharts(chart_db)
         chart_db.Delete(charts)
+
+    static member val DEFAULT_OSU_SONGS_LOCATION =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs")
+
+    static member val DEFAULT_STEPMANIA_SONGS_LOCATION =
+        Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Stepmania 5", "Songs")
+
+    static member val DEFAULT_ETTERNA_SONGS_LOCATION =
+        Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Etterna", "Songs")
+
+    static member val DEFAULT_QUAVER_SONGS_LOCATION =
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+            "Steam",
+            "steamapps",
+            "common",
+            "Quaver",
+            "Songs"
+        )

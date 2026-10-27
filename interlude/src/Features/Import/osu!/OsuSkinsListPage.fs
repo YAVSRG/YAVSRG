@@ -13,7 +13,7 @@ type OsuSkinsListPage(on_select: string -> unit) =
     let osu_song_folder =
         match options.OsuMount.Value with
         | Some mount -> mount.SourceFolder
-        | None -> OSU_SONG_FOLDER
+        | None -> MountedChartSource.DEFAULT_OSU_SONGS_LOCATION
 
     let osu_skin_folder = Path.Combine(Path.GetDirectoryName(osu_song_folder), "Skins")
 
