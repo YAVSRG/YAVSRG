@@ -39,7 +39,13 @@ module Localisation =
                     yield m.Index, m.Groups.[1].Value
             }
 
-        for filename, file_contents in SourceFiles.walk_fs_file_contents INTERLUDE_SOURCE_PATH do
+        let files_containing_localisation =
+            seq {
+                yield! SourceFiles.walk_fs_file_contents(INTERLUDE_SOURCE_PATH)
+                yield! SourceFiles.walk_fs_file_contents(Path.Combine(YAVSRG_PATH, "prelude", "src"))
+            }
+
+        for filename, file_contents in files_containing_localisation do
 
             for position, m in matches """ [^%]%"([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)

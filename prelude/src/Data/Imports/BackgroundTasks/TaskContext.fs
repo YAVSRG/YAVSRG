@@ -17,9 +17,6 @@ type ITaskContext() =
     member this.DownloadProgress(percentage: float32) : unit = this.Progress(Downloading(percentage))
     member this.Progress(count: int, total: int) : unit = this.Progress(Processing(count, total))
 
-    // temp
-    member this.set_Progress p = this.Progress(p)
-
 type TaskContext(label: string) =
     inherit ITaskContext()
 

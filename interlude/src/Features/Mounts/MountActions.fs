@@ -106,12 +106,8 @@ module Mounts =
 
                         mount
                             .ImportNewCharts(Content.Library)
-                            .Track(TaskTracking.add(sprintf "%s: %s" name %"mount.importall")) // create tracking that isn't listed
-                            .WithCallback(
-                                function
-                                | Ok _ -> ()
-                                | Error _ -> ()
-                            )
+                            .Track(TaskContext(sprintf "%s: %s" name %"mount.importall"))
+                            .WithCallback(fun (_: Result<_, _>) -> ())
                             .Queue(import_queue)
                 else
                     Logging.Warn
