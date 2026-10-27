@@ -36,7 +36,9 @@ type TaskContext(label: string) =
 
     override this.Progress(p: TaskProgress) : unit =
         match status with
-        | InProgress _ -> this.Status <- InProgress(p)
+        | InProgress _ ->
+            progress_ev.Trigger(p)
+            this.Status <- InProgress(p)
         | _ -> ()
 
     member this.Faulted() : unit =
