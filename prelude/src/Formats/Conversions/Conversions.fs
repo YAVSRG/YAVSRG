@@ -78,6 +78,13 @@ type ConversionResult =
         else
             Logging.Info "Successfully imported %i chart(s)" this.ConvertedCharts
 
+    static member Skip(path: string, reason: string) : ConversionResult =
+        {
+            ConversionResult.ConvertedCharts = 0
+            SkippedCharts = [ { SkippedConversion.OriginalPath = path; Reason = reason } ]
+            FirstConvertedChart = None
+        }
+
 exception ConversionSkipException of Reason: string
 
 (*

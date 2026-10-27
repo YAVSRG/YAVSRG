@@ -171,12 +171,12 @@ module FileSystemImports =
 
     let internal convert_stepmania_pack_zip
         (path: string, pack_name: string, library: Library, ctx: ITaskContext)
-        : Async<Result<ConversionResult, string>> =
+        : Async<ConversionResult> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
             if Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not then
-                return Error(sprintf "Target extraction folder (%s) already exists" dir)
+                return ConversionResult.Skip(path, "Target extraction folder already exists")
             else
                 ZipFile.ExtractToDirectory(path, dir)
 
@@ -196,8 +196,13 @@ module FileSystemImports =
                         results <- results.CombineWith(result)
 
                     FileSystemServices.delete_folder.Request(dir, ignore)
-                    return Ok results
+                    return results
                 | _ ->
                     FileSystemServices.delete_folder.Request(dir, ignore)
-                    return Error "Extracted zip does not match the usual structure for a StepMania pack"
+
+                    return
+                        ConversionResult.Skip(
+                            dir,
+                            "Extracted zip does not match the usual structure for a StepMania pack"
+                        )
         }

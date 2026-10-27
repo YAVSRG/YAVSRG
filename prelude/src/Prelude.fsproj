@@ -172,6 +172,8 @@
     <Compile Include="Data\Imports\FileSystemImportTask.fs" />
     <Compile Include="Data\Imports\MountedChartSource.fs" />
     <Compile Include="Data\Imports\MountedImportTask.fs" />
+    <Compile Include="Data\Imports\DownloadEtternaPackTask.fs" />
+    <Compile Include="Data\Imports\DownloadOsuSetTask.fs" />
     <Compile Include="Data\Imports\OnlineImports.fs" />
     <Compile Include="Data\Maintenance\RecalculatePatternsTask.fs" />
     <Compile Include="Data\Maintenance\VacuumTask.fs" />

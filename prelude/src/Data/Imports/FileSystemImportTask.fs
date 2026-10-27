@@ -34,19 +34,7 @@ type FileSystemImportTask(path: string, library: Library) =
                     let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
                     if Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not then
-                        return
-                            Some
-                                {
-                                    ConversionResult.ConvertedCharts = 0
-                                    SkippedCharts =
-                                        [
-                                            {
-                                                SkippedConversion.OriginalPath = path
-                                                Reason = "Target extraction folder already exists"
-                                            }
-                                        ]
-                                    FirstConvertedChart = None
-                                }
+                        return Some(ConversionResult.Skip(path, "Target extraction folder already exists"))
                     else
                         ZipFile.ExtractToDirectory(path, dir)
                         let! result = FileSystemImportTask(dir, library).Run(ctx)

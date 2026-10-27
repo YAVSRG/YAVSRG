@@ -1,75 +1,16 @@
 namespace Prelude.Data.Imports
 
-open System
 open System.IO
-open Percyqaz.Common
+open System.Net.Http
 open Prelude
 open Prelude.Charts
 open Prelude.Formats.Conversions
 open Prelude.Data
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
+open Prelude.Backbeat.Archive
 
 module OnlineImports =
-
-    let etterna_download_url (pack_name: string) : Async<Result<string, string>> =
-        async {
-            let url =
-                "https://api.etternaonline.com/api/packs?page=1&limit=1&sort=name&filter[search]="
-                + Uri.EscapeDataString(pack_name)
-
-            match! WebServices.download_json_async<_> url with
-            | WebResult.Ok(response: {| data: {| download: string |} array |}) ->
-                match response.data |> Array.tryExactlyOne with
-                | Some d -> return Ok d.download
-                | None -> return Error "No matching packs"
-            | WebResult.HttpError i -> return Error(sprintf "Http error code %i" i)
-            | WebResult.Exception err -> return Error err.Message
-        }
-
-    let download_etterna_pack
-        (name: string, url: string, library: Library, ctx: ITaskContext)
-        : Async<Result<ConversionResult, string>> =
-        async {
-            try
-                let target =
-                    Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
-
-                match! WebServices.download_file.RequestAsync((url, target, ctx.DownloadProgress)) with
-                | false -> return Error "Download failure"
-                | true ->
-                    match! FileSystemImports.convert_stepmania_pack_zip(target, name, library, ctx) with
-                    | Ok result ->
-                        FileSystemServices.delete_file.Request(target, ignore)
-                        return Ok result
-                    | Error reason ->
-                        FileSystemServices.delete_file.Request(target, ignore)
-                        return Error reason
-            with err ->
-                Logging.Error "Unexpected exception while downloading '%s': %O" name err
-                return Error err.Message
-        }
-
-    let download_osu_set (url: string, library: Library, ctx: ITaskContext) : Async<Result<ConversionResult, string>> =
-        async {
-            try
-                let target =
-                    Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
-
-                match! WebServices.download_file.RequestAsync((url, target, ctx.DownloadProgress)) with
-                | false -> return Error "Download failure"
-                | true ->
-                    match! FileSystemImportTask(target, library).Run(ctx) with
-                    | Some result ->
-                        FileSystemServices.delete_file.Request(target, ignore)
-                        return Ok result
-                    | None ->
-                        FileSystemServices.delete_file.Request(target, ignore)
-                        return Error "Downloaded .osz was not importable!"
-            with err ->
-                Logging.Error "Unexpected exception while downloading '%s': %O" url err
-                return Error err.Message
-        }
 
     let download_by_origin
         (origin: ChartOrigin, library: Library, ctx: ITaskContext)
@@ -80,19 +21,18 @@ module OnlineImports =
             | ChartOrigin.Osu osu ->
                 // todo: download via md5 if available
                 let url = sprintf "https://catboy.best/d/%in" osu.BeatmapSetId
-                return! download_osu_set(url, library, ctx)
+                let! result = DownloadOsuSetTask(url, library).Run(ctx)
+                return Ok(result)
 
             | ChartOrigin.Quaver _ -> return Error "No mirror exists for Quaver"
 
             | ChartOrigin.Etterna(pack: string) ->
-                match! etterna_download_url pack with
+                match! DownloadEtternaPackTask.GetDownloadUrl(pack) with
                 | Error reason -> return Error(sprintf "Error getting URL from EtternaOnline for '%s': %s" pack reason)
-                | Ok url -> return! download_etterna_pack(pack, url, library, ctx)
+                | Ok url ->
+                    let! result = DownloadEtternaPackTask(pack, url, library).Run(ctx)
+                    return Ok(result)
         }
-
-    open Prelude.Backbeat.Archive
-    open Prelude.Data.WebServices
-    open System.Net.Http
 
     let private httpclient = new HttpClient()
 
@@ -128,7 +68,7 @@ module OnlineImports =
                         let bg_path = Path.Combine(get_game_folder "Downloads", chart.BackgroundHash)
 
                         let! success =
-                            download_file.RequestAsync(
+                            WebServices.download_file.RequestAsync(
                                 "https://cdn.yavsrg.net/assets/" + chart.BackgroundHash,
                                 bg_path,
                                 ignore
@@ -150,7 +90,7 @@ module OnlineImports =
                         let audio_path = Path.Combine(get_game_folder "Downloads", chart.AudioHash)
 
                         let! success =
-                            download_file.RequestAsync(
+                            WebServices.download_file.RequestAsync(
                                 "https://cdn.yavsrg.net/assets/" + chart.AudioHash,
                                 audio_path,
                                 ignore
