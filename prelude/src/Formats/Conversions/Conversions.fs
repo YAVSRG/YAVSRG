@@ -2,6 +2,7 @@ namespace Prelude.Formats.Conversions
 
 open System
 open System.IO
+open Percyqaz.Common
 open Prelude
 
 [<Struct>]
@@ -62,6 +63,20 @@ type ConversionResult =
             FirstConvertedChart = this.FirstConvertedChart |> Option.orElse other.FirstConvertedChart
             SkippedCharts = this.SkippedCharts @ other.SkippedCharts
         }
+
+    member this.LogInfo() : unit =
+        let skipped = this.SkippedCharts.Length
+
+        if skipped > 0 then
+            let dump = this.SkippedCharts |> Seq.map _.ToString() |> String.concat "\n "
+
+            Logging.Info
+                "Successful import of %i chart(s) also skipped %i file(s):\n %s"
+                this.ConvertedCharts
+                skipped
+                dump
+        else
+            Logging.Info "Successfully imported %i chart(s)" this.ConvertedCharts
 
 exception ConversionSkipException of Reason: string
 

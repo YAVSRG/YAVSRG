@@ -15,20 +15,6 @@ open Prelude.Formats.Conversions
 [<AutoOpen>]
 module Shared =
 
-    let log_conversion (result: ConversionResult) =
-        let skipped = result.SkippedCharts.Length
-
-        if skipped > 0 then
-            let dump = result.SkippedCharts |> Seq.map _.ToString() |> String.concat "\n "
-
-            Logging.Info
-                "Successful import of %i chart(s) also skipped %i file(s):\n %s"
-                result.ConvertedCharts
-                skipped
-                dump
-        else
-            Logging.Info "Successfully imported %i chart(s)" result.ConvertedCharts
-
     let private RATE_REGEX =
         Regex(
             """((^|\s)([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""

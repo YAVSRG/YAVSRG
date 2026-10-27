@@ -197,7 +197,7 @@ module FileSystemImports =
                                 library
                             )
 
-                        log_conversion result
+                        result.LogInfo()
                         return Ok result
                     | ChartArchive _ ->
                         let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
@@ -222,11 +222,11 @@ module FileSystemImports =
                         let! result =
                             convert_song_folder(path, ConversionOptions.Pack(folder_name, None, Copy), library)
 
-                        log_conversion result
+                        result.LogInfo()
                         return Ok result
                     | FolderOfOszs ->
                         let! result = convert_folder_of_oszs(path, library, progress)
-                        log_conversion result
+                        result.LogInfo()
                         return Ok result
                     | PackFolder ->
                         let folder_name =
@@ -245,7 +245,7 @@ module FileSystemImports =
                                 progress
                             )
 
-                        log_conversion result
+                        result.LogInfo()
                         return Ok result
                     | FolderOfPacks ->
                         let mutable results = ConversionResult.Empty
@@ -264,7 +264,7 @@ module FileSystemImports =
 
                             results <- results.CombineWith(result)
 
-                        log_conversion results
+                        results.LogInfo()
                         return Ok results
                     | _ -> return Error "No importable folder structure detected"
             with err ->

@@ -23,7 +23,7 @@ type MountImportTask(source: MountedChartSource, library: Library, since: DateTi
                 let! result =
                     FileSystemImports.convert_pack_folder(source.SourceFolder, config, library, ctx.set_Progress)
 
-                log_conversion result
+                result.LogInfo()
                 source.LastImported <- Some DateTime.UtcNow
                 return result
 
@@ -45,7 +45,7 @@ type MountImportTask(source: MountedChartSource, library: Library, since: DateTi
 
                     results <- results.CombineWith(result)
 
-                log_conversion results
+                results.LogInfo()
                 source.LastImported <- Some DateTime.UtcNow
                 return results
         }
