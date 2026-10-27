@@ -128,11 +128,6 @@
     <Compile Include="Skins\Conversions\StepMania\StepmaniaSkinConverter.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
-    <Compile Include="Data\TaskStatus.fs" />
-    <Compile Include="Data\TaskProgress.fs" />
-    <Compile Include="Data\WebServices.fs" />
-    <Compile Include="Data\ImageServices.fs" />
-    <Compile Include="Data\FileSystemServices.fs" />
     <Compile Include="Data\ChartDatabase\AssetStorage.fs" />
     <Compile Include="Data\ChartDatabase\ChartMeta.fs" />
     <Compile Include="Data\ChartDatabase\DbCharts.fs" />
@@ -162,6 +157,12 @@
     <Compile Include="Data\Stats\TotalStats.fs" />
     <Compile Include="Data\Stats\Stats.fs" />
     <Compile Include="Data\Stats\StatsSync.fs" />
+    <Compile Include="Data\BackgroundTasks\TaskStatus.fs" />
+    <Compile Include="Data\BackgroundTasks\TaskContext.fs" />
+    <Compile Include="Data\BackgroundTasks\BackgroundTask.fs" />
+    <Compile Include="Data\BackgroundTasks\WebServices.fs" />
+    <Compile Include="Data\BackgroundTasks\ImageServices.fs" />
+    <Compile Include="Data\BackgroundTasks\FileSystemServices.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
     <Compile Include="Data\OsuClientInterop\Scores.fs" />
