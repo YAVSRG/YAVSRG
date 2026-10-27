@@ -17,9 +17,7 @@ type InfoPanel() =
     override this.Init(parent: Widget) : unit =
 
         let change_rate (change_rate_by: Rate) : unit =
-            if Transitions.in_progress() then
-                ()
-            else
+            if not(Transitions.in_progress()) then
                 SelectedChart.rate.Value <- SelectedChart.rate.Value + change_rate_by
                 LevelSelect.refresh_details()
 
@@ -39,7 +37,7 @@ type InfoPanel() =
 
             AngledButton(
                 sprintf "%s %s" Icons.EYE %"levelselect.preview",
-                (fun () -> SelectedChart.when_loaded false (fun info -> ChartPreview(info, change_rate).Show())),
+                (fun () -> SelectedChart.when_loaded false (fun info -> ChartPreview(info, false).Show())),
                 Palette.MAIN_100
             )
                 .Hotkey("preview")
