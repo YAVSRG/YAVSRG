@@ -9,6 +9,7 @@ open Prelude.Data.Imports
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Import
+open Prelude.Formats.Conversions
 
 type private BeatmapDownloadStatus =
     | NotDownloaded
@@ -32,47 +33,33 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
     let download () =
         if status = NotDownloaded || status = DownloadFailed then
+            progress <- 0.0f
 
-            let task_tracking = TaskTracking.add data.title
+            DownloadOsuSetTask(sprintf "https://catboy.best/d/%in" data.id, Content.Library)
+                .Track(TaskTracking.add(data.title).SubscribeDownloadProgress(fun percent -> progress <- percent))
+                .WithCallback(
+                    function
+                    | Ok(result: ConversionResult) ->
+                        Notifications.task_feedback(
+                            Icons.DOWNLOAD,
+                            %"notification.install_song",
+                            [
+                                data.title
+                                result.ConvertedCharts.ToString()
+                                result.SkippedCharts.Length.ToString()
+                            ]
+                            %> "notification.install_song.body"
+                        )
 
-            let progress_callback =
-                fun p ->
-                    match p with
-                    | Data.Downloading percent -> progress <- percent
-                    | _ -> ()
-
-                    task_tracking.Progress <- p
-
-            let task =
-                OnlineImports.download_osu_set(
-                    sprintf "https://catboy.best/d/%in" data.id,
-                    Content.Library,
-                    progress_callback
+                        Content.TriggerChartAdded(result.FirstConvertedChart)
+                        progress <- 1.0f
+                        status <- Installed
+                    | Error reason ->
+                        Logging.Error "Error importing %s: %s" data.title reason
+                        Notifications.error(%"notification.install_song_failed", data.title)
+                        status <- DownloadFailed
                 )
-
-            import_queue.Request(
-                task,
-                function
-                | Ok result ->
-                    Notifications.task_feedback(
-                        Icons.DOWNLOAD,
-                        %"notification.install_song",
-                        [
-                            data.title
-                            result.ConvertedCharts.ToString()
-                            result.SkippedCharts.Length.ToString()
-                        ]
-                        %> "notification.install_song.body"
-                    )
-
-                    Content.TriggerChartAdded(result.FirstConvertedChart)
-                    progress <- 1.0f
-                    status <- Installed
-                | Error reason ->
-                    Logging.Error "Error importing %s: %s" data.title reason
-                    Notifications.error(%"notification.install_song_failed", data.title)
-                    status <- DownloadFailed
-            )
+                .Queue(import_queue)
 
             status <- Downloading
 

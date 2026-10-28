@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Data.Markdown
 open Percyqaz.Flux.Windowing
-open Prelude.Data
+open Prelude.Data.Imports
 
 [<Json.AutoCodec>]
 type WikiPage = { Folder: string; Title: string; Filename: string }

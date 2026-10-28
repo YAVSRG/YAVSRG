@@ -4,12 +4,13 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.ChartDatabase
 
-module Patterns =
+type RecalculatePatternsTask(chart_db: ChartDatabase) =
+    inherit BackgroundTask<unit>()
 
-    let recalculate (chart_db: ChartDatabase, progress: ProgressCallback) : Async<unit> =
+    override this.Run(ctx: ITaskContext) : Async<unit> =
         chart_db.RecalculationNeeded <- false
 
         async {
@@ -23,14 +24,12 @@ module Patterns =
                         yield entry.Hash, difficulty.Overall, PatternReport.from_chart(difficulty, chart)
                     | Error reason -> Logging.Warn "Error recalculating patterns for %s: %s" entry.Hash reason
 
-                    progress(Processing(i + 1, charts.Length))
+                    ctx.Progress(i + 1, charts.Length)
             }
             |> Seq.chunkBySize 1000
             |> Seq.iter(fun chunk ->
                 lock chart_db.LockObject (fun () -> DbCharts.update_calculated_data chunk chart_db.Database)
             )
-
-            progress Complete
         }
 
-    let recalculate_needed (db: ChartDatabase) : bool = db.RecalculationNeeded
+    static member RecalculationNeeded(chart_db: ChartDatabase) : bool = chart_db.RecalculationNeeded

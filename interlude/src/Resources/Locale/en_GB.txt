@@ -958,6 +958,7 @@ notification.export_skin_failure.body=Check the logs for more info.
 notification.export_skin_failure.title=Skin export failed!
 notification.file_picker_error=Error opening file picker
 notification.import_failed=The file/folder you dropped wasn't recognised as anything importable
+notification.import_failed.not_importable=Nothing to import recognised
 notification.import_limit.body=You can import up to %0 items at a time.
 notification.import_limit.title=Too many items to import
 notification.import_queued=Import queued!

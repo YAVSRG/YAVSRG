@@ -7,6 +7,7 @@ open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
+open Prelude.Formats.Conversions
 open Prelude.Skins.Conversions
 open Prelude.Skins.Conversions.Osu
 open Interlude.UI
@@ -15,6 +16,19 @@ open Interlude.Features.Import.Etterna
 open Interlude.Features.Import.Osu
 
 module FileDrop =
+
+    let conversion_result_callback (result: Result<ConversionResult, string>) : unit =
+        match result with
+        | Ok result ->
+            Notifications.task_feedback(
+                Icons.CHECK,
+                %"notification.import_success",
+                [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                %> "notification.import_success.body"
+            )
+
+            Content.TriggerChartAdded(result.FirstConvertedChart)
+        | Error reason -> Notifications.error(%"notification.import_failed", reason)
 
     let import_stepmania_noteskin (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
@@ -95,28 +109,19 @@ module FileDrop =
                 Menu.Exit()
                 ConfirmUnlinkedImportPage(path).Show()
             else
-
-            let task_tracking = TaskTracking.add(Path.GetFileName(path))
-
-            let task =
-                FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
-
-            import_queue.Request(
-                task,
-                function
-                | Ok result ->
-                    Notifications.task_feedback(
-                        Icons.CHECK,
-                        %"notification.import_success",
-                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
-                        %> "notification.import_success.body"
+                FileSystemImportTask(path, Content.Library)
+                    .Track(TaskTracking.add(Path.GetFileName(path)))
+                    .WithCallback(
+                        function
+                        | Ok(Some result) -> conversion_result_callback(Ok(result))
+                        | Ok(None) ->
+                            Notifications.error(
+                                %"notification.import_failed",
+                                %"notification.import_failed.not_importable"
+                            )
+                        | Error(reason) -> conversion_result_callback(Error(reason))
                     )
-
-                    Content.TriggerChartAdded(result.FirstConvertedChart)
-                | Error reason ->
-                    Logging.Error "Error importing %s: %s" path reason
-                    Notifications.error(%"notification.import_failed", reason)
-            )
+                    .Queue(import_queue)
 
     let MAX_ITEMS_ALLOWED = 20
 

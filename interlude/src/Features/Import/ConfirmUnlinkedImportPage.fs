@@ -1,15 +1,29 @@
 namespace Interlude.Features.Import
 
 open System.IO
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Imports
 open Interlude.UI
 open Interlude.Content
+open Prelude.Formats.Conversions
 
 type ConfirmUnlinkedImportPage(path: string) =
     inherit Page()
+
+    // todo: remove duplication
+    let conversion_result_callback (result: Result<ConversionResult, string>) : unit =
+        match result with
+        | Ok result ->
+            Notifications.task_feedback(
+                Icons.CHECK,
+                %"notification.import_success",
+                [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                %> "notification.import_success.body"
+            )
+
+            Content.TriggerChartAdded(result.FirstConvertedChart)
+        | Error reason -> Notifications.error(%"notification.import_failed", reason)
 
     let info =
         Callout.Normal
@@ -26,27 +40,19 @@ type ConfirmUnlinkedImportPage(path: string) =
                     .Once(
                         %"unlinkedsongsimport.confirm",
                         fun () ->
-                            let task_tracking = TaskTracking.add(Path.GetFileName(path))
-
-                            let task =
-                                FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
-
-                            import_queue.Request(
-                                task,
-                                function
-                                | Ok result ->
-                                    Notifications.task_feedback(
-                                        Icons.CHECK,
-                                        %"notification.import_success",
-                                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
-                                        %> "notification.import_success.body"
-                                    )
-
-                                    Content.TriggerChartAdded(result.FirstConvertedChart)
-                                | Error reason ->
-                                    Logging.Error "Error importing %s: %s" path reason
-                                    Notifications.error(%"notification.import_failed", reason)
-                            )
+                            FileSystemImportTask(path, Content.Library)
+                                .Track(TaskTracking.add(Path.GetFileName(path)))
+                                .WithCallback(
+                                    function
+                                    | Ok(Some result) -> conversion_result_callback(Ok(result))
+                                    | Ok(None) ->
+                                        Notifications.error(
+                                            %"notification.import_failed",
+                                            %"notification.import_failed.not_importable"
+                                        )
+                                    | Error(reason) -> conversion_result_callback(Error(reason))
+                                )
+                                .Queue(import_queue)
 
                             Menu.Back()
                     )

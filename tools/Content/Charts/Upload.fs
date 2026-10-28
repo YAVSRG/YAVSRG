@@ -5,7 +5,6 @@ open System.Net.Http
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Data
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Imports
 open Interlude.Web.Shared
@@ -252,7 +251,7 @@ module Upload =
         OnlineImports.download_by_origin(
             ChartOrigin.Etterna(pack_name),
             interlude_library,
-            TaskProgress.log_progress_bar pack_name
+            TaskContext(pack_name).LogProgress()
         )
         |> Async.RunSynchronously
 

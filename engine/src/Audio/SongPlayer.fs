@@ -268,6 +268,7 @@ type SongPlayer() =
 
     member this.LoadSong(request: SongLoadRequest, new_rate: float32<rate>) : unit =
         let path_changed = request.Path <> load_path
+        let rate_changed = rate <> new_rate
         rate <- new_rate
 
         if path_changed then
@@ -276,7 +277,9 @@ type SongPlayer() =
             loading <- true
             this.AsyncSongLoader.Request(request, this)
         else
-            this.ApplyRateChange()
+            if rate_changed then
+                this.ApplyRateChange()
+
             song.LocalOffset <- request.LocalOffset
 
     member this.Update(elapsed_ms: float) : unit =

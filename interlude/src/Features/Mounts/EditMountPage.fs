@@ -17,52 +17,35 @@ type private EditMountPage
     let import_on_startup = Setting.simple mount.ImportOnStartup
     let mutable queued_import = 0
 
-    let linked_chart_count =
-        Mount.find_linked_charts(mount, Content.Charts) |> Seq.length
+    let linked_chart_count = mount.FindLinkedCharts(Content.Charts) |> Seq.length
 
     let delete () : unit =
         setting.Value <- None
         queued_import <- -1
-        Mount.delete_linked_charts(mount, Content.Charts)
+        mount.DeleteLinkedCharts(Content.Charts)
         Content.TriggerChartAdded(None)
         Notifications.action_feedback(Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
         Menu.Back()
 
     member this.SaveChangesAndImport() : unit =
 
-        if queued_import >= 0 then
+        if queued_import <> -1 then
             setting.Value <-
                 Some { mount with ImportOnStartup = import_on_startup.Value; CopyAssetFiles = copy_assets.Value }
 
-        if queued_import > 0 then
+        if queued_import = 1 then
+            setting.Value.Value
+                .ImportNewCharts(Content.Library)
+                .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.import"))
+                .WithCallback(FileDrop.conversion_result_callback)
+                .Queue(import_queue)
 
-            let task_tracking =
-                if queued_import = 2 then %"mount.importall" else %"mount.import"
-                |> sprintf "%O: %s" game
-                |> TaskTracking.add
-
-            let task =
-                if queued_import = 2 then
-                    Mount.import_all(setting.Value.Value, Content.Library, task_tracking.set_Progress)
-                else
-                    Mount.import_new(setting.Value.Value, Content.Library, task_tracking.set_Progress)
-
-            import_queue.Request(
-                task,
-                function
-                | Ok result ->
-                    Notifications.task_feedback(
-                        Icons.CHECK,
-                        %"notification.import_success",
-                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
-                        %> "notification.import_success.body"
-                    )
-
-                    Content.TriggerChartAdded(result.FirstConvertedChart)
-                | Error reason ->
-                    Logging.Error "Error importing %s: %s" setting.Value.Value.SourceFolder reason
-                    Notifications.error(%"notification.import_failed", reason)
-            )
+        elif queued_import = 2 then
+            setting.Value.Value
+                .ImportAllCharts(Content.Library)
+                .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.importall"))
+                .WithCallback(FileDrop.conversion_result_callback)
+                .Queue(import_queue)
 
     override this.Content() : Widget =
         this.OnClose(this.SaveChangesAndImport)

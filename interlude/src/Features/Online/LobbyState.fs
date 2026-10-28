@@ -19,7 +19,7 @@ type LobbyPlayer =
         mutable Status: LobbyPlayerStatus
     }
 
-    static member Create color =
+    static member Create(color: int) : LobbyPlayer =
         { Color = Color.FromArgb(color); Status = LobbyPlayerStatus.NotReady }
 
 type LobbyPlayerReplayInfo =

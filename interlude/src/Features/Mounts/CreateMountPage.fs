@@ -36,33 +36,18 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
 
         setting.Value <- Some mount
 
-        let task_tracking = sprintf "%O: %s" game %"mount.importall" |> TaskTracking.add
+        mount
+            .ImportAllCharts(Content.Library)
+            .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.importall"))
+            .WithCallback(fun result ->
+                FileDrop.conversion_result_callback(result)
 
-        let task =
-            Mount.import_all(setting.Value.Value, Content.Library, task_tracking.set_Progress)
-
-        import_queue.Request(
-            task,
-            function
-            | Ok result ->
-                Notifications.task_feedback(
-                    Icons.CHECK,
-                    %"notification.import_success",
-                    [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
-                    %> "notification.import_success.body"
-                )
-
-                Content.TriggerChartAdded(result.FirstConvertedChart)
-
-                if also_import_scores.Value then
+                if result.IsOk && also_import_scores.Value then
                     GameThread.defer(fun () -> Mounts.import_osu_scores(mount, false))
-            | Error reason ->
-                Logging.Error "Error importing %s: %s" path reason
-                Notifications.error(%"notification.import_failed", reason)
-        )
+            )
+            .Queue(import_queue)
 
         Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.import_queued", "")
-
         Menu.Back()
 
     override this.Content() : Widget =
