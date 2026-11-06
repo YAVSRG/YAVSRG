@@ -113,6 +113,12 @@ module SelectedChart =
 
     let private chart_change_failed = Event<unit>()
     let on_chart_change_failed = chart_change_failed.Publish
+    
+    let on_chart_update_or_change_finished =
+        let ev = Event<LoadedChartInfo>()
+        on_chart_change_finished.Add(ev.Trigger)
+        on_chart_update_finished.Add(ev.Trigger)
+        ev.Publish
 
     let mutable private on_load_succeeded: (bool * (unit -> unit)) list = []
     let mutable private on_song_load_succeeded: (unit -> unit) list = []

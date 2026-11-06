@@ -27,24 +27,25 @@ type ChartPreview(info: LoadedChartInfo, multiplayer_lobby: bool) as this =
         DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
 
     let mutable show_difficulty_overlay = false
+    
+    let recreate_preview(info: LoadedChartInfo) : unit =
+        let _playstate, _recreate_scoring = PlayState.Dummy(info)
+        playstate <- _playstate
+        recreate_scoring <- _recreate_scoring
+
+        playfield <-
+            Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
+
+        difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
+        timeline <- Timeline(info.WithMods, Song.Seek, SelectedChart.rate)
+
+        if this.Initialised then
+            difficulty_overlay.Init(this)
+            playfield.Init(this)
+            timeline.Init(this)
 
     let change_chart_listener =
-        SelectedChart.on_chart_update_finished.Subscribe(fun info ->
-            let _playstate, _recreate_scoring = PlayState.Dummy(info)
-            playstate <- _playstate
-            recreate_scoring <- _recreate_scoring
-
-            playfield <-
-                Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
-
-            difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
-            timeline <- Timeline(info.WithMods, Song.Seek, SelectedChart.rate)
-
-            if this.Initialised then
-                difficulty_overlay.Init(this)
-                playfield.Init(this)
-                timeline.Init(this)
-        )
+        SelectedChart.on_chart_update_or_change_finished.Subscribe(recreate_preview)
 
     let unpause_song_on_exit = Song.IsPlaying
 
