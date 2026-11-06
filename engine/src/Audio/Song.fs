@@ -140,21 +140,24 @@ type Song =
     member this.Play(delay_callback: float32<ms / rate> -> unit) : unit =
         if this.ID <> 0 && not this.Playing then
             this.Playing <- true
-            
+
             if this.PlaybackSync <> 0 then
                 Bass.ChannelRemoveSync(this.ID, this.PlaybackSync) |> ignore
+
             let sync_flags = SyncFlags.Position ||| SyncFlags.Onetime
-            
+
             let mutable before = Stopwatch.GetTimestamp()
 
             let callback =
                 SyncProcedure(fun _ _ _ _ ->
                     delay_callback(float32(Stopwatch.GetElapsedTime(before).TotalMilliseconds) * 1.0f<ms / rate>)
                 )
-                
-            this.PlaybackSync <- Bass.ChannelSetSync(this.ID, sync_flags, Bass.ChannelGetPosition(this.ID) + 1L, callback)
+
+            this.PlaybackSync <-
+                Bass.ChannelSetSync(this.ID, sync_flags, Bass.ChannelGetPosition(this.ID) + 1L, callback)
+
             this.PlaybackSync.LogBassError()
-            
+
             before <- Stopwatch.GetTimestamp()
             Bass.ChannelPlay(this.ID).LogBassError()
 

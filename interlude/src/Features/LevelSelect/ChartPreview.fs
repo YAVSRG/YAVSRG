@@ -27,14 +27,13 @@ type ChartPreview(info: LoadedChartInfo, multiplayer_lobby: bool) as this =
         DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
 
     let mutable show_difficulty_overlay = false
-    
-    let recreate_preview(info: LoadedChartInfo) : unit =
+
+    let recreate_preview (info: LoadedChartInfo) : unit =
         let _playstate, _recreate_scoring = PlayState.Dummy(info)
         playstate <- _playstate
         recreate_scoring <- _recreate_scoring
 
-        playfield <-
-            Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
+        playfield <- Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
 
         difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
         timeline <- Timeline(info.WithMods, Song.Seek, SelectedChart.rate)

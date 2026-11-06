@@ -127,10 +127,8 @@ module StepmaniaParser =
     let parse_file path : Result<StepManiaFile, string> =
         try
             let lines_without_comments =
-                File.ReadAllLines(path)
-                |> Array.filter (fun s -> not(s.StartsWith("//")))
-                |> String.concat("\n")
-            
+                File.ReadAllLines(path) |> Array.filter(fun s -> not(s.StartsWith("//"))) |> String.concat("\n")
+
             match runParserOnString parse_stepmania_file () path lines_without_comments with
             | Success(result, _, _) -> Result.Ok(result)
             | Failure(error_message, _, _) -> Result.Error(error_message)

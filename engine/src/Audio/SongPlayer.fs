@@ -66,8 +66,11 @@ type SongPlayer() =
 
     let delay_callback =
         fun delay ->
-            if abs(actual_bass_delay - estimated_bass_delay) > 50.0f<ms/rate> then
-                Logging.Debug "BASS didn't report playback as expected (%.1fms vs %.1fms)" actual_bass_delay estimated_bass_delay
+            if abs(actual_bass_delay - estimated_bass_delay) > 50.0f<ms / rate> then
+                Logging.Debug
+                    "BASS didn't report playback as expected (%.1fms vs %.1fms)"
+                    actual_bass_delay
+                    estimated_bass_delay
             else
                 actual_bass_delay <- delay
                 playback_start <- Stopwatch.GetTimestamp()
