@@ -29,8 +29,7 @@ type GameplayInfoBoxes() =
             |> String.concat ", "
 
     override this.Init(parent: Widget) : unit =
-        SelectedChart.on_chart_change_finished.Add(refresh)
-        SelectedChart.on_chart_update_finished.Add(refresh)
+        SelectedChart.on_chart_update_or_change_finished.Add(refresh)
         SelectedChart.if_loaded refresh
         base.Init(parent)
 
