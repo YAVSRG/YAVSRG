@@ -15,6 +15,7 @@ type Song =
         mutable LocalOffset: Time
         mutable LowPassFilterEffect: int
         mutable Playing: bool
+        mutable PlaybackSync: int
     }
 
     static member CreatePlaceholder(preview_point: Time, last_note: Time, local_offset: Time) : Song =
@@ -27,6 +28,7 @@ type Song =
             LocalOffset = local_offset
             LowPassFilterEffect = 0
             Playing = false
+            PlaybackSync = 0
         }
 
     static member CreateFromFile(file: string, preview_point: Time, last_note: Time, local_offset: Time) : Song =
@@ -67,6 +69,7 @@ type Song =
                 LocalOffset = local_offset
                 LowPassFilterEffect = 0
                 Playing = false
+                PlaybackSync = 0
             }
 
     member this.ChangeDevice(device_id: int) : unit =
@@ -137,15 +140,22 @@ type Song =
     member this.Play(delay_callback: float32<ms / rate> -> unit) : unit =
         if this.ID <> 0 && not this.Playing then
             this.Playing <- true
-            let before = Stopwatch.GetTimestamp()
+            
+            if this.PlaybackSync <> 0 then
+                Bass.ChannelRemoveSync(this.ID, this.PlaybackSync) |> ignore
             let sync_flags = SyncFlags.Position ||| SyncFlags.Onetime
+            
+            let mutable before = Stopwatch.GetTimestamp()
 
             let callback =
                 SyncProcedure(fun _ _ _ _ ->
                     delay_callback(float32(Stopwatch.GetElapsedTime(before).TotalMilliseconds) * 1.0f<ms / rate>)
                 )
-
-            Bass.ChannelSetSync(this.ID, sync_flags, Bass.ChannelGetPosition(this.ID) + 1L, callback).LogBassError()
+                
+            this.PlaybackSync <- Bass.ChannelSetSync(this.ID, sync_flags, Bass.ChannelGetPosition(this.ID) + 1L, callback)
+            this.PlaybackSync.LogBassError()
+            
+            before <- Stopwatch.GetTimestamp()
             Bass.ChannelPlay(this.ID).LogBassError()
 
     member inline this.PlayFrom(time: Time, delay_callback: float32<ms / rate> -> unit) : unit =
