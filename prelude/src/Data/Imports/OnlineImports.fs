@@ -187,7 +187,8 @@ module OnlineImports =
                                 Chart = chart_data
                             }
                         ]
-                    ) |> ignore
+                    )
+                    |> ignore
 
                     return Ok()
             with err ->
