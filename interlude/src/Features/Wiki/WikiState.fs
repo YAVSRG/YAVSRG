@@ -44,7 +44,7 @@ module private WikiState =
                             match!
                                 WebServices.download_string.RequestAsync(
                                     sprintf
-                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.md"
+                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/docs/wiki/index.md"
                                         "githubusercontent"
                                 )
                             with
@@ -52,7 +52,7 @@ module private WikiState =
                                 match!
                                     WebServices.download_json_async(
                                         sprintf
-                                            "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.json"
+                                            "https://raw.%s.com/YAVSRG/YAVSRG/main/docs/wiki/index.json"
                                             "githubusercontent"
                                     )
                                 with
@@ -86,7 +86,7 @@ module private WikiState =
                             match!
                                 WebServices.download_string.RequestAsync(
                                     sprintf
-                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/%s.md"
+                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/docs/wiki/%s.md"
                                         "githubusercontent"
                                         p.Filename
                                 )
@@ -111,7 +111,7 @@ module private WikiState =
                             match!
                                 WebServices.download_string.RequestAsync(
                                     sprintf
-                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md"
+                                        "https://raw.%s.com/YAVSRG/YAVSRG/main/docs/changelog.md"
                                         "githubusercontent"
                                 )
                             with
