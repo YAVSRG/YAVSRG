@@ -188,6 +188,7 @@ module OnlineImports =
                             }
                         ]
                     )
+                    |> ignore
 
                     return Ok()
             with err ->
