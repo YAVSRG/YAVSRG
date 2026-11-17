@@ -4,10 +4,9 @@ open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
-open Prelude
 open Prelude.Gameplay.Rulesets
 
-type RulesetLibrary() =
+type RulesetLibrary(rulesets_storage_path: string) =
 
     /// Ruleset IDs are the name of the file under the Rulesets folder, without the extension
     /// e.g. Rulesets/my-ruleset.ruleset is loaded with id 'my-ruleset'
@@ -31,13 +30,12 @@ type RulesetLibrary() =
     member this.Load() : unit =
         loaded.Clear()
 
-        let path = get_game_folder "Rulesets"
-        let default_path = Path.Combine(path, DEFAULT_ID + ".ruleset")
+        let default_path = Path.Combine(rulesets_storage_path, DEFAULT_ID + ".ruleset")
 
         if not(File.Exists(default_path)) then
             Ruleset.DefaultRuleset.WriteToFile(default_path)
 
-        for f in Directory.GetFiles(path) do
+        for f in Directory.GetFiles(rulesets_storage_path) do
             if Path.GetExtension(f).ToLower() = ".ruleset" then
                 let id = Path.GetFileNameWithoutExtension(f)
 
@@ -117,10 +115,10 @@ type RulesetLibrary() =
 
         assert not(loaded.ContainsKey(new_id))
         loaded.Add(new_id, ruleset)
-        ruleset.WriteToFile(Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
+        ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_id + ".ruleset"))
 
     member this.Install(path: string) : bool =
-        if Path.GetDirectoryName(path) = get_game_folder "Rulesets" then
+        if Path.GetDirectoryName(path) = rulesets_storage_path then
             Logging.Debug("User tried to import a ruleset that was already in the Rulesets folder")
             false
         else
@@ -146,8 +144,8 @@ type RulesetLibrary() =
             try
                 if new_id <> existing_file_id then
                     File.Move(
-                        Path.Combine(get_game_folder "Rulesets", existing_file_id + ".ruleset"),
-                        Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset")
+                        Path.Combine(rulesets_storage_path, existing_file_id + ".ruleset"),
+                        Path.Combine(rulesets_storage_path, new_id + ".ruleset")
                     )
 
                 new_id
@@ -164,12 +162,12 @@ type RulesetLibrary() =
                 current_hash <- current.CalculateHash()
                 on_changed_ev.Trigger(current)
 
-            ruleset.WriteToFile(Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
+            ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_id + ".ruleset"))
 
     member this.Delete(file_id: string) : bool =
         if file_id <> DEFAULT_ID && this.Exists(file_id) then
             try
-                File.Delete(Path.Combine(get_game_folder "Rulesets", file_id + ".ruleset"))
+                File.Delete(Path.Combine(rulesets_storage_path, file_id + ".ruleset"))
                 loaded.Remove(file_id)
             with :? IOException as err ->
                 Logging.Error "IO error deleting ruleset: %O" err
