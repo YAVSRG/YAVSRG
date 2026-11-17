@@ -75,22 +75,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
             )
             (fun () -> _selected_id.Value)
 
-    member this.GetFilename(ruleset: Ruleset) : string =
-        ruleset.Name
-        |> Seq.filter(
-            function
-            | '\''
-            | '_'
-            | '.'
-            | ' ' -> true
-            | c -> Char.IsAsciiLetterOrDigit(c)
-        )
-        |> Array.ofSeq
-        |> String
-        |> _.ToLowerInvariant()
-        |> fun s ->
-            s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
-
     member this.FindById(file_id: string) : Ruleset = loaded.[file_id]
 
     member this.FindByHash(hash: string) : Ruleset option =
@@ -104,11 +88,11 @@ type RulesetLibrary(rulesets_storage_path: string) =
         }
         |> Seq.sortBy(fun (_, rs) -> rs.Name.ToLowerInvariant())
 
-    member this.Exists(id: string) : bool = loaded.ContainsKey(id)
+    member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
     member this.Install(ruleset: Ruleset) : unit =
-        let new_id: string = this.GetFilename(ruleset)
+        let new_id: string = ruleset.Filename()
 
         let new_id =
             if this.Exists(new_id) then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
@@ -132,7 +116,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     member this.Update(existing_file_id: string, ruleset: Ruleset) : unit =
-        let new_id: string = this.GetFilename(ruleset)
+        let new_id: string = ruleset.Filename()
 
         let new_id =
             if new_id <> existing_file_id && this.Exists(new_id) then

@@ -656,3 +656,17 @@ type Ruleset =
                 | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve(j)
             Formatting = { DecimalPlaces = this.Formatting.DecimalPlaces }
         }
+
+    member this.Filename() =
+        this.Name
+        |> String.filter(
+            function
+            | '\''
+            | '_'
+            | '.'
+            | ' ' -> true
+            | c -> Char.IsAsciiLetterOrDigit(c)
+        )
+        |> _.ToLowerInvariant()
+        |> fun s ->
+            s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
