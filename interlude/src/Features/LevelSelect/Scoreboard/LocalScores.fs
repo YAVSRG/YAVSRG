@@ -113,9 +113,9 @@ module LocalScores =
                 )
             )
 
-        Rulesets.on_changed.Add(fun ruleset ->
+        Rulesets.on_changed.Add(fun () ->
             for score_info in local_scores do
-                score_info.Ruleset <- ruleset
+                score_info.Ruleset <- Rulesets.current
         )
 
         Gameplay.score_saved.Add(load_score)

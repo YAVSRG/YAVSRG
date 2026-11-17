@@ -6,9 +6,11 @@ open Percyqaz.Common
 open Prelude.Data.ChartDatabase
 open Prelude.Gameplay.Rulesets
 
+type RulesetSelection =
+    | FileId of string
+    | Automatic
+
 type RulesetLibrary(rulesets_storage_path: string) =
-
-
 
     /// Ruleset IDs are the name of the file under the Rulesets folder, without the extension
     /// e.g. Rulesets/my-ruleset.ruleset is loaded with id 'my-ruleset'
@@ -20,10 +22,8 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     let mutable initialised = false
     let loaded = Dictionary<string, Ruleset>()
-    let mutable current: Ruleset = Ruleset.DefaultRuleset
-    let mutable current_hash: string = Ruleset.DefaultRulesetHash
-    let mutable current_file_id = DEFAULT_ID
-    let on_changed_ev = Event<Ruleset>()
+    let mutable current_selection = FileId(DEFAULT_ID)
+    let on_changed_ev = Event<unit>()
     member val OnChanged = on_changed_ev.Publish
 
     /// Once called: All rulesets from the Rulesets folder have been read; The valid ones are loaded into the available list
@@ -47,12 +47,12 @@ type RulesetLibrary(rulesets_storage_path: string) =
         if not(loaded.ContainsKey(DEFAULT_ID)) then
             loaded.Add(DEFAULT_ID, Ruleset.DefaultRuleset)
 
-        if not(loaded.ContainsKey(current_file_id)) then
-            Logging.Warn "Ruleset '%s' not found, switching to default" current_file_id
-            current_file_id <- DEFAULT_ID
+        match current_selection with
+        | FileId file_id when not(loaded.ContainsKey(file_id)) ->
+            Logging.Warn "Ruleset '%s' not found, switching to default" file_id
+            current_selection <- FileId(DEFAULT_ID)
+        | _ -> ()
 
-        current <- loaded.[current_file_id]
-        current_hash <- current.CalculateHash()
         initialised <- true
 
     member this.FindById(file_id: string) : Ruleset = loaded.[file_id]
@@ -62,26 +62,31 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
-    member val Selected: Setting<string> =
+    member val Selected: Setting<RulesetSelection> =
         Setting.make
-            (fun new_id ->
-                if initialised then
-                    if not(loaded.ContainsKey(new_id)) then
-                        Logging.Warn "Ruleset '%s' not found, switching to default" new_id
-                        current_file_id <- DEFAULT_ID
+            (function
+                | FileId new_id ->
+                    if initialised then
+                        if not(loaded.ContainsKey(new_id)) then
+                            Logging.Warn "Ruleset '%s' not found, switching to default" new_id
+                            current_selection <- FileId(DEFAULT_ID)
+                        else
+                            current_selection <- FileId(new_id)
+
+                        on_changed_ev.Trigger()
                     else
-                        current_file_id <- new_id
-
-                    current <- loaded.[current_file_id]
-                    current_hash <- current.CalculateHash()
-                    on_changed_ev.Trigger(current)
-                else
-                    current_file_id <- new_id
+                        current_selection <- FileId(new_id)
+                | Automatic -> current_selection <- Automatic
             )
-            (fun () -> current_file_id)
+            (fun () -> current_selection)
 
-    member this.Current: Ruleset = current
-    member this.CurrentHash: string = current_hash
+    member this.Current: Ruleset = SC_J4 // todo: temp!!!
+    member this.CurrentHash: string = SC_J4_HASH // todo: temp!!!
+    
+    member this.Get(selection: RulesetSelection) : Ruleset =
+        match selection with
+        | FileId file_id -> this.FindById(file_id)
+        | Automatic -> SC_J4
 
     /// Each ruleset and its file ID, sorted alphabetically
     member this.ToList() : (string * Ruleset) seq =
@@ -142,14 +147,12 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
         if loaded.Remove(existing_file_id) then
             loaded.Add(new_file_id, ruleset)
-
-            if current_file_id = existing_file_id then
-                current_file_id <- new_file_id
-                current <- ruleset
-                current_hash <- current.CalculateHash()
-                on_changed_ev.Trigger(current)
-
             ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_file_id + ".ruleset"))
+            let selected_was_changed = current_selection = FileId(existing_file_id)
+            
+            if selected_was_changed then
+                current_selection <- FileId(new_file_id)
+                on_changed_ev.Trigger()
 
     member this.Delete(file_id: string) : bool =
         if file_id <> DEFAULT_ID && this.Exists(file_id) then

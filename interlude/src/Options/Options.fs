@@ -8,6 +8,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Percyqaz.Flux.Windowing
 open Prelude
+open Prelude.Data.Options
 open Prelude.Mods
 open Prelude.Data.Imports
 open Interlude.Content
@@ -171,7 +172,7 @@ type GameOptions =
         LaneCover: LanecoverOptions
         Noteskin: Setting<string>
         SelectedHUD: Setting<string>
-        SelectedRuleset: Setting<string>
+        SelectedRuleset: Setting<RulesetSelection>
 
         Pacemaker: Dictionary<string, PacemakerSettings>
         EnablePacemaker: Setting<bool>

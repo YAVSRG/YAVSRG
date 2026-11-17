@@ -4,13 +4,14 @@ open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Data.Options
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
 open Interlude.Content
 
 module RulesetSwitcher =
 
-    let make_dropdown (setting: Setting<string>) (w: DropdownWrapper) =
+    let make_dropdown (setting: Setting<RulesetSelection>) (w: DropdownWrapper) =
         w.Toggle(fun () ->
             let rulesets = Rulesets.list()
             let remove_bracket = System.Text.RegularExpressions.Regex("\\(.+?\\)")
@@ -32,10 +33,10 @@ module RulesetSwitcher =
                     for name, items in groups do
                         if items.Length < 3 then
                             for id, rs in items do
-                                yield ((fun () -> setting.Set(id)), rs.Name)
+                                yield ((fun () -> setting.Set(FileId(id))), rs.Name)
                         else
                             let inner_items =
-                                items |> Array.map(fun (id, rs) -> (fun () -> setting.Set(id)), rs.Name)
+                                items |> Array.map(fun (id, rs) -> (fun () -> setting.Set(FileId(id))), rs.Name)
 
                             let inner_dropdown = DropdownMenu { Items = inner_items }
 
@@ -53,7 +54,7 @@ module RulesetSwitcher =
             DropdownMenu { Items = dropdown_items }
         )
 
-type RulesetSwitcher(setting: Setting<string>) =
+type RulesetSwitcher(setting: Setting<RulesetSelection>) =
     inherit Container(NodeType.None)
 
     let dropdown_wrapper =

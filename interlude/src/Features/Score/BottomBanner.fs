@@ -5,6 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Data.Options
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.UserDatabase
 open Interlude
@@ -15,7 +16,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Online
 
-type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> unit, score_info: ScoreInfo) =
+type RulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: Ruleset -> unit, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     let mutable dropdown_height = 500.0f
@@ -119,8 +120,8 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
 
                     RulesetSwitcher(
                         Setting.simple Rulesets.selected_id.Value
-                        |> Setting.trigger(fun id ->
-                            score_info.Ruleset <- Rulesets.by_id id
+                        |> Setting.trigger(fun selection ->
+                            score_info.Ruleset <- Rulesets.rulesets.Get(selection)
                             refresh()
                         ),
                         (fun ruleset ->

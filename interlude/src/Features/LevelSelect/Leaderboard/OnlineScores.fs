@@ -125,9 +125,9 @@ module OnlineScores =
             score_loader.Cancel()
         )
 
-        Rulesets.on_changed.Add(fun ruleset ->
+        Rulesets.on_changed.Add(fun () ->
             for score_info in leaderboard_scores do
-                score_info.Ruleset <- ruleset
+                score_info.Ruleset <- Rulesets.current
         )
 
         Gameplay.leaderboard_rank_changed.Add(fun info ->

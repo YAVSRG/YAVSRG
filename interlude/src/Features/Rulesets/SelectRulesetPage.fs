@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Rulesets
+open Prelude.Data.Options
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
@@ -32,9 +33,9 @@ type SelectRulesetPage() =
                             NavigationContainer
                                 .Row()
                                 .With(
-                                    PageButton(ruleset.Name, fun () -> options.SelectedRuleset.Set(id))
+                                    PageButton(ruleset.Name, fun () -> options.SelectedRuleset.Set(FileId(id)))
                                         .TextColor(fun () ->
-                                            if options.SelectedRuleset.Value = id then
+                                            if options.SelectedRuleset.Value = FileId(id) then
                                                 Colors.text_pink_2
                                             else
                                                 Colors.text
