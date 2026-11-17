@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
+open Prelude.Gameplay.Rulesets
 open Prelude.Mods
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
@@ -426,7 +427,7 @@ module SelectedChart =
         elif (%%"downrate").Pressed() then
             change_rate_by(-0.1f<rate>)
 
-    let init () =
+    let init (ruleset: Ruleset, ruleset_hash: string) =
 
         match Content.Charts.GetChartMeta(options.CurrentChart.Value) with
         | Some chart_meta -> change(chart_meta, LibraryContext.None, true)
@@ -436,8 +437,8 @@ module SelectedChart =
                     Filter.Empty
                     {
                         Rate = rate.Value
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
+                        RulesetId = ruleset_hash
+                        Ruleset = ruleset
                         Library = Content.Library
                     }
             with

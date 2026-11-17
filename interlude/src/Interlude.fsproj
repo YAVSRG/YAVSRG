@@ -94,6 +94,9 @@
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerListPage.fs" />
     <Compile Include="Features\Export\Osz.fs" />
+    <Compile Include="Features\Gameplay\SelectedChart.fs" />
+    <Compile Include="Features\Gameplay\Rulesets.fs" />
+    <Compile Include="Features\Gameplay\ScoreHelpers.fs" />
     <Compile Include="Features\Rulesets\CompareRulesetsPage.fs" />
     <Compile Include="Features\Rulesets\Create\SCRulesetPage.fs" />
     <Compile Include="Features\Rulesets\Create\OsuRulesetPage.fs" />
@@ -112,8 +115,6 @@
     <Compile Include="Features\Rulesets\Edit\RulesetEditorPage.fs" />
     <Compile Include="Features\Rulesets\SelectRulesetPage.fs" />
     <Compile Include="Features\Rulesets\RulesetSwitcher.fs" />
-    <Compile Include="Features\Gameplay\SelectedChart.fs" />
-    <Compile Include="Features\Gameplay\ScoreHelpers.fs" />
     <Compile Include="Features\Tables\Browser\DownloadMenu.fs" />
     <Compile Include="Features\Tables\Browser\Tables.fs" />
     <Compile Include="Features\Tables\SelectTableLevelPage.fs" />

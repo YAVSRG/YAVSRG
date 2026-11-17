@@ -65,24 +65,23 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member val Selected: Setting<RulesetSelection> =
         Setting.make
             (function
-                | FileId new_id ->
-                    if initialised then
-                        if not(loaded.ContainsKey(new_id)) then
-                            Logging.Warn "Ruleset '%s' not found, switching to default" new_id
-                            current_selection <- FileId(DEFAULT_ID)
-                        else
-                            current_selection <- FileId(new_id)
-
-                        on_changed_ev.Trigger()
+            | FileId new_id ->
+                if initialised then
+                    if not(loaded.ContainsKey(new_id)) then
+                        Logging.Warn "Ruleset '%s' not found, switching to default" new_id
+                        current_selection <- FileId(DEFAULT_ID)
                     else
                         current_selection <- FileId(new_id)
-                | Automatic -> current_selection <- Automatic
-            )
+
+                    on_changed_ev.Trigger()
+                else
+                    current_selection <- FileId(new_id)
+            | Automatic -> current_selection <- Automatic)
             (fun () -> current_selection)
 
     member this.Current: Ruleset = SC_J4 // todo: temp!!!
     member this.CurrentHash: string = SC_J4_HASH // todo: temp!!!
-    
+
     member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : Ruleset =
         match selection with
         | FileId file_id -> loaded.[file_id]
@@ -90,8 +89,9 @@ type RulesetLibrary(rulesets_storage_path: string) =
             match Ruleset.GetNativeRuleset(chart_meta.Origins) with
             | Some cached_ruleset -> this.FindByHash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset.Ruleset
             | None -> SC_J4
-            
-    member this.GetCurrentRuleset(chart_meta: ChartMeta) : Ruleset = this.GetCurrentRuleset(chart_meta, current_selection)
+
+    member this.GetCurrentRuleset(chart_meta: ChartMeta) : Ruleset =
+        this.GetCurrentRuleset(chart_meta, current_selection)
 
     member this.Get(selection: RulesetSelection) : Ruleset = // todo: temp!!!
         match selection with
@@ -159,7 +159,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             loaded.Add(new_file_id, ruleset)
             ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_file_id + ".ruleset"))
             let selected_was_changed = current_selection = FileId(existing_file_id)
-            
+
             if selected_was_changed then
                 current_selection <- FileId(new_file_id)
                 on_changed_ev.Trigger()

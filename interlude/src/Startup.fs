@@ -31,7 +31,7 @@ module Startup =
             Content.LoadData()
             Printerlude.init instance
             StatsSync.init()
-            SelectedChart.init()
+            SelectedChart.init(Rulesets.current, Rulesets.current_hash)
             Mounts.init()
             Network.init()
             DiscordRPC.init()

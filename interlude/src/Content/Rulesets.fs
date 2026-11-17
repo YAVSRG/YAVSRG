@@ -22,6 +22,4 @@ module Rulesets =
     let update (existing_id: string) (ruleset: Ruleset) : unit = rulesets.Update(existing_id, ruleset)
     let delete (id: string) : bool = rulesets.Delete(id)
 
-type Rulesets =
-    static member current = Rulesets.rulesets.Current
-    static member current_hash = Rulesets.rulesets.CurrentHash
+type Rulesets = struct end
