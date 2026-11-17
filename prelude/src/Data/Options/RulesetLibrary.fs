@@ -51,10 +51,14 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
         current <- loaded.[_selected_id.Value]
         current_hash <- current.CalculateHash()
-
-    member this.Init() : unit =
-        this.Load()
         initialised <- true
+
+    member this.FindById(file_id: string) : Ruleset = loaded.[file_id]
+
+    member this.FindByHash(hash: string) : Ruleset option =
+        loaded.Values |> Seq.tryFind(fun rs -> rs.CalculateHash() = hash)
+
+    member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
     member val Selected: Setting<string> =
         Setting.make
@@ -74,11 +78,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
             )
             (fun () -> _selected_id.Value)
 
-    member this.FindById(file_id: string) : Ruleset = loaded.[file_id]
-
-    member this.FindByHash(hash: string) : Ruleset option =
-        loaded.Values |> Seq.tryFind(fun rs -> rs.CalculateHash() = hash)
-
     /// Each ruleset and its file ID, sorted alphabetically
     member this.ToList() : (string * Ruleset) seq =
         seq {
@@ -86,8 +85,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 yield (k, loaded.[k])
         }
         |> Seq.sortBy(fun (_, rs) -> rs.Name.ToLowerInvariant())
-
-    member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
     member this.Install(ruleset: Ruleset) : unit =
