@@ -93,7 +93,7 @@ type RulesetLibrary() =
         |> fun s ->
             s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
 
-    member this.FindById(id: string) : Ruleset = loaded.[id]
+    member this.FindById(file_id: string) : Ruleset = loaded.[file_id]
 
     member this.FindByHash(hash: string) : Ruleset option =
         loaded.Values |> Seq.tryFind(fun rs -> rs.CalculateHash() = hash)
@@ -133,29 +133,32 @@ type RulesetLibrary() =
                 false
 
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
-    member this.Update(existing_id: string, ruleset: Ruleset) : unit =
+    member this.Update(existing_file_id: string, ruleset: Ruleset) : unit =
         let new_id: string = this.GetFilename(ruleset)
 
         let new_id =
-            if new_id <> existing_id && this.Exists(new_id) then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
+            if new_id <> existing_file_id && this.Exists(new_id) then
+                sprintf "%s_%i" new_id (Timestamp.now())
+            else
+                new_id
 
         let new_id =
             try
-                if new_id <> existing_id then
+                if new_id <> existing_file_id then
                     File.Move(
-                        Path.Combine(get_game_folder "Rulesets", existing_id + ".ruleset"),
+                        Path.Combine(get_game_folder "Rulesets", existing_file_id + ".ruleset"),
                         Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset")
                     )
 
                 new_id
             with err ->
-                Logging.Error "Failed to move ruleset file from '%s' to '%s': %O" existing_id new_id err
-                existing_id
+                Logging.Error "Failed to move ruleset file from '%s' to '%s': %O" existing_file_id new_id err
+                existing_file_id
 
-        if loaded.Remove(existing_id) then
+        if loaded.Remove(existing_file_id) then
             loaded.Add(new_id, ruleset)
 
-            if _selected_id.Value = existing_id then
+            if _selected_id.Value = existing_file_id then
                 _selected_id.Value <- new_id
                 current <- ruleset
                 current_hash <- current.CalculateHash()
@@ -163,11 +166,11 @@ type RulesetLibrary() =
 
             ruleset.WriteToFile(Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
 
-    member this.Delete(id: string) : bool =
-        if id <> DEFAULT_ID && this.Exists(id) then
+    member this.Delete(file_id: string) : bool =
+        if file_id <> DEFAULT_ID && this.Exists(file_id) then
             try
-                File.Delete(Path.Combine(get_game_folder "Rulesets", id + ".ruleset"))
-                loaded.Remove(id)
+                File.Delete(Path.Combine(get_game_folder "Rulesets", file_id + ".ruleset"))
+                loaded.Remove(file_id)
             with :? IOException as err ->
                 Logging.Error "IO error deleting ruleset: %O" err
                 false
