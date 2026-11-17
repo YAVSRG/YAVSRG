@@ -54,13 +54,11 @@ type Toolbar() =
                 (Rect.FromSize(bounds.Right - (float32 i + 1.0f) * s + 2.5f, bounds.Bottom - level, s - 5.0f, level))
                 (Palette.color(int level, 1.0f, 0.5f))
 
-    let import_status_fade = Animation.Fade(0.0f)
-
     let import_button =
         InlaidButton(%"menu.import", fun () -> ImportsPage().Show())
             .Icon(Icons.DOWNLOAD)
             .Hotkey("import")
-            .With(TaskProgressMiniBar().Position(Position.BorderB(Style.PADDING)))
+            .With(BackgroundTaskProgressBar().Position(Position.BorderB(Style.PADDING)))
 
     override this.Init(parent: Widget) : unit =
         container
@@ -92,10 +90,9 @@ type Toolbar() =
                             .SliceB(HEIGHT)
                             .SlicePercentL(0.4f)
                             .ShrinkL(BUTTON_WIDTH + Style.PADDING * 4.0f)
+                            .ShrinkR(Style.PADDING * 2.0f)
                             .SliceY(InlaidButton.HEIGHT)
-                    ),
-
-                VolumeSlider().Position(Position.ShrinkY(HEIGHT))
+                    )
             )
             // Top buttons (quick, options, etc)
             .With(
@@ -123,7 +120,11 @@ type Toolbar() =
                             .Conditional(fun () -> Screen.current_type = ScreenType.MainMenu)
                     ),
 
-                NetworkStatus().Position(Position.SliceT(HEIGHT).SliceR(300.0f))
+                NetworkStatus().Position(Position.SliceT(HEIGHT).SliceR(300.0f)),
+
+                BackgroundTaskList(import_button),
+
+                VolumeSlider().Position(Position.ShrinkY(HEIGHT))
             )
             // Hotkey behaviours when toolbar isn't hidden
             .Add(
@@ -169,12 +170,6 @@ type Toolbar() =
 
             container.Draw()
 
-            if import_status_fade.Value > 0.005f then
-                TaskTracking.draw(
-                    this.Bounds.ShrinkY(HEIGHT).SlicePercentL(0.4f).Shrink(20.0f),
-                    import_status_fade.Value
-                )
-
             Terminal.draw()
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =
@@ -202,13 +197,6 @@ type Toolbar() =
 
         if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"quick_menu").Pressed() then
             QuickMenuPage().Show()
-
-        if Mouse.hover(import_button.Bounds) && TaskTracking.in_progress() then
-            import_status_fade.Target <- 1.0f
-        else
-            import_status_fade.Target <- 0.0f
-
-        import_status_fade.Update(elapsed_ms)
 
         Terminal.update()
 

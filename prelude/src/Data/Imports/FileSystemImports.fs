@@ -5,10 +5,38 @@ open System.IO.Compression
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Formats.Conversions
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.Library
+open Prelude.Formats.Osu
+open Prelude.Formats.Quaver
+open Prelude.Formats.StepMania
 
 module FileSystemImports =
+
+    let convert_chart_file (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> list =
+        let inline parse_error (message: string) =
+            [
+                Error { OriginalPath = ctx.OriginalPath; Reason = sprintf "Failed to parse this file: %s" message }
+            ]
+
+        match Path.GetExtension(ctx.OriginalPath).ToLower() with
+        | ".sm" ->
+            match StepMania.FromFile(ctx.OriginalPath) with
+            | Ok data -> StepManiaConverter.convert data ctx
+            | Error msg -> parse_error(msg)
+
+        | ".qua" ->
+            match QuaverChart.FromFile(ctx.OriginalPath) with
+            | Ok quaver_chart -> [ QuaverConverter.convert quaver_chart ctx ]
+            | Error msg -> parse_error(msg)
+
+        | ".osu" ->
+            match Beatmap.TryReadFromFile(ctx.OriginalPath) with
+            | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
+            | Ok beatmap -> [ OsuConverter.convert beatmap ctx ]
+            | Error msg -> parse_error(msg)
+
+        | _ -> []
 
     let internal convert_song_folder
         (path: string, config: ConversionOptions, library: Library)
@@ -38,8 +66,7 @@ module FileSystemImports =
                 )
                 |> List.ofSeq
 
-            let filtered = filter_rates results
-
+            let filtered = RateFiltering.apply(results)
             let mutable success_count = 0
 
             let charts =
@@ -67,7 +94,7 @@ module FileSystemImports =
         }
 
     let internal convert_pack_folder
-        (path: string, config: ConversionOptions, library: Library, progress: ProgressCallback)
+        (path: string, config: ConversionOptions, library: Library, ctx: ITaskContext)
         : Async<ConversionResult> =
         async {
             let mutable results = ConversionResult.Empty
@@ -83,13 +110,13 @@ module FileSystemImports =
             for i, song_folder in Array.indexed song_folders do
                 let! result = convert_song_folder(song_folder, config, library)
                 results <- results.CombineWith(result)
-                progress(Processing(i + 1, song_folders.Length))
+                ctx.Progress(i + 1, song_folders.Length)
 
             return results
         }
 
     let internal convert_folder_of_oszs
-        (folder_of_oszs: string, library: Library, progress: ProgressCallback)
+        (folder_of_oszs: string, library: Library, ctx: ITaskContext)
         : Async<ConversionResult> =
         async {
             let config = ConversionOptions.Pack(Path.GetFileName(folder_of_oszs), None, Copy)
@@ -137,19 +164,19 @@ module FileSystemImports =
                                     :: results.SkippedCharts
                             }
 
-                progress(Processing(i + 1, files.Length))
+                ctx.Progress(i + 1, files.Length)
 
             return results
         }
 
     let internal convert_stepmania_pack_zip
-        (path: string, pack_name: string, library: Library, progress: ProgressCallback)
-        : Async<Result<ConversionResult, string>> =
+        (path: string, pack_name: string, library: Library, ctx: ITaskContext)
+        : Async<ConversionResult> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
             if Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not then
-                return Error(sprintf "Target extraction folder (%s) already exists" dir)
+                return ConversionResult.Skip(path, "Target extraction folder already exists")
             else
                 ZipFile.ExtractToDirectory(path, dir)
 
@@ -163,121 +190,19 @@ module FileSystemImports =
                                 pack_folder,
                                 ConversionOptions.EtternaPack(pack_name, None, Copy),
                                 library,
-                                progress
+                                ctx
                             )
 
                         results <- results.CombineWith(result)
 
                     FileSystemServices.delete_folder.Request(dir, ignore)
-                    return Ok results
+                    return results
                 | _ ->
                     FileSystemServices.delete_folder.Request(dir, ignore)
-                    return Error "Extracted zip does not match the usual structure for a StepMania pack"
-        }
 
-    let rec auto_detect_import
-        (path: string, library: Library, progress: ProgressCallback)
-        : Async<Result<ConversionResult, string>> =
-        async {
-            try
-                match File.GetAttributes(path) &&& FileAttributes.Directory |> int with
-                | 0 ->
-                    match path with
-                    | ChartFile ext ->
-                        let folder_name =
-                            match ext with
-                            | ".osu" -> "osu!"
-                            | ".qua" -> "Quaver"
-                            | _ -> "Singles"
-
-                        let! result =
-                            convert_song_folder(
-                                Path.GetDirectoryName(path),
-                                ConversionOptions.Pack(folder_name, None, Copy),
-                                library
-                            )
-
-                        log_conversion result
-                        progress Complete
-                        return Ok result
-                    | ChartArchive _ ->
-                        let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
-
-                        if Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not then
-                            return Error(sprintf "Target extraction folder (%s) already exists" dir)
-                        else
-                            ZipFile.ExtractToDirectory(path, dir)
-                            let! result = auto_detect_import(dir, library, progress)
-                            FileSystemServices.delete_folder.Request(dir, ignore)
-                            return result
-                    | _ ->
-                        progress Faulted
-                        return Error "File type not recognised as importable"
-                | _ ->
-                    match path with
-                    | SongFolder ext ->
-                        let folder_name =
-                            match ext with
-                            | ".osu" -> "osu!"
-                            | ".qua" -> "Quaver"
-                            | _ -> "Singles"
-
-                        let! result =
-                            convert_song_folder(path, ConversionOptions.Pack(folder_name, None, Copy), library)
-
-                        log_conversion result
-                        progress Complete
-                        return Ok result
-                    | FolderOfOszs ->
-                        let! result = convert_folder_of_oszs(path, library, progress)
-                        log_conversion result
-                        progress Complete
-                        return Ok result
-                    | PackFolder ->
-                        let folder_name =
-                            match Path.GetFileName(path) with
-                            | "Songs" ->
-                                if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!"
-                                elif path |> Path.GetDirectoryName |> Path.GetFileName = "Quaver" then "Quaver"
-                                else "Songs"
-                            | s -> s
-
-                        let! result =
-                            convert_pack_folder(
-                                path,
-                                ConversionOptions.Pack(folder_name, None, Copy),
-                                library,
-                                progress
-                            )
-
-                        log_conversion result
-                        progress Complete
-                        return Ok result
-                    | FolderOfPacks ->
-                        let mutable results = ConversionResult.Empty
-                        let pack_folders = Directory.GetDirectories(path)
-
-                        for i, pack_folder in Array.indexed pack_folders do
-                            let pack_name = Path.GetFileName(pack_folder)
-
-                            let! result =
-                                convert_pack_folder(
-                                    pack_folder,
-                                    ConversionOptions.Pack(pack_name, None, Copy),
-                                    library,
-                                    (fun p -> Nested(pack_name, i + 1, pack_folders.Length, p)) >> progress
-                                )
-
-                            results <- results.CombineWith(result)
-
-                        log_conversion results
-                        progress Complete
-                        return Ok results
-                    | _ ->
-                        progress Faulted
-                        return Error "No importable folder structure detected"
-            with err ->
-                Logging.Error "Unexpected exception while importing '%s': %O" path err
-                progress Faulted
-                return Error err.Message
+                    return
+                        ConversionResult.Skip(
+                            dir,
+                            "Extracted zip does not match the usual structure for a StepMania pack"
+                        )
         }

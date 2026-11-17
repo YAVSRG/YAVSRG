@@ -2,7 +2,6 @@ namespace Interlude.Features.OptionsMenu.Library
 
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay.Rulesets
 open Prelude.Data.Library
 open Prelude.Data.Imports
 open Prelude.Data.Maintenance
@@ -21,20 +20,16 @@ module LibraryActions =
         let rulesets =
             Rulesets.list() |> Seq.map(fun (_, rs) -> rs.CalculateHash(), rs) |> Array.ofSeq
 
-        let task_tracking = TaskTracking.add %"library.recalculate_personal_bests"
-
-        let task =
-            PersonalBests.recalculate(rulesets, false, Content.Library, task_tracking.set_Progress)
-
-        general_task_queue.Request(
-            task,
-            fun () ->
+        RecalculatePersonalBestsTask(Content.Library, rulesets, false)
+            .Track(TaskTracking.add %"library.recalculate_personal_bests")
+            .WithCallback(fun () ->
                 Notifications.system_feedback(
                     Icons.ALERT_OCTAGON,
                     %"notification.score_recalculation_complete.title",
                     ""
                 )
-        )
+            )
+            .Queue(general_task_queue)
 
         Notifications.system_feedback(
             Icons.ALERT_OCTAGON,
@@ -43,14 +38,12 @@ module LibraryActions =
         )
 
     let recalculate_patterns () : unit =
-        let task_tracking = TaskTracking.add %"library.recache_patterns"
-        let task = Patterns.recalculate(Content.Charts, task_tracking.set_Progress)
-
-        general_task_queue.Request(
-            task,
-            fun () ->
+        RecalculatePatternsTask(Content.Charts)
+            .Track(TaskTracking.add %"library.recache_patterns")
+            .WithCallback(fun () ->
                 Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.pattern_cache_complete.title", "")
-        )
+            )
+            .Queue(general_task_queue)
 
         Notifications.system_feedback(
             Icons.ALERT_OCTAGON,
@@ -59,13 +52,12 @@ module LibraryActions =
         )
 
     let vacuum () : unit =
-        let task_tracking = TaskTracking.add %"library.vacuum"
-        let task = Vacuum.vacuum_charts(true, Content.Charts, task_tracking.set_Progress)
-
-        general_task_queue.Request(
-            task,
-            fun () -> Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.vacuum_complete.title", "")
-        )
+        VacuumTask(true, Content.Charts)
+            .Track(TaskTracking.add %"library.vacuum")
+            .WithCallback(fun () ->
+                Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.vacuum_complete.title", "")
+            )
+            .Queue(general_task_queue)
 
 type LibraryPage() =
     inherit Page()

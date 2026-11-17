@@ -1,4 +1,4 @@
-namespace Prelude.Tests.Charts
+namespace Prelude.Tests.Data.Imports
 
 open System.IO.Compression
 open NUnit.Framework
@@ -9,7 +9,7 @@ open Prelude.Formats.Osu
 open Prelude.Formats.Conversions
 open Prelude.Tests.Helpers
 
-module ChartRateDetectionTests =
+module RateFilteringTests =
 
     [<TestCase("[4K] Test [1.1x]", 1.1f<rate>)>]
     [<TestCase("[4K] Test[1.1x]", 1.1f<rate>)>]
@@ -29,7 +29,7 @@ module ChartRateDetectionTests =
     [<TestCase("0.50x", 0.5f<rate>)>]
     let RateDetection_Regex_ExpectedValue (difficulty_name: string, expected_value: Rate) =
 
-        let result = detect_rate_mod difficulty_name
+        let result = RateFiltering.detect_rate_mod difficulty_name
 
         match result with
         | Some value -> Assert.AreEqual(expected_value, value)
@@ -48,7 +48,7 @@ module ChartRateDetectionTests =
     [<TestCase("0.49x")>]
     let RateDetection_Regex_ExpectNoRate (difficulty_name: string) =
 
-        let result = detect_rate_mod difficulty_name
+        let result = RateFiltering.detect_rate_mod difficulty_name
 
         match result with
         | Some value -> Assert.Fail(sprintf "%f" value)
@@ -106,7 +106,8 @@ module ChartRateDetectionTests =
                 Ok(simulate_normal_import 1.2f<rate>)
             ]
 
-        let results = filter_rates example_data |> List.choose Result.toOption
+        let results = RateFiltering.apply example_data |> List.choose Result.toOption
+
         printfn "%A" results
         Assert.AreEqual(1, results.Length)
         let single_result = List.head results
@@ -135,7 +136,8 @@ module ChartRateDetectionTests =
                 Ok(simulate_mislabelled_rate 1.3f<rate>)
             ]
 
-        let results = filter_rates example_data |> List.choose Result.toOption
+        let results = RateFiltering.apply example_data |> List.choose Result.toOption
+
         printfn "%A" results
         Assert.AreEqual(2, results.Length)
 
@@ -162,7 +164,8 @@ module ChartRateDetectionTests =
             )
             |> List.ofSeq
 
-        let results = filter_rates song_rates |> List.choose Result.toOption
+        let results = RateFiltering.apply song_rates |> List.choose Result.toOption
+
         printfn "%A" results
         Assert.AreEqual(1, results.Length)
         Assert.AreEqual(song_rates.Length, results.Head.Header.Origins.Count)
@@ -188,6 +191,7 @@ module ChartRateDetectionTests =
             )
             |> List.ofSeq
 
-        let results = filter_rates song_rates |> List.choose Result.toOption
+        let results = RateFiltering.apply song_rates |> List.choose Result.toOption
+
         printfn "%A" results
         Assert.AreEqual(2, results.Length)

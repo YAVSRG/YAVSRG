@@ -1,52 +1,14 @@
-﻿namespace Prelude.Data.Imports
+namespace Prelude.Data.Imports
 
 open System
 open System.Globalization
-open System.IO
 open System.Text.RegularExpressions
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats.Osu
-open Prelude.Formats.Quaver
-open Prelude.Formats.StepMania
 open Prelude.Formats.Conversions
 
-[<AutoOpen>]
-module Shared =
-
-    let OSU_SONG_FOLDER =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs")
-
-    let STEPMANIA_PACK_FOLDER =
-        Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Stepmania 5", "Songs")
-
-    let ETTERNA_PACK_FOLDER =
-        Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Etterna", "Songs")
-
-    let QUAVER_SONG_FOLDER =
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-            "Steam",
-            "steamapps",
-            "common",
-            "Quaver",
-            "Songs"
-        )
-
-    let log_conversion (result: ConversionResult) =
-        let skipped = result.SkippedCharts.Length
-
-        if skipped > 0 then
-            let dump = result.SkippedCharts |> Seq.map _.ToString() |> String.concat "\n "
-
-            Logging.Info
-                "Successful import of %i chart(s) also skipped %i file(s):\n %s"
-                result.ConvertedCharts
-                skipped
-                dump
-        else
-            Logging.Info "Successfully imported %i chart(s)" result.ConvertedCharts
+module RateFiltering =
 
     let private RATE_REGEX =
         Regex(
@@ -66,9 +28,7 @@ module Shared =
         else
             None
 
-    let filter_rates
-        (results: Result<ImportChart, SkippedConversion> list)
-        : Result<ImportChart, SkippedConversion> list =
+    let apply (results: Result<ImportChart, SkippedConversion> list) : Result<ImportChart, SkippedConversion> list =
 
         let find_matching_1x (import: ImportChart, rate: Rate) =
             results
@@ -122,41 +82,3 @@ module Shared =
                 | None -> Ok import
             | Error skipped_conversion -> Error skipped_conversion
         )
-
-    let convert_chart_file (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> list =
-        let inline parse_error (message: string) =
-            [
-                Error { OriginalPath = ctx.OriginalPath; Reason = sprintf "Failed to parse this file: %s" message }
-            ]
-
-        match Path.GetExtension(ctx.OriginalPath).ToLower() with
-        | ".sm" ->
-            match StepMania.FromFile(ctx.OriginalPath) with
-            | Ok data -> StepManiaConverter.convert data ctx
-            | Error msg -> parse_error(msg)
-
-        | ".qua" ->
-            match QuaverChart.FromFile(ctx.OriginalPath) with
-            | Ok quaver_chart -> [ QuaverConverter.convert quaver_chart ctx ]
-            | Error msg -> parse_error(msg)
-
-        | ".osu" ->
-            match Beatmap.TryReadFromFile(ctx.OriginalPath) with
-            | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
-            | Ok beatmap -> [ OsuConverter.convert beatmap ctx ]
-            | Error msg -> parse_error(msg)
-
-        | _ -> []
-
-    let import_queue =
-        { new Async.Queue<Async<Result<ConversionResult, string>>, Result<ConversionResult, string>>() with
-            override this.Handle
-                (task: Async<Result<ConversionResult, string>>)
-                : Async<Result<ConversionResult, string>> =
-                task
-        }
-
-    let general_task_queue =
-        { new Async.Queue<Async<unit>, unit>() with
-            override this.Handle(task: Async<unit>) : Async<unit> = task
-        }

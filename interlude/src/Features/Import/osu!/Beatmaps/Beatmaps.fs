@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data
+open Prelude.Data.Imports
 open Interlude.UI
 
 type BeatmapStatusToggle =

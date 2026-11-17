@@ -7,7 +7,6 @@ open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Formats.Conversions
 open Prelude.Data.Imports
-open Prelude.Data.OsuClientInterop
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -33,6 +32,13 @@ type MountedGameType =
         | Quaver -> Color.FromArgb(0xFF_39B6D1)
         | Etterna -> Color.FromArgb(0xFF_8F60F6)
         | Stepmania -> Color.FromArgb(0xFF_FF703C)
+
+    member this.DefaultSongsLocation: string =
+        match this with
+        | MountedGameType.Osu -> MountedChartSource.DEFAULT_OSU_SONGS_LOCATION
+        | MountedGameType.Quaver -> MountedChartSource.DEFAULT_QUAVER_SONGS_LOCATION
+        | MountedGameType.Stepmania -> MountedChartSource.DEFAULT_STEPMANIA_SONGS_LOCATION
+        | MountedGameType.Etterna -> MountedChartSource.DEFAULT_ETTERNA_SONGS_LOCATION
 
 type private MountFolderPickerPage(game: MountedGameType, callback: string -> unit) =
     inherit Page()
@@ -97,8 +103,12 @@ module Mounts =
                 if Directory.Exists(mount.SourceFolder) then
                     if mount.ImportOnStartup then
                         Logging.Info "Checking for new %s songs to import.." name
-                        let task = Mount.import_new(mount, Content.Library, ignore)
-                        import_queue.Request(task, ignore)
+
+                        mount
+                            .ImportNewCharts(Content.Library)
+                            .Track(TaskContext(sprintf "%s: %s" name %"mount.importall"))
+                            .WithCallback(fun (_: Result<_, _>) -> ())
+                            .Queue(import_queue)
                 else
                     Logging.Warn
                         "%s Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
@@ -112,41 +122,30 @@ module Mounts =
         import_mount_if_auto_enabled(options.EtternaMount, "Etterna", %"notification.mount_moved.etterna")
         import_mount_if_auto_enabled(options.StepmaniaMount, "Stepmania", %"notification.mount_moved.stepmania")
 
-    let private auto_detect_location (game: MountedGameType) : string =
-        match game with
-        | MountedGameType.Osu -> OSU_SONG_FOLDER
-        | MountedGameType.Quaver -> QUAVER_SONG_FOLDER
-        | MountedGameType.Stepmania -> STEPMANIA_PACK_FOLDER
-        | MountedGameType.Etterna -> ETTERNA_PACK_FOLDER
-
     let detect_or_drop_folder (game: MountedGameType) (callback: string -> unit) =
-        let location = auto_detect_location game
+        let default_location = game.DefaultSongsLocation
 
-        if Directory.Exists(location) then callback location else MountFolderPickerPage(game, callback).Show()
+        if Directory.Exists(default_location) then
+            callback(default_location)
+        else
+            MountFolderPickerPage(game, callback).Show()
 
     let import_osu_scores (osu_mount: MountedChartSource, notify_start: bool) : unit =
 
-        let task_tracking = TaskTracking.add %"mount.import_osu_scores"
-
-        let task =
-            let import_task =
-                Scores.import_osu_scores_async(
-                    Path.GetDirectoryName(osu_mount.SourceFolder),
-                    Content.Library,
-                    task_tracking.set_Progress
-                )
-
-            async {
-                let! result = import_task
-
-                Notifications.task_feedback(
-                    Icons.FOLDER_PLUS,
-                    %"notification.score_import_success",
-                    [ result.NewScores.ToString(); result.Maps.ToString() ] %> "notification.score_import_success.body"
-                )
-            }
-
-        general_task_queue.Request(task, ignore)
+        ImportOsuScoresTask(Path.GetDirectoryName(osu_mount.SourceFolder), Content.Library)
+            .Track(TaskTracking.add %"mount.import_osu_scores")
+            .WithCallback(
+                function
+                | Ok result ->
+                    Notifications.task_feedback(
+                        Icons.FOLDER_PLUS,
+                        %"notification.score_import_success",
+                        [ result.NewScores.ToString(); result.Maps.ToString() ]
+                        %> "notification.score_import_success.body"
+                    )
+                | Error _ -> ()
+            )
+            .Queue(general_task_queue)
 
         if notify_start then
             Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.score_import_queued", "")

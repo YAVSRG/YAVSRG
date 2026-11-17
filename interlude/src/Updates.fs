@@ -9,7 +9,7 @@ open Percyqaz.Common
 open System.IO.Compression
 open Percyqaz.Data
 open Prelude
-open Prelude.Data
+open Prelude.Data.Imports
 
 // todo: move to prelude (?)
 

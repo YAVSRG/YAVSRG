@@ -1,4 +1,4 @@
-namespace Prelude.Data
+namespace Prelude.Data.Imports
 
 open System
 open System.IO

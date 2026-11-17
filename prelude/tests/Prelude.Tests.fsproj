@@ -53,7 +53,6 @@
     <Compile Include="Shared\LocalisationTests.fs" />
     <Compile Include="Charts\ChartTests.fs" />
     <Compile Include="Charts\ChartOriginTests.fs" />
-    <Compile Include="Charts\ChartRateDetectionTests.fs" />
     <Compile Include="Formats\osu!\TimingPointTests.fs" />
     <Compile Include="Formats\osu!\HitSampleTests.fs" />
     <Compile Include="Formats\osu!\HitObjectTests.fs" />
@@ -90,6 +89,7 @@
     <Compile Include="Data\UserDatabase\DbSessionsTests.fs" />
     <Compile Include="Data\Stats\StatsHelpersTests.fs" />
     <Compile Include="Data\Stats\StatsTests.fs" />
+    <Compile Include="Data\Imports\RateFilteringTests.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -3,14 +3,15 @@ namespace Prelude.Data.Maintenance
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
-open Prelude.Data
+open Prelude.Data.Imports
 open Prelude.Data.ChartDatabase
 
-module Vacuum =
+type VacuumTask(delete_missing_audio: bool, chart_db: ChartDatabase) =
+    inherit BackgroundTask<unit>()
 
-    let vacuum_charts (delete_missing_audio: bool, chart_db: ChartDatabase, progress: ProgressCallback) : Async<unit> =
+    override this.Run(ctx: ITaskContext) : Async<unit> =
         async {
-            progress(Generic "Vacuuming")
+            ctx.Status("Vacuuming")
             Logging.Debug("Running SQLite VACUUM command on charts.db")
             chart_db.VacuumSqlite()
             Logging.Debug("Chart database vacuum started")
@@ -36,12 +37,12 @@ module Vacuum =
                 | AssetLocation.Deleted -> ()
 
             if delete_missing_audio && to_delete.Count > 0 then
-                progress(Generic "Deleting charts without audio")
+                ctx.Status("Deleting charts without audio")
                 Logging.Debug "Found %i charts with misplaced audio files, deleting them..." to_delete.Count
                 chart_db.Delete(to_delete)
 
             if unused_asset_hashes.Count > 0 then
-                progress(Generic "Deleting unused assets")
+                ctx.Status("Deleting unused assets")
 
                 Logging.Debug
                     "Found %i assets not being used by chart database, deleting them..."
@@ -63,6 +64,4 @@ module Vacuum =
                     (bytes_freed / 1024L / 1024L)
             else
                 Logging.Debug("No assets found to delete, you're all good!")
-
-            progress Complete
         }

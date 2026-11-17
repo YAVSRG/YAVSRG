@@ -9,6 +9,7 @@ open Prelude.Data.Imports
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Import
+open Prelude.Formats.Conversions
 
 type private PackDownloadStatus =
     | NotDownloaded
@@ -36,42 +37,31 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
         if status <> Downloading then
             progress <- 0.0f
 
-            let task_tracking = TaskTracking.add data.name
+            DownloadEtternaPackTask(data.name, data.download, Content.Library)
+                .Track(TaskTracking.add(data.name).SubscribeDownloadProgress(fun percent -> progress <- percent))
+                .WithCallback(
+                    function
+                    | Ok(result: ConversionResult) ->
+                        Notifications.task_feedback(
+                            Icons.DOWNLOAD,
+                            %"notification.install_pack",
+                            [
+                                data.name
+                                result.ConvertedCharts.ToString()
+                                result.SkippedCharts.Length.ToString()
+                            ]
+                            %> "notification.install_pack.body"
+                        )
 
-            let progress_callback =
-                fun p ->
-                    match p with
-                    | Data.Downloading percent -> progress <- percent
-                    | _ -> ()
-
-                    task_tracking.Progress <- p
-
-            let task =
-                OnlineImports.download_etterna_pack(data.name, data.download, Content.Library, progress_callback)
-
-            import_queue.Request(
-                task,
-                function
-                | Ok result ->
-                    Notifications.task_feedback(
-                        Icons.DOWNLOAD,
-                        %"notification.install_pack",
-                        [
-                            data.name
-                            result.ConvertedCharts.ToString()
-                            result.SkippedCharts.Length.ToString()
-                        ]
-                        %> "notification.install_pack.body"
-                    )
-
-                    Content.TriggerChartAdded(result.FirstConvertedChart)
-                    progress <- 1.0f
-                    status <- Installed
-                | Error reason ->
-                    Logging.Error "Error installing %s: %s" data.name reason
-                    Notifications.error(%"notification.install_pack_failed", data.name)
-                    status <- DownloadFailed
-            )
+                        Content.TriggerChartAdded(result.FirstConvertedChart)
+                        progress <- 1.0f
+                        status <- Installed
+                    | Error reason ->
+                        Logging.Error "Error installing %s: %s" data.name reason
+                        Notifications.error(%"notification.install_pack_failed", data.name)
+                        status <- DownloadFailed
+                )
+                .Queue(import_queue)
 
             status <- Downloading
 
