@@ -7,8 +7,9 @@ open Prelude
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
 
+[<Sealed>]
 type private EditTimingWindowsPage
-    (judgements: Judgement array, windows: Setting<(GameplayTime * GameplayTime) option> array) =
+    (judgements: Judgement array, windows: Setting<(GameplayTime * GameplayTime) option> array, title: string) =
     inherit Page()
 
     let tab = Bind.mk Keys.Tab
@@ -148,7 +149,7 @@ type private EditTimingWindowsPage
             | Some(:? Widget as w) -> next_entry w.Parent.Parent
             | _ -> ()
 
-    override this.Title = %"rulesets.edit.windows"
+    override this.Title = title
 
     static member NoteWindowsPage(ruleset: Setting<Ruleset>) : Page =
         let new_judgements = ruleset.Value.Judgements |> Array.copy
@@ -161,34 +162,32 @@ type private EditTimingWindowsPage
                     Setting.make
                         (fun v -> new_judgements.[i] <- { new_judgements.[i] with TimingWindows = v })
                         (fun () -> new_judgements.[i].TimingWindows)
-                )
+                ),
+            %"rulesets.edit.windows"
         )
             .WithOnClose(fun () -> ruleset.Value <- { ruleset.Value with Judgements = new_judgements })
 
     static member NoteWindowsAsReleaseWindows(ruleset: Setting<Ruleset>) : Page =
         let new_judgements = ruleset.Value.Judgements |> Array.copy
 
-        { new EditTimingWindowsPage(new_judgements,
-                                    Array.init
-                                        new_judgements.Length
-                                        (fun i ->
-                                            Setting.make
-                                                (fun v ->
-                                                    new_judgements.[i] <-
-                                                        { new_judgements.[i] with TimingWindows = v }
-                                                )
-                                                (fun () -> new_judgements.[i].TimingWindows)
-                                        )) with
-            override this.Title = %"rulesets.mechanics.release_windows"
-        }
+        EditTimingWindowsPage(
+            new_judgements,
+            Array.init
+                new_judgements.Length
+                (fun i ->
+                    Setting.make
+                        (fun v -> new_judgements.[i] <- { new_judgements.[i] with TimingWindows = v })
+                        (fun () -> new_judgements.[i].TimingWindows)
+                ),
+            %"rulesets.mechanics.release_windows"
+        )
             .WithOnClose(fun () -> ruleset.Value <- { ruleset.Value with Judgements = new_judgements })
 
     static member ReleaseWindows
         (judgements: Judgement array, windows: (GameplayTime * GameplayTime) option array)
         : Page =
-        { new EditTimingWindowsPage(judgements,
-                                    Array.init
-                                        windows.Length
-                                        (fun i -> Setting.make (fun v -> windows.[i] <- v) (fun () -> windows.[i]))) with
-            override this.Title = %"rulesets.mechanics.release_windows"
-        }
+        EditTimingWindowsPage(
+            judgements,
+            Array.init windows.Length (fun i -> Setting.make (fun v -> windows.[i] <- v) (fun () -> windows.[i])),
+            %"rulesets.mechanics.release_windows"
+        )
