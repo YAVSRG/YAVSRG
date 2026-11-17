@@ -27,7 +27,7 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
         )
 
     let switch_to_native_ruleset () =
-        match Rulesets.get_native_ruleset score_info.ChartMeta.Origins with
+        match Ruleset.GetNativeRuleset(score_info.ChartMeta.Origins) with
         | Some ruleset ->
             // Use user's version (custom colors, names, etc) if available
             Rulesets.by_hash(ruleset.CalculateHash()) |> Option.defaultValue ruleset |> set_ruleset_direct
