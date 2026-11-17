@@ -11,7 +11,7 @@ module Rulesets =
     let DEFAULT_ID = "sc-j4"
     let on_changed = rulesets.OnChanged
     let load () : unit = rulesets.Load()
-    let init () = rulesets.Load()
+    let init () : unit = rulesets.Load()
     let selected_id: Setting<RulesetSelection> = rulesets.Selected
     let by_id (id: string) : Ruleset = rulesets.FindById(id).Ruleset
 
@@ -25,4 +25,4 @@ module Rulesets =
     let update (existing_id: string) (ruleset: Ruleset) : unit = rulesets.Update(existing_id, ruleset)
     let delete (id: string) : bool = rulesets.Delete(id)
 
-type Rulesets = struct end
+type Rulesets = class end

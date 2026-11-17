@@ -33,12 +33,9 @@ type SelectRulesetPage() =
                             NavigationContainer
                                 .Row()
                                 .With(
-                                    PageButton(
-                                        cached_ruleset.Ruleset.Name,
-                                        fun () -> options.SelectedRuleset.Set(FileId(id))
-                                    )
+                                    PageButton(cached_ruleset.Ruleset.Name, fun () -> options.Ruleset.Set(FileId(id)))
                                         .TextColor(fun () ->
-                                            if options.SelectedRuleset.Value = FileId(id) then
+                                            if options.Ruleset.Value = FileId(id) then
                                                 Colors.text_pink_2
                                             else
                                                 Colors.text

@@ -3,9 +3,11 @@ namespace Prelude.Data.Options
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
+open Percyqaz.Data
 open Prelude.Data.ChartDatabase
 open Prelude.Gameplay.Rulesets
 
+[<Json.AutoCodec>]
 type RulesetSelection =
     | FileId of string
     | Automatic
@@ -79,9 +81,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
                     current_selection <- FileId(new_id)
             | Automatic -> current_selection <- Automatic)
             (fun () -> current_selection)
-
-    member this.Current: Ruleset = SC_J4.Ruleset // todo: temp!!!
-    member this.CurrentHash: string = SC_J4.Hash // todo: temp!!!
 
     member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : CachedRuleset =
         match selection with

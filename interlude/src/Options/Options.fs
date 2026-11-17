@@ -172,7 +172,7 @@ type GameOptions =
         LaneCover: LanecoverOptions
         Noteskin: Setting<string>
         SelectedHUD: Setting<string>
-        SelectedRuleset: Setting<RulesetSelection>
+        Ruleset: Setting<RulesetSelection>
 
         Pacemaker: Dictionary<string, PacemakerSettings>
         EnablePacemaker: Setting<bool>
@@ -245,7 +245,7 @@ type GameOptions =
             LaneCover = LanecoverOptions.Default
             Noteskin = Skins.selected_noteskin_id
             SelectedHUD = Skins.selected_hud_id
-            SelectedRuleset = Rulesets.selected_id
+            Ruleset = Rulesets.selected_id
 
             Pacemaker = Dictionary<string, PacemakerSettings>()
             EnablePacemaker = Setting.simple false
