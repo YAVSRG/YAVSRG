@@ -8,7 +8,7 @@ open Prelude.Data.UserDatabase
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Library
 
-type RecalculatePersonalBestsTask(library: Library, rulesets: (string * Ruleset) array, merge_with_existing: bool) =
+type RecalculatePersonalBestsTask(library: Library, rulesets: CachedRuleset array, merge_with_existing: bool) =
     inherit BackgroundTask<unit>()
 
     override this.Run(ctx: ITaskContext) : Async<unit> =
@@ -33,21 +33,21 @@ type RecalculatePersonalBestsTask(library: Library, rulesets: (string * Ruleset)
                         if merge_with_existing then data.PersonalBests else Map.empty
 
                     for score in data.Scores do
-                        let _, initial_ruleset = rulesets.[0]
+                        let initial_ruleset = rulesets.[0].Ruleset
 
                         let score_info =
                             ScoreInfo.CreateFromScore(chart_meta, chart, initial_ruleset, score)
 
                         if score_info.ModStatus = ModStatus.Ranked then
 
-                            for ruleset_id, ruleset in rulesets do
-                                score_info.Ruleset <- ruleset
+                            for cached_ruleset in rulesets do
+                                score_info.Ruleset <- cached_ruleset.Ruleset
 
-                                if new_bests.ContainsKey(ruleset_id) then
-                                    let ruleset_bests, _ = Bests.update score_info new_bests.[ruleset_id]
-                                    new_bests <- Map.add ruleset_id ruleset_bests new_bests
+                                if new_bests.ContainsKey(cached_ruleset.Hash) then
+                                    let ruleset_bests, _ = Bests.update score_info new_bests.[cached_ruleset.Hash]
+                                    new_bests <- Map.add cached_ruleset.Hash ruleset_bests new_bests
                                 else
-                                    new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
+                                    new_bests <- Map.add cached_ruleset.Hash (Bests.create score_info) new_bests
 
                     if new_bests <> existing_bests then
                         data.PersonalBests <- new_bests

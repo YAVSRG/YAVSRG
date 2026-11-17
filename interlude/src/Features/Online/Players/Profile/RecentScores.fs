@@ -16,8 +16,8 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
         |> Array.map(fun score ->
             score,
             (DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp) |> format_timespan),
-            Gameplay.Scoring.Grade.calculate SC_J4.Grades score.Score |> SC_J4.GradeColor,
-            SC_J4.LampColor(score.Lamp)
+            Gameplay.Scoring.Grade.calculate SC_J4.Ruleset.Grades score.Score |> SC_J4.Ruleset.GradeColor,
+            SC_J4.Ruleset.LampColor(score.Lamp)
         )
 
     override this.Draw() : unit =
@@ -49,7 +49,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
 
             Text.fill_b(
                 Style.font,
-                SC_J4.LampName(score.Lamp),
+                SC_J4.Ruleset.LampName(score.Lamp),
                 b.ShrinkR(h * 2.0f).SliceR(h).ShrinkY(h * 0.2f),
                 (lamp_color, Colors.shadow_2),
                 Alignment.CENTER

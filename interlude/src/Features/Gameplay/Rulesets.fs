@@ -6,5 +6,8 @@ open Interlude.Features.Gameplay
 module temp =
 
     type Rulesets with
-        static member current = Rulesets.rulesets.GetCurrentRuleset(SelectedChart.CACHE_DATA.Value)
-        static member current_hash = Rulesets.rulesets.CurrentHash
+        static member current =
+            Rulesets.rulesets.GetCurrentRuleset(SelectedChart.CACHE_DATA.Value).Ruleset
+
+        static member current_hash =
+            Rulesets.rulesets.GetCurrentRuleset(SelectedChart.CACHE_DATA.Value).Hash

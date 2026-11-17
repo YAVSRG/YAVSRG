@@ -15,10 +15,9 @@ type CachedRuleset =
 [<AutoOpen>]
 module RulesetExtensions =
 
-    let SC_J4 = SC.create(4)
-    let SC_J4_HASH = SC_J4.CalculateHash()
+    let SC_J4 = CachedRuleset.Create(SC.create(4))
 
-    let private OSU_RULESETS_HASHES: CachedRuleset array =
+    let private OSU_RULESETS: CachedRuleset array =
         let rulesets = Array.zeroCreate 101
         let mutable unique: Map<string, Ruleset> = Map.empty
 
@@ -34,15 +33,12 @@ module RulesetExtensions =
 
         rulesets
 
-    let private QUAVER_RULESET: CachedRuleset =
+    let private QUAVER_STANDARD: CachedRuleset =
         CachedRuleset.Create(Quaver.create(Quaver.Standard))
 
-    let private WIFE3_RULESET = CachedRuleset.Create(Wife3.create(4))
+    let private WIFE3_J4 = CachedRuleset.Create(Wife3.create(4))
 
     type Ruleset with
-        static member DefaultRuleset: Ruleset = SC_J4
-        static member DefaultRulesetHash: string = SC_J4_HASH
-
         static member GetNativeRuleset(origins: ChartOrigin seq) : CachedRuleset option =
             let mutable wife3_as_fallback = false
 
@@ -54,9 +50,9 @@ module RulesetExtensions =
                         None
                     | ChartOrigin.Osu osu ->
                         let idx = int(round(osu.SourceOD * 10.0f)) |> min 100 |> max 0
-                        Some(OSU_RULESETS_HASHES.[idx])
-                    | ChartOrigin.Quaver _ -> Some(QUAVER_RULESET))
+                        Some(OSU_RULESETS.[idx])
+                    | ChartOrigin.Quaver _ -> Some(QUAVER_STANDARD))
                     origins
             with
-            | None when wife3_as_fallback -> Some(WIFE3_RULESET)
+            | None when wife3_as_fallback -> Some(WIFE3_J4)
             | otherwise -> otherwise

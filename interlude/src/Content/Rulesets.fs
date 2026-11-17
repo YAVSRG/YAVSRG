@@ -13,9 +13,12 @@ module Rulesets =
     let load () : unit = rulesets.Load()
     let init () = rulesets.Load()
     let selected_id: Setting<RulesetSelection> = rulesets.Selected
-    let by_id (id: string) : Ruleset = rulesets.FindById(id)
-    let by_hash (hash: string) : Ruleset option = rulesets.FindByHash(hash)
-    let list () : (string * Ruleset) seq = rulesets.ToList()
+    let by_id (id: string) : Ruleset = rulesets.FindById(id).Ruleset
+
+    let by_hash (hash: string) : Ruleset option =
+        rulesets.FindByHash(hash) |> Option.map _.Ruleset
+
+    let list () : (string * CachedRuleset) seq = rulesets.ToList()
     let exists (id: string) : bool = rulesets.Exists(id)
     let install (ruleset: Ruleset) : unit = rulesets.Install(ruleset)
     let install_from_file (path: string) : bool = rulesets.Install(path)

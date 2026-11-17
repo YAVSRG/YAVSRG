@@ -28,12 +28,15 @@ type SelectRulesetPage() =
             )
             .Add(
                 seq {
-                    for id, ruleset in Rulesets.list() do
+                    for id, cached_ruleset in Rulesets.list() do
                         yield
                             NavigationContainer
                                 .Row()
                                 .With(
-                                    PageButton(ruleset.Name, fun () -> options.SelectedRuleset.Set(FileId(id)))
+                                    PageButton(
+                                        cached_ruleset.Ruleset.Name,
+                                        fun () -> options.SelectedRuleset.Set(FileId(id))
+                                    )
                                         .TextColor(fun () ->
                                             if options.SelectedRuleset.Value = FileId(id) then
                                                 Colors.text_pink_2
@@ -43,20 +46,22 @@ type SelectRulesetPage() =
                                         .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 4.0f)),
                                     Button(
                                         Icons.PIE_CHART,
-                                        fun () -> CompareRulesetsPage(Rulesets.current, ruleset).Show()
+                                        fun () -> CompareRulesetsPage(Rulesets.current, cached_ruleset.Ruleset).Show()
                                     )
                                         .Position(Position.SliceR(PAGE_ITEM_HEIGHT * 3.0f, PAGE_ITEM_HEIGHT))
-                                        .Disabled(fun () -> Rulesets.current = ruleset),
-                                    Button(Icons.EDIT, fun () -> RulesetEditorPage(id, ruleset).Show())
+                                        .Disabled(fun () -> Rulesets.current = cached_ruleset.Ruleset),
+                                    Button(Icons.EDIT, fun () -> RulesetEditorPage(id, cached_ruleset.Ruleset).Show())
                                         .Position(Position.SliceR(PAGE_ITEM_HEIGHT * 2.0f, PAGE_ITEM_HEIGHT)),
                                     Button(
                                         Icons.COPY,
                                         fun () ->
                                             ConfirmPage(
-                                                [ ruleset.Name ] %> "rulesets.confirm_copy",
+                                                [ cached_ruleset.Ruleset.Name ] %> "rulesets.confirm_copy",
                                                 fun () ->
                                                     Rulesets.install
-                                                        { ruleset.Clone() with Name = ruleset.Name + " (Copy)" }
+                                                        { cached_ruleset.Ruleset.Clone() with
+                                                            Name = cached_ruleset.Ruleset.Name + " (Copy)"
+                                                        }
                                             )
                                                 .Show()
                                     )
@@ -65,7 +70,7 @@ type SelectRulesetPage() =
                                         Icons.TRASH,
                                         (fun () ->
                                             ConfirmPage(
-                                                [ ruleset.Name ] %> "rulesets.confirm_delete",
+                                                [ cached_ruleset.Ruleset.Name ] %> "rulesets.confirm_delete",
                                                 fun () -> Rulesets.delete id |> ignore
                                             )
                                                 .Show()

@@ -16,7 +16,7 @@ module Backbeat =
         let add_ruleset (ruleset: Ruleset) =
             rulesets.[ruleset.CalculateHash()] <- ruleset
 
-        add_ruleset SC_J4
+        add_ruleset(SC_J4.Ruleset)
         add_ruleset(OsuMania.create 8.0f OsuMania.NoMod)
         add_ruleset(Wife3.create 4)
 

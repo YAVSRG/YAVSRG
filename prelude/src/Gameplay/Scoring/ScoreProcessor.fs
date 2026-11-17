@@ -367,4 +367,4 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
         ScoreProcessor.ProcessEntireReplay(ruleset, StoredReplaySource(replay), chart, rate)
 
     static member inline Dummy< ^T when ^T: (member ToNoteData: unit -> NoteData)>(chart: ^T) : ScoreProcessor =
-        ScoreProcessor.Create(SC_J4, Replay.Empty, chart, 1.0f<rate>)
+        ScoreProcessor.Create(SC_J4.Ruleset, Replay.Empty, chart, 1.0f<rate>)
