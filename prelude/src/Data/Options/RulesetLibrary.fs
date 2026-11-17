@@ -1,6 +1,5 @@
 namespace Prelude.Data.Options
 
-open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
@@ -57,7 +56,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
         this.Load()
         initialised <- true
 
-    member val SelectedId: Setting<string> =
+    member val Selected: Setting<string> =
         Setting.make
             (fun new_id ->
                 if initialised then
@@ -97,7 +96,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
         let new_id =
             if this.Exists(new_id) then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
 
-        assert not(loaded.ContainsKey(new_id))
         loaded.Add(new_id, ruleset)
         ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_id + ".ruleset"))
 
@@ -116,15 +114,16 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     member this.Update(existing_file_id: string, ruleset: Ruleset) : unit =
-        let new_id: string = ruleset.Filename()
 
-        let new_id =
-            if new_id <> existing_file_id && this.Exists(new_id) then
-                sprintf "%s_%i" new_id (Timestamp.now())
-            else
-                new_id
+        let ensure_filename_updated () =
+            let new_id: string = ruleset.Filename()
 
-        let new_id =
+            let new_id =
+                if new_id <> existing_file_id && this.Exists(new_id) then
+                    sprintf "%s_%i" new_id (Timestamp.now())
+                else
+                    new_id
+
             try
                 if new_id <> existing_file_id then
                     File.Move(
@@ -137,16 +136,18 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 Logging.Error "Failed to move ruleset file from '%s' to '%s': %O" existing_file_id new_id err
                 existing_file_id
 
+        let new_file_id = ensure_filename_updated()
+
         if loaded.Remove(existing_file_id) then
-            loaded.Add(new_id, ruleset)
+            loaded.Add(new_file_id, ruleset)
 
             if _selected_id.Value = existing_file_id then
-                _selected_id.Value <- new_id
+                _selected_id.Value <- new_file_id
                 current <- ruleset
                 current_hash <- current.CalculateHash()
                 on_changed_ev.Trigger(current)
 
-            ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_id + ".ruleset"))
+            ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_file_id + ".ruleset"))
 
     member this.Delete(file_id: string) : bool =
         if file_id <> DEFAULT_ID && this.Exists(file_id) then
