@@ -48,8 +48,7 @@ type GameplayInfo() =
     static member HEIGHT = 230.0f
 
     override this.Init(parent: Widget) : unit =
-        SelectedChart.on_chart_change_finished.Add(refresh)
-        SelectedChart.on_chart_update_finished.Add(refresh)
+        SelectedChart.on_chart_update_or_change_finished.Add(refresh)
         SelectedChart.if_loaded refresh
 
         this.Add(GameplayInfoBoxes().Position(Position.SliceT(100.0f).Shrink(10.0f)))
