@@ -16,13 +16,11 @@ module Rulesets =
     //   If their gameplay behaviour is the same they get the same hash for gameplay purposes
     //   They get different IDs which allows the user to distinguish and select the version they want
     let DEFAULT_ID = "sc-j4"
-    let DEFAULT_RULESET = SC_J4
-    let DEFAULT_RULESET_HASH = SC_J4_HASH
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Ruleset>()
-    let mutable current: Ruleset = DEFAULT_RULESET
-    let mutable current_hash: string = DEFAULT_RULESET_HASH
+    let mutable current: Ruleset = Ruleset.DefaultRuleset
+    let mutable current_hash: string = Ruleset.DefaultRulesetHash
     /// This is the ID (file name) of the selected ruleset, not a hash of its behaviour
     let private _selected_id = Setting.simple DEFAULT_ID
     let private on_changed_ev = Event<Ruleset>()
@@ -37,7 +35,7 @@ module Rulesets =
         let default_path = Path.Combine(path, DEFAULT_ID + ".ruleset")
 
         if not(File.Exists(default_path)) then
-            DEFAULT_RULESET.WriteToFile(default_path)
+            Ruleset.DefaultRuleset.WriteToFile(default_path)
 
         for f in Directory.GetFiles(path) do
             if Path.GetExtension(f).ToLower() = ".ruleset" then
@@ -48,7 +46,7 @@ module Rulesets =
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         if not(loaded.ContainsKey(DEFAULT_ID)) then
-            loaded.Add(DEFAULT_ID, DEFAULT_RULESET)
+            loaded.Add(DEFAULT_ID, Ruleset.DefaultRuleset)
 
         if not(loaded.ContainsKey(_selected_id.Value)) then
             Logging.Warn "Ruleset '%s' not found, switching to default" _selected_id.Value
