@@ -83,7 +83,17 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.Current: Ruleset = SC_J4 // todo: temp!!!
     member this.CurrentHash: string = SC_J4_HASH // todo: temp!!!
     
-    member this.Get(selection: RulesetSelection) : Ruleset =
+    member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : Ruleset =
+        match selection with
+        | FileId file_id -> loaded.[file_id]
+        | Automatic ->
+            match Ruleset.GetNativeRuleset(chart_meta.Origins) with
+            | Some cached_ruleset -> this.FindByHash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset.Ruleset
+            | None -> SC_J4
+            
+    member this.GetCurrentRuleset(chart_meta: ChartMeta) : Ruleset = this.GetCurrentRuleset(chart_meta, current_selection)
+
+    member this.Get(selection: RulesetSelection) : Ruleset = // todo: temp!!!
         match selection with
         | FileId file_id -> this.FindById(file_id)
         | Automatic -> SC_J4
