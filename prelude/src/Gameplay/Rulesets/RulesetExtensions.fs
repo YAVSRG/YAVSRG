@@ -9,8 +9,9 @@ module RulesetExtensions =
     let SC_J4_HASH = SC_J4.CalculateHash()
 
     type Ruleset with
-        static member DefaultRuleset : Ruleset = SC_J4
-        static member DefaultRulesetHash : string = SC_J4_HASH
+        static member DefaultRuleset: Ruleset = SC_J4
+        static member DefaultRulesetHash: string = SC_J4_HASH
+
         static member GetNativeRuleset(origins: ChartOrigin seq) : Ruleset option =
             let mutable wife3_as_fallback = false
 
