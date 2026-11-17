@@ -10,7 +10,6 @@ open Prelude.Gameplay.Rulesets
 open Prelude.Calculator
 open Prelude.Data.UserDatabase
 open Prelude.Data.Stats
-open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
