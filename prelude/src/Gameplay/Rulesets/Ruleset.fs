@@ -53,7 +53,7 @@ type AccuracyPoints =
     | WifeCurve of judge: int
     | PointsPerJudgement of points: float array
 
-    member internal this.Clone =
+    member internal this.Clone() : AccuracyPoints =
         match this with
         | PointsPerJudgement points -> PointsPerJudgement(Array.copy points)
         | other -> other
@@ -103,7 +103,7 @@ type HoldMechanics =
     | JudgeReleasesSeparately of windows: (GameplayTime * GameplayTime) option array * judgement_if_overheld: int
     | OnlyJudgeReleases of judgement_if_dropped: int
 
-    member internal this.Clone =
+    member internal this.Clone() : HoldMechanics =
         match this with
         | JudgeReleasesSeparately(windows, j) -> JudgeReleasesSeparately(Array.copy windows, j)
         | other -> other
@@ -140,8 +140,8 @@ type Ruleset =
             Lamps = Array.copy this.Lamps
             Grades = Array.copy this.Grades
             HitMechanics = this.HitMechanics
-            HoldMechanics = this.HoldMechanics.Clone
-            Accuracy = this.Accuracy.Clone
+            HoldMechanics = this.HoldMechanics.Clone()
+            Accuracy = this.Accuracy.Clone()
             Formatting = this.Formatting
         }
 
