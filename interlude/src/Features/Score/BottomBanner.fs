@@ -28,9 +28,9 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
 
     let switch_to_native_ruleset () =
         match Ruleset.GetNativeRuleset(score_info.ChartMeta.Origins) with
-        | Some ruleset ->
+        | Some cached_ruleset ->
             // Use user's version (custom colors, names, etc) if available
-            Rulesets.by_hash(ruleset.CalculateHash()) |> Option.defaultValue ruleset |> set_ruleset_direct
+            Rulesets.by_hash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset.Ruleset |> set_ruleset_direct
             Style.click.Play()
         | None ->
             Notifications.system_feedback(

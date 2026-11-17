@@ -21,7 +21,7 @@ module Rulesets =
     let install_from_file (path: string) : bool = rulesets.Install(path)
     let update (existing_id: string) (ruleset: Ruleset) : unit = rulesets.Update(existing_id, ruleset)
     let delete (id: string) : bool = rulesets.Delete(id)
-    
+
 type Rulesets =
     static member current = Rulesets.rulesets.Current
     static member current_hash = Rulesets.rulesets.CurrentHash
