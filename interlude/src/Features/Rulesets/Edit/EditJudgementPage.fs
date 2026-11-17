@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Rulesets.Edit
+namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
