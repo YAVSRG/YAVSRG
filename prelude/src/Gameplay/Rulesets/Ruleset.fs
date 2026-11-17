@@ -213,7 +213,7 @@ type Ruleset =
     /// The 'hash' of a ruleset is used to identify it
     /// The ruleset is rendered to an array of bytes, then a hash is computed
     /// Any change to a ruleset that changes how it functions changes the bytes, and the hash will change
-    /// Any change is only cosmetic (e.g. color of a judemgent) does not appear in the bytes, and the hash will stay the same
+    /// Any change that is only cosmetic (e.g. color of a judemgent) does not appear in the bytes, and the hash will stay the same
     member this.CalculateHash() : string =
         let h = SHA256.Create()
         use ms = new MemoryStream()
