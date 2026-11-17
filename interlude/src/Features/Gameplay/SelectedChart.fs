@@ -427,7 +427,7 @@ module SelectedChart =
         elif (%%"downrate").Pressed() then
             change_rate_by(-0.1f<rate>)
 
-    let init (ruleset: Ruleset, ruleset_hash: string) =
+    let init () =
 
         match Content.Charts.GetChartMeta(options.CurrentChart.Value) with
         | Some chart_meta -> change(chart_meta, LibraryContext.None, true)
@@ -437,8 +437,8 @@ module SelectedChart =
                     Filter.Empty
                     {
                         Rate = rate.Value
-                        RulesetId = ruleset_hash
-                        Ruleset = ruleset
+                        RulesetId = SC_J4.Hash
+                        Ruleset = SC_J4.Ruleset
                         Library = Content.Library
                     }
             with
