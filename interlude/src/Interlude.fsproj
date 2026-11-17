@@ -100,7 +100,8 @@
     <Compile Include="Features\Rulesets\Create\QuaverRulesetPage.fs" />
     <Compile Include="Features\Rulesets\Create\WifeRulesetPage.fs" />
     <Compile Include="Features\Rulesets\Create\AddRulesetsPage.fs" />
-    <Compile Include="Features\Rulesets\Edit\Judgements.fs" />
+    <Compile Include="Features\Rulesets\Edit\EditJudgementPage.fs" />
+    <Compile Include="Features\Rulesets\Edit\EditJudgementsPage.fs" />
     <Compile Include="Features\Rulesets\Edit\EditTimingWindowsPage.fs" />
     <Compile Include="Features\Rulesets\Edit\ConfigureAccuracyPage.fs" />
     <Compile Include="Features\Rulesets\Edit\EditMechanicsPage.fs" />
