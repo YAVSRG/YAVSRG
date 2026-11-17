@@ -105,7 +105,8 @@
     <Compile Include="Features\Rulesets\Edit\EditTimingWindowsPage.fs" />
     <Compile Include="Features\Rulesets\Edit\ConfigureAccuracyPage.fs" />
     <Compile Include="Features\Rulesets\Edit\EditMechanicsPage.fs" />
-    <Compile Include="Features\Rulesets\Edit\Grades.fs" />
+    <Compile Include="Features\Rulesets\Edit\EditGradePage.fs" />
+    <Compile Include="Features\Rulesets\Edit\EditGradesPage.fs" />
     <Compile Include="Features\Rulesets\Edit\Lamps.fs" />
     <Compile Include="Features\Rulesets\Edit\RulesetEditorPage.fs" />
     <Compile Include="Features\Rulesets\SelectRulesetPage.fs" />
