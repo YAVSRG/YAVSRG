@@ -19,8 +19,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
     let loaded = Dictionary<string, Ruleset>()
     let mutable current: Ruleset = Ruleset.DefaultRuleset
     let mutable current_hash: string = Ruleset.DefaultRulesetHash
-    /// This is the ID (file name) of the selected ruleset, not a hash of its behaviour
-    let _selected_id = Setting.simple DEFAULT_ID
+    let mutable current_file_id = DEFAULT_ID
     let on_changed_ev = Event<Ruleset>()
     member val OnChanged = on_changed_ev.Publish
 
@@ -39,24 +38,24 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 let id = Path.GetFileNameWithoutExtension(f)
 
                 match Ruleset.TryFromFile(f) with
-                | Ok rs -> loaded.Add(id, rs)
+                | Ok ruleset -> loaded.Add(id, ruleset)
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         if not(loaded.ContainsKey(DEFAULT_ID)) then
             loaded.Add(DEFAULT_ID, Ruleset.DefaultRuleset)
 
-        if not(loaded.ContainsKey(_selected_id.Value)) then
-            Logging.Warn "Ruleset '%s' not found, switching to default" _selected_id.Value
-            _selected_id.Value <- DEFAULT_ID
+        if not(loaded.ContainsKey(current_file_id)) then
+            Logging.Warn "Ruleset '%s' not found, switching to default" current_file_id
+            current_file_id <- DEFAULT_ID
 
-        current <- loaded.[_selected_id.Value]
+        current <- loaded.[current_file_id]
         current_hash <- current.CalculateHash()
         initialised <- true
 
     member this.FindById(file_id: string) : Ruleset = loaded.[file_id]
 
     member this.FindByHash(hash: string) : Ruleset option =
-        loaded.Values |> Seq.tryFind(fun rs -> rs.CalculateHash() = hash)
+        loaded.Values |> Seq.tryFind(fun ruleset -> ruleset.CalculateHash() = hash)
 
     member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
@@ -66,17 +65,17 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 if initialised then
                     if not(loaded.ContainsKey(new_id)) then
                         Logging.Warn "Ruleset '%s' not found, switching to default" new_id
-                        _selected_id.Value <- DEFAULT_ID
+                        current_file_id <- DEFAULT_ID
                     else
-                        _selected_id.Value <- new_id
+                        current_file_id <- new_id
 
-                    current <- loaded.[_selected_id.Value]
+                    current <- loaded.[current_file_id]
                     current_hash <- current.CalculateHash()
                     on_changed_ev.Trigger(current)
                 else
-                    _selected_id.Value <- new_id
+                    current_file_id <- new_id
             )
-            (fun () -> _selected_id.Value)
+            (fun () -> current_file_id)
 
     /// Each ruleset and its file ID, sorted alphabetically
     member this.ToList() : (string * Ruleset) seq =
@@ -84,7 +83,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             for k in loaded.Keys do
                 yield (k, loaded.[k])
         }
-        |> Seq.sortBy(fun (_, rs) -> rs.Name.ToLowerInvariant())
+        |> Seq.sortBy(fun (_, ruleset) -> ruleset.Name.ToLowerInvariant())
 
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
     member this.Install(ruleset: Ruleset) : unit =
@@ -102,8 +101,8 @@ type RulesetLibrary(rulesets_storage_path: string) =
             false
         else
             match Ruleset.TryFromFile(path) with
-            | Ok rs ->
-                this.Install(rs)
+            | Ok ruleset ->
+                this.Install(ruleset)
                 true
             | Error reason ->
                 Logging.Error "Ruleset import failed: %s" reason
@@ -138,8 +137,8 @@ type RulesetLibrary(rulesets_storage_path: string) =
         if loaded.Remove(existing_file_id) then
             loaded.Add(new_file_id, ruleset)
 
-            if _selected_id.Value = existing_file_id then
-                _selected_id.Value <- new_file_id
+            if current_file_id = existing_file_id then
+                current_file_id <- new_file_id
                 current <- ruleset
                 current_hash <- current.CalculateHash()
                 on_changed_ev.Trigger(current)
