@@ -128,12 +128,12 @@
     <Compile Include="Skins\Conversions\StepMania\StepmaniaSkinConverter.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
-    <Compile Include="Data\Options\RulesetLibrary.fs" />
     <Compile Include="Data\ChartDatabase\AssetStorage.fs" />
     <Compile Include="Data\ChartDatabase\ChartMeta.fs" />
     <Compile Include="Data\ChartDatabase\DbCharts.fs" />
     <Compile Include="Data\ChartDatabase\ChartDatabaseMigrations.fs" />
     <Compile Include="Data\ChartDatabase\ChartDatabase.fs" />
+    <Compile Include="Data\Options\RulesetLibrary.fs" />
     <Compile Include="Data\UserDatabase\Score.fs" />
     <Compile Include="Data\UserDatabase\Session.fs" />
     <Compile Include="Data\UserDatabase\ScoreInfo.fs" />

@@ -3,6 +3,7 @@ namespace Prelude.Data.Options
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
+open Prelude.Data.ChartDatabase
 open Prelude.Gameplay.Rulesets
 
 type RulesetLibrary(rulesets_storage_path: string) =
@@ -76,6 +77,9 @@ type RulesetLibrary(rulesets_storage_path: string) =
                     current_file_id <- new_id
             )
             (fun () -> current_file_id)
+
+    member this.Current: Ruleset = current
+    member this.CurrentHash: string = current_hash
 
     /// Each ruleset and its file ID, sorted alphabetically
     member this.ToList() : (string * Ruleset) seq =

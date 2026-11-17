@@ -657,7 +657,7 @@ type Ruleset =
             Formatting = { DecimalPlaces = this.Formatting.DecimalPlaces }
         }
 
-    member this.Filename() =
+    member this.Filename() : string =
         this.Name
         |> String.filter(
             function
