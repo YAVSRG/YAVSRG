@@ -13,47 +13,51 @@ open Interlude.Content
 module RulesetSwitcher =
 
     let make_dropdown (setting: Setting<RulesetSelection>) (w: DropdownWrapper) =
-        w.Toggle(fun () ->
+
+        let get_ruleset_groups () =
             let rulesets = Rulesets.list()
             let remove_bracket = System.Text.RegularExpressions.Regex("\\(.+?\\)")
 
-            let groups =
-                rulesets
-                |> Seq.groupBy(fun (id, _) -> id.Split("-").[0].Trim())
-                |> Seq.map(fun (_, grouped) ->
-                    let arr =
-                        grouped |> Seq.map(fun (id, ruleset_info) -> (id, ruleset_info.Ruleset)) |> Array.ofSeq
+            rulesets
+            |> Seq.groupBy(fun (id, _) -> id.Split("-").[0].Trim())
+            |> Seq.map(fun (_, grouped) ->
+                let arr =
+                    grouped |> Seq.map(fun (id, ruleset_info) -> (id, ruleset_info.Ruleset)) |> Array.ofSeq
 
-                    let group_name = remove_bracket.Replace((snd arr.[0]).Name, "").Trim()
-                    group_name, arr
+                let group_name = remove_bracket.Replace((snd arr.[0]).Name, "").Trim()
+                group_name, arr
+            )
+            |> Array.ofSeq
+
+        let ruleset_button (id: string, ruleset: Ruleset) =
+            (fun () -> setting.Set(FileId(id))), ruleset.Name
+
+        let nested_ruleset_dropdown (name, items) =
+            let inner_items = items |> Array.map ruleset_button
+            let inner_dropdown = DropdownMenu { Items = inner_items }
+
+            ((fun () ->
+                GameThread.defer(fun () ->
+                    w.Show(inner_dropdown)
+                    w.OnClose <- Selection.unclamp
+                    Selection.clamp_to inner_dropdown
                 )
-                |> Array.ofSeq
+             ),
+             name + " >")
+
+        w.Toggle(fun () ->
+
+            let groups = get_ruleset_groups()
 
             let dropdown_items =
                 seq {
                     yield ((fun () -> SelectRulesetPage().Show()), %"rulesets")
 
-                    yield ((fun () -> setting.Set(OsuAutomatic 8.0f)), "AUTOMATIC")
-
                     for name, items in groups do
                         if items.Length < 3 then
-                            for id, rs in items do
-                                yield ((fun () -> setting.Set(FileId(id))), rs.Name)
+                            yield! items |> Seq.map ruleset_button
                         else
-                            let inner_items =
-                                items |> Array.map(fun (id, rs) -> (fun () -> setting.Set(FileId(id))), rs.Name)
-
-                            let inner_dropdown = DropdownMenu { Items = inner_items }
-
-                            yield
-                                ((fun () ->
-                                    GameThread.defer(fun () ->
-                                        w.Show(inner_dropdown)
-                                        w.OnClose <- Selection.unclamp
-                                        Selection.clamp_to inner_dropdown
-                                    )
-                                 ),
-                                 name + " >")
+                            yield nested_ruleset_dropdown(name, items)
                 }
 
             DropdownMenu { Items = dropdown_items }
