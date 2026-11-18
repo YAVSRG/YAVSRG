@@ -8,7 +8,7 @@ open Prelude
 
 module private Dropdown =
 
-    let ITEMSIZE = 55.0f
+    let ITEMSIZE = 50.0f
 
     type Item(label: string, is_odd: bool, color: Color * Color, onclick: unit -> unit) =
         inherit
