@@ -60,7 +60,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                         .Icon(Icons.FILM)
                         .Position(Position.GridX(3, 4, 30.0f)),
 
-                    RulesetSwitcher(
+                    ScoreScreenRulesetSwitcher(
                         Setting.simple Rulesets.selected_id.Value
                         |> Setting.trigger(fun selection ->
                             score_info.RulesetInfo <-

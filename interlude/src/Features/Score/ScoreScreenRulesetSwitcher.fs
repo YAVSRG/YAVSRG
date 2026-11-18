@@ -12,7 +12,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Rulesets
 
-type RulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: RulesetInfo -> unit, score_info: ScoreInfo)
+type ScoreScreenRulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: RulesetInfo -> unit, score_info: ScoreInfo)
     =
     inherit Container(NodeType.None)
 
