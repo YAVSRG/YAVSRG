@@ -37,7 +37,8 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
     let previous_personal_bests =
         match SelectedChart.SAVE_DATA with
-        | Some d when d.PersonalBests.ContainsKey(Rulesets.current_hash) -> Some d.PersonalBests.[Rulesets.current_hash]
+        | Some d when d.PersonalBests.ContainsKey(score_info.RulesetInfo.Hash) ->
+            Some d.PersonalBests.[score_info.RulesetInfo.Hash]
         | _ -> None
         |> ref
 

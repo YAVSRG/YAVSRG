@@ -103,7 +103,7 @@ module Gameplay =
                     upload_score standardised_score
 
                 let new_bests, improvement_flags =
-                    match Map.tryFind Rulesets.current_hash save_data.PersonalBests with
+                    match Map.tryFind score_info.RulesetInfo.Hash save_data.PersonalBests with
                     | Some existing_bests -> Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
 
@@ -119,9 +119,9 @@ module Gameplay =
                 then
                     Content.UserData.SaveScore(score_info)
                     score_saved_ev.Trigger(score_info)
-                    save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
+                    save_data.PersonalBests <- Map.add score_info.RulesetInfo.Hash new_bests save_data.PersonalBests
 
-                    if Rulesets.current_hash <> SC_J4.Hash then
+                    if score_info.RulesetInfo.Hash <> SC_J4.Hash then
                         let new_standard_bests =
                             match Map.tryFind SC_J4.Hash save_data.PersonalBests with
                             | Some existing_bests -> Bests.update standardised_score existing_bests |> fst
