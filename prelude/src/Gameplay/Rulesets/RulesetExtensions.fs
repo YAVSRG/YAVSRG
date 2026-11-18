@@ -12,7 +12,7 @@ module RulesetExtensions =
         let mutable unique: Map<string, Ruleset> = Map.empty
 
         for od = 0 to 100 do
-            let ruleset = OsuMania.create (float32 od * 0.1f) OsuMania.NoMod
+            let ruleset = OsuMania.nomod(float32 od * 0.1f)
             let hash = ruleset.CalculateHash()
 
             match unique.TryFind(hash) with

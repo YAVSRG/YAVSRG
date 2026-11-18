@@ -476,8 +476,8 @@ module ScoreProcessorTests =
             Assert.AreEqual(0, result.ComboBreaks)
 
         ensure_perfect_on_ruleset(SC.create(4))
-        ensure_perfect_on_ruleset(OsuMania.create 10.0f OsuMania.NoMod)
-        ensure_perfect_on_ruleset(Wife3.create 4)
+        ensure_perfect_on_ruleset(OsuMania.nomod(10.0f))
+        ensure_perfect_on_ruleset(Wife3.create(4))
 
     [<Test>]
     let GhostTapJudgement_BreaksCombo_When_JudgementBreaksCombo () =

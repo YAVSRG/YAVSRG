@@ -1138,7 +1138,7 @@ module GameplayEventProcessorTests =
             ReplayBuilder().KeyDownFor(100.0f<ms>, 1.0f<ms>).KeyDownFor(102.0f<ms>, 30.0f<ms>).Build()
 
         let event_processing =
-            GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OsuMania.nomod 8.0f, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
