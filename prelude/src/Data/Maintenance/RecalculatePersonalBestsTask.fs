@@ -40,7 +40,7 @@ type RecalculatePersonalBestsTask(library: Library, rulesets: RulesetInfo array,
 
                         if score_info.ModStatus = ModStatus.Ranked then
 
-                            for ruleset_info in rulesets do
+                            let update_bests_for_ruleset (ruleset_info: RulesetInfo) =
                                 score_info.RulesetInfo <- ruleset_info
 
                                 if new_bests.ContainsKey(ruleset_info.Hash) then
@@ -48,6 +48,13 @@ type RecalculatePersonalBestsTask(library: Library, rulesets: RulesetInfo array,
                                     new_bests <- Map.add ruleset_info.Hash ruleset_bests new_bests
                                 else
                                     new_bests <- Map.add ruleset_info.Hash (Bests.create score_info) new_bests
+
+                            for ruleset_info in rulesets do
+                                update_bests_for_ruleset(ruleset_info)
+
+                            match Ruleset.GetAutomaticOsuRuleset(chart_meta.Origins) with
+                            | Some ruleset_info -> update_bests_for_ruleset(ruleset_info)
+                            | None -> ()
 
                     if new_bests <> existing_bests then
                         data.PersonalBests <- new_bests

@@ -41,7 +41,7 @@ module RulesetExtensions =
             | None when wife3_as_fallback -> Some(WIFE3_J4)
             | otherwise -> otherwise
 
-        static member GetAutomaticOsuRuleset(origins: ChartOrigin seq, default_od: float32) : RulesetInfo option =
+        static member GetAutomaticOsuRuleset(origins: ChartOrigin seq) : RulesetInfo option =
             Seq.tryPick
                 (function
                 | ChartOrigin.Osu osu -> Some(Ruleset.GetOsuRuleset(osu.SourceOD))

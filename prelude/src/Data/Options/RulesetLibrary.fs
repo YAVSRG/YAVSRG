@@ -92,7 +92,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             match chart_meta with
             | None -> Ruleset.GetOsuRuleset(od)
             | Some chart_meta ->
-                match Ruleset.GetAutomaticOsuRuleset(chart_meta.Origins, od) with
+                match Ruleset.GetAutomaticOsuRuleset(chart_meta.Origins) with
                 | Some ruleset_info -> this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
                 | None -> Ruleset.GetOsuRuleset(od)
 
