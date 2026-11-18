@@ -112,6 +112,7 @@
     <Compile Include="Features\Rulesets\Edit\EditLampPage.fs" />
     <Compile Include="Features\Rulesets\Edit\EditLampsPage.fs" />
     <Compile Include="Features\Rulesets\Edit\RulesetEditorPage.fs" />
+    <Compile Include="Features\Rulesets\OsuAutomaticPage.fs" />
     <Compile Include="Features\Rulesets\SelectRulesetPage.fs" />
     <Compile Include="Features\Rulesets\RulesetSwitcher.fs" />
     <Compile Include="Features\Tables\Browser\DownloadMenu.fs" />

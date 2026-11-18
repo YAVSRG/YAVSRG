@@ -82,6 +82,11 @@ type SelectRulesetPage() =
                 delete_action.Position(Position.SliceR(PAGE_ITEM_HEIGHT))
             )
 
+    let automatic_osu () : Widget =
+        PageButton(%"rulesets.osu_automatic", fun () -> OsuAutomaticPage().WithOnClose(update_selected).Show())
+            .TextColor(fun () -> if options.Ruleset.Value.IsOsuAutomatic then Colors.text_pink_2 else Colors.text)
+            .Help(Help.Info("rulesets.osu_automatic"))
+
     let refresh () =
         container.Clear()
 
@@ -90,7 +95,8 @@ type SelectRulesetPage() =
                 PageButton(%"rulesets.add", fun () -> AddRulesetsPage().Show()).Icon(Icons.DOWNLOAD),
                 PageButton(%"rulesets.open_folder", fun () -> open_directory(get_game_folder "Rulesets"))
                     .Icon(Icons.FOLDER),
-                Dummy()
+                Dummy(),
+                automatic_osu()
             )
             .Add(Rulesets.list() |> Seq.map listed_ruleset)
 
