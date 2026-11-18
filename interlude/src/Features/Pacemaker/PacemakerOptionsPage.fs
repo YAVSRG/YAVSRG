@@ -10,6 +10,7 @@ open Interlude.Content
 type PacemakerOptionsPage() =
     inherit Page()
 
+    // todo: pacemaker needs redesigning around RulesetSelection since you want one setting per all osu! rulesets
     let ruleset_id = Rulesets.current_hash
 
     let existing =
