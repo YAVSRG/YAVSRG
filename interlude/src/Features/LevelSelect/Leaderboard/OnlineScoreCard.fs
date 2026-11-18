@@ -45,7 +45,7 @@ type private OnlineScoreCard(score: LeaderboardScore, score_info: ScoreInfo) =
             Text(fun () ->
                 sprintf
                     "%s  •  %ix  •  %.2f"
-                    (score_info.RulesetInfo.Ruleset.LampName(score_info.Lamp))
+                    (score_info.Ruleset.LampName(score_info.Lamp))
                     score_info.Scoring.BestCombo
                     score_info.Performance
             )

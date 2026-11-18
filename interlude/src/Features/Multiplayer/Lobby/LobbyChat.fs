@@ -115,13 +115,13 @@ type LobbyChat(lobby: Lobby) =
                             )
                             .Align(Alignment.LEFT),
                         Text(data.Scoring.FormattedAccuracy)
-                            .Color(data.RulesetInfo.Ruleset.GradeColor(grade), Colors.shadow_1)
+                            .Color(data.Ruleset.GradeColor(grade), Colors.shadow_1)
                             .Align(Alignment.CENTER),
-                        Text(data.RulesetInfo.Ruleset.LampName(lamp))
-                            .Color(data.RulesetInfo.Ruleset.LampColor(lamp), Colors.shadow_1)
+                        Text(data.Ruleset.LampName(lamp))
+                            .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
                             .Align(0.75f),
                         Text(sprintf "%ix" data.Scoring.BestCombo)
-                            .Color(data.RulesetInfo.Ruleset.LampColor(lamp), Colors.shadow_1)
+                            .Color(data.Ruleset.LampColor(lamp), Colors.shadow_1)
                             .Align(Alignment.RIGHT)
                     )
 

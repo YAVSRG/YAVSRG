@@ -43,7 +43,7 @@ type RulesetSwitcher
 
     override this.Init(parent: Widget) : unit =
         this.Add(
-            InlaidButton((fun () -> score_info.RulesetInfo.Ruleset.Name), (fun () -> this.ToggleDropdown()))
+            InlaidButton((fun () -> score_info.Ruleset.Name), (fun () -> this.ToggleDropdown()))
                 .Hotkey("ruleset_switch")
                 .HoverText(%"score.switch_ruleset"),
 

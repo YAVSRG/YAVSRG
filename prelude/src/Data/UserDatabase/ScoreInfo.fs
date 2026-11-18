@@ -38,14 +38,16 @@ type ScoreInfo =
     }
 
     member this.RulesetInfo
-        with get () = this.Scoring.Ruleset
-        and set ruleset =
+        with get (): CachedRuleset = this.Scoring.Ruleset
+        and set (cached_ruleset: CachedRuleset) =
             let scoring =
-                ScoreProcessor.ProcessEntireReplay(ruleset, this.Replay, this.WithMods, this.Rate)
+                ScoreProcessor.ProcessEntireReplay(cached_ruleset, this.Replay, this.WithMods, this.Rate)
 
             this.Scoring <- scoring
-            this.Lamp <- Lamp.calculate ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            this.Grade <- Grade.calculate ruleset.Ruleset.Grades scoring.Accuracy
+            this.Lamp <- Lamp.calculate cached_ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            this.Grade <- Grade.calculate cached_ruleset.Ruleset.Grades scoring.Accuracy
+
+    member this.Ruleset: Ruleset = this.RulesetInfo.Ruleset
 
     member this.WithRuleset(cached_ruleset: CachedRuleset) : ScoreInfo =
         let scoring =
@@ -65,7 +67,7 @@ type ScoreInfo =
     member this.ModString() : string = ModState.format(this.Rate, this.Mods)
 
     member this.Shorthand: string =
-        sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.RulesetInfo.Ruleset.LampName(this.Lamp))
+        sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.LampName(this.Lamp))
 
     member this.ToScore() : Score =
         {
