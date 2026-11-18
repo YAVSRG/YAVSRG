@@ -19,7 +19,7 @@ module EditHudScreen =
     let rec edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
 
         let replay = WavyAutoplay.CreateReplay(info.WithColors)
-        let ruleset = Rulesets.GetCurrent(info.ChartMeta)
+        let ruleset = rulesets.GetCurrent(info.ChartMeta)
 
         let scoring =
             ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)

@@ -34,7 +34,7 @@ type SelectRulesetPage() =
             Button(
                 Icons.PIE_CHART,
                 fun () ->
-                    CompareRulesetsPage(Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset, ruleset_info.Ruleset)
+                    CompareRulesetsPage(rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset, ruleset_info.Ruleset)
                         .Show()
             )
                 .Disabled(fun () -> selected = FileId(id))

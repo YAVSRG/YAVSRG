@@ -47,7 +47,7 @@ type PracticeScreen =
 
             scoring <-
                 ScoreProcessor.Create(
-                    Rulesets.GetCurrent(info.ChartMeta),
+                    rulesets.GetCurrent(info.ChartMeta),
                     liveplay,
                     info.WithMods,
                     SelectedChart.rate.Value

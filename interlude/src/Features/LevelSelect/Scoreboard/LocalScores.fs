@@ -34,7 +34,7 @@ module LocalScores =
     let private load_score (score_info: ScoreInfo) =
         // score_info was loaded on a background thread, the user could have changed the ruleset since then
         // if so, set it to that ruleset on the main thread
-        let current_ruleset = Rulesets.GetCurrent(score_info.ChartMeta)
+        let current_ruleset = rulesets.GetCurrent(score_info.ChartMeta)
 
         if score_info.RulesetInfo <> current_ruleset then
             score_info.RulesetInfo <- current_ruleset
@@ -45,7 +45,7 @@ module LocalScores =
     let private finish_loading () =
         let mutable new_bests = None
 
-        let ruleset_info = Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+        let ruleset_info = rulesets.GetCurrent(SelectedChart.CACHE_DATA)
 
         for score_info in local_scores do
             assert (score_info.RulesetInfo = ruleset_info)
@@ -95,7 +95,7 @@ module LocalScores =
         SelectedChart.on_chart_change_finished.Add(fun info ->
             score_loader.Request(
                 {
-                    RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
+                    RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
                     ChartMeta = info.ChartMeta
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
@@ -108,7 +108,7 @@ module LocalScores =
             (fun info ->
                 score_loader.Request(
                     {
-                        RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
+                        RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
                         ChartMeta = info.ChartMeta
                         CurrentChart = info.Chart
                         ChartSaveData = info.SaveData
@@ -118,7 +118,7 @@ module LocalScores =
 
         rulesets.OnChanged.Add(fun () ->
             for score_info in local_scores do
-                score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+                score_info.RulesetInfo <- rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.score_saved.Add(load_score)

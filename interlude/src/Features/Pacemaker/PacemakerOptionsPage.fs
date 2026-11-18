@@ -12,7 +12,7 @@ type PacemakerOptionsPage() =
     inherit Page()
 
     // todo: pacemaker needs redesigning around RulesetSelection since you want one setting per all osu! rulesets
-    let ruleset_info = Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+    let ruleset_info = rulesets.GetCurrent(SelectedChart.CACHE_DATA)
 
     let existing =
         if options.Pacemaker.ContainsKey(ruleset_info.Hash) then

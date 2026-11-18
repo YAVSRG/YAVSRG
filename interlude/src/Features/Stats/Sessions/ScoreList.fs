@@ -252,7 +252,7 @@ type ScoreList(start_time: int64, end_time: int64) =
              , end_time
              , match rulesets.Selected.Value with
                | OsuAutomatic od -> ScoreList.ScoreListRuleset.OsuAutomatic(od)
-               | FileId _ -> ScoreList.ScoreListRuleset.Ruleset(Rulesets.GetCurrent(None))
+               | FileId _ -> ScoreList.ScoreListRuleset.Ruleset(rulesets.GetCurrent(None))
              , (fun s ->
                  has_scores <- true
                  scores.Add(s)

@@ -116,7 +116,7 @@ type JudgementPage() =
     let use_texture = Setting.simple config.JudgementMeterUseTexture
 
     let texture = Content.Texture("judgements")
-    let ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
+    let ruleset = rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
     let JUDGEMENT_COUNT = ruleset.Judgements.Length
 
     let judgement_display =

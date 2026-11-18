@@ -95,7 +95,7 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
     override this.Init(parent: Widget) : unit =
         this.Add(
             AngledButton(
-                (fun () -> Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset.Name),
+                (fun () -> rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset.Name),
                 (fun () -> this.ToggleDropdown()),
                 Palette.MAIN_100
             )

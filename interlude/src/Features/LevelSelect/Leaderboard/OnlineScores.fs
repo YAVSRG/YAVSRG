@@ -48,7 +48,7 @@ module OnlineScores =
     let private load_score (score: LeaderboardScore, score_info: ScoreInfo) : unit =
         // score_info was loaded on a background thread, the user could have changed the ruleset since then
         // if so, set it to that ruleset on the main thread
-        let current_ruleset = Rulesets.GetCurrent(score_info.ChartMeta)
+        let current_ruleset = rulesets.GetCurrent(score_info.ChartMeta)
 
         if score_info.RulesetInfo <> current_ruleset then
             score_info.RulesetInfo <- current_ruleset
@@ -126,7 +126,7 @@ module OnlineScores =
         elif state = State.Unloaded then
             score_loader.Request(
                 {
-                    RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
+                    RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
                     ChartMeta = info.ChartMeta
                     CurrentChart = info.Chart
                 }
@@ -141,14 +141,14 @@ module OnlineScores =
 
         rulesets.OnChanged.Add(fun () ->
             for score_info in leaderboard_scores do
-                score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+                score_info.RulesetInfo <- rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.leaderboard_rank_changed.Add(fun info ->
             if state = State.Loaded then
                 score_loader.Request(
                     {
-                        RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
+                        RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
                         ChartMeta = info.ChartMeta
                         CurrentChart = info.Chart
                     }

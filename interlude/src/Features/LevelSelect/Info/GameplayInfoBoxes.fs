@@ -23,7 +23,7 @@ type GameplayInfoBoxes() =
     let refresh (info: LoadedChartInfo) =
         save_data <- Some info.SaveData
         category <- info.Patterns.Category
-        ruleset_info <- Rulesets.GetCurrent(info.ChartMeta)
+        ruleset_info <- rulesets.GetCurrent(info.ChartMeta)
 
         specific_patterns <-
             info.Patterns.ImportantClusters

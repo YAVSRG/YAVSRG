@@ -153,7 +153,7 @@ type JudgementCounterPage() =
     let show_ratio = Setting.simple config.JudgementCounterShowRatio
 
     let show_labels = Setting.simple config.JudgementCounterShowLabels
-    let ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
+    let ruleset = rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
     let JUDGEMENT_COUNT = ruleset.Judgements.Length
 
     let display: int option array =

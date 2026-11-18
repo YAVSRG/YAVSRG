@@ -29,7 +29,7 @@ type AccuracyPage() =
     let alignment = config.AccuracyPosition.TextAlignment
 
     let texture = Content.Texture("accuracy-font")
-    let ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
+    let ruleset = rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
 
     let preview =
         { new ElementPreview(config.AccuracyPosition) with

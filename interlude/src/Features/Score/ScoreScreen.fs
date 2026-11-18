@@ -103,7 +103,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         DiscordRPC.in_menus(%"discord_status.score_screen")
 
     override this.OnExit(_: ScreenType) : unit =
-        score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+        score_info.RulesetInfo <- rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         (graph :> System.IDisposable).Dispose()
         on_ruleset_changed.Dispose()
         Toolbar.show()

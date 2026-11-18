@@ -94,7 +94,7 @@ type PacemakerState =
 
     static member Create(info: LoadedChartInfo, ctx: PacemakerCreationContext) : PacemakerState =
 
-        let ruleset_info = Rulesets.GetCurrent(info.ChartMeta)
+        let ruleset_info = rulesets.GetCurrent(info.ChartMeta)
         let ruleset = ruleset_info.Ruleset
         let ruleset_hash = ruleset_info.Hash
 

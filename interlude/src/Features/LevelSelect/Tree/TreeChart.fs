@@ -36,7 +36,7 @@ type private TreeChart
 
     member this.UpdateCachedInfo() : unit =
 
-        let ruleset_info = Rulesets.GetCurrent(chart_meta)
+        let ruleset_info = rulesets.GetCurrent(chart_meta)
         let ruleset = ruleset_info.Ruleset
         let ruleset_hash = ruleset_info.Hash
 

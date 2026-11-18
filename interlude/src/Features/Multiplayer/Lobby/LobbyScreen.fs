@@ -114,7 +114,7 @@ type LobbyUI(lobby: Lobby) =
 
                     let scoring =
                         ScoreProcessor.Create(
-                            Rulesets.GetCurrent(info.ChartMeta),
+                            rulesets.GetCurrent(info.ChartMeta),
                             replay_source,
                             info.WithMods,
                             SelectedChart.rate.Value
