@@ -22,11 +22,7 @@ type SuggestionContext =
     }
 
     member this.LibraryViewContext: LibraryViewContext =
-        {
-            Rate = snd this.BaseChart
-            Ruleset = this.Ruleset
-            Library = this.Library
-        }
+        { Rate = snd this.BaseChart; Ruleset = this.Ruleset; Library = this.Library }
 
 module Suggestion =
 
