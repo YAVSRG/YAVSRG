@@ -44,7 +44,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 let id = Path.GetFileNameWithoutExtension(f)
 
                 match Ruleset.TryFromFile(f) with
-                | Ok ruleset -> loaded.Add(id, RulesetInfo.Create(ruleset))
+                | Ok ruleset -> loaded.Add(id, ruleset.ToInfo())
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         if not(loaded.ContainsKey(DEFAULT_ID)) then
@@ -116,7 +116,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
         let new_id =
             if this.Exists(new_id) then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
 
-        loaded.Add(new_id, RulesetInfo.Create(ruleset))
+        loaded.Add(new_id, ruleset.ToInfo())
         ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_id + ".ruleset"))
 
     member this.Install(path: string) : bool =
@@ -159,7 +159,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
         let new_file_id = ensure_filename_updated()
 
         if loaded.Remove(existing_file_id) then
-            loaded.Add(new_file_id, RulesetInfo.Create(ruleset))
+            loaded.Add(new_file_id, ruleset.ToInfo())
             ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_file_id + ".ruleset"))
             let selected_was_changed = current_selection = FileId(existing_file_id)
 

@@ -9,8 +9,8 @@ type RulesetInfo =
         Hash: string
     }
 
-    static member Create(ruleset: Ruleset) : RulesetInfo =
+    static member private FromRuleset(ruleset: Ruleset) : RulesetInfo =
         { Ruleset = ruleset; Hash = ruleset.CalculateHash() }
 
     [<Extension>]
-    static member ToInfo(ruleset: Ruleset) : RulesetInfo = RulesetInfo.Create(ruleset)
+    static member ToInfo(ruleset: Ruleset) : RulesetInfo = RulesetInfo.FromRuleset(ruleset)

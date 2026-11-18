@@ -186,7 +186,7 @@ module private ScoreList =
                             | Ok chart ->
                                 // todo: temporary to make it compile
                                 let score_info =
-                                    ScoreInfo.CreateFromScore(chart_meta, chart, RulesetInfo.Create(ruleset), score)
+                                    ScoreInfo.CreateFromScore(chart_meta, chart, ruleset.ToInfo(), score)
 
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()

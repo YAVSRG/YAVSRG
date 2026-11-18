@@ -11,7 +11,8 @@ type GameplayEventCollector(ruleset_info: RulesetInfo, replay: ReplaySource, not
 
     let events = ResizeArray<GameplayEvent>()
 
-    new(ruleset, replay, note_data, rate) = GameplayEventCollector(RulesetInfo.Create(ruleset), replay, note_data, rate)
+    new(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
+        GameplayEventCollector(ruleset.ToInfo(), replay, note_data, rate)
 
     override this.HandleEvent(event: GameplayEvent) : unit =
         printfn "%A" event

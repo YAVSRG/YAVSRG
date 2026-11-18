@@ -17,6 +17,7 @@ type ScoringEventCollector(ruleset_info: RulesetInfo, replay: ReplaySource, note
             events.Add(event)
         )
 
-    new(ruleset, replay, note_data, rate) = ScoringEventCollector(RulesetInfo.Create(ruleset), replay, note_data, rate)
+    new(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
+        ScoringEventCollector(ruleset.ToInfo(), replay, note_data, rate)
 
     member this.Events = events.AsReadOnly()

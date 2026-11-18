@@ -5,7 +5,7 @@ open Prelude.Charts
 [<AutoOpen>]
 module RulesetExtensions =
 
-    let SC_J4 = RulesetInfo.Create(SC.create(4))
+    let SC_J4 = SC.create(4).ToInfo()
 
     let private OSU_RULESETS: RulesetInfo array =
         let rulesets = Array.zeroCreate 101
@@ -23,10 +23,9 @@ module RulesetExtensions =
 
         rulesets
 
-    let private QUAVER_STANDARD: RulesetInfo =
-        RulesetInfo.Create(Quaver.create(Quaver.Standard))
+    let private QUAVER_STANDARD: RulesetInfo = Quaver.create(Quaver.Standard).ToInfo()
 
-    let private WIFE3_J4 = RulesetInfo.Create(Wife3.create(4))
+    let private WIFE3_J4 = Wife3.create(4).ToInfo()
 
     type Ruleset with
         static member GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =

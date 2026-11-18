@@ -13,7 +13,7 @@ open Prelude.Tests.Helpers
 
 module ScoreProcessorTests =
 
-    let RULESET = RulesetInfo.Create(SC.create(4))
+    let RULESET = SC.create(4).ToInfo()
 
     [<Test>]
     let BasicEndToEnd () =
@@ -468,12 +468,7 @@ module ScoreProcessorTests =
         let perfect_replay = Autoplay.CreateReplay(DONUT_HOLE_CHART)
 
         let inline ruleset_result (ruleset: Ruleset) : ScoreProcessor =
-            ScoreProcessor.ProcessEntireReplay(
-                RulesetInfo.Create(ruleset),
-                perfect_replay,
-                DONUT_HOLE_CHART,
-                1.0f<rate>
-            )
+            ScoreProcessor.ProcessEntireReplay(ruleset.ToInfo(), perfect_replay, DONUT_HOLE_CHART, 1.0f<rate>)
 
         let inline ensure_perfect_on_ruleset (ruleset: Ruleset) =
             let result = ruleset_result(ruleset)
@@ -499,7 +494,7 @@ module ScoreProcessorTests =
             { RULESET.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 5 }
 
         let event_processing =
-            ScoringEventCollector(RulesetInfo.Create(ruleset), replay, note_data, 1.0f<rate>)
+            ScoringEventCollector(ruleset.ToInfo(), replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -523,7 +518,7 @@ module ScoreProcessorTests =
             { RULESET.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 2 }
 
         let event_processing =
-            ScoringEventCollector(RulesetInfo.Create(ruleset), replay, note_data, 1.0f<rate>)
+            ScoringEventCollector(ruleset.ToInfo(), replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
