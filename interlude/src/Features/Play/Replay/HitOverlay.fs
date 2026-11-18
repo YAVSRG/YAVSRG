@@ -18,7 +18,7 @@ type private HitOverlay(rate: Rate, chart: ModdedChart, replay: Replay, state: P
 
     let hit_events =
         let full_score =
-            ScoreProcessor.ProcessEntireReplay(state.Ruleset, replay, chart, rate)
+            ScoreProcessor.ProcessEntireReplay(state.Scoring.Ruleset, replay, chart, rate)
 
         full_score.Events |> Array.ofSeq
 

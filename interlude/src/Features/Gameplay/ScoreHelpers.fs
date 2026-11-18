@@ -42,7 +42,7 @@ module Gameplay =
             | None ->
                 Logging.Error
                     "Error submitting score (%s on %s)"
-                    (score_info.Ruleset.FormatAccuracy(score_info.Accuracy))
+                    score_info.Scoring.FormattedAccuracy
                     score_info.ChartMeta.Title
             | Some None -> ()
             | Some(Some leaderboard_result) ->
@@ -51,7 +51,7 @@ module Gameplay =
             | Some new_position ->
                 Logging.Info
                     "New leaderboard rank! (%s on %s) is #%i"
-                    (score_info.Ruleset.FormatAccuracy(score_info.Accuracy))
+                    score_info.Scoring.FormattedAccuracy
                     score_info.ChartMeta.Title
                     new_position
 
@@ -76,8 +76,8 @@ module Gameplay =
 
             Replay = replay
             Scoring = scoring
-            Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
+            Lamp = Lamp.calculate scoring.Ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate scoring.Ruleset.Ruleset.Grades scoring.Accuracy
 
             Rating = info.Difficulty
             Performance = Performance.calculate info.Difficulty scoring
@@ -97,7 +97,7 @@ module Gameplay =
             if mod_status = ModStatus.Ranked then
 
                 let standardised_score =
-                    if Rulesets.current_hash <> SC_J4.Hash then score_info.WithRuleset(SC_J4.Ruleset) else score_info
+                    if score_info.Ruleset.Hash <> SC_J4.Hash then score_info.WithRuleset(SC_J4) else score_info
 
                 if Network.status = Network.Status.LoggedIn && not standardised_score.IsFailed then
                     upload_score standardised_score

@@ -28,7 +28,7 @@ type PlayScreen =
 
     static member Create(info: LoadedChartInfo, pacemaker_ctx: PacemakerCreationContext) : Screen =
 
-        let ruleset = Rulesets.current
+        let ruleset = Rulesets.GetCurrent(info.ChartMeta)
         let first_note = info.WithMods.FirstNote
         let liveplay = GameplayReplaySource first_note
 

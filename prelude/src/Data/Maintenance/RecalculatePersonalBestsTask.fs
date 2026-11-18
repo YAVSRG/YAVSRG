@@ -33,7 +33,7 @@ type RecalculatePersonalBestsTask(library: Library, rulesets: CachedRuleset arra
                         if merge_with_existing then data.PersonalBests else Map.empty
 
                     for score in data.Scores do
-                        let initial_ruleset = rulesets.[0].Ruleset
+                        let initial_ruleset = rulesets.[0]
 
                         let score_info =
                             ScoreInfo.CreateFromScore(chart_meta, chart, initial_ruleset, score)
@@ -41,7 +41,7 @@ type RecalculatePersonalBestsTask(library: Library, rulesets: CachedRuleset arra
                         if score_info.ModStatus = ModStatus.Ranked then
 
                             for cached_ruleset in rulesets do
-                                score_info.Ruleset <- cached_ruleset.Ruleset
+                                score_info.Ruleset <- cached_ruleset
 
                                 if new_bests.ContainsKey(cached_ruleset.Hash) then
                                     let ruleset_bests, _ = Bests.update score_info new_bests.[cached_ruleset.Hash]

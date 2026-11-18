@@ -114,7 +114,7 @@ type LobbyUI(lobby: Lobby) =
 
                     let scoring =
                         ScoreProcessor.Create(
-                            Rulesets.current,
+                            Rulesets.GetCurrent(info.ChartMeta),
                             replay_source,
                             info.WithMods,
                             SelectedChart.rate.Value
@@ -146,10 +146,10 @@ type LobbyUI(lobby: Lobby) =
                                         Scoring = scoring
                                         Lamp =
                                             Lamp.calculate
-                                                scoring.Ruleset.Lamps
+                                                scoring.Ruleset.Ruleset.Lamps
                                                 scoring.JudgementCounts
                                                 scoring.ComboBreaks
-                                        Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
+                                        Grade = Grade.calculate scoring.Ruleset.Ruleset.Grades scoring.Accuracy
 
                                         Rating = info.Difficulty
                                         Performance = Performance.calculate info.Difficulty scoring

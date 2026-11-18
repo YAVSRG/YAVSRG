@@ -38,7 +38,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Text(sprintf "%s  %s" Icons.ZAP mod_string)
                 .Align(Alignment.CENTER)
                 .Position(Position.SliceT(90.0f).ShrinkX(25.0f)),
-            Text(fun () -> sprintf "%s  %s  •  %s" Icons.BAR_CHART keymode_label score_info.Ruleset.Name)
+            Text(fun () -> sprintf "%s  %s  •  %s" Icons.BAR_CHART keymode_label score_info.Ruleset.Ruleset.Name)
                 .Color(Colors.text_subheading)
                 .Align(Alignment.CENTER)
                 .Position(Position.ShrinkT(90.0f).SliceT(70.0f).ShrinkX(25.0f)),
@@ -150,7 +150,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         let counters = this.Bounds.ShrinkX(25.0f).SliceT(170.0f, 350.0f)
 
         let judgement_counts = (!stats).Judgements
-        let judgements = score_info.Ruleset.Judgements |> Array.indexed
+        let judgements = score_info.Ruleset.Ruleset.Judgements |> Array.indexed
         let judgement_box_height = counters.Height / float32 judgements.Length
         let mutable y = 0.0f
 

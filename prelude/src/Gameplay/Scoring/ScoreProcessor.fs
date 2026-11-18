@@ -49,9 +49,10 @@ type ScoringEvent =
 /// These raw events are converted to judgements, points, combo changes etc according to the ruleset and then output as `GameplayEvent<GameplayAction>` event markers
 /// `GameplayEvent<GameplayAction>` event markers are subscribable and exposed as a list, they power everything the gameplay HUD, score screen and playfield display in the client
 
-type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
-    inherit GameplayEventProcessor(ruleset, replay, note_data, rate)
+type ScoreProcessor(cached_ruleset: CachedRuleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
+    inherit GameplayEventProcessor(cached_ruleset, replay, note_data, rate)
 
+    let ruleset = cached_ruleset.Ruleset
     let scoring_events = ResizeArray<ScoringEvent>()
 
     let on_event_ev = Event<ScoringEvent>()
@@ -136,10 +137,10 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
     member this.OnEvent: IEvent<ScoringEvent> = on_event
 
     /// Throws an exception if used on a live/online replay
-    member this.Recreate(ruleset: Ruleset) : ScoreProcessor =
-        ScoreProcessor(ruleset, replay.GetFullReplay() |> StoredReplaySource, note_data, rate)
+    member this.Recreate(cached_ruleset: CachedRuleset) : ScoreProcessor =
+        ScoreProcessor(cached_ruleset, replay.GetFullReplay() |> StoredReplaySource, note_data, rate)
 
-    member this.Recreate() : ScoreProcessor = this.Recreate(ruleset)
+    member this.Recreate() : ScoreProcessor = this.Recreate(cached_ruleset)
 
     member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboChange * ScoringEventInner =
 
@@ -345,26 +346,28 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
         on_event_ev.Trigger(gameplay_event)
 
     static member inline Create< ^T when ^T: (member ToNoteData: unit -> NoteData)>
-        (ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate)
+        (cached_ruleset: CachedRuleset, replay: ReplaySource, chart: ^T, rate: Rate)
         : ScoreProcessor =
-        ScoreProcessor(ruleset, replay, chart.ToNoteData(), rate)
+        ScoreProcessor(cached_ruleset, replay, chart.ToNoteData(), rate)
 
     static member inline Create< ^T when ^T: (member ToNoteData: unit -> NoteData)>
-        (ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate)
+        (cached_ruleset: CachedRuleset, replay: Replay, chart: ^T, rate: Rate)
         : ScoreProcessor =
-        ScoreProcessor.Create(ruleset, StoredReplaySource(replay), chart, rate)
+        ScoreProcessor.Create(cached_ruleset, StoredReplaySource(replay), chart, rate)
 
     static member inline ProcessEntireReplay< ^T when ^T: (member ToNoteData: unit -> NoteData)>
-        (ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate)
+        (cached_ruleset: CachedRuleset, replay: ReplaySource, chart: ^T, rate: Rate)
         : ScoreProcessor =
-        let score_processor = ScoreProcessor(ruleset, replay, chart.ToNoteData(), rate)
+        let score_processor =
+            ScoreProcessor(cached_ruleset, replay, chart.ToNoteData(), rate)
+
         score_processor.ProcessEntireReplay()
         score_processor
 
     static member inline ProcessEntireReplay< ^T when ^T: (member ToNoteData: unit -> NoteData)>
-        (ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate)
+        (cached_ruleset: CachedRuleset, replay: Replay, chart: ^T, rate: Rate)
         : ScoreProcessor =
-        ScoreProcessor.ProcessEntireReplay(ruleset, StoredReplaySource(replay), chart, rate)
+        ScoreProcessor.ProcessEntireReplay(cached_ruleset, StoredReplaySource(replay), chart, rate)
 
     static member inline Dummy< ^T when ^T: (member ToNoteData: unit -> NoteData)>(chart: ^T) : ScoreProcessor =
-        ScoreProcessor.Create(SC_J4.Ruleset, Replay.Empty, chart, 1.0f<rate>)
+        ScoreProcessor.Create(SC_J4, Replay.Empty, chart, 1.0f<rate>)

@@ -31,7 +31,7 @@ type ReplayScreen =
                 StoredReplaySource(score_info.Replay), false, score_info.Rate, score_info.IsFailed
 
         let LAST_NOTE = info.WithColors.LastNote
-        let ruleset = Rulesets.current
+        let ruleset = Rulesets.GetCurrent(info.ChartMeta)
 
         let replay_ended_fade = Animation.Fade(0.0f)
 

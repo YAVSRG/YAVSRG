@@ -11,7 +11,8 @@ open Prelude.Tests.Helpers
 
 module RulesetOsuParityTests =
 
-    let RULESET = OsuMania.create 8.0f OsuMania.NoMod
+    let RULESET = CachedRuleset.Create(OsuMania.create 8.0f OsuMania.NoMod)
+    let OD10_RULESET = CachedRuleset.Create(OsuMania.create 10.0f OsuMania.NoMod)
 
     let TEST_REPLAY_FILE =
         OsuReplay.TryReadFile(
@@ -81,7 +82,12 @@ module RulesetOsuParityTests =
             OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score =
-            ScoreProcessor.ProcessEntireReplay(as_interlude_ruleset, as_interlude_replay, TEST_CHART, 1.0f<rate>)
+            ScoreProcessor.ProcessEntireReplay(
+                CachedRuleset.Create(as_interlude_ruleset),
+                as_interlude_replay,
+                TEST_CHART,
+                1.0f<rate>
+            )
 
         Assert.AreEqual(
             (TEST_REPLAY_FILE.CountGeki,
@@ -107,7 +113,12 @@ module RulesetOsuParityTests =
             OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score =
-            ScoreProcessor.ProcessEntireReplay(as_interlude_ruleset, as_interlude_replay, TEST_CHART, 1.0f<rate>)
+            ScoreProcessor.ProcessEntireReplay(
+                CachedRuleset.Create(as_interlude_ruleset),
+                as_interlude_replay,
+                TEST_CHART,
+                1.0f<rate>
+            )
 
         printfn "%.2f%%" (score.Accuracy * 100.0)
 
@@ -122,7 +133,12 @@ module RulesetOsuParityTests =
             OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score =
-            ScoreProcessor.ProcessEntireReplay(as_interlude_ruleset, as_interlude_replay, TEST_CHART, 1.0f<rate>)
+            ScoreProcessor.ProcessEntireReplay(
+                CachedRuleset.Create(as_interlude_ruleset),
+                as_interlude_replay,
+                TEST_CHART,
+                1.0f<rate>
+            )
 
         let event_deltas =
             score.Events
@@ -141,8 +157,6 @@ module RulesetOsuParityTests =
             System.IO.File.ReadAllLines("./test_data/osu_parity/hehehe_events.txt") |> Array.map int
 
         Assert.AreEqual(EXPECTED_DATA, event_deltas)
-
-    let OD10_RULESET = OsuMania.create 10.0f OsuMania.NoMod
 
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_1 () =
@@ -189,7 +203,7 @@ module RulesetOsuParityTests =
 
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd OD10_RULESET.NoteWindows
+        let CONVENTIONAL_LATE_WINDOW = snd OD10_RULESET.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -218,7 +232,7 @@ module RulesetOsuParityTests =
 
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -247,7 +261,7 @@ module RulesetOsuParityTests =
 
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -269,7 +283,7 @@ module RulesetOsuParityTests =
             OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score =
-            ScoreProcessor.ProcessEntireReplay(ruleset, replay, TEST_CHART_2, 1.5f<rate>)
+            ScoreProcessor.ProcessEntireReplay(CachedRuleset.Create(ruleset), replay, TEST_CHART_2, 1.5f<rate>)
 
         Assert.AreEqual(
             (TEST_REPLAY_FILE_2.CountGeki,
@@ -294,7 +308,9 @@ module RulesetOsuParityTests =
         let ruleset =
             OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor.Create(ruleset, replay, TEST_CHART_2, 1.5f<rate>)
+        let score =
+            ScoreProcessor.Create(CachedRuleset.Create(ruleset), replay, TEST_CHART_2, 1.5f<rate>)
+
         score.ProcessEntireReplay()
 
         let event_deltas =
@@ -338,7 +354,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing =
-            GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -376,14 +392,12 @@ module RulesetOsuParityTests =
                 .KeyDownFor(3000.0f<ms> + 102.0f<ms>, 30.0f<ms>) // 1ms inside border, but actually this is the latest ms you can hit the note
                 .Build()
 
-        let ruleset = OsuMania.create 8.0f OsuMania.NoMod
-
         let event_processing =
-            GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
-        let LATE_WINDOW_ON_MISS = snd ruleset.NoteWindows
+        let LATE_WINDOW_ON_MISS = snd RULESET.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -451,7 +465,9 @@ module RulesetOsuParityTests =
 
             printfn "TRYING OD %.1f\n" od
 
-            let event_processing = ScoreProcessor(ruleset, replay, note_data, 1.0f<rate>)
+            let event_processing =
+                ScoreProcessor(CachedRuleset.Create(ruleset), replay, note_data, 1.0f<rate>)
+
             event_processing.ProcessEntireReplay()
 
             let judgement_sequence =
@@ -498,8 +514,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(800.0f<ms> + 104.0f<ms>, 1.0f<ms>)
                 .Build()
 
-        let event_processing =
-            ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -541,8 +556,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -585,8 +599,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -629,8 +642,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -673,8 +685,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -717,8 +728,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -761,8 +771,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -805,8 +814,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -849,8 +857,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -893,8 +900,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -940,8 +946,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -986,8 +991,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -1032,8 +1036,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing =
-                ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 

@@ -52,7 +52,7 @@ module Replay =
 
     let show_replay (played_by: string) (chart_meta: ChartMeta) (chart: Chart) (score: Score) : unit =
         let score_info =
-            { ScoreInfo.CreateFromScore(chart_meta, chart, Rulesets.current, score) with
+            { ScoreInfo.CreateFromScore(chart_meta, chart, Rulesets.GetCurrent(chart_meta), score) with
                 PlayedBy = ScorePlayedBy.Username(played_by)
             }
 

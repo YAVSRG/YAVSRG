@@ -27,7 +27,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     member this.Pacemaker = pacemaker
 
     member this.Rate = this.Scoring.Rate
-    member this.Ruleset = this.Scoring.Ruleset
+    member this.Ruleset = this.Scoring.Ruleset.Ruleset
 
     member this.ChangeScoring(new_scoring: ScoreProcessor) : unit =
         scoring <- new_scoring
@@ -52,7 +52,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
 
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
         let replay = Autoplay.CreateReplay(info.WithColors)
-        let ruleset = Rulesets.current
+        let ruleset = Rulesets.GetCurrent(info.ChartMeta)
 
         let scoring =
             ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)

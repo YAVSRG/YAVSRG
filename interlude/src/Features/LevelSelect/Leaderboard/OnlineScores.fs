@@ -27,7 +27,7 @@ module OnlineScores =
 
     type Request =
         {
-            Ruleset: Ruleset
+            Ruleset: CachedRuleset
             ChartMeta: ChartMeta
             CurrentChart: Chart
         }
@@ -46,8 +46,12 @@ module OnlineScores =
     let leaderboard_loaded = leaderboard_loaded_ev.Publish
 
     let private load_score (score: LeaderboardScore, score_info: ScoreInfo) : unit =
-        if score_info.Ruleset <> Rulesets.current then
-            score_info.Ruleset <- Rulesets.current
+        // score_info was loaded on a background thread, the user could have changed the ruleset since then
+        // if so, set it to that ruleset on the main thread
+        let current_ruleset = Rulesets.GetCurrent(score_info.ChartMeta)
+
+        if score_info.Ruleset <> current_ruleset then
+            score_info.Ruleset <- current_ruleset
 
         leaderboard_scores.Add(score_info)
         leaderboard_score_loaded_ev.Trigger(score, score_info)
@@ -94,8 +98,9 @@ module OnlineScores =
 
                                 Replay = replay
                                 Scoring = scoring
-                                Lamp = Lamp.calculate req.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-                                Grade = Grade.calculate req.Ruleset.Grades scoring.Accuracy
+                                Lamp =
+                                    Lamp.calculate req.Ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+                                Grade = Grade.calculate req.Ruleset.Ruleset.Grades scoring.Accuracy
 
                                 Rating = rating
                                 Performance = Performance.calculate rating scoring
@@ -116,7 +121,9 @@ module OnlineScores =
         if Network.status <> Network.Status.LoggedIn then
             state <- State.Offline
         elif state = State.Unloaded then
-            score_loader.Request({ Ruleset = Rulesets.current; ChartMeta = info.ChartMeta; CurrentChart = info.Chart })
+            score_loader.Request(
+                { Ruleset = Rulesets.GetCurrent(info.ChartMeta); ChartMeta = info.ChartMeta; CurrentChart = info.Chart }
+            )
 
     do
         SelectedChart.on_chart_change_started.Add(fun _ ->
@@ -127,12 +134,16 @@ module OnlineScores =
 
         Rulesets.on_changed.Add(fun () ->
             for score_info in leaderboard_scores do
-                score_info.Ruleset <- Rulesets.current
+                score_info.Ruleset <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.leaderboard_rank_changed.Add(fun info ->
             if state = State.Loaded then
                 score_loader.Request(
-                    { Ruleset = Rulesets.current; ChartMeta = info.ChartMeta; CurrentChart = info.Chart }
+                    {
+                        Ruleset = Rulesets.GetCurrent(info.ChartMeta)
+                        ChartMeta = info.ChartMeta
+                        CurrentChart = info.Chart
+                    }
                 )
         )

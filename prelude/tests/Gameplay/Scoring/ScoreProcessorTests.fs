@@ -13,7 +13,7 @@ open Prelude.Tests.Helpers
 
 module ScoreProcessorTests =
 
-    let RULESET = SC.create(4)
+    let RULESET = CachedRuleset.Create(SC.create(4))
 
     [<Test>]
     let BasicEndToEnd () =
@@ -468,7 +468,12 @@ module ScoreProcessorTests =
         let perfect_replay = Autoplay.CreateReplay(DONUT_HOLE_CHART)
 
         let inline ruleset_result (ruleset: Ruleset) : ScoreProcessor =
-            ScoreProcessor.ProcessEntireReplay(ruleset, perfect_replay, DONUT_HOLE_CHART, 1.0f<rate>)
+            ScoreProcessor.ProcessEntireReplay(
+                CachedRuleset.Create(ruleset),
+                perfect_replay,
+                DONUT_HOLE_CHART,
+                1.0f<rate>
+            )
 
         let inline ensure_perfect_on_ruleset (ruleset: Ruleset) =
             let result = ruleset_result(ruleset)
@@ -490,9 +495,12 @@ module ScoreProcessorTests =
                 .KeyDownFor(1000.0f<ms>, 10.0f<ms>)
                 .Build()
 
-        let ruleset = { RULESET with Ruleset.HitMechanics.GhostTapJudgement = Some 5 }
+        let ruleset =
+            { RULESET.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 5 }
 
-        let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(CachedRuleset.Create(ruleset), replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
         Assert.True(ruleset.Judgements.[5].BreaksCombo)
@@ -512,9 +520,11 @@ module ScoreProcessorTests =
                 .Build()
 
         let ruleset =
-            { RULESET with HitMechanics = { RULESET.HitMechanics with GhostTapJudgement = Some 2 } }
+            { RULESET.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 2 }
 
-        let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(CachedRuleset.Create(ruleset), replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
         Assert.False(ruleset.Judgements.[2].BreaksCombo)

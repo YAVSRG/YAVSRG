@@ -15,8 +15,8 @@ type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
 
     override this.Init(parent: Widget) : unit =
         this.Add(
-            Text(fun () -> score_info.Ruleset.GradeName((!grade).Grade))
-                .Color(fun () -> (score_info.Ruleset.GradeColor((!grade).Grade), Colors.black))
+            Text(fun () -> score_info.Ruleset.Ruleset.GradeName((!grade).Grade))
+                .Color(fun () -> (score_info.Ruleset.Ruleset.GradeColor((!grade).Grade), Colors.black))
                 .Position(Position.Expand(10.0f))
         )
 
@@ -25,7 +25,7 @@ type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
     override this.Draw() : unit =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw(this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
-        let grade_color = score_info.Ruleset.GradeColor((!grade).Grade)
+        let grade_color = score_info.Ruleset.Ruleset.GradeColor((!grade).Grade)
         Render.rect this.Bounds grade_color.O1
         base.Draw()
 
@@ -58,7 +58,7 @@ type Accuracy
     override this.Draw() : unit =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw(this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
-        let grade_color = score_info.Ruleset.GradeColor((!grade).Grade)
+        let grade_color = score_info.Ruleset.Ruleset.GradeColor((!grade).Grade)
         Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) grade_color.O1
         Render.rect (this.Bounds.SliceB(LOWER_SIZE)) grade_color.O2
 
@@ -67,7 +67,7 @@ type Accuracy
         if (!stats).ColumnFilterApplied then
             Text.fill_b(
                 Style.font,
-                score_info.Scoring.Ruleset.FormatAccuracy((!stats).Accuracy),
+                score_info.Ruleset.Ruleset.FormatAccuracy((!stats).Accuracy),
                 this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
                 Colors.text_green,
                 Alignment.CENTER
@@ -110,10 +110,10 @@ type Accuracy
 
                         let summary, distance_from_pb =
                             if r > score_info.Rate then
-                                sprintf "%s (%.2fx)" (score_info.Ruleset.FormatAccuracy(v)) r,
+                                sprintf "%s (%.2fx)" (score_info.Ruleset.Ruleset.FormatAccuracy(v)) r,
                                 (v - score_info.Scoring.Accuracy)
                             else
-                                score_info.Ruleset.FormatAccuracy(v), (v - score_info.Scoring.Accuracy)
+                                score_info.Ruleset.Ruleset.FormatAccuracy(v), (v - score_info.Scoring.Accuracy)
 
                         if distance_from_pb < 0.0001 then
                             [ summary ] %> "score.your_record", (Colors.grey_2.O2, Colors.black)
@@ -156,8 +156,8 @@ type Lamp
 
     override this.Init(parent: Widget) : unit =
         this.Add(
-            Text(fun () -> score_info.Ruleset.LampName((!lamp).Lamp))
-                .Color(fun () -> (score_info.Ruleset.LampColor((!lamp).Lamp), Colors.black))
+            Text(fun () -> score_info.Ruleset.Ruleset.LampName((!lamp).Lamp))
+                .Color(fun () -> (score_info.Ruleset.Ruleset.LampColor((!lamp).Lamp), Colors.black))
                 .Position(Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE))
         )
 
@@ -173,8 +173,8 @@ type Lamp
     override this.Draw() : unit =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw(this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
-        Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.LampColor((!lamp).Lamp)).O1
-        Render.rect (this.Bounds.SliceB(LOWER_SIZE)) (score_info.Ruleset.LampColor((!lamp).Lamp)).O2
+        Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.Ruleset.LampColor((!lamp).Lamp)).O1
+        Render.rect (this.Bounds.SliceB(LOWER_SIZE)) (score_info.Ruleset.Ruleset.LampColor((!lamp).Lamp)).O2
 
         Glint.draw_stencilled (float32 glint_animation.Progress) this.Bounds Glint.COLOR
 
@@ -184,12 +184,12 @@ type Lamp
             | Improvement.Faster r ->
                 sprintf "%s  •  +%gx" new_record (System.MathF.Round(float32 r, 2)), Colors.text_cyan_2
             | Improvement.Better b ->
-                let new_lamp = score_info.Ruleset.LampName((!lamp).Lamp)
-                let old_lamp = score_info.Ruleset.LampName((!lamp).Lamp - b)
+                let new_lamp = score_info.Ruleset.Ruleset.LampName((!lamp).Lamp)
+                let old_lamp = score_info.Ruleset.Ruleset.LampName((!lamp).Lamp - b)
                 sprintf "%s  •  %s > %s" new_record old_lamp new_lamp, Colors.text_green_2
             | Improvement.FasterBetter(r, b) ->
-                let new_lamp = score_info.Ruleset.LampName((!lamp).Lamp)
-                let old_lamp = score_info.Ruleset.LampName((!lamp).Lamp - b)
+                let new_lamp = score_info.Ruleset.Ruleset.LampName((!lamp).Lamp)
+                let old_lamp = score_info.Ruleset.Ruleset.LampName((!lamp).Lamp - b)
 
                 sprintf "%s  •  %s > %s  •  +%gx" new_record old_lamp new_lamp (System.MathF.Round(float32 r, 2)),
                 Colors.text_pink_2
@@ -201,9 +201,9 @@ type Lamp
 
                         let summary =
                             if r > score_info.Rate then
-                                sprintf "%s (%.2fx)" (score_info.Ruleset.LampName(v)) r
+                                sprintf "%s (%.2fx)" (score_info.Ruleset.Ruleset.LampName(v)) r
                             else
-                                score_info.Ruleset.LampName(v)
+                                score_info.Ruleset.Ruleset.LampName(v)
 
                         [ summary ] %> "score.your_record", (Colors.grey_2.O2, Colors.black)
 

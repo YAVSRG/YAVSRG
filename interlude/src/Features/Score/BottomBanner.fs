@@ -16,7 +16,8 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Online
 
-type RulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: Ruleset -> unit, score_info: ScoreInfo) =
+type RulesetSwitcher
+    (setting: Setting<RulesetSelection>, set_ruleset_direct: CachedRuleset -> unit, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     let mutable dropdown_height = 500.0f
@@ -31,7 +32,7 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: Rul
         match Ruleset.GetNativeRuleset(score_info.ChartMeta.Origins) with
         | Some cached_ruleset ->
             // Use user's version (custom colors, names, etc) if available
-            Rulesets.by_hash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset.Ruleset |> set_ruleset_direct
+            Rulesets.by_hash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset |> set_ruleset_direct
             Style.click.Play()
         | None ->
             Notifications.system_feedback(
@@ -42,7 +43,7 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: Rul
 
     override this.Init(parent: Widget) : unit =
         this.Add(
-            InlaidButton((fun () -> score_info.Ruleset.Name), (fun () -> this.ToggleDropdown()))
+            InlaidButton((fun () -> score_info.Ruleset.Ruleset.Name), (fun () -> this.ToggleDropdown()))
                 .Hotkey("ruleset_switch")
                 .HoverText(%"score.switch_ruleset"),
 
@@ -121,8 +122,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                     RulesetSwitcher(
                         Setting.simple Rulesets.selected_id.Value
                         |> Setting.trigger(fun selection ->
-                            score_info.Ruleset <-
-                                Rulesets.rulesets.GetCurrentRuleset(score_info.ChartMeta, selection).Ruleset
+                            score_info.Ruleset <- Rulesets.rulesets.GetCurrentRuleset(score_info.ChartMeta, selection)
 
                             refresh()
                         ),

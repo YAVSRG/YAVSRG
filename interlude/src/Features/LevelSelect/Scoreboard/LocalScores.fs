@@ -34,7 +34,7 @@ module LocalScores =
     let private load_score (score_info: ScoreInfo) =
         // score_info was loaded on a background thread, the user could have changed the ruleset since then
         // if so, set it to that ruleset on the main thread
-        let current_ruleset = Rulesets.GetCurrentRuleset(score_info.ChartMeta)
+        let current_ruleset = Rulesets.GetCurrent(score_info.ChartMeta)
 
         if score_info.Ruleset <> current_ruleset then
             score_info.Ruleset <- current_ruleset
@@ -48,7 +48,7 @@ module LocalScores =
         let cached_ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
 
         for score_info in local_scores do
-            assert (score_info.Ruleset = cached_ruleset.Ruleset)
+            assert (score_info.Ruleset = cached_ruleset)
 
             if score_info.ModStatus = ModStatus.Ranked then
                 new_bests <-
@@ -76,7 +76,7 @@ module LocalScores =
                 seq {
                     for score in req.ChartSaveData.Scores do
                         let score_info =
-                            ScoreInfo.CreateFromScore(req.ChartMeta, req.CurrentChart, req.Ruleset.Ruleset, score)
+                            ScoreInfo.CreateFromScore(req.ChartMeta, req.CurrentChart, req.Ruleset, score)
 
                         yield fun () -> load_score score_info
 
@@ -118,7 +118,7 @@ module LocalScores =
 
         Rulesets.on_changed.Add(fun () ->
             for score_info in local_scores do
-                score_info.Ruleset <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
+                score_info.Ruleset <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.score_saved.Add(load_score)

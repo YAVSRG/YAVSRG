@@ -9,7 +9,7 @@ open Prelude.Tests.Helpers
 
 module GameplayEventProcessorTests =
 
-    let RULESET = SC.create(4)
+    let RULESET = SC_J4
 
     [<Test>]
     let BasicEndToEnd () =
@@ -132,7 +132,7 @@ module GameplayEventProcessorTests =
             ReplayBuilder().KeyDownFor(-180.0f<ms>, 30.0f<ms>).KeyDownFor(0.0f<ms>, 30.0f<ms>).Build()
 
         let ruleset =
-            { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
+            { RULESET.Ruleset with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing =
             GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
@@ -152,7 +152,7 @@ module GameplayEventProcessorTests =
             ReplayBuilder().KeyDownFor(180.0f<ms>, 30.0f<ms>).KeyDownFor(360.0f<ms>, 30.0f<ms>).Build()
 
         let ruleset =
-            { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
+            { RULESET.Ruleset with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing =
             GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
@@ -252,7 +252,7 @@ module GameplayEventProcessorTests =
                 .Build()
 
         let ruleset =
-            { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
+            { RULESET.Ruleset with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing =
             GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)

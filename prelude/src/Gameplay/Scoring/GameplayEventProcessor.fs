@@ -65,9 +65,10 @@ type HoldState =
 /// These internal actions are then processed further by rulesets to calculate accuracy, combo, score, etc
 
 [<AbstractClass>]
-type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
+type GameplayEventProcessor(cached_ruleset: CachedRuleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
     inherit KeyPressReader(note_data.Keys, replay)
 
+    let ruleset = cached_ruleset.Ruleset
     let first_note = (TimeArray.first note_data.Notes).Value.Time
 
     let early_note_window_raw, late_note_window_raw = ruleset.NoteWindows
@@ -138,7 +139,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                 tail_search_index <- tail_search_index + 1
 
     member this.EnumerateRecentFrames() : ReplayFrame seq = replay.EnumerateRecentFrames()
-    member this.Ruleset = ruleset
+    member this.Ruleset = cached_ruleset
 
     member this.HoldState(index: int, k: int) : HoldState =
         let state, i = hold_states.[k]
