@@ -15,7 +15,7 @@ let test() =
     let ctx : LibraryViewContext =
         {
             Library = library
-            Ruleset = SC_J4
+            RulesetInfo = SC_J4
             Rate = 1.0f<rate>
         }
 
@@ -34,7 +34,7 @@ let test() =
             MaximumRate = 1.5f<rate>
             OnlyNewCharts = false
             Filter = FilteredSearch.Empty
-            Ruleset = SC_J4
+            RulesetInfo = SC_J4
             Mods = Map.empty
         }
 

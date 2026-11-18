@@ -27,7 +27,7 @@ module OnlineScores =
 
     type Request =
         {
-            Ruleset: RulesetInfo
+            RulesetInfo: RulesetInfo
             ChartMeta: ChartMeta
             CurrentChart: Chart
         }
@@ -82,7 +82,7 @@ module OnlineScores =
                         let replay = Replay.FromBase64String(score.Replay)
 
                         let scoring =
-                            ScoreProcessor.ProcessEntireReplay(req.Ruleset, replay, with_mods, score.Rate)
+                            ScoreProcessor.ProcessEntireReplay(req.RulesetInfo, replay, with_mods, score.Rate)
 
                         let rating = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
@@ -99,8 +99,11 @@ module OnlineScores =
                                 Replay = replay
                                 Scoring = scoring
                                 Lamp =
-                                    Lamp.calculate req.Ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-                                Grade = Grade.calculate req.Ruleset.Ruleset.Grades scoring.Accuracy
+                                    Lamp.calculate
+                                        req.RulesetInfo.Ruleset.Lamps
+                                        scoring.JudgementCounts
+                                        scoring.ComboBreaks
+                                Grade = Grade.calculate req.RulesetInfo.Ruleset.Grades scoring.Accuracy
 
                                 Rating = rating
                                 Performance = Performance.calculate rating scoring
@@ -122,7 +125,11 @@ module OnlineScores =
             state <- State.Offline
         elif state = State.Unloaded then
             score_loader.Request(
-                { Ruleset = Rulesets.GetCurrent(info.ChartMeta); ChartMeta = info.ChartMeta; CurrentChart = info.Chart }
+                {
+                    RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
+                    ChartMeta = info.ChartMeta
+                    CurrentChart = info.Chart
+                }
             )
 
     do
@@ -141,7 +148,7 @@ module OnlineScores =
             if state = State.Loaded then
                 score_loader.Request(
                     {
-                        Ruleset = Rulesets.GetCurrent(info.ChartMeta)
+                        RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
                         ChartMeta = info.ChartMeta
                         CurrentChart = info.Chart
                     }

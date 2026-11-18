@@ -13,7 +13,7 @@ module LocalScores =
 
     type Request =
         {
-            Ruleset: RulesetInfo
+            RulesetInfo: RulesetInfo
             ChartMeta: ChartMeta
             CurrentChart: Chart
             ChartSaveData: ChartSaveData
@@ -76,7 +76,7 @@ module LocalScores =
                 seq {
                     for score in req.ChartSaveData.Scores do
                         let score_info =
-                            ScoreInfo.CreateFromScore(req.ChartMeta, req.CurrentChart, req.Ruleset, score)
+                            ScoreInfo.CreateFromScore(req.ChartMeta, req.CurrentChart, req.RulesetInfo, score)
 
                         yield fun () -> load_score score_info
 
@@ -95,7 +95,7 @@ module LocalScores =
         SelectedChart.on_chart_change_finished.Add(fun info ->
             score_loader.Request(
                 {
-                    Ruleset = Rulesets.GetCurrent(info.ChartMeta)
+                    RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
                     ChartMeta = info.ChartMeta
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
@@ -108,7 +108,7 @@ module LocalScores =
             (fun info ->
                 score_loader.Request(
                     {
-                        Ruleset = Rulesets.GetCurrent(info.ChartMeta)
+                        RulesetInfo = Rulesets.GetCurrent(info.ChartMeta)
                         ChartMeta = info.ChartMeta
                         CurrentChart = info.Chart
                         ChartSaveData = info.SaveData

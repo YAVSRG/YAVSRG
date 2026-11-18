@@ -53,4 +53,11 @@ type Library =
         this.UserData.SaveChanges()
         save_important_json_file (Path.Combine(get_game_folder "Data", "collections.json")) this.Collections
 
-type LibraryViewContext = { Rate: Rate; Ruleset: RulesetInfo; Library: Library }
+type LibraryViewContext =
+    {
+        Rate: Rate
+        RulesetInfo: RulesetInfo
+        Library: Library
+    }
+
+    member this.Ruleset: Ruleset = this.RulesetInfo.Ruleset
