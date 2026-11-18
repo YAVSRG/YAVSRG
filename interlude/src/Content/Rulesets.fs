@@ -2,6 +2,7 @@ namespace Interlude.Content
 
 open Percyqaz.Common
 open Prelude
+open Prelude.Data.ChartDatabase
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.Options
 
@@ -22,4 +23,16 @@ module Rulesets =
     let update (existing_id: string) (ruleset: Ruleset) : unit = rulesets.Update(existing_id, ruleset)
     let delete (id: string) : bool = rulesets.Delete(id)
 
-type Rulesets = class end
+type Rulesets =
+
+    static member GetCurrent(chart_meta: ChartMeta option) : RulesetInfo =
+        Rulesets.rulesets.GetCurrentRuleset(chart_meta)
+
+    static member GetCurrent(chart_meta: ChartMeta) : RulesetInfo =
+        Rulesets.rulesets.GetCurrentRuleset(chart_meta)
+
+    static member GetCurrentRuleset(chart_meta: ChartMeta) : Ruleset =
+        Rulesets.rulesets.GetCurrentRuleset(chart_meta).Ruleset
+
+    static member GetCurrentHash(chart_meta: ChartMeta) : string =
+        Rulesets.rulesets.GetCurrentRuleset(chart_meta).Hash

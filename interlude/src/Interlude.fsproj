@@ -95,7 +95,6 @@
     <Compile Include="Features\Online\Players\PlayerListPage.fs" />
     <Compile Include="Features\Export\Osz.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
-    <Compile Include="Features\Gameplay\Rulesets.fs" />
     <Compile Include="Features\Gameplay\ScoreHelpers.fs" />
     <Compile Include="Features\Rulesets\CompareRulesetsPage.fs" />
     <Compile Include="Features\Rulesets\Create\SCRulesetPage.fs" />
