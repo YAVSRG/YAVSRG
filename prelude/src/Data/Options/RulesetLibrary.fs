@@ -173,6 +173,9 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.Delete(file_id: string) : bool =
         if file_id <> DEFAULT_ID && this.Exists(file_id) then
             try
+                if current_selection = FileId(file_id) then
+                    current_selection <- FileId(DEFAULT_ID)
+
                 File.Delete(Path.Combine(rulesets_storage_path, file_id + ".ruleset"))
                 loaded.Remove(file_id)
             with :? IOException as err ->
