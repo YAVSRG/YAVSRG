@@ -13,8 +13,6 @@ open Prelude.Tests.Helpers
 
 module ScoreProcessorTests =
 
-    let RULESET = SC.create(4).ToInfo()
-
     [<Test>]
     let BasicEndToEnd () =
         let note_data = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
@@ -27,7 +25,7 @@ module ScoreProcessorTests =
                 .Build()
 
         let result =
-            ScoreProcessor.ProcessEntireReplay(RULESET, replay, note_data, 1.0f<rate>)
+            ScoreProcessor.ProcessEntireReplay(SC_J4, replay, note_data, 1.0f<rate>)
 
         printfn "Accuracy: %.2f%%" (result.Accuracy * 100.0)
         printfn "Judgements: %A" result.JudgementCounts
@@ -57,7 +55,7 @@ module ScoreProcessorTests =
                 .KeyDownFor(3100.0f<ms>, 900.0f<ms>)
                 .Build()
 
-        let stepper = ScoreProcessor.Create(RULESET, replay, note_data, 1.0f<rate>)
+        let stepper = ScoreProcessor.Create(SC_J4, replay, note_data, 1.0f<rate>)
 
         stepper.OnEvent.Add(printfn "%A")
 
@@ -166,7 +164,7 @@ module ScoreProcessorTests =
 
             let replay = ReplayBuilder().KeyDownFor(offset, 1.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(1, event_processing.JudgementCounts.[expected_judgement])
@@ -204,7 +202,7 @@ module ScoreProcessorTests =
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1000.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -242,7 +240,7 @@ module ScoreProcessorTests =
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1180.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -280,7 +278,7 @@ module ScoreProcessorTests =
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 820.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -318,7 +316,7 @@ module ScoreProcessorTests =
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 500.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -357,7 +355,7 @@ module ScoreProcessorTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(offset, 500.0f<ms>).KeyDownUntil(501.0f<ms>, 1000.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -395,7 +393,7 @@ module ScoreProcessorTests =
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1500.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
             event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -406,7 +404,7 @@ module ScoreProcessorTests =
 
         let replay = ReplayBuilder().Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
         event_processing.ProcessEntireReplay()
 
         Assert.AreEqual([| 0; 0; 0; 0; 0; 1 |], event_processing.JudgementCounts)
@@ -490,8 +488,7 @@ module ScoreProcessorTests =
                 .KeyDownFor(1000.0f<ms>, 10.0f<ms>)
                 .Build()
 
-        let ruleset =
-            { RULESET.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 5 }
+        let ruleset = { SC_J4.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 5 }
 
         let event_processing =
             ScoringEventCollector(ruleset.ToInfo(), replay, note_data, 1.0f<rate>)
@@ -514,8 +511,7 @@ module ScoreProcessorTests =
                 .KeyDownFor(1000.0f<ms>, 10.0f<ms>)
                 .Build()
 
-        let ruleset =
-            { RULESET.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 2 }
+        let ruleset = { SC_J4.Ruleset with Ruleset.HitMechanics.GhostTapJudgement = Some 2 }
 
         let event_processing =
             ScoringEventCollector(ruleset.ToInfo(), replay, note_data, 1.0f<rate>)

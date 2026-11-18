@@ -11,8 +11,8 @@ open Prelude.Tests.Helpers
 
 module RulesetOsuParityTests =
 
-    let RULESET = OsuMania.nomod(8.0f).ToInfo()
-    let OD10_RULESET = OsuMania.nomod(10.0f).ToInfo()
+    let OSU_OD8 = OsuMania.nomod(8.0f).ToInfo()
+    let OSU_OD10 = OsuMania.nomod(10.0f).ToInfo()
 
     let TEST_REPLAY_FILE =
         OsuReplay.TryReadFile(
@@ -173,7 +173,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -199,11 +199,11 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing =
-            GameplayEventCollector(OD10_RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OSU_OD10, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd OD10_RULESET.Ruleset.NoteWindows
+        let CONVENTIONAL_LATE_WINDOW = snd OSU_OD10.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -228,11 +228,11 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd RULESET.Ruleset.NoteWindows
+        let CONVENTIONAL_LATE_WINDOW = snd OSU_OD8.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -257,11 +257,11 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd RULESET.Ruleset.NoteWindows
+        let CONVENTIONAL_LATE_WINDOW = snd OSU_OD8.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -352,7 +352,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -391,11 +391,11 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
-        let LATE_WINDOW_ON_MISS = snd RULESET.Ruleset.NoteWindows
+        let LATE_WINDOW_ON_MISS = snd OSU_OD8.Ruleset.NoteWindows
 
         Assert.AreEqual(
             [
@@ -512,7 +512,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(800.0f<ms> + 104.0f<ms>, 1.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -554,7 +554,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -597,7 +597,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -640,7 +640,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -683,7 +683,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -726,7 +726,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -769,7 +769,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -812,7 +812,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -855,7 +855,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -898,7 +898,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -944,7 +944,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -989,7 +989,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
@@ -1034,7 +1034,7 @@ module RulesetOsuParityTests =
             let replay =
                 ReplayBuilder().KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OSU_OD8, replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 
