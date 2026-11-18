@@ -30,9 +30,3 @@ type Rulesets =
 
     static member GetCurrent(chart_meta: ChartMeta) : RulesetInfo =
         Rulesets.rulesets.GetCurrent(chart_meta)
-
-    static member GetCurrentRuleset(chart_meta: ChartMeta) : Ruleset =
-        Rulesets.rulesets.GetCurrent(chart_meta).Ruleset
-
-    static member GetCurrentHash(chart_meta: ChartMeta) : string =
-        Rulesets.rulesets.GetCurrent(chart_meta).Hash
