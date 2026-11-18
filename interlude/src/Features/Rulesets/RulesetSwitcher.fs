@@ -66,9 +66,11 @@ module RulesetSwitcher =
 type RulesetSwitcher(setting: Setting<RulesetSelection>) =
     inherit Container(NodeType.None)
 
+    let MAX_HEIGHT = 700.0f
+
     let dropdown_wrapper =
         DropdownWrapper(fun d ->
-            Position.BorderT(min d.Height 500.0f).Shrink(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING)
+            Position.BorderT(min d.Height MAX_HEIGHT).Shrink(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING)
         )
 
     override this.Init(parent: Widget) : unit =

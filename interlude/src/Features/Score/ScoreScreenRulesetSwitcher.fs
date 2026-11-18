@@ -16,11 +16,12 @@ type ScoreScreenRulesetSwitcher
     (setting: Setting<RulesetSelection>, set_ruleset_direct: RulesetInfo -> unit, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
-    let mutable dropdown_height = 500.0f
+    let MAX_HEIGHT = 700.0f
+    let mutable dropdown_height = MAX_HEIGHT
 
     let dropdown_wrapper =
         DropdownWrapper(fun d ->
-            dropdown_height <- min d.Height 500.0f
+            dropdown_height <- min d.Height MAX_HEIGHT
             Position.BorderT(dropdown_height).ShrinkX(Style.PADDING).TranslateY(-10.0f)
         )
 
