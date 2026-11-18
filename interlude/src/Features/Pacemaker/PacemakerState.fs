@@ -93,16 +93,21 @@ type PacemakerState =
         | PacemakerState.ComboBreaks target_max_count -> scoring.ComboBreaks > target_max_count
 
     static member Create(info: LoadedChartInfo, ctx: PacemakerCreationContext) : PacemakerState =
+        
+        let cached_ruleset = Rulesets.GetCurrent(info.ChartMeta)
+        let ruleset = cached_ruleset.Ruleset
+        let ruleset_hash = cached_ruleset.Hash
+        
         let inline create_from_score (score_info: ScoreInfo) =
             let replay_scoring =
-                ScoreProcessor.Create(Rulesets.current, score_info.Replay, score_info.WithMods, score_info.Rate)
+                ScoreProcessor.Create(ruleset, score_info.Replay, score_info.WithMods, score_info.Rate)
 
             PacemakerState.Replay(score_info.Accuracy, replay_scoring)
 
         let inline create_from_accuracy (pacemaker_settings: PacemakerSettings) : PacemakerState =
             let personal_best_accuracy =
                 Bests.ruleset_best_above
-                    Rulesets.current_hash
+                    ruleset_hash
                     _.Accuracy
                     SelectedChart.rate.Value
                     info.SaveData.PersonalBests
@@ -115,7 +120,7 @@ type PacemakerState =
             let inline use_score (final_accuracy: float, score: Score) =
                 let with_mods = ModState.apply score.Mods info.Chart
                 let replay = Replay.FromByteArray(score.Replay)
-                let scoring = ScoreProcessor.Create(Rulesets.current, replay, with_mods, score.Rate)
+                let scoring = ScoreProcessor.Create(ruleset, replay, with_mods, score.Rate)
                 PacemakerState.Replay(final_accuracy, scoring)
 
             let inline use_accuracy (accuracy: float) = PacemakerState.Accuracy(accuracy)
@@ -131,7 +136,7 @@ type PacemakerState =
         let inline create_from_lamp (pacemaker_settings: PacemakerSettings) : PacemakerState =
             let personal_best_lamp =
                 Bests.ruleset_best_above
-                    Rulesets.current_hash
+                    ruleset_hash
                     _.Lamp
                     SelectedChart.rate.Value
                     info.SaveData.PersonalBests
@@ -146,9 +151,9 @@ type PacemakerState =
                 | Some(best_lamp, _, _) when should_use_personal_best(best_lamp) -> best_lamp
                 | _ -> pacemaker_settings.Lamp
                 |> max 0
-                |> min(Rulesets.current.Lamps.Length - 1)
+                |> min(ruleset.Lamps.Length - 1)
 
-            match Rulesets.current.Lamps.[target_lamp].Requirement with
+            match ruleset.Lamps.[target_lamp].Requirement with
             | LampRequirement.ComboBreaksAtMost n -> PacemakerState.ComboBreaks(n)
             | LampRequirement.JudgementAtMost(j, n) -> PacemakerState.Judgement(j, n)
 
@@ -158,7 +163,7 @@ type PacemakerState =
 
         | PacemakerCreationContext.FromUserSetting ->
             let pacemaker_settings =
-                match options.Pacemaker.TryGetValue(Rulesets.current_hash) with
+                match options.Pacemaker.TryGetValue(ruleset_hash) with
                 | true, settings -> settings
                 | false, _ -> PacemakerSettings.Default
 

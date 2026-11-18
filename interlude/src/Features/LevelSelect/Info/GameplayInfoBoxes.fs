@@ -17,10 +17,12 @@ type GameplayInfoBoxes() =
     let mutable save_data = None
     let mutable category = "Uncategorised"
     let mutable specific_patterns = ""
+    let mutable ruleset_hash = ""
 
     let refresh (info: LoadedChartInfo) =
         save_data <- Some info.SaveData
         category <- info.Patterns.Category
+        ruleset_hash <- Rulesets.GetCurrent(info.ChartMeta).Hash
 
         specific_patterns <-
             info.Patterns.ImportantClusters
@@ -35,9 +37,9 @@ type GameplayInfoBoxes() =
 
     override this.Draw() : unit =
         match save_data with
-        | Some save_data when save_data.PersonalBests.ContainsKey(Rulesets.current_hash) ->
+        | Some save_data when save_data.PersonalBests.ContainsKey(ruleset_hash) ->
 
-            let pbs = save_data.PersonalBests.[Rulesets.current_hash]
+            let pbs = save_data.PersonalBests.[ruleset_hash]
 
             let accuracy =
                 match pbs.Accuracy |> PersonalBests.get_best_above SelectedChart.rate.Value with
