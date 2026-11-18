@@ -19,6 +19,69 @@ type SelectRulesetPage() =
     let mutable selected = Rulesets.selected_id.Value
     let update_selected () = selected <- Rulesets.selected_id.Value
 
+    let listed_ruleset (id: string, ruleset_info: RulesetInfo) : Widget =
+
+        let name_button =
+            PageButton(
+                ruleset_info.Ruleset.Name,
+                fun () ->
+                    options.Ruleset.Set(FileId(id))
+                    update_selected()
+            )
+                .TextColor(fun () -> if options.Ruleset.Value = FileId(id) then Colors.text_pink_2 else Colors.text)
+
+        let compare_action =
+            Button(
+                Icons.PIE_CHART,
+                fun () ->
+                    CompareRulesetsPage(Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset, ruleset_info.Ruleset)
+                        .Show()
+            )
+                .Disabled(fun () -> selected = FileId(id))
+                .Position(Position.SliceR(PAGE_ITEM_HEIGHT * 3.0f, PAGE_ITEM_HEIGHT))
+
+        let edit_action =
+            Button(Icons.EDIT, fun () -> RulesetEditorPage(id, ruleset_info.Ruleset).Show())
+
+        let copy_action =
+            Button(
+                Icons.COPY,
+                fun () ->
+                    ConfirmPage(
+                        [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_copy",
+                        fun () ->
+                            Rulesets.install
+                                { ruleset_info.Ruleset.Clone() with Name = ruleset_info.Ruleset.Name + " (Copy)" }
+                    )
+                        .Show()
+            )
+
+        let delete_action =
+            Button(
+                Icons.TRASH,
+                (fun () ->
+                    ConfirmPage(
+                        [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_delete",
+                        fun () ->
+                            if Rulesets.delete(id) then
+                                update_selected()
+                    )
+                        .Show()
+                )
+            )
+                .Disabled(Rulesets.DEFAULT_ID = id)
+                .TextColor(Colors.red_accent)
+
+        NavigationContainer
+            .Row()
+            .With(
+                name_button.Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 4.0f)),
+                compare_action.Position(Position.SliceR(PAGE_ITEM_HEIGHT * 3.0f, PAGE_ITEM_HEIGHT)),
+                edit_action.Position(Position.SliceR(PAGE_ITEM_HEIGHT * 2.0f, PAGE_ITEM_HEIGHT)),
+                copy_action.Position(Position.SliceR(PAGE_ITEM_HEIGHT, PAGE_ITEM_HEIGHT)),
+                delete_action.Position(Position.SliceR(PAGE_ITEM_HEIGHT))
+            )
+
     let refresh () =
         container.Clear()
 
@@ -29,72 +92,7 @@ type SelectRulesetPage() =
                     .Icon(Icons.FOLDER),
                 Dummy()
             )
-            .Add(
-                seq {
-                    for id, ruleset_info in Rulesets.list() do
-                        yield
-                            NavigationContainer
-                                .Row()
-                                .With(
-                                    PageButton(
-                                        ruleset_info.Ruleset.Name,
-                                        fun () ->
-                                            options.Ruleset.Set(FileId(id))
-                                            update_selected()
-                                    )
-                                        .TextColor(fun () ->
-                                            if options.Ruleset.Value = FileId(id) then
-                                                Colors.text_pink_2
-                                            else
-                                                Colors.text
-                                        )
-                                        .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 4.0f)),
-                                    Button(
-                                        Icons.PIE_CHART,
-                                        fun () ->
-                                            CompareRulesetsPage(
-                                                Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset,
-                                                ruleset_info.Ruleset
-                                            )
-                                                .Show()
-                                    )
-                                        .Position(Position.SliceR(PAGE_ITEM_HEIGHT * 3.0f, PAGE_ITEM_HEIGHT))
-                                        .Disabled(fun () -> selected = FileId(id)),
-                                    Button(Icons.EDIT, fun () -> RulesetEditorPage(id, ruleset_info.Ruleset).Show())
-                                        .Position(Position.SliceR(PAGE_ITEM_HEIGHT * 2.0f, PAGE_ITEM_HEIGHT)),
-                                    Button(
-                                        Icons.COPY,
-                                        fun () ->
-                                            ConfirmPage(
-                                                [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_copy",
-                                                fun () ->
-                                                    Rulesets.install
-                                                        { ruleset_info.Ruleset.Clone() with
-                                                            Name = ruleset_info.Ruleset.Name + " (Copy)"
-                                                        }
-                                            )
-                                                .Show()
-                                    )
-                                        .Position(Position.SliceR(PAGE_ITEM_HEIGHT, PAGE_ITEM_HEIGHT)),
-                                    Button(
-                                        Icons.TRASH,
-                                        (fun () ->
-                                            ConfirmPage(
-                                                [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_delete",
-                                                fun () ->
-                                                    if Rulesets.delete(id) then
-                                                        update_selected()
-                                            )
-                                                .Show()
-                                        )
-                                    )
-                                        .Disabled(Rulesets.DEFAULT_ID = id)
-                                        .TextColor(Colors.red_accent)
-                                        .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
-                                )
-                            :> Widget
-                }
-            )
+            .Add(Rulesets.list() |> Seq.map listed_ruleset)
 
         if container.Focused then
             container.Focus(false)

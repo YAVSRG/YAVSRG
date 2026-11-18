@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Score
+namespace Interlude.Features.Score
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -12,8 +12,8 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Rulesets
 
-type ScoreScreenRulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: RulesetInfo -> unit, score_info: ScoreInfo)
-    =
+type ScoreScreenRulesetSwitcher
+    (setting: Setting<RulesetSelection>, set_ruleset_direct: RulesetInfo -> unit, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     let mutable dropdown_height = 500.0f
