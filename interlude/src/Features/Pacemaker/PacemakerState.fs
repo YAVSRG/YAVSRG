@@ -25,18 +25,18 @@ type PacemakerState =
     | Judgement of judgement: int * target_max_count: int
     | ComboBreaks of target_max_count: int
 
-    member this.Description(ruleset: Ruleset) : string =
+    member this.Description(scoring: ScoreProcessor) : string =
         match this with
         | PacemakerState.None -> ""
 
         | PacemakerState.Accuracy accuracy ->
-            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (ruleset.FormatAccuracy(accuracy))
+            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (scoring.Ruleset.FormatAccuracy(accuracy))
 
         | PacemakerState.Replay(accuracy, _) ->
-            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (ruleset.FormatAccuracy(accuracy))
+            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (scoring.Ruleset.FormatAccuracy(accuracy))
 
         | PacemakerState.Judgement(judgement, target_max_count) ->
-            let judgement_name = ruleset.JudgementName(judgement)
+            let judgement_name = scoring.Ruleset.JudgementName(judgement)
 
             if target_max_count = 0 then
                 sprintf "%s %s" Icons.FLAG ([ judgement_name ] %> "pacemaker.zero_judgements")

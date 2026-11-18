@@ -6,9 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Interlude.Content
 open Interlude.UI
-open Interlude.Features.Pacemaker
 
 type FailButtonType =
     | NONE = 0
@@ -70,16 +68,13 @@ type FailButton(kind: FailButtonType, label: string, hotkey: Bind, action: unit 
         Style.hover.Play()
         base.OnFocus(by_mouse)
 
-type FailOverlay
-    (pacemaker_state: PacemakerState, retry: unit -> unit, score_screen: unit -> unit, next_song: unit -> unit) =
+type FailOverlay(pacemaker_desc: string, retry: unit -> unit, score_screen: unit -> unit, next_song: unit -> unit) =
     inherit Container(NodeType.None)
 
     let main_fade = Animation.Fade(0.0f, Target = 1.0f)
     let b1_fade = Animation.Fade(0.0f)
     let b2_fade = Animation.Fade(0.0f)
     let b3_fade = Animation.Fade(0.0f)
-
-    let pacemaker_desc = pacemaker_state.Description(Rulesets.current)
 
     let animation =
         Animation.seq
