@@ -23,11 +23,9 @@ type SuggestionContext =
 
     member this.LibraryViewContext: LibraryViewContext =
         {
-            Rate =
-                let _, rate = this.BaseChart in
-                rate
-                Ruleset = this.Ruleset
-                Library = this.Library
+            Rate = snd this.BaseChart
+            Ruleset = this.Ruleset
+            Library = this.Library
         }
 
 module Suggestion =
