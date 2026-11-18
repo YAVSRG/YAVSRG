@@ -1,5 +1,6 @@
 namespace Interlude.Features.Pacemaker
 
+open Interlude.Features.Gameplay
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
@@ -11,7 +12,7 @@ type PacemakerOptionsPage() =
     inherit Page()
 
     // todo: pacemaker needs redesigning around RulesetSelection since you want one setting per all osu! rulesets
-    let ruleset_id = Rulesets.current_hash
+    let ruleset_id = Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Hash
 
     let existing =
         if options.Pacemaker.ContainsKey(ruleset_id) then options.Pacemaker.[ruleset_id] else PacemakerSettings.Default
