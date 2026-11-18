@@ -20,6 +20,11 @@ module RulesetExtensions =
     let private WIFE3_J4 = Wife3.create(4).ToInfo()
 
     type Ruleset with
+
+        static member GetOsuRuleset(od: float32) : RulesetInfo =
+            let idx = int(round(od * 10.0f)) |> min 100 |> max 0
+            OSU_RULESETS.[idx]
+
         static member GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =
             let mutable wife3_as_fallback = false
 
@@ -29,11 +34,16 @@ module RulesetExtensions =
                     | ChartOrigin.Etterna _ ->
                         wife3_as_fallback <- true
                         None
-                    | ChartOrigin.Osu osu ->
-                        let idx = int(round(osu.SourceOD * 10.0f)) |> min 100 |> max 0
-                        Some(OSU_RULESETS.[idx])
+                    | ChartOrigin.Osu osu -> Some(Ruleset.GetOsuRuleset(osu.SourceOD))
                     | ChartOrigin.Quaver _ -> Some(QUAVER_STANDARD))
                     origins
             with
             | None when wife3_as_fallback -> Some(WIFE3_J4)
             | otherwise -> otherwise
+
+        static member GetAutomaticOsuRuleset(origins: ChartOrigin seq, default_od: float32) : RulesetInfo option =
+            Seq.tryPick
+                (function
+                | ChartOrigin.Osu osu -> Some(Ruleset.GetOsuRuleset(osu.SourceOD))
+                | _ -> None)
+                origins

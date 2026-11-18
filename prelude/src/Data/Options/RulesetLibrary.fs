@@ -10,7 +10,7 @@ open Prelude.Gameplay.Rulesets
 [<Json.AutoCodec>]
 type RulesetSelection =
     | FileId of string
-    | Automatic
+    | OsuAutomatic of default_od: float32
 
 type RulesetLibrary(rulesets_storage_path: string) =
 
@@ -79,8 +79,8 @@ type RulesetLibrary(rulesets_storage_path: string) =
                     on_changed_ev.Trigger()
                 else
                     current_selection <- FileId(new_id)
-            | Automatic ->
-                current_selection <- Automatic
+            | OsuAutomatic od ->
+                current_selection <- OsuAutomatic od
                 on_changed_ev.Trigger()
 
         Setting.make on_set (fun () -> current_selection)
@@ -88,13 +88,13 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.GetCurrentRuleset(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
         match selection with
         | FileId file_id -> loaded.[file_id]
-        | Automatic ->
+        | OsuAutomatic od ->
             match chart_meta with
-            | None -> SC_J4
+            | None -> Ruleset.GetOsuRuleset(od)
             | Some chart_meta ->
-                match Ruleset.GetNativeRuleset(chart_meta.Origins) with
-                | None -> SC_J4
+                match Ruleset.GetAutomaticOsuRuleset(chart_meta.Origins, od) with
                 | Some ruleset_info -> this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
+                | None -> Ruleset.GetOsuRuleset(od)
 
     member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
         this.GetCurrentRuleset(Some chart_meta, selection)

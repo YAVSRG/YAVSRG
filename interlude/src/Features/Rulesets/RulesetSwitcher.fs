@@ -32,7 +32,7 @@ module RulesetSwitcher =
                 seq {
                     yield ((fun () -> SelectRulesetPage().Show()), %"rulesets")
 
-                    yield ((fun () -> setting.Set(Automatic)), "AUTOMATIC")
+                    yield ((fun () -> setting.Set(OsuAutomatic 8.0f)), "AUTOMATIC")
 
                     for name, items in groups do
                         if items.Length < 3 then
