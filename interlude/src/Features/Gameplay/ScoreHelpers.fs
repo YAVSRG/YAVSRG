@@ -76,8 +76,8 @@ module Gameplay =
 
             Replay = replay
             Scoring = scoring
-            Lamp = Lamp.calculate scoring.Ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            Grade = Grade.calculate scoring.Ruleset.Ruleset.Grades scoring.Accuracy
+            Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
             Rating = info.Difficulty
             Performance = Performance.calculate info.Difficulty scoring

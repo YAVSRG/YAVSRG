@@ -38,7 +38,7 @@ type ScoreInfo =
     }
 
     member this.RulesetInfo
-        with get (): CachedRuleset = this.Scoring.Ruleset
+        with get (): CachedRuleset = this.Scoring.RulesetInfo
         and set (cached_ruleset: CachedRuleset) =
             let scoring =
                 ScoreProcessor.ProcessEntireReplay(cached_ruleset, this.Replay, this.WithMods, this.Rate)
@@ -47,7 +47,7 @@ type ScoreInfo =
             this.Lamp <- Lamp.calculate cached_ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             this.Grade <- Grade.calculate cached_ruleset.Ruleset.Grades scoring.Accuracy
 
-    member this.Ruleset: Ruleset = this.RulesetInfo.Ruleset
+    member this.Ruleset: Ruleset = this.Scoring.Ruleset
 
     member this.WithRuleset(cached_ruleset: CachedRuleset) : ScoreInfo =
         let scoring =

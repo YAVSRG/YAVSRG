@@ -139,7 +139,8 @@ type GameplayEventProcessor(cached_ruleset: CachedRuleset, replay: ReplaySource,
                 tail_search_index <- tail_search_index + 1
 
     member this.EnumerateRecentFrames() : ReplayFrame seq = replay.EnumerateRecentFrames()
-    member this.Ruleset = cached_ruleset
+    member this.RulesetInfo: CachedRuleset = cached_ruleset
+    member this.Ruleset: Ruleset = cached_ruleset.Ruleset
 
     member this.HoldState(index: int, k: int) : HoldState =
         let state, i = hold_states.[k]

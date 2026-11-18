@@ -81,8 +81,7 @@ module ScoreScreenStats =
         let inc (x: int ref) = x.Value <- x.Value + 1
         let (++) (x: GameplayTime ref) (t: GameplayTime) = x.Value <- x.Value + t
 
-        let filtered_judgements =
-            Array.zeroCreate score_processor.Ruleset.Ruleset.Judgements.Length
+        let filtered_judgements = Array.zeroCreate score_processor.Ruleset.Judgements.Length
 
         let graph_points = ResizeArray<GraphPoint>()
 
@@ -216,7 +215,7 @@ module ScoreScreenStats =
                 * 1.0f<ms / rate>
 
             let lamp =
-                Lamp.calculate score_processor.Ruleset.Ruleset.Lamps filtered_judgements combo_breaks
+                Lamp.calculate score_processor.Ruleset.Lamps filtered_judgements combo_breaks
 
             for i = 1 to new_graph_points_needed do
                 let this_point_timestamp =

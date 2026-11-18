@@ -27,7 +27,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     member this.Pacemaker = pacemaker
 
     member this.Rate = this.Scoring.Rate
-    member this.Ruleset = this.Scoring.Ruleset.Ruleset
+    member this.Ruleset = this.Scoring.Ruleset
 
     member this.ChangeScoring(new_scoring: ScoreProcessor) : unit =
         scoring <- new_scoring
