@@ -13,7 +13,7 @@ type QuaverRulesetPage() =
     let judgement = Setting.simple Quaver.Standard
 
     let create () =
-        Rulesets.install(Quaver.create judgement.Value)
+        rulesets.Install(Quaver.create judgement.Value)
         Menu.Back()
         Menu.Back()
 

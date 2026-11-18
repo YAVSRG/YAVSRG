@@ -116,7 +116,7 @@ module LocalScores =
                 )
             )
 
-        Rulesets.on_changed.Add(fun () ->
+        rulesets.OnChanged.Add(fun () ->
             for score_info in local_scores do
                 score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )

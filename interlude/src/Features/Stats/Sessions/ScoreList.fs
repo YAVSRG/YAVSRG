@@ -193,7 +193,7 @@ module private ScoreList =
                                     match ruleset with
                                     | ScoreListRuleset.Ruleset ruleset_info -> ruleset_info
                                     | ScoreListRuleset.OsuAutomatic od ->
-                                        Rulesets.rulesets.GetCurrent(chart_meta, OsuAutomatic(od))
+                                        rulesets.GetCurrent(chart_meta, OsuAutomatic(od))
 
                                 let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset_info, score)
 
@@ -250,7 +250,7 @@ type ScoreList(start_time: int64, end_time: int64) =
         ScoreList.loader.Request(
             (start_time
              , end_time
-             , match Rulesets.selected_id.Value with
+             , match rulesets.Selected.Value with
                | OsuAutomatic od -> ScoreList.ScoreListRuleset.OsuAutomatic(od)
                | FileId _ -> ScoreList.ScoreListRuleset.Ruleset(Rulesets.GetCurrent(None))
              , (fun s ->

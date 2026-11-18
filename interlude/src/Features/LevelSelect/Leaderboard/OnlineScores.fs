@@ -139,7 +139,7 @@ module OnlineScores =
             score_loader.Cancel()
         )
 
-        Rulesets.on_changed.Add(fun () ->
+        rulesets.OnChanged.Add(fun () ->
             for score_info in leaderboard_scores do
                 score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )

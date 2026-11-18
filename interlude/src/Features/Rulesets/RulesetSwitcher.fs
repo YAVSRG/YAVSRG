@@ -17,7 +17,7 @@ module RulesetSwitcher =
     let make_dropdown (setting: Setting<RulesetSelection>) (w: DropdownWrapper) =
 
         let get_ruleset_groups () =
-            let rulesets = Rulesets.list()
+            let rulesets = rulesets.ToList()
             let remove_bracket = System.Text.RegularExpressions.Regex("\\(.+?\\)")
 
             rulesets
@@ -81,9 +81,9 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
         match SelectedChart.CACHE_DATA with
         | Some chart_meta ->
             match Ruleset.GetNativeRulesetType(chart_meta.Origins) with
-            | Some(NativeRuleset.Wife3) -> Rulesets.rulesets.EnsureInstalledAndSelect(WIFE3_J4)
-            | Some(NativeRuleset.Quaver) -> Rulesets.rulesets.EnsureInstalledAndSelect(QUAVER_STANDARD)
-            | Some(NativeRuleset.OsuMania(od)) -> Rulesets.rulesets.Selected.Set(OsuAutomatic(od))
+            | Some(NativeRuleset.Wife3) -> rulesets.EnsureInstalledAndSelect(WIFE3_J4)
+            | Some(NativeRuleset.Quaver) -> rulesets.EnsureInstalledAndSelect(QUAVER_STANDARD)
+            | Some(NativeRuleset.OsuMania(od)) -> rulesets.Selected.Set(OsuAutomatic(od))
             | None ->
                 Notifications.system_feedback(
                     Icons.HELP_CIRCLE,

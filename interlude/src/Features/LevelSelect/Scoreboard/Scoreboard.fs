@@ -84,7 +84,7 @@ type Scoreboard(display: Setting<InfoPanelMode>) =
             count <- 0
         )
 
-        Rulesets.on_changed.Add(fun _ -> GameThread.defer(fun () -> scores_list.Sort <- sorter()))
+        rulesets.OnChanged.Add(fun _ -> GameThread.defer(fun () -> scores_list.Sort <- sorter()))
         SelectedChart.on_chart_update_finished.Add(fun _ -> refresh_filter())
 
         Gameplay.score_deleted.Add(fun timestamp ->

@@ -29,7 +29,7 @@ type ScoreScreenRulesetSwitcher
         match Ruleset.GetNativeRuleset(score_info.ChartMeta.Origins) with
         | Some ruleset_info ->
             // Use user's version (custom colors, names, etc) if available
-            Rulesets.by_hash(ruleset_info.Hash) |> Option.defaultValue ruleset_info |> set_ruleset_direct
+            rulesets.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info |> set_ruleset_direct
             Style.click.Play()
         | None ->
             Notifications.system_feedback(

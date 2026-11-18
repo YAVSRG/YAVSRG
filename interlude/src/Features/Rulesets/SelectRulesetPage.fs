@@ -16,8 +16,8 @@ type SelectRulesetPage() =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
-    let mutable selected = Rulesets.selected_id.Value
-    let update_selected () = selected <- Rulesets.selected_id.Value
+    let mutable selected = rulesets.Selected.Value
+    let update_selected () = selected <- rulesets.Selected.Value
 
     let listed_ruleset (id: string, ruleset_info: RulesetInfo) : Widget =
 
@@ -50,7 +50,7 @@ type SelectRulesetPage() =
                     ConfirmPage(
                         [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_copy",
                         fun () ->
-                            Rulesets.install
+                            rulesets.Install
                                 { ruleset_info.Ruleset.Clone() with Name = ruleset_info.Ruleset.Name + " (Copy)" }
                     )
                         .Show()
@@ -63,7 +63,7 @@ type SelectRulesetPage() =
                     ConfirmPage(
                         [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_delete",
                         fun () ->
-                            if Rulesets.delete(id) then
+                            if rulesets.Delete(id) then
                                 update_selected()
                     )
                         .Show()
@@ -98,7 +98,7 @@ type SelectRulesetPage() =
                 Dummy(),
                 automatic_osu()
             )
-            .Add(Rulesets.list() |> Seq.map listed_ruleset)
+            .Add(rulesets.ToList() |> Seq.map listed_ruleset)
 
         if container.Focused then
             container.Focus(false)
@@ -113,7 +113,7 @@ type SelectRulesetPage() =
         if (%%"reload_content").Pressed() then
             Style.notify_system.Play()
             Menu.Back()
-            Rulesets.load()
+            rulesets.Load()
             SelectRulesetPage().Show()
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")

@@ -17,7 +17,7 @@ open Interlude.Features.Rulesets
 module LibraryActions =
 
     let recalculate_pbs () : unit =
-        let rulesets = Rulesets.list() |> Seq.map snd |> Array.ofSeq
+        let rulesets = rulesets.ToList() |> Seq.map snd |> Array.ofSeq
 
         RecalculatePersonalBestsTask(Content.Library, rulesets, false)
             .Track(TaskTracking.add %"library.recalculate_personal_bests")

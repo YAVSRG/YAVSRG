@@ -13,7 +13,7 @@ type SCRulesetPage() =
     let judge = Setting.simple 4
 
     let create () =
-        Rulesets.install(SC.create judge.Value)
+        rulesets.Install(SC.create judge.Value)
         Menu.Back()
         Menu.Back()
 
