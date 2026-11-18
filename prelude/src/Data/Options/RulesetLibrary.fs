@@ -90,13 +90,13 @@ type RulesetLibrary(rulesets_storage_path: string) =
             | Some cached_ruleset -> this.FindByHash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset
             | None -> SC_J4
 
+    member this.GetCurrentRuleset(selection: RulesetSelection) : CachedRuleset =
+        match selection with
+        | FileId file_id -> loaded.[file_id]
+        | Automatic -> SC_J4
+
     member this.GetCurrentRuleset(chart_meta: ChartMeta) : CachedRuleset =
         this.GetCurrentRuleset(chart_meta, current_selection)
-
-    member this.Get(selection: RulesetSelection) : Ruleset = // todo: temp!!!
-        match selection with
-        | FileId file_id -> this.FindById(file_id).Ruleset
-        | Automatic -> SC_J4.Ruleset
 
     /// Each ruleset and its file ID, sorted alphabetically
     member this.ToList() : (string * CachedRuleset) seq =
