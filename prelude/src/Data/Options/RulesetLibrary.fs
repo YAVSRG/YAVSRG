@@ -89,7 +89,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
         Setting.make on_set (fun () -> current_selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
+    member this.GetCurrent(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
         match selection with
         | FileId file_id -> loaded.[file_id]
         | OsuAutomatic od ->
@@ -100,13 +100,13 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 | Some ruleset_info -> this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
                 | None -> Ruleset.GetOsuRuleset(od)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
-        this.GetCurrentRuleset(Some chart_meta, selection)
+    member this.GetCurrent(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
+        this.GetCurrent(Some chart_meta, selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta option) : RulesetInfo =
-        this.GetCurrentRuleset(chart_meta, current_selection)
+    member this.GetCurrent(chart_meta: ChartMeta option) : RulesetInfo =
+        this.GetCurrent(chart_meta, current_selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta) : RulesetInfo = this.GetCurrentRuleset(Some chart_meta)
+    member this.GetCurrent(chart_meta: ChartMeta) : RulesetInfo = this.GetCurrent(Some chart_meta)
 
     /// Each ruleset and its file ID, sorted alphabetically
     member this.ToList() : (string * RulesetInfo) seq =

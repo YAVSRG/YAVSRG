@@ -193,7 +193,7 @@ module private ScoreList =
                                     match ruleset with
                                     | ScoreListRuleset.Ruleset ruleset_info -> ruleset_info
                                     | ScoreListRuleset.OsuAutomatic od ->
-                                        Rulesets.rulesets.GetCurrentRuleset(chart_meta, OsuAutomatic(od))
+                                        Rulesets.rulesets.GetCurrent(chart_meta, OsuAutomatic(od))
 
                                 let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset_info, score)
 

@@ -64,7 +64,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                         Setting.simple Rulesets.selected_id.Value
                         |> Setting.trigger(fun selection ->
                             score_info.RulesetInfo <-
-                                Rulesets.rulesets.GetCurrentRuleset(score_info.ChartMeta, selection)
+                                Rulesets.rulesets.GetCurrent(score_info.ChartMeta, selection)
 
                             refresh()
                         ),

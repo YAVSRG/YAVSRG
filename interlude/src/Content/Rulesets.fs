@@ -26,13 +26,13 @@ module Rulesets =
 type Rulesets =
 
     static member GetCurrent(chart_meta: ChartMeta option) : RulesetInfo =
-        Rulesets.rulesets.GetCurrentRuleset(chart_meta)
+        Rulesets.rulesets.GetCurrent(chart_meta)
 
     static member GetCurrent(chart_meta: ChartMeta) : RulesetInfo =
-        Rulesets.rulesets.GetCurrentRuleset(chart_meta)
+        Rulesets.rulesets.GetCurrent(chart_meta)
 
     static member GetCurrentRuleset(chart_meta: ChartMeta) : Ruleset =
-        Rulesets.rulesets.GetCurrentRuleset(chart_meta).Ruleset
+        Rulesets.rulesets.GetCurrent(chart_meta).Ruleset
 
     static member GetCurrentHash(chart_meta: ChartMeta) : string =
-        Rulesets.rulesets.GetCurrentRuleset(chart_meta).Hash
+        Rulesets.rulesets.GetCurrent(chart_meta).Hash
