@@ -57,8 +57,7 @@ module Tree =
             let ctx: LibraryViewContext =
                 {
                     Rate = SelectedChart.rate.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
+                    Ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
                     Library = Content.Library
                 }
 

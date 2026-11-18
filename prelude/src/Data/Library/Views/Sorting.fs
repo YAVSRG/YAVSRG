@@ -30,7 +30,7 @@ module Sorting =
                 fun (x, ctx) ->
                     match
                         ctx.Library.UserData.GetChartData(x.Hash).PersonalBests
-                        |> Bests.ruleset_best_above ctx.RulesetId _.Accuracy ctx.Rate
+                        |> Bests.ruleset_best_above ctx.Ruleset.Hash _.Accuracy ctx.Rate
                     with
                     | Some(acc, _, _) -> "", float32 acc, x.Rating
                     | None -> "", -2.0f, x.Rating
@@ -38,9 +38,9 @@ module Sorting =
                 fun (x, ctx) ->
                     let pbs = ctx.Library.UserData.GetChartData(x.Hash).PersonalBests
 
-                    match Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate pbs with
+                    match Bests.ruleset_best_above ctx.Ruleset.Hash _.Lamp ctx.Rate pbs with
                     | Some(i, _, _) ->
-                        match Bests.ruleset_best_above ctx.RulesetId _.Accuracy ctx.Rate pbs with
+                        match Bests.ruleset_best_above ctx.Ruleset.Hash _.Accuracy ctx.Rate pbs with
                         | Some(acc, _, _) -> "", float32 i, float32 acc
                         | None -> "", float32 i, 0.0f
                     | None -> "", -2.0f, x.Rating

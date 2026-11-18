@@ -82,21 +82,24 @@ type RulesetLibrary(rulesets_storage_path: string) =
             | Automatic -> current_selection <- Automatic)
             (fun () -> current_selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : CachedRuleset =
+    member this.GetCurrentRuleset(chart_meta: ChartMeta option, selection: RulesetSelection) : CachedRuleset =
         match selection with
         | FileId file_id -> loaded.[file_id]
         | Automatic ->
-            match Ruleset.GetNativeRuleset(chart_meta.Origins) with
-            | Some cached_ruleset -> this.FindByHash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset
+            match chart_meta with
             | None -> SC_J4
+            | Some chart_meta ->
+                match Ruleset.GetNativeRuleset(chart_meta.Origins) with
+                | None -> SC_J4
+                | Some cached_ruleset -> this.FindByHash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset
 
-    member this.GetCurrentRuleset(selection: RulesetSelection) : CachedRuleset =
-        match selection with
-        | FileId file_id -> loaded.[file_id]
-        | Automatic -> SC_J4
+    member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : CachedRuleset =
+        this.GetCurrentRuleset(Some chart_meta, selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta) : CachedRuleset =
+    member this.GetCurrentRuleset(chart_meta: ChartMeta option) : CachedRuleset =
         this.GetCurrentRuleset(chart_meta, current_selection)
+
+    member this.GetCurrentRuleset(chart_meta: ChartMeta) : CachedRuleset = this.GetCurrentRuleset(Some chart_meta)
 
     /// Each ruleset and its file ID, sorted alphabetically
     member this.ToList() : (string * CachedRuleset) seq =

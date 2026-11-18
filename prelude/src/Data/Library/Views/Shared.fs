@@ -58,15 +58,15 @@ module internal Shared =
     let grade_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
         let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
-        match data.PersonalBests |> Bests.ruleset_best_above ctx.RulesetId _.Grade ctx.Rate with
-        | Some(i, _, _) -> i, ctx.Ruleset.GradeName(i)
+        match data.PersonalBests |> Bests.ruleset_best_above ctx.Ruleset.Hash _.Grade ctx.Rate with
+        | Some(i, _, _) -> i, ctx.Ruleset.Ruleset.GradeName(i)
         | None -> -2, "No grade achieved"
 
     let lamp_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
         let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
-        match data.PersonalBests |> Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate with
-        | Some(i, _, _) -> i, ctx.Ruleset.LampName(i)
+        match data.PersonalBests |> Bests.ruleset_best_above ctx.Ruleset.Hash _.Lamp ctx.Rate with
+        | Some(i, _, _) -> i, ctx.Ruleset.Ruleset.LampName(i)
         | None -> -2, "No lamp achieved"
 
     let below_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =

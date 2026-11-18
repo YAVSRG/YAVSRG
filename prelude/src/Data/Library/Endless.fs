@@ -17,17 +17,17 @@ type SuggestionContext =
         MinimumRate: Rate
         MaximumRate: Rate
         OnlyNewCharts: bool
-        RulesetId: string
-        Ruleset: Ruleset
+        Ruleset: CachedRuleset
         Library: Library
     }
 
     member this.LibraryViewContext: LibraryViewContext =
         {
-            Rate = let _, rate = this.BaseChart in rate
-            RulesetId = this.RulesetId
-            Ruleset = this.Ruleset
-            Library = this.Library
+            Rate =
+                let _, rate = this.BaseChart in
+                rate
+                Ruleset = this.Ruleset
+                Library = this.Library
         }
 
 module Suggestion =
