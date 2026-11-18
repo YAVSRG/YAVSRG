@@ -9,11 +9,11 @@ open Prelude.Data.Options
 module Rulesets =
     
     let rulesets: RulesetLibrary = RulesetLibrary(get_game_folder("Rulesets"))
-
-type Rulesets =
     
     // todo: rulesets.CanDelete instead of exposing this
-    static member val DEFAULT_ID = "sc-j4"
+    let DEFAULT_RULESET_ID = "sc-j4"
+
+type Rulesets =
 
     static member GetCurrent(chart_meta: ChartMeta option) : RulesetInfo =
         rulesets.GetCurrent(chart_meta)

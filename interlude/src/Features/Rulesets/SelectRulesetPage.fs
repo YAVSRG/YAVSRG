@@ -69,7 +69,7 @@ type SelectRulesetPage() =
                         .Show()
                 )
             )
-                .Disabled(Rulesets.DEFAULT_ID = id)
+                .Disabled((DEFAULT_RULESET_ID = id))
                 .TextColor(Colors.red_accent)
 
         NavigationContainer
