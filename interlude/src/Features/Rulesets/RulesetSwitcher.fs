@@ -1,5 +1,6 @@
 namespace Interlude.Features.Rulesets
 
+open Interlude.Features.Gameplay
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
@@ -68,7 +69,11 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
 
     override this.Init(parent: Widget) : unit =
         this.Add(
-            AngledButton((fun () -> Rulesets.current.Name), (fun () -> this.ToggleDropdown()), Palette.MAIN_100)
+            AngledButton(
+                (fun () -> Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset.Name),
+                (fun () -> this.ToggleDropdown()),
+                Palette.MAIN_100
+            )
                 .LeanRight(false)
                 .Hotkey("ruleset_switch"),
             dropdown_wrapper

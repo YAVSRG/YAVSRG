@@ -38,9 +38,9 @@ type Pacemaker(ctx: HudContext) =
         | PacemakerState.None
         | PacemakerState.Accuracy _
         | PacemakerState.Replay _ -> ()
-        | PacemakerState.Judgement(judgement, _) -> color.Target <- Rulesets.current.Judgements.[judgement].Color
+        | PacemakerState.Judgement(judgement, _) -> color.Target <- ctx.State.Ruleset.JudgementColor(judgement)
         | PacemakerState.ComboBreaks _ ->
-            color.Target <- Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
+            color.Target <- ctx.State.Ruleset.JudgementColor(ctx.State.Ruleset.Judgements.Length - 1)
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)

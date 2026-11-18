@@ -1,5 +1,6 @@
 namespace Interlude.Features.Skins.EditHUD
 
+open Interlude.Features.Gameplay
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
@@ -152,7 +153,7 @@ type JudgementCounterPage() =
     let show_ratio = Setting.simple config.JudgementCounterShowRatio
 
     let show_labels = Setting.simple config.JudgementCounterShowLabels
-    let ruleset = Rulesets.current
+    let ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset
     let JUDGEMENT_COUNT = ruleset.Judgements.Length
 
     let display: int option array =

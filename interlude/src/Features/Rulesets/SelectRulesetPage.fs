@@ -1,5 +1,6 @@
 namespace Interlude.Features.Rulesets
 
+open Interlude.Features.Gameplay
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
@@ -15,6 +16,8 @@ type SelectRulesetPage() =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
+    let mutable selected = Rulesets.selected_id.Value
+    let update_selected () = selected <- Rulesets.selected_id.Value
 
     let refresh () =
         container.Clear()
@@ -33,7 +36,12 @@ type SelectRulesetPage() =
                             NavigationContainer
                                 .Row()
                                 .With(
-                                    PageButton(ruleset_info.Ruleset.Name, fun () -> options.Ruleset.Set(FileId(id)))
+                                    PageButton(
+                                        ruleset_info.Ruleset.Name,
+                                        fun () ->
+                                            options.Ruleset.Set(FileId(id))
+                                            update_selected()
+                                    )
                                         .TextColor(fun () ->
                                             if options.Ruleset.Value = FileId(id) then
                                                 Colors.text_pink_2
@@ -43,10 +51,15 @@ type SelectRulesetPage() =
                                         .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 4.0f)),
                                     Button(
                                         Icons.PIE_CHART,
-                                        fun () -> CompareRulesetsPage(Rulesets.current, ruleset_info.Ruleset).Show()
+                                        fun () ->
+                                            CompareRulesetsPage(
+                                                Rulesets.GetCurrent(SelectedChart.CACHE_DATA).Ruleset,
+                                                ruleset_info.Ruleset
+                                            )
+                                                .Show()
                                     )
                                         .Position(Position.SliceR(PAGE_ITEM_HEIGHT * 3.0f, PAGE_ITEM_HEIGHT))
-                                        .Disabled(fun () -> Rulesets.current = ruleset_info.Ruleset),
+                                        .Disabled(fun () -> selected = FileId(id)),
                                     Button(Icons.EDIT, fun () -> RulesetEditorPage(id, ruleset_info.Ruleset).Show())
                                         .Position(Position.SliceR(PAGE_ITEM_HEIGHT * 2.0f, PAGE_ITEM_HEIGHT)),
                                     Button(
@@ -68,7 +81,9 @@ type SelectRulesetPage() =
                                         (fun () ->
                                             ConfirmPage(
                                                 [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_delete",
-                                                fun () -> Rulesets.delete id |> ignore
+                                                fun () ->
+                                                    if Rulesets.delete(id) then
+                                                        update_selected()
                                             )
                                                 .Show()
                                         )
