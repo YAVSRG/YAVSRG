@@ -97,7 +97,7 @@ module Gameplay =
             if mod_status = ModStatus.Ranked then
 
                 let standardised_score =
-                    if score_info.Ruleset.Hash <> SC_J4.Hash then score_info.WithRuleset(SC_J4) else score_info
+                    if score_info.RulesetInfo.Hash <> SC_J4.Hash then score_info.WithRuleset(SC_J4) else score_info
 
                 if Network.status = Network.Status.LoggedIn && not standardised_score.IsFailed then
                     upload_score standardised_score

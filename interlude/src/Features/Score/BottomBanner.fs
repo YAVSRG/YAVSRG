@@ -43,7 +43,7 @@ type RulesetSwitcher
 
     override this.Init(parent: Widget) : unit =
         this.Add(
-            InlaidButton((fun () -> score_info.Ruleset.Ruleset.Name), (fun () -> this.ToggleDropdown()))
+            InlaidButton((fun () -> score_info.RulesetInfo.Ruleset.Name), (fun () -> this.ToggleDropdown()))
                 .Hotkey("ruleset_switch")
                 .HoverText(%"score.switch_ruleset"),
 
@@ -122,12 +122,13 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                     RulesetSwitcher(
                         Setting.simple Rulesets.selected_id.Value
                         |> Setting.trigger(fun selection ->
-                            score_info.Ruleset <- Rulesets.rulesets.GetCurrentRuleset(score_info.ChartMeta, selection)
+                            score_info.RulesetInfo <-
+                                Rulesets.rulesets.GetCurrentRuleset(score_info.ChartMeta, selection)
 
                             refresh()
                         ),
                         (fun ruleset ->
-                            score_info.Ruleset <- ruleset
+                            score_info.RulesetInfo <- ruleset
                             refresh()
                         ),
                         score_info

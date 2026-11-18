@@ -133,7 +133,7 @@ type Score(score_info: ScoreInfo) =
             Style.font,
             score_info.Scoring.FormattedAccuracy,
             box.ShrinkY(5.0f),
-            (score_info.Ruleset.Ruleset.GradeColor(score_info.Grade).O4a alpha, Colors.shadow_2.O4a(alpha)),
+            (score_info.RulesetInfo.Ruleset.GradeColor(score_info.Grade).O4a alpha, Colors.shadow_2.O4a(alpha)),
             Alignment.CENTER
         )
 
@@ -142,9 +142,9 @@ type Score(score_info: ScoreInfo) =
 
         Text.fill_b(
             Style.font,
-            score_info.Ruleset.Ruleset.LampName(score_info.Lamp),
+            score_info.RulesetInfo.Ruleset.LampName(score_info.Lamp),
             box.ShrinkY(5.0f),
-            (score_info.Ruleset.Ruleset.LampColor(score_info.Lamp).O4a alpha, Colors.shadow_2.O4a(alpha)),
+            (score_info.RulesetInfo.Ruleset.LampColor(score_info.Lamp).O4a alpha, Colors.shadow_2.O4a(alpha)),
             Alignment.CENTER
         )
 
@@ -185,7 +185,9 @@ module private ScoreList =
                             match Content.Charts.GetChart(chart_hash) with
                             | Ok chart ->
                                 // todo: temporary to make it compile
-                                let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, CachedRuleset.Create(ruleset), score)
+                                let score_info =
+                                    ScoreInfo.CreateFromScore(chart_meta, chart, CachedRuleset.Create(ruleset), score)
+
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
                         | _ -> yield fun () -> callback(MissingScore())

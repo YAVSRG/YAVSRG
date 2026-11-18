@@ -158,7 +158,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let duration =
         (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> format_duration_ms
 
-    let mutable MAX_WINDOW = score_info.Ruleset.Ruleset.LargestWindow
+    let mutable MAX_WINDOW = score_info.RulesetInfo.Ruleset.LargestWindow
 
     do fbo.Unbind()
 
@@ -397,7 +397,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let mutable previous_early = 0.0f<ms / rate>
         let mutable previous_late = 0.0f<ms / rate>
 
-        for j in score_info.Ruleset.Ruleset.Judgements do
+        for j in score_info.RulesetInfo.Ruleset.Judgements do
             match j.TimingWindows with
             | Some(early, late) ->
                 Render.rect_edges
@@ -431,7 +431,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let ms_to_y (time: GameplayTime) =
                 c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
-            for j in score_info.Ruleset.Ruleset.Judgements do
+            for j in score_info.RulesetInfo.Ruleset.Judgements do
                 match j.TimingWindows with
                 | Some(early, late) ->
                     let early_y = ms_to_y early - 24.0f
@@ -516,11 +516,11 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let line_color =
             match options.ScoreGraphLineColor.Value with
             | ScoreGraphLineColor.Lamp ->
-                fun (snapshot: GraphPoint) -> score_info.Ruleset.Ruleset.LampColor(snapshot.Lamp)
+                fun (snapshot: GraphPoint) -> score_info.RulesetInfo.Ruleset.LampColor(snapshot.Lamp)
             | ScoreGraphLineColor.Grade ->
                 fun (snapshot: GraphPoint) ->
-                    let grade = Grade.calculate score_info.Ruleset.Ruleset.Grades snapshot.Accuracy
-                    score_info.Ruleset.Ruleset.GradeColor(grade)
+                    let grade = Grade.calculate score_info.RulesetInfo.Ruleset.Grades snapshot.Accuracy
+                    score_info.RulesetInfo.Ruleset.GradeColor(grade)
             | _ -> K Colors.white
 
         match options.ScoreGraphLineMode.Value with
@@ -613,7 +613,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 | Some(judgement, _) when
                     not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column]
                     ->
-                    let color = score_info.Ruleset.Ruleset.JudgementColor(judgement)
+                    let color = score_info.RulesetInfo.Ruleset.JudgementColor(judgement)
 
                     if e.Missed then
                         //bar x color
@@ -635,7 +635,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 match e.Judgement with
                 | Some(judgement, _) when GraphSettings.column_filter.[ev.Column] ->
                     // todo: figure something out about half-scale releases
-                    let color = score_info.Ruleset.Ruleset.JudgementColor(judgement)
+                    let color = score_info.RulesetInfo.Ruleset.JudgementColor(judgement)
 
                     if e.Missed then
                         //bar x (score_info.Ruleset.JudgementColor judgement)
@@ -654,7 +654,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 | Some(judgement, _) when
                     not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column]
                     ->
-                    let color = score_info.Ruleset.Ruleset.JudgementColor(judgement)
+                    let color = score_info.RulesetInfo.Ruleset.JudgementColor(judgement)
                     //bar x color
                     dot (x, THICKNESS) color
                 | _ -> ()
@@ -664,7 +664,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     member private this.Redraw() : unit =
         refresh <- false
-        MAX_WINDOW <- score_info.Ruleset.Ruleset.LargestWindow
+        MAX_WINDOW <- score_info.RulesetInfo.Ruleset.LargestWindow
         let h = 0.5f * this.Bounds.Height
         fbo.Bind(true)
 

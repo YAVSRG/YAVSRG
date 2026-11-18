@@ -37,7 +37,7 @@ type ScoreInfo =
         IsFailed: bool
     }
 
-    member this.Ruleset
+    member this.RulesetInfo
         with get () = this.Scoring.Ruleset
         and set ruleset =
             let scoring =
@@ -65,7 +65,7 @@ type ScoreInfo =
     member this.ModString() : string = ModState.format(this.Rate, this.Mods)
 
     member this.Shorthand: string =
-        sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.Ruleset.LampName(this.Lamp))
+        sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.RulesetInfo.Ruleset.LampName(this.Lamp))
 
     member this.ToScore() : Score =
         {

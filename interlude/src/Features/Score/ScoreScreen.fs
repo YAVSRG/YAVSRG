@@ -22,12 +22,12 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
     let personal_bests = ref pbs
 
     let grade =
-        ref(Grade.calculate_with_target score_info.Ruleset.Ruleset.Grades score_info.Accuracy)
+        ref(Grade.calculate_with_target score_info.RulesetInfo.Ruleset.Grades score_info.Accuracy)
 
     let lamp =
         ref(
             Lamp.calculate_with_target
-                score_info.Ruleset.Ruleset.Lamps
+                score_info.RulesetInfo.Ruleset.Lamps
                 score_info.Scoring.JudgementCounts
                 score_info.Scoring.ComboBreaks
         )
@@ -46,11 +46,11 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
     let refresh () =
         personal_bests := ImprovementFlags.None
 
-        grade := Grade.calculate_with_target score_info.Ruleset.Ruleset.Grades score_info.Accuracy
+        grade := Grade.calculate_with_target score_info.RulesetInfo.Ruleset.Grades score_info.Accuracy
 
         lamp
         := Lamp.calculate_with_target
-            score_info.Ruleset.Ruleset.Lamps
+            score_info.RulesetInfo.Ruleset.Lamps
             score_info.Scoring.JudgementCounts
             score_info.Scoring.ComboBreaks
 
@@ -102,7 +102,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         DiscordRPC.in_menus(%"discord_status.score_screen")
 
     override this.OnExit(_: ScreenType) : unit =
-        score_info.Ruleset <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+        score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         (graph :> System.IDisposable).Dispose()
         on_ruleset_changed.Dispose()
         Toolbar.show()

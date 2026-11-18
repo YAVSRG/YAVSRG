@@ -41,7 +41,7 @@ type RecalculatePersonalBestsTask(library: Library, rulesets: CachedRuleset arra
                         if score_info.ModStatus = ModStatus.Ranked then
 
                             for cached_ruleset in rulesets do
-                                score_info.Ruleset <- cached_ruleset
+                                score_info.RulesetInfo <- cached_ruleset
 
                                 if new_bests.ContainsKey(cached_ruleset.Hash) then
                                     let ruleset_bests, _ = Bests.update score_info new_bests.[cached_ruleset.Hash]

@@ -36,8 +36,8 @@ module LocalScores =
         // if so, set it to that ruleset on the main thread
         let current_ruleset = Rulesets.GetCurrent(score_info.ChartMeta)
 
-        if score_info.Ruleset <> current_ruleset then
-            score_info.Ruleset <- current_ruleset
+        if score_info.RulesetInfo <> current_ruleset then
+            score_info.RulesetInfo <- current_ruleset
 
         local_scores.Add(score_info)
         score_loaded_ev.Trigger(score_info)
@@ -48,7 +48,7 @@ module LocalScores =
         let cached_ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
 
         for score_info in local_scores do
-            assert (score_info.Ruleset = cached_ruleset)
+            assert (score_info.RulesetInfo = cached_ruleset)
 
             if score_info.ModStatus = ModStatus.Ranked then
                 new_bests <-
@@ -118,7 +118,7 @@ module LocalScores =
 
         Rulesets.on_changed.Add(fun () ->
             for score_info in local_scores do
-                score_info.Ruleset <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+                score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.score_saved.Add(load_score)

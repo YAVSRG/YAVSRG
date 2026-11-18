@@ -50,8 +50,8 @@ module OnlineScores =
         // if so, set it to that ruleset on the main thread
         let current_ruleset = Rulesets.GetCurrent(score_info.ChartMeta)
 
-        if score_info.Ruleset <> current_ruleset then
-            score_info.Ruleset <- current_ruleset
+        if score_info.RulesetInfo <> current_ruleset then
+            score_info.RulesetInfo <- current_ruleset
 
         leaderboard_scores.Add(score_info)
         leaderboard_score_loaded_ev.Trigger(score, score_info)
@@ -134,7 +134,7 @@ module OnlineScores =
 
         Rulesets.on_changed.Add(fun () ->
             for score_info in leaderboard_scores do
-                score_info.Ruleset <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+                score_info.RulesetInfo <- Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.leaderboard_rank_changed.Add(fun info ->
