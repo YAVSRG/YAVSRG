@@ -54,6 +54,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
         | FileId file_id when not(loaded.ContainsKey(file_id)) ->
             Logging.Warn "Ruleset '%s' not found, switching to default" file_id
             current_selection <- FileId(DEFAULT_ID)
+            on_changed_ev.Trigger()
         | _ -> ()
 
         initialised <- true
@@ -62,6 +63,9 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     member this.FindByHash(hash: string) : RulesetInfo option =
         loaded.Values |> Seq.tryFind(fun ruleset -> ruleset.Hash = hash)
+
+    member this.FindIdByHash(hash: string) : string option =
+        loaded.Keys |> Seq.tryFind(fun id -> loaded.[id].Hash = hash)
 
     member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
@@ -135,6 +139,16 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 Logging.Error "Ruleset import failed: %s" reason
                 false
 
+    member this.EnsureInstalledAndSelect(ruleset_info: RulesetInfo) : unit =
+        let id =
+            match this.FindIdByHash(ruleset_info.Hash) with
+            | None ->
+                this.Install(ruleset_info.Ruleset)
+                this.FindIdByHash(ruleset_info.Hash).Value
+            | Some id -> id
+
+        this.Selected.Set(FileId(id))
+
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     member this.Update(existing_file_id: string, ruleset: Ruleset) : unit =
 
@@ -175,6 +189,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             try
                 if current_selection = FileId(file_id) then
                     current_selection <- FileId(DEFAULT_ID)
+                    on_changed_ev.Trigger()
 
                 File.Delete(Path.Combine(rulesets_storage_path, file_id + ".ruleset"))
                 loaded.Remove(file_id)

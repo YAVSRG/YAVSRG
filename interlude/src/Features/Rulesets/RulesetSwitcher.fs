@@ -2,7 +2,9 @@ namespace Interlude.Features.Rulesets
 
 open Interlude.Features.Gameplay
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Options
@@ -67,11 +69,28 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
     inherit Container(NodeType.None)
 
     let MAX_HEIGHT = 700.0f
+    let mutable dropdown_height = MAX_HEIGHT
 
     let dropdown_wrapper =
         DropdownWrapper(fun d ->
+            dropdown_height <- min d.Height MAX_HEIGHT
             Position.BorderT(min d.Height MAX_HEIGHT).Shrink(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING)
         )
+
+    let switch_to_native_ruleset () =
+        match SelectedChart.CACHE_DATA with
+        | Some chart_meta ->
+            match Ruleset.GetNativeRulesetType(chart_meta.Origins) with
+            | Some(NativeRuleset.Wife3) -> Rulesets.rulesets.EnsureInstalledAndSelect(WIFE3_J4)
+            | Some(NativeRuleset.Quaver) -> Rulesets.rulesets.EnsureInstalledAndSelect(QUAVER_STANDARD)
+            | Some(NativeRuleset.OsuMania(od)) -> Rulesets.rulesets.Selected.Set(OsuAutomatic(od))
+            | None ->
+                Notifications.system_feedback(
+                    Icons.HELP_CIRCLE,
+                    %"notification.no_native_ruleset.title",
+                    %"notification.no_native_ruleset.body"
+                )
+        | None -> ()
 
     override this.Init(parent: Widget) : unit =
         this.Add(
@@ -82,10 +101,30 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
             )
                 .LeanRight(false)
                 .Hotkey("ruleset_switch"),
+            HotkeyListener("native_ruleset", switch_to_native_ruleset),
             dropdown_wrapper
         )
 
         base.Init(parent)
+
+    override this.Draw() =
+        base.Draw()
+
+        let show_native_hint =
+            dropdown_wrapper.Active
+            && SelectedChart.CACHE_DATA.IsSome
+            && not SelectedChart.CACHE_DATA.Value.Origins.IsEmpty
+
+        if show_native_hint then
+            Text.draw_aligned_b(
+                Style.font,
+                sprintf "%O: %s" %%"native_ruleset" %"ruleset.use_native",
+                20.0f,
+                this.Bounds.CenterX,
+                this.Bounds.Top - dropdown_height - 50.0f,
+                Colors.text_cyan_2,
+                Alignment.CENTER
+            )
 
     member this.ToggleDropdown() : unit =
         RulesetSwitcher.make_dropdown setting dropdown_wrapper

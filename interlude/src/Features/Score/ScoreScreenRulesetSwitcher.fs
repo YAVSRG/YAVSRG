@@ -43,9 +43,7 @@ type ScoreScreenRulesetSwitcher
             InlaidButton((fun () -> score_info.Ruleset.Name), (fun () -> this.ToggleDropdown()))
                 .Hotkey("ruleset_switch")
                 .HoverText(%"score.switch_ruleset"),
-
             HotkeyListener("native_ruleset", switch_to_native_ruleset),
-
             dropdown_wrapper
         )
 
