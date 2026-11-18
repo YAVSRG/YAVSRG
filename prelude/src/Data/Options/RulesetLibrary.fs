@@ -66,8 +66,8 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
     member val Selected: Setting<RulesetSelection> =
-        Setting.make
-            (function
+        let on_set (selection: RulesetSelection) : unit =
+            match selection with
             | FileId new_id ->
                 if initialised then
                     if not(loaded.ContainsKey(new_id)) then
@@ -79,8 +79,11 @@ type RulesetLibrary(rulesets_storage_path: string) =
                     on_changed_ev.Trigger()
                 else
                     current_selection <- FileId(new_id)
-            | Automatic -> current_selection <- Automatic)
-            (fun () -> current_selection)
+            | Automatic ->
+                current_selection <- Automatic
+                on_changed_ev.Trigger()
+
+        Setting.make on_set (fun () -> current_selection)
 
     member this.GetCurrentRuleset(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
         match selection with
