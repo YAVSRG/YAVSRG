@@ -184,7 +184,8 @@ module private ScoreList =
                         | Some chart_meta ->
                             match Content.Charts.GetChart(chart_hash) with
                             | Ok chart ->
-                                let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset, score)
+                                // todo: temporary to make it compile
+                                let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, CachedRuleset.Create(ruleset), score)
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
                         | _ -> yield fun () -> callback(MissingScore())
