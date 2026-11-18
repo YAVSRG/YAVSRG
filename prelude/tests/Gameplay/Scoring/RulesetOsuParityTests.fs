@@ -11,8 +11,8 @@ open Prelude.Tests.Helpers
 
 module RulesetOsuParityTests =
 
-    let RULESET = CachedRuleset.Create(OsuMania.create 8.0f OsuMania.NoMod)
-    let OD10_RULESET = CachedRuleset.Create(OsuMania.create 10.0f OsuMania.NoMod)
+    let RULESET = RulesetInfo.Create(OsuMania.create 8.0f OsuMania.NoMod)
+    let OD10_RULESET = RulesetInfo.Create(OsuMania.create 10.0f OsuMania.NoMod)
 
     let TEST_REPLAY_FILE =
         OsuReplay.TryReadFile(
@@ -83,7 +83,7 @@ module RulesetOsuParityTests =
 
         let score =
             ScoreProcessor.ProcessEntireReplay(
-                CachedRuleset.Create(as_interlude_ruleset),
+                RulesetInfo.Create(as_interlude_ruleset),
                 as_interlude_replay,
                 TEST_CHART,
                 1.0f<rate>
@@ -114,7 +114,7 @@ module RulesetOsuParityTests =
 
         let score =
             ScoreProcessor.ProcessEntireReplay(
-                CachedRuleset.Create(as_interlude_ruleset),
+                RulesetInfo.Create(as_interlude_ruleset),
                 as_interlude_replay,
                 TEST_CHART,
                 1.0f<rate>
@@ -134,7 +134,7 @@ module RulesetOsuParityTests =
 
         let score =
             ScoreProcessor.ProcessEntireReplay(
-                CachedRuleset.Create(as_interlude_ruleset),
+                RulesetInfo.Create(as_interlude_ruleset),
                 as_interlude_replay,
                 TEST_CHART,
                 1.0f<rate>
@@ -283,7 +283,7 @@ module RulesetOsuParityTests =
             OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score =
-            ScoreProcessor.ProcessEntireReplay(CachedRuleset.Create(ruleset), replay, TEST_CHART_2, 1.5f<rate>)
+            ScoreProcessor.ProcessEntireReplay(RulesetInfo.Create(ruleset), replay, TEST_CHART_2, 1.5f<rate>)
 
         Assert.AreEqual(
             (TEST_REPLAY_FILE_2.CountGeki,
@@ -309,7 +309,7 @@ module RulesetOsuParityTests =
             OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score =
-            ScoreProcessor.Create(CachedRuleset.Create(ruleset), replay, TEST_CHART_2, 1.5f<rate>)
+            ScoreProcessor.Create(RulesetInfo.Create(ruleset), replay, TEST_CHART_2, 1.5f<rate>)
 
         score.ProcessEntireReplay()
 
@@ -466,7 +466,7 @@ module RulesetOsuParityTests =
             printfn "TRYING OD %.1f\n" od
 
             let event_processing =
-                ScoreProcessor(CachedRuleset.Create(ruleset), replay, note_data, 1.0f<rate>)
+                ScoreProcessor(RulesetInfo.Create(ruleset), replay, note_data, 1.0f<rate>)
 
             event_processing.ProcessEntireReplay()
 

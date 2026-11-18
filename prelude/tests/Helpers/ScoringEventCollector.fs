@@ -6,9 +6,8 @@ open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 
-type ScoringEventCollector(cached_ruleset: CachedRuleset, replay: ReplaySource, note_data: NoteData, rate: Rate) as this
-    =
-    inherit ScoreProcessor(cached_ruleset, replay, note_data, rate)
+type ScoringEventCollector(ruleset_info: RulesetInfo, replay: ReplaySource, note_data: NoteData, rate: Rate) as this =
+    inherit ScoreProcessor(ruleset_info, replay, note_data, rate)
 
     let events = ResizeArray<ScoringEvent>()
 
@@ -18,6 +17,6 @@ type ScoringEventCollector(cached_ruleset: CachedRuleset, replay: ReplaySource, 
             events.Add(event)
         )
 
-    new(ruleset, replay, note_data, rate)= ScoringEventCollector(CachedRuleset.Create(ruleset), replay, note_data, rate)
+    new(ruleset, replay, note_data, rate) = ScoringEventCollector(RulesetInfo.Create(ruleset), replay, note_data, rate)
 
     member this.Events = events.AsReadOnly()

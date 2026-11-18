@@ -27,7 +27,7 @@ module OnlineScores =
 
     type Request =
         {
-            Ruleset: CachedRuleset
+            Ruleset: RulesetInfo
             ChartMeta: ChartMeta
             CurrentChart: Chart
         }

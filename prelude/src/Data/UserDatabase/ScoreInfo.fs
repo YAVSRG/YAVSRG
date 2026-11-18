@@ -38,25 +38,25 @@ type ScoreInfo =
     }
 
     member this.RulesetInfo
-        with get (): CachedRuleset = this.Scoring.RulesetInfo
-        and set (cached_ruleset: CachedRuleset) =
+        with get (): RulesetInfo = this.Scoring.RulesetInfo
+        and set (ruleset_info: RulesetInfo) =
             let scoring =
-                ScoreProcessor.ProcessEntireReplay(cached_ruleset, this.Replay, this.WithMods, this.Rate)
+                ScoreProcessor.ProcessEntireReplay(ruleset_info, this.Replay, this.WithMods, this.Rate)
 
             this.Scoring <- scoring
-            this.Lamp <- Lamp.calculate cached_ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            this.Grade <- Grade.calculate cached_ruleset.Ruleset.Grades scoring.Accuracy
+            this.Lamp <- Lamp.calculate ruleset_info.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            this.Grade <- Grade.calculate ruleset_info.Ruleset.Grades scoring.Accuracy
 
     member this.Ruleset: Ruleset = this.Scoring.Ruleset
 
-    member this.WithRuleset(cached_ruleset: CachedRuleset) : ScoreInfo =
+    member this.WithRuleset(ruleset_info: RulesetInfo) : ScoreInfo =
         let scoring =
-            ScoreProcessor.ProcessEntireReplay(cached_ruleset, this.Replay, this.WithMods, this.Rate)
+            ScoreProcessor.ProcessEntireReplay(ruleset_info, this.Replay, this.WithMods, this.Rate)
 
         { this with
             Scoring = scoring
-            Lamp = Lamp.calculate cached_ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            Grade = Grade.calculate cached_ruleset.Ruleset.Grades scoring.Accuracy
+            Lamp = Lamp.calculate ruleset_info.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate ruleset_info.Ruleset.Grades scoring.Accuracy
         }
 
     member this.Accuracy = this.Scoring.Accuracy
@@ -81,13 +81,13 @@ type ScoreInfo =
         }
 
     static member CreateFromScore
-        (chart_meta: ChartMeta, chart: Chart, cached_ruleset: CachedRuleset, score: Score)
+        (chart_meta: ChartMeta, chart: Chart, ruleset_info: RulesetInfo, score: Score)
         : ScoreInfo =
         let with_mods = ModState.apply score.Mods chart
         let replay = Replay.FromByteArray(score.Replay)
 
         let scoring =
-            ScoreProcessor.ProcessEntireReplay(cached_ruleset, replay, with_mods, score.Rate)
+            ScoreProcessor.ProcessEntireReplay(ruleset_info, replay, with_mods, score.Rate)
 
         let difficulty = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
@@ -102,8 +102,8 @@ type ScoreInfo =
 
             Replay = replay
             Scoring = scoring
-            Lamp = Lamp.calculate cached_ruleset.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            Grade = Grade.calculate cached_ruleset.Ruleset.Grades scoring.Accuracy
+            Lamp = Lamp.calculate ruleset_info.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate ruleset_info.Ruleset.Grades scoring.Accuracy
 
             Rating = difficulty
             Performance = Performance.calculate difficulty scoring

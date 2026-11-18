@@ -76,10 +76,10 @@ module Scores =
             let mod_chart = ModState.apply mods chart
 
             let ruleset = Backbeat.rulesets.[Score.PRIMARY_RULESET]
-            let cached_ruleset = { Ruleset = ruleset; Hash = Score.PRIMARY_RULESET }
+            let ruleset_info = { Ruleset = ruleset; Hash = Score.PRIMARY_RULESET }
 
             let scoring =
-                ScoreProcessor.ProcessEntireReplay(cached_ruleset, replay, mod_chart, rate)
+                ScoreProcessor.ProcessEntireReplay(ruleset_info, replay, mod_chart, rate)
 
             let accuracy = scoring.Accuracy
 

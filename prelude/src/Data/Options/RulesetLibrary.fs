@@ -24,7 +24,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
     let DEFAULT_ID = DEFAULT.Ruleset.Filename()
 
     let mutable initialised = false
-    let loaded = Dictionary<string, CachedRuleset>()
+    let loaded = Dictionary<string, RulesetInfo>()
     let mutable current_selection = FileId(DEFAULT_ID)
     let on_changed_ev = Event<unit>()
     member val OnChanged = on_changed_ev.Publish
@@ -44,7 +44,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 let id = Path.GetFileNameWithoutExtension(f)
 
                 match Ruleset.TryFromFile(f) with
-                | Ok ruleset -> loaded.Add(id, CachedRuleset.Create(ruleset))
+                | Ok ruleset -> loaded.Add(id, RulesetInfo.Create(ruleset))
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         if not(loaded.ContainsKey(DEFAULT_ID)) then
@@ -58,9 +58,9 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
         initialised <- true
 
-    member this.FindById(file_id: string) : CachedRuleset = loaded.[file_id]
+    member this.FindById(file_id: string) : RulesetInfo = loaded.[file_id]
 
-    member this.FindByHash(hash: string) : CachedRuleset option =
+    member this.FindByHash(hash: string) : RulesetInfo option =
         loaded.Values |> Seq.tryFind(fun ruleset -> ruleset.Hash = hash)
 
     member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
@@ -82,7 +82,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             | Automatic -> current_selection <- Automatic)
             (fun () -> current_selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta option, selection: RulesetSelection) : CachedRuleset =
+    member this.GetCurrentRuleset(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
         match selection with
         | FileId file_id -> loaded.[file_id]
         | Automatic ->
@@ -91,23 +91,23 @@ type RulesetLibrary(rulesets_storage_path: string) =
             | Some chart_meta ->
                 match Ruleset.GetNativeRuleset(chart_meta.Origins) with
                 | None -> SC_J4
-                | Some cached_ruleset -> this.FindByHash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset
+                | Some ruleset_info -> this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : CachedRuleset =
+    member this.GetCurrentRuleset(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
         this.GetCurrentRuleset(Some chart_meta, selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta option) : CachedRuleset =
+    member this.GetCurrentRuleset(chart_meta: ChartMeta option) : RulesetInfo =
         this.GetCurrentRuleset(chart_meta, current_selection)
 
-    member this.GetCurrentRuleset(chart_meta: ChartMeta) : CachedRuleset = this.GetCurrentRuleset(Some chart_meta)
+    member this.GetCurrentRuleset(chart_meta: ChartMeta) : RulesetInfo = this.GetCurrentRuleset(Some chart_meta)
 
     /// Each ruleset and its file ID, sorted alphabetically
-    member this.ToList() : (string * CachedRuleset) seq =
+    member this.ToList() : (string * RulesetInfo) seq =
         seq {
             for k in loaded.Keys do
                 yield (k, loaded.[k])
         }
-        |> Seq.sortBy(fun (_, cached_ruleset) -> cached_ruleset.Ruleset.Name.ToLowerInvariant())
+        |> Seq.sortBy(fun (_, ruleset_info) -> ruleset_info.Ruleset.Name.ToLowerInvariant())
 
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
     member this.Install(ruleset: Ruleset) : unit =
@@ -116,7 +116,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
         let new_id =
             if this.Exists(new_id) then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
 
-        loaded.Add(new_id, CachedRuleset.Create(ruleset))
+        loaded.Add(new_id, RulesetInfo.Create(ruleset))
         ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_id + ".ruleset"))
 
     member this.Install(path: string) : bool =
@@ -159,7 +159,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
         let new_file_id = ensure_filename_updated()
 
         if loaded.Remove(existing_file_id) then
-            loaded.Add(new_file_id, CachedRuleset.Create(ruleset))
+            loaded.Add(new_file_id, RulesetInfo.Create(ruleset))
             ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_file_id + ".ruleset"))
             let selected_was_changed = current_selection = FileId(existing_file_id)
 

@@ -17,7 +17,7 @@ type SuggestionContext =
         MinimumRate: Rate
         MaximumRate: Rate
         OnlyNewCharts: bool
-        Ruleset: CachedRuleset
+        Ruleset: RulesetInfo
         Library: Library
     }
 

@@ -14,10 +14,10 @@ module temp =
         static member current_hash =
             Rulesets.rulesets.GetCurrentRuleset(SelectedChart.CACHE_DATA.Value).Hash
 
-        static member GetCurrent(chart_meta: ChartMeta option) : CachedRuleset =
+        static member GetCurrent(chart_meta: ChartMeta option) : RulesetInfo =
             Rulesets.rulesets.GetCurrentRuleset(chart_meta)
 
-        static member GetCurrent(chart_meta: ChartMeta) : CachedRuleset =
+        static member GetCurrent(chart_meta: ChartMeta) : RulesetInfo =
             Rulesets.rulesets.GetCurrentRuleset(chart_meta)
 
         static member GetCurrentRuleset(chart_meta: ChartMeta) : Ruleset =

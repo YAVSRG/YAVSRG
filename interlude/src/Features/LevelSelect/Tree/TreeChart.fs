@@ -36,9 +36,9 @@ type private TreeChart
 
     member this.UpdateCachedInfo() : unit =
 
-        let cached_ruleset = Rulesets.GetCurrent(chart_meta)
-        let ruleset = cached_ruleset.Ruleset
-        let ruleset_hash = cached_ruleset.Hash
+        let ruleset_info = Rulesets.GetCurrent(chart_meta)
+        let ruleset = ruleset_info.Ruleset
+        let ruleset_hash = ruleset_info.Hash
 
         let get_pb (bests: PersonalBests<'T>) (rate: Rate) =
             match PersonalBests.get_best_above rate bests with

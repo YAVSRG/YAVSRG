@@ -13,7 +13,7 @@ module LocalScores =
 
     type Request =
         {
-            Ruleset: CachedRuleset
+            Ruleset: RulesetInfo
             ChartMeta: ChartMeta
             CurrentChart: Chart
             ChartSaveData: ChartSaveData
@@ -45,10 +45,10 @@ module LocalScores =
     let private finish_loading () =
         let mutable new_bests = None
 
-        let cached_ruleset = Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+        let ruleset_info = Rulesets.GetCurrent(SelectedChart.CACHE_DATA)
 
         for score_info in local_scores do
-            assert (score_info.RulesetInfo = cached_ruleset)
+            assert (score_info.RulesetInfo = ruleset_info)
 
             if score_info.ModStatus = ModStatus.Ranked then
                 new_bests <-
@@ -61,7 +61,7 @@ module LocalScores =
         match new_bests, SelectedChart.SAVE_DATA with
         | Some new_bests, Some save_data ->
             let old_bests = save_data.PersonalBests
-            let new_bests = Map.add cached_ruleset.Hash new_bests old_bests
+            let new_bests = Map.add ruleset_info.Hash new_bests old_bests
 
             if new_bests <> old_bests then
                 save_data.PersonalBests <- new_bests

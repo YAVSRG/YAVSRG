@@ -1,23 +1,27 @@
 namespace Prelude.Gameplay.Rulesets
 
+open System.Runtime.CompilerServices
 open Prelude.Charts
 
 [<Struct>]
-type CachedRuleset =
+type RulesetInfo =
     {
         Ruleset: Ruleset
         Hash: string
     }
 
-    static member Create(ruleset: Ruleset) : CachedRuleset =
+    static member Create(ruleset: Ruleset) : RulesetInfo =
         { Ruleset = ruleset; Hash = ruleset.CalculateHash() }
+
+    [<Extension>]
+    static member ToInfo(ruleset: Ruleset) : RulesetInfo = RulesetInfo.Create(ruleset)
 
 [<AutoOpen>]
 module RulesetExtensions =
 
-    let SC_J4 = CachedRuleset.Create(SC.create(4))
+    let SC_J4 = RulesetInfo.Create(SC.create(4))
 
-    let private OSU_RULESETS: CachedRuleset array =
+    let private OSU_RULESETS: RulesetInfo array =
         let rulesets = Array.zeroCreate 101
         let mutable unique: Map<string, Ruleset> = Map.empty
 
@@ -33,13 +37,13 @@ module RulesetExtensions =
 
         rulesets
 
-    let private QUAVER_STANDARD: CachedRuleset =
-        CachedRuleset.Create(Quaver.create(Quaver.Standard))
+    let private QUAVER_STANDARD: RulesetInfo =
+        RulesetInfo.Create(Quaver.create(Quaver.Standard))
 
-    let private WIFE3_J4 = CachedRuleset.Create(Wife3.create(4))
+    let private WIFE3_J4 = RulesetInfo.Create(Wife3.create(4))
 
     type Ruleset with
-        static member GetNativeRuleset(origins: ChartOrigin seq) : CachedRuleset option =
+        static member GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =
             let mutable wife3_as_fallback = false
 
             match

@@ -16,8 +16,8 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Online
 
-type RulesetSwitcher
-    (setting: Setting<RulesetSelection>, set_ruleset_direct: CachedRuleset -> unit, score_info: ScoreInfo) =
+type RulesetSwitcher(setting: Setting<RulesetSelection>, set_ruleset_direct: RulesetInfo -> unit, score_info: ScoreInfo)
+    =
     inherit Container(NodeType.None)
 
     let mutable dropdown_height = 500.0f
@@ -30,9 +30,9 @@ type RulesetSwitcher
 
     let switch_to_native_ruleset () =
         match Ruleset.GetNativeRuleset(score_info.ChartMeta.Origins) with
-        | Some cached_ruleset ->
+        | Some ruleset_info ->
             // Use user's version (custom colors, names, etc) if available
-            Rulesets.by_hash(cached_ruleset.Hash) |> Option.defaultValue cached_ruleset |> set_ruleset_direct
+            Rulesets.by_hash(ruleset_info.Hash) |> Option.defaultValue ruleset_info |> set_ruleset_direct
             Style.click.Play()
         | None ->
             Notifications.system_feedback(

@@ -21,7 +21,7 @@ module RulesetSwitcher =
                 |> Seq.groupBy(fun (id, _) -> id.Split("-").[0].Trim())
                 |> Seq.map(fun (_, grouped) ->
                     let arr =
-                        grouped |> Seq.map(fun (id, cached_ruleset) -> (id, cached_ruleset.Ruleset)) |> Array.ofSeq
+                        grouped |> Seq.map(fun (id, ruleset_info) -> (id, ruleset_info.Ruleset)) |> Array.ofSeq
 
                     let group_name = remove_bracket.Replace((snd arr.[0]).Name, "").Trim()
                     group_name, arr

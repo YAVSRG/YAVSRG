@@ -32,7 +32,7 @@ let private compare_interlude_implementation_to_osu
             OsuMania.NoMod
 
     let score_v2 = score_data.ModsUsed &&& Mods.ScoreV2 <> Mods.None
-    let ruleset = CachedRuleset.Create(OsuMania.create (float32 chart_od) window_modifier)
+    let ruleset = RulesetInfo.Create(OsuMania.create (float32 chart_od) window_modifier)
     let metric = ScoreProcessor.ProcessEntireReplay(ruleset, replay, chart, rate)
 
     let osu_accuracy =
