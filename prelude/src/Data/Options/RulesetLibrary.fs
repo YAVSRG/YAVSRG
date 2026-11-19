@@ -13,6 +13,9 @@ type RulesetSelection =
     | FileId of string
     | OsuAutomatic of default_od: float32
 
+// See RulesetLibrary.RulesetProvider()
+type RulesetProvider = ChartMeta -> RulesetInfo
+
 type RulesetLibrary(rulesets_storage_path: string) =
 
     let mutable initialised = false
@@ -230,3 +233,17 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
             true
         | None -> false
+
+    /// Creates an immutable function that decides what ruleset a chart gets
+    /// The function being immutable means it can safely be passed into background tasks/other threads,
+    /// If the user changes what is 'selected' on the RulesetLibrary, the thread can carry on with the old selection
+    member this.RulesetProvider() : RulesetProvider =
+        match this.Selected.Value with
+        | FileId file_id ->
+            let constant_ruleset = loaded.[file_id]
+            fun _ -> constant_ruleset
+        | OsuAutomatic od ->
+            fun chart_meta ->
+                match NativeRuleset.DetectOsu(chart_meta.Origins) with
+                | Some native_ruleset -> native_ruleset.ToInfo()
+                | None -> NativeRuleset.OsuMania(od).ToInfo()

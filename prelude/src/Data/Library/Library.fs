@@ -4,6 +4,7 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
+open Prelude.Data.Options
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.UserDatabase
 open Prelude.Data.ChartDatabase
@@ -53,11 +54,4 @@ type Library =
         this.UserData.SaveChanges()
         save_important_json_file (Path.Combine(get_game_folder "Data", "collections.json")) this.Collections
 
-type LibraryViewContext =
-    {
-        Rate: Rate
-        RulesetInfo: RulesetInfo
-        Library: Library
-    }
-
-    member this.Ruleset: Ruleset = this.RulesetInfo.Ruleset
+type LibraryViewContext = { Rate: Rate; RulesetProvider: RulesetProvider; Library: Library }

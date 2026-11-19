@@ -111,7 +111,7 @@ module LevelSelect =
                     OnlyNewCharts = options.SuggestionsOnlyNew.Value
                     Filter = filter.WithoutSearchTerms
                     Mods = SelectedChart.selected_mods.Value
-                    RulesetInfo = rulesets.GetCurrent(SelectedChart.CACHE_DATA.Value)
+                    RulesetProvider = rulesets.RulesetProvider()
                     Library = Content.Library
                 }
             | Some ctx -> ctx
@@ -144,7 +144,11 @@ module LevelSelect =
     let random_chart () : unit =
         let true_random_chart () =
             let ctx =
-                { Rate = SelectedChart.rate.Value; RulesetInfo = rulesets.GetCurrent(None); Library = Content.Library }
+                {
+                    Rate = SelectedChart.rate.Value
+                    RulesetProvider = rulesets.RulesetProvider()
+                    Library = Content.Library
+                }
 
             match Suggestion.get_random filter.Filter ctx with
             | Some chart_meta ->
@@ -170,7 +174,7 @@ module LevelSelect =
                         OnlyNewCharts = false
                         Filter = filter
                         Mods = SelectedChart.selected_mods.Value
-                        RulesetInfo = rulesets.GetCurrent(SelectedChart.CACHE_DATA.Value)
+                        RulesetProvider = rulesets.RulesetProvider()
                         Library = Content.Library
                     }
 
