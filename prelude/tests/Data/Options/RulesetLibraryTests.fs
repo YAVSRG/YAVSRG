@@ -150,7 +150,7 @@ module RulesetLibraryTests =
 
         Assert.AreEqual(
             QUAVER_STANDARD.Ruleset.Description,
-            library.GetCurrent(None, FileId("quaver-standard")).Ruleset.Description
+            library.Get(None, FileId("quaver-standard")).Ruleset.Description
         )
 
         let updated_ruleset =
@@ -162,7 +162,7 @@ module RulesetLibraryTests =
 
         Assert.AreNotEqual(
             QUAVER_STANDARD.Ruleset.Description,
-            library.GetCurrent(None, FileId("quaver-standard")).Ruleset.Description
+            library.Get(None, FileId("quaver-standard")).Ruleset.Description
         )
 
     [<Test>]
@@ -182,7 +182,7 @@ module RulesetLibraryTests =
 
         Assert.AreEqual(
             QUAVER_STANDARD.Ruleset.Description,
-            library.GetCurrent(None, FileId("quaver-standard")).Ruleset.Description
+            library.Get(None, FileId("quaver-standard")).Ruleset.Description
         )
 
         Assert.AreEqual([| "quaver-standard"; "sc-j4" |], file_system_state())
@@ -190,7 +190,7 @@ module RulesetLibraryTests =
         Assert.AreEqual(Some("wife3-j4"), library.Update(id, WIFE3_J4.Ruleset))
         Assert.False(library.Exists(id))
         Assert.AreEqual(2, library.Count)
-        Assert.AreEqual(WIFE3_J4.Ruleset.Description, library.GetCurrent(None, FileId("wife3-j4")).Ruleset.Description)
+        Assert.AreEqual(WIFE3_J4.Ruleset.Description, library.Get(None, FileId("wife3-j4")).Ruleset.Description)
         Assert.AreEqual([| "sc-j4"; "wife3-j4" |], file_system_state())
 
     [<Test>]

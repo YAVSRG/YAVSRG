@@ -89,7 +89,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     member this.Select(file_id: string) : unit = this.Select(FileId(file_id))
 
-    member this.GetCurrent(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
+    member this.Get(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
         match selection with
         | FileId file_id -> loaded.[file_id]
         | OsuAutomatic od ->
@@ -102,11 +102,10 @@ type RulesetLibrary(rulesets_storage_path: string) =
                     this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
                 | None -> NativeRuleset.OsuMania(od).ToInfo()
 
-    member this.GetCurrent(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
-        this.GetCurrent(Some chart_meta, selection)
+    member this.Get(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
+        this.Get(Some chart_meta, selection)
 
-    member this.GetCurrent(chart_meta: ChartMeta option) : RulesetInfo =
-        this.GetCurrent(chart_meta, current_selection)
+    member this.GetCurrent(chart_meta: ChartMeta option) : RulesetInfo = this.Get(chart_meta, current_selection)
 
     member this.GetCurrent(chart_meta: ChartMeta) : RulesetInfo = this.GetCurrent(Some chart_meta)
 
