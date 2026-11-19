@@ -23,59 +23,34 @@ type Notifications =
 
     static let notification_ev = Event<Notification>()
 
+    static member val OnNotificationAdded = notification_ev.Publish
+
     static member internal Send(notification: Notification) : unit =
         GameThread.on_game_thread(fun () -> notification_ev.Trigger(notification))
 
-    static member val OnNotificationAdded = notification_ev.Publish
+    static member internal Send(icon: string, title: string, description: string, ntype: NotificationType) : unit =
+        Notifications.Send(
+            {
+                Icon = icon
+                Title = title
+                Description = description
+                Type = ntype
+            }
+        )
 
     static member Task(icon: string, title: string, description: string) : unit =
-        Notifications.Send(
-            {
-                Icon = icon
-                Title = title
-                Description = description
-                Type = NotificationType.Task
-            }
-        )
+        Notifications.Send(icon, title, description, NotificationType.Task)
 
     static member Result(icon: string, title: string, description: string) : unit =
-        Notifications.Send(
-            {
-                Icon = icon
-                Title = title
-                Description = description
-                Type = NotificationType.Result(None)
-            }
-        )
+        Notifications.Send(icon, title, description, NotificationType.Result(None))
 
-    static member action_feedback_button
+    static member Result
         (icon: string, title: string, description: string, button_label: string, button_action: unit -> unit)
         : unit =
-        Notifications.Send(
-            {
-                Icon = icon
-                Title = title
-                Description = description
-                Type = NotificationType.Result(Some(button_label, button_action))
-            }
-        )
+        Notifications.Send(icon, title, description, NotificationType.Result(Some(button_label, button_action)))
 
     static member System(icon: string, title: string, description: string) : unit =
-        Notifications.Send(
-            {
-                Icon = icon
-                Title = title
-                Description = description
-                Type = NotificationType.System
-            }
-        )
+        Notifications.Send(icon, title, description, NotificationType.System)
 
     static member Error(title: string, description: string) : unit =
-        Notifications.Send(
-            {
-                Icon = Icons.ALERT_CIRCLE
-                Title = title
-                Description = description
-                Type = NotificationType.Error
-            }
-        )
+        Notifications.Send(Icons.ALERT_CIRCLE, title, description, NotificationType.Error)

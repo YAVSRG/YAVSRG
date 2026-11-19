@@ -39,7 +39,7 @@ module Toolbar =
         ClipboardWin32.set_image img |> ignore
         ImageServices.save_image_jpg.Request((img, path), img.Dispose)
 
-        Notifications.action_feedback_button(
+        Notifications.Result(
             Icons.IMAGE,
             %"notification.screenshot",
             id,
