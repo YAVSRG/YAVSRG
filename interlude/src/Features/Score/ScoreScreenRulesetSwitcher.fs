@@ -26,7 +26,7 @@ type ScoreScreenRulesetSwitcher
         )
 
     let switch_to_native_ruleset () =
-        match NativeRuleset.GetNativeRuleset(score_info.ChartMeta.Origins) with
+        match NativeRuleset.Detect(score_info.ChartMeta.Origins) with
         | Some native_ruleset ->
             let ruleset_info = native_ruleset.ToInfo()
             // Use user's version (custom colors, names, etc) if available
