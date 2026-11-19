@@ -19,16 +19,17 @@ type Notification =
         Type: NotificationType
     }
 
-module Notifications =
+type Notifications =
 
-    let notification_ev = Event<Notification>()
-    let OnNotificationAdded = notification_ev.Publish
+    static let notification_ev = Event<Notification>()
 
-    let private send_notification (notification: Notification) : unit =
+    static member internal Send(notification: Notification) : unit =
         GameThread.on_game_thread(fun () -> notification_ev.Trigger(notification))
 
-    let Task (icon: string, title: string, description: string) : unit =
-        send_notification(
+    static member val OnNotificationAdded = notification_ev.Publish
+
+    static member Task(icon: string, title: string, description: string) : unit =
+        Notifications.Send(
             {
                 Icon = icon
                 Title = title
@@ -37,8 +38,8 @@ module Notifications =
             }
         )
 
-    let Result (icon: string, title: string, description: string) : unit =
-        send_notification(
+    static member Result(icon: string, title: string, description: string) : unit =
+        Notifications.Send(
             {
                 Icon = icon
                 Title = title
@@ -47,10 +48,10 @@ module Notifications =
             }
         )
 
-    let action_feedback_button
+    static member action_feedback_button
         (icon: string, title: string, description: string, button_label: string, button_action: unit -> unit)
         : unit =
-        send_notification(
+        Notifications.Send(
             {
                 Icon = icon
                 Title = title
@@ -59,8 +60,8 @@ module Notifications =
             }
         )
 
-    let System (icon: string, title: string, description: string) : unit =
-        send_notification(
+    static member System(icon: string, title: string, description: string) : unit =
+        Notifications.Send(
             {
                 Icon = icon
                 Title = title
@@ -69,8 +70,8 @@ module Notifications =
             }
         )
 
-    let Error (title: string, description: string) : unit =
-        send_notification(
+    static member Error(title: string, description: string) : unit =
+        Notifications.Send(
             {
                 Icon = Icons.ALERT_CIRCLE
                 Title = title
