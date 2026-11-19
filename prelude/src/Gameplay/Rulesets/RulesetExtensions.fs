@@ -6,6 +6,8 @@ open Prelude.Charts
 module RulesetExtensions =
 
     let SC_J4 = SC.create(4).ToInfo()
+    let QUAVER_STANDARD: RulesetInfo = Quaver.create(Quaver.Standard).ToInfo()
+    let WIFE3_J4: RulesetInfo = Wife3.create(4).ToInfo()
 
     let private OSU_RULESETS: RulesetInfo array =
         let rulesets = Array.zeroCreate 101
@@ -15,21 +17,21 @@ module RulesetExtensions =
 
         rulesets
 
-    let QUAVER_STANDARD: RulesetInfo = Quaver.create(Quaver.Standard).ToInfo()
-
-    let WIFE3_J4 = Wife3.create(4).ToInfo()
-
     [<RequireQualifiedAccess>]
     type NativeRuleset =
         | OsuMania of od: float32
         | Wife3
         | Quaver
 
-    type Ruleset with
+        member this.GetInfo() : RulesetInfo =
+            match this with
+            | OsuMania od ->
+                let idx = int(round(od * 10.0f)) |> min 100 |> max 0
+                OSU_RULESETS.[idx]
+            | Wife3 -> WIFE3_J4
+            | Quaver -> QUAVER_STANDARD
 
-        static member GetOsuRuleset(od: float32) : RulesetInfo =
-            let idx = int(round(od * 10.0f)) |> min 100 |> max 0
-            OSU_RULESETS.[idx]
+    type Ruleset with
 
         static member GetNativeRulesetType(origins: ChartOrigin seq) : NativeRuleset option =
             let mutable wife3_as_fallback = false
@@ -50,13 +52,11 @@ module RulesetExtensions =
         static member GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =
             match Ruleset.GetNativeRulesetType(origins) with
             | None -> None
-            | Some(NativeRuleset.Wife3) -> Some(WIFE3_J4)
-            | Some(NativeRuleset.Quaver) -> Some(QUAVER_STANDARD)
-            | Some(NativeRuleset.OsuMania(od)) -> Some(Ruleset.GetOsuRuleset(od))
+            | Some(native_ruleset) -> Some(native_ruleset.GetInfo())
 
         static member GetAutomaticOsuRuleset(origins: ChartOrigin seq) : RulesetInfo option =
             Seq.tryPick
                 (function
-                | ChartOrigin.Osu osu -> Some(Ruleset.GetOsuRuleset(osu.SourceOD))
+                | ChartOrigin.Osu osu -> Some(NativeRuleset.OsuMania(osu.SourceOD).GetInfo())
                 | _ -> None)
                 origins
