@@ -138,16 +138,10 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 Logging.Error "Ruleset import failed: %s" reason
                 None
 
-    member this.EnsureInstalledAndSelect(ruleset_info: RulesetInfo) : unit =
-        let id =
-            match loaded.Keys |> Seq.tryFind(fun id -> loaded.[id].Hash = ruleset_info.Hash) with
-            | None -> this.Install(ruleset_info.Ruleset)
-            | Some id -> id
-
-        this.Selected.Set(FileId(id))
-
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     member this.Update(existing_file_id: string, ruleset: Ruleset) : unit =
+
+        // todo: prevent updating the default ruleset?
 
         let ensure_filename_updated () =
             let new_id: string = ruleset.Filename()
@@ -181,8 +175,11 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 current_selection <- FileId(new_file_id)
                 on_changed_ev.Trigger()
 
+    member this.CanDelete(file_id: string) : bool =
+        file_id <> RulesetLibrary.DEFAULT_ID && this.Exists(file_id)
+
     member this.Delete(file_id: string) : bool =
-        if file_id <> RulesetLibrary.DEFAULT_ID && this.Exists(file_id) then
+        if this.CanDelete(file_id) then
             try
                 if current_selection = FileId(file_id) then
                     current_selection <- FileId(RulesetLibrary.DEFAULT_ID)
@@ -196,10 +193,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
         else
             false
 
-    member this.CanDelete(file_id: string) : bool = file_id <> RulesetLibrary.DEFAULT_ID
-
-    member this.CanEdit(file_id: string) : bool = file_id <> RulesetLibrary.DEFAULT_ID
-
     member this.GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =
         match NativeRuleset.Detect(origins) with
         | Some native_ruleset ->
@@ -209,11 +202,19 @@ type RulesetLibrary(rulesets_storage_path: string) =
         | None -> None
 
     member this.SwitchToNativeRuleset(origins: ChartOrigin seq) : bool =
+        let ensure_installed_and_select (ruleset_info: RulesetInfo) =
+            let id =
+                match loaded.Keys |> Seq.tryFind(fun id -> loaded.[id].Hash = ruleset_info.Hash) with
+                | None -> this.Install(ruleset_info.Ruleset)
+                | Some id -> id
+
+            this.Selected.Set(FileId(id))
+
         match NativeRuleset.Detect(origins) with
         | Some(native_ruleset) ->
             match native_ruleset with
-            | NativeRuleset.Wife3 -> this.EnsureInstalledAndSelect(WIFE3_J4)
-            | NativeRuleset.Quaver -> this.EnsureInstalledAndSelect(QUAVER_STANDARD)
+            | NativeRuleset.Wife3 -> ensure_installed_and_select(WIFE3_J4)
+            | NativeRuleset.Quaver -> ensure_installed_and_select(QUAVER_STANDARD)
             | NativeRuleset.OsuMania(od) -> this.Selected.Set(OsuAutomatic(od))
 
             true
