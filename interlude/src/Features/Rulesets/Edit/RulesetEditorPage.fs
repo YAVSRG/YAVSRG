@@ -40,7 +40,7 @@ type RulesetEditorPage(id: string, original: Ruleset) =
             | _ -> true
 
         if not has_error then
-            Rulesets.update id { ruleset.Value with Name = name.Value.Trim() }
+            rulesets.Update(id, { ruleset.Value with Name = name.Value.Trim() }) |> ignore
 
     override this.Content() : Widget =
         this.OnClose(this.SaveChangesIfValid)
@@ -49,7 +49,8 @@ type RulesetEditorPage(id: string, original: Ruleset) =
             .With(
                 PageTextEntry(%"rulesets.edit.name", name).Pos(0),
                 PageButton(%"rulesets.edit.judgements", fun () -> EditJudgementsPage(ruleset).Show()).Pos(3),
-                PageButton(%"rulesets.edit.windows", fun () -> EditWindowsPage.NoteWindowsPage(ruleset).Show()).Pos(5),
+                PageButton(%"rulesets.edit.windows", fun () -> EditTimingWindowsPage.NoteWindowsPage(ruleset).Show())
+                    .Pos(5),
                 PageButton(%"rulesets.edit.accuracy", fun () -> ConfigureAccuracyPage(ruleset).Show()).Pos(7),
                 PageButton(%"rulesets.edit.mechanics", fun () -> EditMechanicsPage(ruleset).Show()).Pos(9),
                 PageButton(%"rulesets.edit.grades", fun () -> EditGradesPage(ruleset).Show()).Pos(12),

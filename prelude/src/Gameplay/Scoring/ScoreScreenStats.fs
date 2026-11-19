@@ -82,6 +82,7 @@ module ScoreScreenStats =
         let (++) (x: GameplayTime ref) (t: GameplayTime) = x.Value <- x.Value + t
 
         let filtered_judgements = Array.zeroCreate score_processor.Ruleset.Judgements.Length
+
         let graph_points = ResizeArray<GraphPoint>()
 
         let taps = ref 0

@@ -82,6 +82,7 @@
     <Compile Include="Data\InMemoryDatabase.fs" />
     <Compile Include="Data\ChartDatabase\ChartDatabaseTests.fs" />
     <Compile Include="Data\ChartDatabase\DbChartsTests.fs" />
+    <Compile Include="Data\Options\RulesetLibraryTests.fs" />
     <Compile Include="Data\UserDatabase\UserDatabaseTests.fs" />
     <Compile Include="Data\UserDatabase\DbScoresTests.fs" />
     <Compile Include="Data\UserDatabase\DbChartDataTests.fs" />

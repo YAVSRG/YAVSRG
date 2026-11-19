@@ -6,12 +6,10 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Mods
-open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
-open Interlude.Features.Pacemaker
 
-type StartOverlay(info: LoadedChartInfo, pacemaker_state: PacemakerState, on_ready: unit -> unit) =
+type StartOverlay(info: LoadedChartInfo, pacemaker_desc: string, on_ready: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let mod_string =
@@ -21,8 +19,6 @@ type StartOverlay(info: LoadedChartInfo, pacemaker_state: PacemakerState, on_rea
 
     let timer = Animation.Delay(float SongPlayer.LEADIN_TIME * 0.5)
     let fade = Animation.Fade(1.0f)
-
-    let pacemaker_desc = pacemaker_state.Description(Rulesets.current)
 
     override this.Draw() : unit =
         let alpha = fade.Alpha

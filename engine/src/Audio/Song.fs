@@ -108,7 +108,7 @@ type Song =
     member this.SetLowPassFilter(amount: float32) : unit =
 
         let apply_effect (handle: int) =
-            let center = lerp amount 22049f 800f
+            let center = lerp amount (-1f + float32 this.Frequency * 0.5f) 800f
             let parameters = BQFParameters(lFilter = BQFType.LowPass, fQ = 0.7f)
             parameters.fCenter <- center
             parameters.fBandwidth <- 0f

@@ -49,7 +49,7 @@ type InfoPanel() =
                 .Position(Position.SliceB(AngledButton.HEIGHT).GridX(2, 3, AngledButton.LEAN_AMOUNT))
                 .Help(Help.Info("levelselect.mods", "mods")),
 
-            RulesetSwitcher(options.SelectedRuleset)
+            RulesetSwitcher(options.Ruleset)
                 .Position(Position.SliceB(AngledButton.HEIGHT).GridX(3, 3, AngledButton.LEAN_AMOUNT))
                 .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
         )

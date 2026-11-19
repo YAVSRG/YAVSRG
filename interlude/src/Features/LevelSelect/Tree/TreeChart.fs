@@ -34,69 +34,69 @@ type private TreeChart
     let mutable lamp: PersonalBestCached option = None
     let mutable markers = ""
 
-    let get_pb (bests: PersonalBests<'T>) (rate: Rate) =
-        match PersonalBests.get_best_above rate bests with
-        | Some pb_above_rate -> Some pb_above_rate
-        | None -> PersonalBests.get_best_below rate bests
+    member this.UpdateCachedInfo() : unit =
 
-    let details (rate: Rate) (timestamp: int64) =
-        if options.TreeShowTimestamps.Value then
-            sprintf "%.2fx • %s" rate (timestamp |> Timestamp.since |> format_timespan)
-        else
-            sprintf "(%.2fx)" rate
+        let ruleset_info = rulesets.GetCurrent(chart_meta)
+        let ruleset = ruleset_info.Ruleset
+        let ruleset_hash = ruleset_info.Hash
 
-    let grade_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
-        match get_pb bests.Grade rate with
-        | Some(grade, r, timestamp) when r >= rate ->
-            Some
-                {
-                    Text = Rulesets.current.GradeName(grade)
-                    Color = Rulesets.current.GradeColor(grade)
-                    Details = details r timestamp
-                }
-        | Some(grade, r, timestamp) ->
-            Some { Text = Rulesets.current.GradeName(grade); Color = Colors.white.O2; Details = details r timestamp }
-        | None -> None
+        let get_pb (bests: PersonalBests<'T>) (rate: Rate) =
+            match PersonalBests.get_best_above rate bests with
+            | Some pb_above_rate -> Some pb_above_rate
+            | None -> PersonalBests.get_best_below rate bests
 
-    let acc_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
-        match grade_pb bests rate with
-        | None -> None
-        | Some d ->
+        let details (rate: Rate) (timestamp: int64) =
+            if options.TreeShowTimestamps.Value then
+                sprintf "%.2fx • %s" rate (timestamp |> Timestamp.since |> format_timespan)
+            else
+                sprintf "(%.2fx)" rate
 
-        match get_pb bests.Accuracy rate with
-        | Some(accuracy, r, timestamp) when r >= rate ->
-            Some { d with Text = Rulesets.current.FormatAccuracy(accuracy); Details = details r timestamp }
-        | Some(accuracy, r, timestamp) ->
-            Some { d with Text = Rulesets.current.FormatAccuracy(accuracy); Details = details r timestamp }
-        | None -> None
+        let grade_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
+            match get_pb bests.Grade rate with
+            | Some(grade, r, timestamp) when r >= rate ->
+                Some
+                    {
+                        Text = ruleset.GradeName(grade)
+                        Color = ruleset.GradeColor(grade)
+                        Details = details r timestamp
+                    }
+            | Some(grade, r, timestamp) ->
+                Some { Text = ruleset.GradeName(grade); Color = Colors.white.O2; Details = details r timestamp }
+            | None -> None
 
-    let lamp_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
-        match get_pb bests.Lamp rate with
-        | Some(lamp, r, timestamp) when r >= rate ->
-            Some
-                {
-                    Text = Rulesets.current.LampName(lamp)
-                    Color = Rulesets.current.LampColor(lamp)
-                    Details = details r timestamp
-                }
-        | Some(lamp, r, timestamp) ->
-            Some { Text = Rulesets.current.LampName(lamp); Color = Colors.white.O2; Details = details r timestamp }
-        | None -> None
+        let acc_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
+            match grade_pb bests rate with
+            | None -> None
+            | Some d ->
 
-    let update_cached_info () : unit =
+            match get_pb bests.Accuracy rate with
+            | Some(accuracy, r, timestamp) when r >= rate ->
+                Some { d with Text = ruleset.FormatAccuracy(accuracy); Details = details r timestamp }
+            | Some(accuracy, r, timestamp) ->
+                Some { d with Text = ruleset.FormatAccuracy(accuracy); Details = details r timestamp }
+            | None -> None
+
+        let lamp_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
+            match get_pb bests.Lamp rate with
+            | Some(lamp, r, timestamp) when r >= rate ->
+                Some { Text = ruleset.LampName(lamp); Color = ruleset.LampColor(lamp); Details = details r timestamp }
+            | Some(lamp, r, timestamp) ->
+                Some { Text = ruleset.LampName(lamp); Color = Colors.white.O2; Details = details r timestamp }
+            | None -> None
+
         last_cached_flag <- tree_ctx.CacheFlag
 
         if chart_save_data.IsNone then
             chart_save_data <- Some(Content.UserData.GetChartData(chart_meta.Hash))
 
         match chart_save_data with
-        | Some d when d.PersonalBests.ContainsKey(Rulesets.current_hash) ->
+        | Some d when d.PersonalBests.ContainsKey(ruleset_hash) ->
             let rate =
                 match library_ctx with
                 | LibraryContext.Playlist(_, _, d) -> d.Rate.Value
                 | _ -> SelectedChart.rate.Value
 
-            personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
+            personal_bests <- Some d.PersonalBests.[ruleset_hash]
 
             grade_or_accuracy <-
                 if options.TreeShowGradesOnly.Value then
@@ -251,7 +251,7 @@ type private TreeChart
     member private this.UpdateCulled(tree_top: float32, bounds: Rect, elapsed_ms: float) : unit =
 
         if last_cached_flag < tree_ctx.CacheFlag then
-            update_cached_info()
+            this.UpdateCachedInfo()
 
         if this.Selected && (%%"multi_select").Pressed() then
             tree_ctx.ToggleMultiSelect(chart_meta, library_ctx)

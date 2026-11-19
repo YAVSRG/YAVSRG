@@ -1,4 +1,4 @@
-﻿namespace Interlude.Options
+namespace Interlude.Options
 
 open System.IO
 open System.Collections.Generic
@@ -8,6 +8,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Percyqaz.Flux.Windowing
 open Prelude
+open Prelude.Data.Options
 open Prelude.Mods
 open Prelude.Data.Imports
 open Interlude.Content
@@ -171,7 +172,8 @@ type GameOptions =
         LaneCover: LanecoverOptions
         Noteskin: Setting<string>
         SelectedHUD: Setting<string>
-        SelectedRuleset: Setting<string>
+        Ruleset: Setting<RulesetSelection>
+        AutomaticOsuOD: Setting.Bounded<float32>
 
         Pacemaker: Dictionary<string, PacemakerSettings>
         EnablePacemaker: Setting<bool>
@@ -244,7 +246,8 @@ type GameOptions =
             LaneCover = LanecoverOptions.Default
             Noteskin = Skins.selected_noteskin_id
             SelectedHUD = Skins.selected_hud_id
-            SelectedRuleset = Rulesets.selected_id
+            Ruleset = Setting.make rulesets.Select rulesets.get_Selected
+            AutomaticOsuOD = 8.0f |> Setting.bounded(0.0f, 10.0f)
 
             Pacemaker = Dictionary<string, PacemakerSettings>()
             EnablePacemaker = Setting.simple false
@@ -347,6 +350,25 @@ type GameOptions =
             ScoreGraphWindowBackground = Setting.simple false
             HoldToGiveUp = Setting.simple false
         }
+
+    member this.GetPacemakerOptions() : PacemakerSettings =
+        let pacemaker_options_key =
+            match this.Ruleset.Value with
+            | OsuAutomatic _ -> "osu"
+            | FileId file_id -> file_id.Split('-').[0].Trim()
+
+        if this.Pacemaker.ContainsKey(pacemaker_options_key) then
+            this.Pacemaker.[pacemaker_options_key]
+        else
+            PacemakerSettings.Default
+
+    member this.SavePacemakerOptions(options: PacemakerSettings) : unit =
+        let pacemaker_options_key =
+            match this.Ruleset.Value with
+            | OsuAutomatic _ -> "osu"
+            | FileId file_id -> file_id.Split('-').[0].Trim()
+
+        this.Pacemaker.[pacemaker_options_key] <- options
 
 [<AutoOpen>]
 module StaticOptions =

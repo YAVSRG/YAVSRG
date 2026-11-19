@@ -13,8 +13,7 @@ module LocalScores =
 
     type Request =
         {
-            RulesetId: string
-            Ruleset: Ruleset
+            RulesetInfo: RulesetInfo
             ChartMeta: ChartMeta
             CurrentChart: Chart
             ChartSaveData: ChartSaveData
@@ -33,8 +32,12 @@ module LocalScores =
     let scores_loaded = scores_loaded_ev.Publish
 
     let private load_score (score_info: ScoreInfo) =
-        if score_info.Ruleset <> Rulesets.current then
-            score_info.Ruleset <- Rulesets.current
+        // score_info was loaded on a background thread, the user could have changed the ruleset since then
+        // if so, set it to that ruleset on the main thread
+        let current_ruleset = rulesets.GetCurrent(score_info.ChartMeta)
+
+        if score_info.RulesetInfo <> current_ruleset then
+            score_info.RulesetInfo <- current_ruleset
 
         local_scores.Add(score_info)
         score_loaded_ev.Trigger(score_info)
@@ -42,8 +45,10 @@ module LocalScores =
     let private finish_loading () =
         let mutable new_bests = None
 
+        let ruleset_info = rulesets.GetCurrent(SelectedChart.CACHE_DATA)
+
         for score_info in local_scores do
-            assert (score_info.Ruleset = Rulesets.current)
+            assert (score_info.RulesetInfo = ruleset_info)
 
             if score_info.ModStatus = ModStatus.Ranked then
                 new_bests <-
@@ -56,7 +61,7 @@ module LocalScores =
         match new_bests, SelectedChart.SAVE_DATA with
         | Some new_bests, Some save_data ->
             let old_bests = save_data.PersonalBests
-            let new_bests = Map.add Rulesets.current_hash new_bests old_bests
+            let new_bests = Map.add ruleset_info.Hash new_bests old_bests
 
             if new_bests <> old_bests then
                 save_data.PersonalBests <- new_bests
@@ -71,7 +76,7 @@ module LocalScores =
                 seq {
                     for score in req.ChartSaveData.Scores do
                         let score_info =
-                            ScoreInfo.CreateFromScore(req.ChartMeta, req.CurrentChart, req.Ruleset, score)
+                            ScoreInfo.CreateFromScore(req.ChartMeta, req.CurrentChart, req.RulesetInfo, score)
 
                         yield fun () -> load_score score_info
 
@@ -90,8 +95,7 @@ module LocalScores =
         SelectedChart.on_chart_change_finished.Add(fun info ->
             score_loader.Request(
                 {
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
+                    RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
                     ChartMeta = info.ChartMeta
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
@@ -104,8 +108,7 @@ module LocalScores =
             (fun info ->
                 score_loader.Request(
                     {
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
+                        RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
                         ChartMeta = info.ChartMeta
                         CurrentChart = info.Chart
                         ChartSaveData = info.SaveData
@@ -113,9 +116,9 @@ module LocalScores =
                 )
             )
 
-        Rulesets.on_changed.Add(fun ruleset ->
+        rulesets.OnChanged.Add(fun () ->
             for score_info in local_scores do
-                score_info.Ruleset <- ruleset
+                score_info.RulesetInfo <- rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.score_saved.Add(load_score)

@@ -67,7 +67,7 @@ type Accuracy
         if (!stats).ColumnFilterApplied then
             Text.fill_b(
                 Style.font,
-                score_info.Scoring.Ruleset.FormatAccuracy((!stats).Accuracy),
+                score_info.Ruleset.FormatAccuracy((!stats).Accuracy),
                 this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
                 Colors.text_green,
                 Alignment.CENTER

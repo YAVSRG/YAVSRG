@@ -148,7 +148,7 @@ type ColumnErrorBars(ctx: HudContext) =
             let mutable previous_early = 0.0f<ms / rate>
             let mutable previous_late = 0.0f<ms / rate>
 
-            for j in ctx.State.Scoring.Ruleset.Judgements do
+            for j in ctx.State.Ruleset.Judgements do
                 match j.TimingWindows with
                 | Some(early, late) ->
                     for k = 0 to ctx.State.WithColors.Keys - 1 do

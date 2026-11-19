@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
+open Prelude.Gameplay.Rulesets
 open Prelude.Mods
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
@@ -434,12 +435,7 @@ module SelectedChart =
             match
                 Suggestion.get_random
                     Filter.Empty
-                    {
-                        Rate = rate.Value
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
-                        Library = Content.Library
-                    }
+                    { Rate = rate.Value; RulesetProvider = rulesets.RulesetProvider(); Library = Content.Library }
             with
             | Some chart_meta -> change(chart_meta, LibraryContext.None, true)
             | None ->

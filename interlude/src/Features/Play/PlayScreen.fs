@@ -28,7 +28,7 @@ type PlayScreen =
 
     static member Create(info: LoadedChartInfo, pacemaker_ctx: PacemakerCreationContext) : Screen =
 
-        let ruleset = Rulesets.current
+        let ruleset = rulesets.GetCurrent(info.ChartMeta)
         let first_note = info.WithMods.FirstNote
         let liveplay = GameplayReplaySource first_note
 
@@ -69,7 +69,7 @@ type PlayScreen =
         let start_overlay =
             StartOverlay(
                 info,
-                pacemaker_state,
+                pacemaker_state.Description(scoring),
                 fun () ->
                     fade_in.Target <- 1.0f
                     Background.dim(float32 options.BackgroundDim.Value)
@@ -142,7 +142,7 @@ type PlayScreen =
                     stats_exit_reason <- ExitReason.Quit
 
             fade_in.Target <- 0.5f
-            this.Add(FailOverlay(pacemaker_state, retry, view_score, skip_song))
+            this.Add(FailOverlay(pacemaker_state.Description(scoring), retry, view_score, skip_song))
 
         let finish_play (this: IPlayScreen) =
             liveplay.Finish()
@@ -167,7 +167,7 @@ type PlayScreen =
 
             if pacemaker_state.IsFailedAtEnd(scoring) then
                 fade_in.Target <- 0.5f
-                this.Add(FailOverlay(pacemaker_state, retry, view_score, skip_song))
+                this.Add(FailOverlay(pacemaker_state.Description(scoring), retry, view_score, skip_song))
             else
                 view_score()
 

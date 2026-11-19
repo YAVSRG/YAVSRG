@@ -21,7 +21,7 @@ type Content =
 
     static member LoadData() : unit =
         Tables.init()
-        Rulesets.init()
+        rulesets.Load()
         Data.init()
 
     static member Deinit() : unit = Data.deinit()

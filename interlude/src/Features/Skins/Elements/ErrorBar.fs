@@ -166,7 +166,7 @@ type ErrorBar(ctx: HudContext) =
             let mutable previous_early = 0.0f<ms / rate>
             let mutable previous_late = 0.0f<ms / rate>
 
-            for j in ctx.State.Scoring.Ruleset.Judgements do
+            for j in ctx.State.Ruleset.Judgements do
                 match j.TimingWindows with
                 | Some(early, late) ->
                     Render.rect (r early previous_early) (j.Color.O4a(opacity))

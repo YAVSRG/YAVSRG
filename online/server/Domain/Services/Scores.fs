@@ -5,6 +5,7 @@ open Prelude
 open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
+open Prelude.Gameplay.Rulesets
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
@@ -75,8 +76,10 @@ module Scores =
             let mod_chart = ModState.apply mods chart
 
             let ruleset = Backbeat.rulesets.[Score.PRIMARY_RULESET]
+            let ruleset_info = { Ruleset = ruleset; Hash = Score.PRIMARY_RULESET }
 
-            let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, replay, mod_chart, rate)
+            let scoring =
+                ScoreProcessor.ProcessEntireReplay(ruleset_info, replay, mod_chart, rate)
 
             let accuracy = scoring.Accuracy
 

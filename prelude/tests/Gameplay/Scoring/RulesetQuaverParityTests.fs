@@ -8,7 +8,7 @@ open Prelude.Tests.Helpers
 
 module RulesetQuaverParityTests =
 
-    let RULESET = Quaver.create Quaver.Standard
+    let QUAVER_STANDARD = Quaver.create(Quaver.Standard).ToInfo()
 
     [<Test>]
     let Quaver_ExpectedBehaviour_DropHold () =
@@ -16,10 +16,12 @@ module RulesetQuaverParityTests =
 
         let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 30.0f<ms>).Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(QUAVER_STANDARD, replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
+        let CONVENTIONAL_LATE_WINDOW = snd QUAVER_STANDARD.Ruleset.ReleaseWindows
 
         Assert.AreEqual(
             [
@@ -44,7 +46,9 @@ module RulesetQuaverParityTests =
         let replay =
             ReplayBuilder().KeyDownUntil(0.0f<ms>, 30.0f<ms>).KeyDownUntil(60.0f<ms>, 1000.0f<ms>).Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(QUAVER_STANDARD, replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
@@ -71,10 +75,12 @@ module RulesetQuaverParityTests =
         let replay =
             ReplayBuilder().KeyDownUntil(0.0f<ms>, 30.0f<ms>).KeyDownUntil(60.0f<ms>, 2000.0f<ms>).Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(QUAVER_STANDARD, replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
+        let CONVENTIONAL_LATE_WINDOW = snd QUAVER_STANDARD.Ruleset.ReleaseWindows
 
         Assert.AreEqual(
             [
@@ -99,10 +105,12 @@ module RulesetQuaverParityTests =
 
         let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 2000.0f<ms>).Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(QUAVER_STANDARD, replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
-        let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
+        let CONVENTIONAL_LATE_WINDOW = snd QUAVER_STANDARD.Ruleset.ReleaseWindows
 
         Assert.AreEqual(
             [
@@ -125,7 +133,9 @@ module RulesetQuaverParityTests =
 
         let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 1190.0f<ms>).Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(QUAVER_STANDARD, replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
@@ -149,7 +159,9 @@ module RulesetQuaverParityTests =
 
         let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 1158.0f<ms>).Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(QUAVER_STANDARD, replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
@@ -173,7 +185,9 @@ module RulesetQuaverParityTests =
 
         let replay = ReplayBuilder().KeyDownUntil(0.0f<ms>, 1113.0f<ms>).Build()
 
-        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing =
+            ScoringEventCollector(QUAVER_STANDARD, replay, note_data, 1.0f<rate>)
+
         event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(

@@ -85,7 +85,7 @@ module FileDrop =
                 Logging.Error "Error moving/importing dropped skin: %O" err
 
         | _ when Path.GetExtension(path).ToLower() = ".ruleset" ->
-            if Rulesets.install_from_file(path) then
+            if rulesets.Install(path).IsSome then
                 Notifications.action_feedback(Icons.CHECK, %"notification.install_ruleset", "")
             else
                 Notifications.error(%"notification.install_ruleset_failed", "")

@@ -6,10 +6,10 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Calculator
+open Prelude.Data.Options
 open Prelude.Data.UserDatabase
 open Prelude.Data.Stats
 open Prelude.Data.Library
-open Prelude.Gameplay.Rulesets
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -175,15 +175,17 @@ type Score(score_info: ScoreInfo) =
 module private ScoreList =
 
     let loader =
-        { new Async.CancelQueueSeq<int64 * int64 * Ruleset * (Widget -> unit) * (unit -> unit), unit -> unit>() with
-            member this.Process((start_time, end_time, ruleset, callback, callback_when_done)) =
+        { new Async.CancelQueueSeq<int64 * int64 * RulesetProvider * (Widget -> unit) * (unit -> unit), unit -> unit>() with
+            member this.Process((start_time, end_time, ruleset_provider, callback, callback_when_done)) =
                 seq {
                     for chart_hash, score in Content.UserData.GetScoresInTimeRange(start_time, end_time) do
                         match Content.Charts.TryGetCachedChartMeta(chart_hash) with
                         | Some chart_meta ->
                             match Content.Charts.GetChart(chart_hash) with
                             | Ok chart ->
-                                let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset, score)
+                                let ruleset_info = ruleset_provider(chart_meta)
+                                let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset_info, score)
+
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
                         | _ -> yield fun () -> callback(MissingScore())
@@ -237,7 +239,7 @@ type ScoreList(start_time: int64, end_time: int64) =
         ScoreList.loader.Request(
             (start_time,
              end_time,
-             Rulesets.current,
+             rulesets.RulesetProvider(),
              (fun s ->
                  has_scores <- true
                  scores.Add(s)

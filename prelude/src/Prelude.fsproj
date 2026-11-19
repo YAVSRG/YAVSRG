@@ -63,14 +63,15 @@
     <Compile Include="Gameplay\Replays\GameplayReplaySource.fs" />
     <Compile Include="Gameplay\Replays\NetworkReplaySource.fs" />
     <Compile Include="Gameplay\Replays\KeyPressReader.fs" />
-    <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
+    <Compile Include="Gameplay\Rulesets\Ruleset.fs" />
     <Compile Include="Gameplay\Rulesets\SC.fs" />
     <Compile Include="Gameplay\Rulesets\osu!mania.fs" />
     <Compile Include="Gameplay\Rulesets\Quaver.fs" />
     <Compile Include="Gameplay\Rulesets\Wife3.fs" />
-    <Compile Include="Gameplay\Rulesets\WifeCurve.fs" />
-    <Compile Include="Gameplay\Rulesets\Compare.fs" />
-    <Compile Include="Gameplay\Rulesets\Helpers.fs" />
+    <Compile Include="Gameplay\Rulesets\Wife3Curve.fs" />
+    <Compile Include="Gameplay\Rulesets\RulesetComparison.fs" />
+    <Compile Include="Gameplay\Rulesets\RulesetInfo.fs" />
+    <Compile Include="Gameplay\Rulesets\NativeRuleset.fs" />
     <Compile Include="Gameplay\Scoring\Grades.fs" />
     <Compile Include="Gameplay\Scoring\Lamps.fs" />
     <Compile Include="Gameplay\Scoring\OsuHolds.fs" />
@@ -133,6 +134,7 @@
     <Compile Include="Data\ChartDatabase\DbCharts.fs" />
     <Compile Include="Data\ChartDatabase\ChartDatabaseMigrations.fs" />
     <Compile Include="Data\ChartDatabase\ChartDatabase.fs" />
+    <Compile Include="Data\Options\RulesetLibrary.fs" />
     <Compile Include="Data\UserDatabase\Score.fs" />
     <Compile Include="Data\UserDatabase\Session.fs" />
     <Compile Include="Data\UserDatabase\ScoreInfo.fs" />

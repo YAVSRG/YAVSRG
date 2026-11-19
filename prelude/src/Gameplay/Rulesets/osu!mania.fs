@@ -35,11 +35,11 @@ module OsuMania =
     let miss_window (od: float32) : GameplayTime =
         188.0f<ms / rate> - 3.0f<ms / rate> * od
 
-    let to_hard_rock_window (unclipped_window: GameplayTime) = unclipped_window / 1.4f
+    let private to_hard_rock_window (unclipped_window: GameplayTime) = unclipped_window / 1.4f
 
-    let to_easy_window (unclipped_window: GameplayTime) = unclipped_window * 1.4f
+    let private to_easy_window (unclipped_window: GameplayTime) = unclipped_window * 1.4f
 
-    let clipped (window: GameplayTime) = floor_uom window + 0.5f<ms / rate>
+    let private clipped (window: GameplayTime) = floor_uom window + 0.5f<ms / rate>
 
     type Mode =
         | Easy
@@ -207,3 +207,7 @@ module OsuMania =
             HoldMechanics = HoldMechanics.CombineHeadAndTail(HeadTailCombineRule.OsuMania(ln_windows od mode))
             Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }
+
+    let nomod (od: float32) = create od NoMod
+    let easy (od: float32) = create od Easy
+    let hard_rock (od: float32) = create od HardRock

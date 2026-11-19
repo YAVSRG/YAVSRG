@@ -30,7 +30,7 @@ type LevelSelectScreen() =
 
         LevelSelect.on_refresh_all.Add(Tree.refresh)
 
-        Rulesets.on_changed.Add(fun _ ->
+        rulesets.OnChanged.Add(fun _ ->
             match options.ChartGroupMode.Value with
             | "grade"
             | "lamp" -> LevelSelect.refresh_all()

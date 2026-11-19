@@ -134,7 +134,7 @@ type Toolbar() =
                         if not(Dialog.exists()) then
                             Themes.reload_current()
                             Skins.load()
-                            Rulesets.load()
+                            rulesets.Load()
                             SelectedChart.recolor()
                             Notifications.action_feedback(Icons.CHECK, %"notification.reload_content", "")
                 ),

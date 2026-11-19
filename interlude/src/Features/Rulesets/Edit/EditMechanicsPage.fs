@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Rulesets.Edit
+namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -227,7 +227,8 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                     .Pos(9),
                 PageButton(
                     %"rulesets.mechanics.release_windows",
-                    fun () -> EditWindowsPage.ReleaseWindows(ruleset.Value.Judgements, release_timing_windows).Show()
+                    fun () ->
+                        EditTimingWindowsPage.ReleaseWindows(ruleset.Value.Judgements, release_timing_windows).Show()
                 )
                     .Pos(11),
                 CalloutCard(
@@ -247,7 +248,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                     .Pos(9),
                 PageButton(
                     %"rulesets.mechanics.release_windows",
-                    fun () -> EditWindowsPage.NoteWindowsAsReleaseWindows(ruleset).Show()
+                    fun () -> EditTimingWindowsPage.NoteWindowsAsReleaseWindows(ruleset).Show()
                 )
                     .Pos(11),
                 CalloutCard(

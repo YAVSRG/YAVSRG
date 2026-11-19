@@ -110,7 +110,7 @@ type private LocalScoreCard(score_info: ScoreInfo) =
             Style.font,
             score_info.Scoring.FormattedAccuracy,
             box.ShrinkY(5.0f),
-            ((score_info.Ruleset.GradeColor(score_info.Grade)).O4a alpha, Colors.shadow_2.O4a(alpha)),
+            (score_info.Ruleset.GradeColor(score_info.Grade).O4a alpha, Colors.shadow_2.O4a(alpha)),
             Alignment.CENTER
         )
 
@@ -121,7 +121,7 @@ type private LocalScoreCard(score_info: ScoreInfo) =
             Style.font,
             score_info.Ruleset.LampName(score_info.Lamp),
             box.ShrinkY(5.0f),
-            ((score_info.Ruleset.LampColor(score_info.Lamp)).O4a alpha, Colors.shadow_2.O4a(alpha)),
+            (score_info.Ruleset.LampColor(score_info.Lamp).O4a alpha, Colors.shadow_2.O4a(alpha)),
             Alignment.CENTER
         )
 

@@ -25,18 +25,18 @@ type PacemakerState =
     | Judgement of judgement: int * target_max_count: int
     | ComboBreaks of target_max_count: int
 
-    member this.Description(ruleset: Ruleset) : string =
+    member this.Description(scoring: ScoreProcessor) : string =
         match this with
         | PacemakerState.None -> ""
 
         | PacemakerState.Accuracy accuracy ->
-            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (ruleset.FormatAccuracy(accuracy))
+            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (scoring.Ruleset.FormatAccuracy(accuracy))
 
         | PacemakerState.Replay(accuracy, _) ->
-            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (ruleset.FormatAccuracy(accuracy))
+            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (scoring.Ruleset.FormatAccuracy(accuracy))
 
         | PacemakerState.Judgement(judgement, target_max_count) ->
-            let judgement_name = ruleset.JudgementName(judgement)
+            let judgement_name = scoring.Ruleset.JudgementName(judgement)
 
             if target_max_count = 0 then
                 sprintf "%s %s" Icons.FLAG ([ judgement_name ] %> "pacemaker.zero_judgements")
@@ -93,19 +93,20 @@ type PacemakerState =
         | PacemakerState.ComboBreaks target_max_count -> scoring.ComboBreaks > target_max_count
 
     static member Create(info: LoadedChartInfo, ctx: PacemakerCreationContext) : PacemakerState =
+
+        let ruleset_info = rulesets.GetCurrent(info.ChartMeta)
+        let ruleset = ruleset_info.Ruleset
+        let ruleset_hash = ruleset_info.Hash
+
         let inline create_from_score (score_info: ScoreInfo) =
             let replay_scoring =
-                ScoreProcessor.Create(Rulesets.current, score_info.Replay, score_info.WithMods, score_info.Rate)
+                ScoreProcessor.Create(ruleset_info, score_info.Replay, score_info.WithMods, score_info.Rate)
 
             PacemakerState.Replay(score_info.Accuracy, replay_scoring)
 
         let inline create_from_accuracy (pacemaker_settings: PacemakerSettings) : PacemakerState =
             let personal_best_accuracy =
-                Bests.ruleset_best_above
-                    Rulesets.current_hash
-                    _.Accuracy
-                    SelectedChart.rate.Value
-                    info.SaveData.PersonalBests
+                Bests.ruleset_best_above ruleset_hash _.Accuracy SelectedChart.rate.Value info.SaveData.PersonalBests
 
             let inline should_use_personal_best (best_accuracy: float) : bool =
                 pacemaker_settings.PersonalBest = PacemakerPersonalBestMode.Always
@@ -115,7 +116,7 @@ type PacemakerState =
             let inline use_score (final_accuracy: float, score: Score) =
                 let with_mods = ModState.apply score.Mods info.Chart
                 let replay = Replay.FromByteArray(score.Replay)
-                let scoring = ScoreProcessor.Create(Rulesets.current, replay, with_mods, score.Rate)
+                let scoring = ScoreProcessor.Create(ruleset_info, replay, with_mods, score.Rate)
                 PacemakerState.Replay(final_accuracy, scoring)
 
             let inline use_accuracy (accuracy: float) = PacemakerState.Accuracy(accuracy)
@@ -130,11 +131,7 @@ type PacemakerState =
 
         let inline create_from_lamp (pacemaker_settings: PacemakerSettings) : PacemakerState =
             let personal_best_lamp =
-                Bests.ruleset_best_above
-                    Rulesets.current_hash
-                    _.Lamp
-                    SelectedChart.rate.Value
-                    info.SaveData.PersonalBests
+                Bests.ruleset_best_above ruleset_hash _.Lamp SelectedChart.rate.Value info.SaveData.PersonalBests
 
             let inline should_use_personal_best (best_lamp: int) : bool =
                 pacemaker_settings.PersonalBest = PacemakerPersonalBestMode.Always
@@ -146,9 +143,9 @@ type PacemakerState =
                 | Some(best_lamp, _, _) when should_use_personal_best(best_lamp) -> best_lamp
                 | _ -> pacemaker_settings.Lamp
                 |> max 0
-                |> min(Rulesets.current.Lamps.Length - 1)
+                |> min(ruleset.Lamps.Length - 1)
 
-            match Rulesets.current.Lamps.[target_lamp].Requirement with
+            match ruleset.Lamps.[target_lamp].Requirement with
             | LampRequirement.ComboBreaksAtMost n -> PacemakerState.ComboBreaks(n)
             | LampRequirement.JudgementAtMost(j, n) -> PacemakerState.Judgement(j, n)
 
@@ -157,10 +154,7 @@ type PacemakerState =
         | PacemakerCreationContext.FromScore score_info -> create_from_score(score_info)
 
         | PacemakerCreationContext.FromUserSetting ->
-            let pacemaker_settings =
-                match options.Pacemaker.TryGetValue(Rulesets.current_hash) with
-                | true, settings -> settings
-                | false, _ -> PacemakerSettings.Default
+            let pacemaker_settings = options.GetPacemakerOptions()
 
             match pacemaker_settings.Mode with
             | PacemakerMode.Accuracy -> create_from_accuracy(pacemaker_settings)

@@ -3,8 +3,8 @@ namespace Prelude.Data.Library
 open System
 open Percyqaz.Common
 open Prelude
+open Prelude.Data.Options
 open Prelude.Mods
-open Prelude.Gameplay.Rulesets
 open Prelude.Calculator.Patterns
 open Prelude.Data.Library
 open Prelude.Data.UserDatabase
@@ -17,18 +17,12 @@ type SuggestionContext =
         MinimumRate: Rate
         MaximumRate: Rate
         OnlyNewCharts: bool
-        RulesetId: string
-        Ruleset: Ruleset
+        RulesetProvider: RulesetProvider
         Library: Library
     }
 
     member this.LibraryViewContext: LibraryViewContext =
-        {
-            Rate = let _, rate = this.BaseChart in rate
-            RulesetId = this.RulesetId
-            Ruleset = this.Ruleset
-            Library = this.Library
-        }
+        { Rate = snd this.BaseChart; RulesetProvider = this.RulesetProvider; Library = this.Library }
 
 module Suggestion =
 

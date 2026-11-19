@@ -111,8 +111,7 @@ module LevelSelect =
                     OnlyNewCharts = options.SuggestionsOnlyNew.Value
                     Filter = filter.WithoutSearchTerms
                     Mods = SelectedChart.selected_mods.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
+                    RulesetProvider = rulesets.RulesetProvider()
                     Library = Content.Library
                 }
             | Some ctx -> ctx
@@ -147,8 +146,7 @@ module LevelSelect =
             let ctx =
                 {
                     Rate = SelectedChart.rate.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
+                    RulesetProvider = rulesets.RulesetProvider()
                     Library = Content.Library
                 }
 
@@ -176,8 +174,7 @@ module LevelSelect =
                         OnlyNewCharts = false
                         Filter = filter
                         Mods = SelectedChart.selected_mods.Value
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
+                        RulesetProvider = rulesets.RulesetProvider()
                         Library = Content.Library
                     }
 

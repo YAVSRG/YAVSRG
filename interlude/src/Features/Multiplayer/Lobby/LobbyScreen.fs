@@ -80,7 +80,7 @@ type LobbyUI(lobby: Lobby) =
                     Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(2, 3, AngledButton.LEAN_AMOUNT)
                 )
                 .Help(Help.Info("levelselect.mods")),
-            RulesetSwitcher(options.SelectedRuleset)
+            RulesetSwitcher(options.Ruleset)
                 .Position(
                     Position.SliceB(AngledButton.HEIGHT).SlicePercentL(0.4f).GridX(3, 3, AngledButton.LEAN_AMOUNT)
                 )
@@ -114,7 +114,7 @@ type LobbyUI(lobby: Lobby) =
 
                     let scoring =
                         ScoreProcessor.Create(
-                            Rulesets.current,
+                            rulesets.GetCurrent(info.ChartMeta),
                             replay_source,
                             info.WithMods,
                             SelectedChart.rate.Value

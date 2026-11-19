@@ -53,7 +53,7 @@ type AccuracyPoints =
     | WifeCurve of judge: int
     | PointsPerJudgement of points: float array
 
-    member internal this.Clone =
+    member internal this.Clone() : AccuracyPoints =
         match this with
         | PointsPerJudgement points -> PointsPerJudgement(Array.copy points)
         | other -> other
@@ -103,7 +103,7 @@ type HoldMechanics =
     | JudgeReleasesSeparately of windows: (GameplayTime * GameplayTime) option array * judgement_if_overheld: int
     | OnlyJudgeReleases of judgement_if_dropped: int
 
-    member internal this.Clone =
+    member internal this.Clone() : HoldMechanics =
         match this with
         | JudgeReleasesSeparately(windows, j) -> JudgeReleasesSeparately(Array.copy windows, j)
         | other -> other
@@ -140,8 +140,8 @@ type Ruleset =
             Lamps = Array.copy this.Lamps
             Grades = Array.copy this.Grades
             HitMechanics = this.HitMechanics
-            HoldMechanics = this.HoldMechanics.Clone
-            Accuracy = this.Accuracy.Clone
+            HoldMechanics = this.HoldMechanics.Clone()
+            Accuracy = this.Accuracy.Clone()
             Formatting = this.Formatting
         }
 
@@ -213,7 +213,7 @@ type Ruleset =
     /// The 'hash' of a ruleset is used to identify it
     /// The ruleset is rendered to an array of bytes, then a hash is computed
     /// Any change to a ruleset that changes how it functions changes the bytes, and the hash will change
-    /// Any change is only cosmetic (e.g. color of a judemgent) does not appear in the bytes, and the hash will stay the same
+    /// Any change that is only cosmetic (e.g. color of a judemgent) does not appear in the bytes, and the hash will stay the same
     member this.CalculateHash() : string =
         let h = SHA256.Create()
         use ms = new MemoryStream()
@@ -656,3 +656,17 @@ type Ruleset =
                 | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve(j)
             Formatting = { DecimalPlaces = this.Formatting.DecimalPlaces }
         }
+
+    member this.Filename() : string =
+        this.Name
+        |> String.filter(
+            function
+            | '\''
+            | '_'
+            | '.'
+            | ' ' -> true
+            | c -> Char.IsAsciiLetterOrDigit(c)
+        )
+        |> _.ToLowerInvariant()
+        |> fun s ->
+            s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
