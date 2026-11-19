@@ -3,7 +3,7 @@ namespace Prelude.Gameplay.Rulesets
 open Prelude.Charts
 
 [<AutoOpen>]
-module RulesetExtensions =
+module NativeRuleset =
 
     let SC_J4 = SC.create(4).ToInfo()
     let QUAVER_STANDARD: RulesetInfo = Quaver.create(Quaver.Standard).ToInfo()
