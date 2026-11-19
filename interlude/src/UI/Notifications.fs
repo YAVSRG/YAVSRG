@@ -72,41 +72,11 @@ type DisplayedNotification =
 
 module Notifications =
 
-    let displayed_notifications = ResizeArray<DisplayedNotification>()
+    let notification_ev = Event<Notification>()
+    let OnNotificationAdded = notification_ev.Publish
 
     let private add_notification (notification: Notification) : unit =
-        let displayed = notification.ToDisplay()
-        GameThread.on_game_thread(fun () -> displayed_notifications.Add(displayed))
-
-    let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
-        GameThread.on_game_thread(fun () ->
-            let n: DisplayedNotification =
-                {
-                    Data = body
-                    Size = Callout.measure body
-                    FillColor = colors
-                    ContentColor = content_colors
-                    Fade = Animation.Fade(0.0f, Target = 1.0f)
-                    Duration = 2000.0
-                }
-
-            displayed_notifications.Add(n)
-        )
-
-    let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
-        GameThread.on_game_thread(fun () ->
-            let n: DisplayedNotification =
-                {
-                    Data = body
-                    Size = Callout.measure body
-                    FillColor = colors
-                    ContentColor = content_colors
-                    Fade = Animation.Fade(0.0f, Target = 1.0f)
-                    Duration = 5000.0
-                }
-
-            displayed_notifications.Add(n)
-        )
+        GameThread.on_game_thread(fun () -> notification_ev.Trigger(notification))
 
     let task_feedback (icon: string, title: string, description: string) : unit =
         add_notification(
@@ -118,8 +88,6 @@ module Notifications =
             }
         )
 
-        GameThread.on_game_thread Style.notify_task.Play
-
     let action_feedback (icon: string, title: string, description: string) : unit =
         add_notification(
             {
@@ -129,9 +97,6 @@ module Notifications =
                 Type = NotificationType.Result(None)
             }
         )
-
-        add(Callout.Small.Icon(icon).Title(title).Body(description), (Colors.cyan_accent, Colors.cyan), Colors.text)
-        GameThread.on_game_thread Style.notify_info.Play
 
     let action_feedback_button
         (icon: string, title: string, description: string, button_label: string, button_action: unit -> unit)
@@ -145,8 +110,6 @@ module Notifications =
             }
         )
 
-        GameThread.on_game_thread Style.notify_info.Play
-
     let system_feedback (icon: string, title: string, description: string) : unit =
         add_notification(
             {
@@ -157,8 +120,6 @@ module Notifications =
             }
         )
 
-        GameThread.on_game_thread Style.notify_system.Play
-
     let error (title: string, description: string) : unit =
         add_notification(
             {
@@ -168,5 +129,3 @@ module Notifications =
                 Type = NotificationType.Error
             }
         )
-
-        GameThread.on_game_thread Style.notify_error.Play

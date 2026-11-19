@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+namespace Interlude.UI
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -10,12 +10,28 @@ open Interlude.UI
 type NotificationsDisplay() =
     inherit Overlay(NodeType.None)
 
+    let displayed_notifications = ResizeArray<DisplayedNotification>()
+
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
+
+        let on_notification_added (notification: Notification) =
+            GameThread.on_game_thread(fun () -> displayed_notifications.Add(notification.ToDisplay()))
+
+            match notification.Type with
+            | NotificationType.Error -> Style.notify_error.Play()
+            | NotificationType.Result _ -> Style.notify_info.Play()
+            | NotificationType.System -> Style.notify_system.Play()
+            | NotificationType.Task -> Style.notify_task.Play()
+
+        Notifications.OnNotificationAdded.Add(on_notification_added)
+
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let mutable y = this.Bounds.Top + 80.0f
 
-        for i in Notifications.displayed_notifications do
+        for i in displayed_notifications do
             let width, height = i.Size
 
             let bounds = Rect.FromSize(this.Bounds.Right - width - 10.0f, y, width, height)
@@ -34,12 +50,12 @@ type NotificationsDisplay() =
                 if i.Duration <= 0.0 then
                     i.Fade.Target <- 0.0f
             elif i.Fade.Value < 0.01f then
-                GameThread.defer(fun () -> Notifications.displayed_notifications.Remove(i) |> ignore)
+                GameThread.defer(fun () -> displayed_notifications.Remove(i) |> ignore)
 
     override this.Draw() : unit =
         let mutable y = this.Bounds.Top + 80.0f
 
-        for i in Notifications.displayed_notifications do
+        for i in displayed_notifications do
             let width, height = i.Size
             let accent, body = i.FillColor
 
