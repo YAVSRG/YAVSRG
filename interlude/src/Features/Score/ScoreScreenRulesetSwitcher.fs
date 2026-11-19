@@ -26,11 +26,9 @@ type ScoreScreenRulesetSwitcher
         )
 
     let switch_to_native_ruleset () =
-        match NativeRuleset.Detect(score_info.ChartMeta.Origins) with
-        | Some native_ruleset ->
-            let ruleset_info = native_ruleset.ToInfo()
-            // Use user's version (custom colors, names, etc) if available
-            rulesets.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info |> set_ruleset_direct
+        match rulesets.GetNativeRuleset(score_info.ChartMeta.Origins) with
+        | Some ruleset_info ->
+            set_ruleset_direct(ruleset_info)
             Style.click.Play()
         | None ->
             Notifications.system_feedback(

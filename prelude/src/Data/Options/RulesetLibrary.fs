@@ -4,6 +4,7 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Data
+open Prelude.Charts
 open Prelude.Data.ChartDatabase
 open Prelude.Gameplay.Rulesets
 
@@ -198,3 +199,22 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.CanDelete(file_id: string) : bool = file_id <> RulesetLibrary.DEFAULT_ID
 
     member this.CanEdit(file_id: string) : bool = file_id <> RulesetLibrary.DEFAULT_ID
+
+    member this.GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =
+        match NativeRuleset.Detect(origins) with
+        | Some native_ruleset ->
+            let ruleset_info = native_ruleset.ToInfo()
+            // Use user's version (custom colors, names, etc) if available
+            Some(this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info)
+        | None -> None
+
+    member this.SwitchToNativeRuleset(origins: ChartOrigin seq) : bool =
+        match NativeRuleset.Detect(origins) with
+        | Some(native_ruleset) ->
+            match native_ruleset with
+            | NativeRuleset.Wife3 -> this.EnsureInstalledAndSelect(WIFE3_J4)
+            | NativeRuleset.Quaver -> this.EnsureInstalledAndSelect(QUAVER_STANDARD)
+            | NativeRuleset.OsuMania(od) -> this.Selected.Set(OsuAutomatic(od))
+
+            true
+        | None -> false
