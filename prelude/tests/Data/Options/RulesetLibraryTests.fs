@@ -34,6 +34,184 @@ module RulesetLibraryTests =
         library.Load()
         Assert.True(library.Selected.Value = FileId(RulesetLibrary.DEFAULT_ID))
 
+    [<Test>]
+    let Install_AddsNewRuleset () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        let id = library.Install(QUAVER_STANDARD.Ruleset)
+        Assert.AreEqual(2, library.Count)
+        Assert.True(library.Exists(id))
+        Assert.AreEqual("quaver-standard", QUAVER_STANDARD.Ruleset.Filename())
+        Assert.AreEqual(QUAVER_STANDARD.Ruleset.Filename(), id)
+
+        let id2 = library.Install(QUAVER_STANDARD.Ruleset)
+        Assert.AreEqual(3, library.Count)
+        Assert.True(library.Exists(id2))
+        Assert.AreNotEqual(id, id2)
+        Assert.True(id2.StartsWith(id))
+
+    [<Test>]
+    let Install_FromPath_AddsNewRuleset () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        let external_path = Path.GetTempFileName()
+        QUAVER_STANDARD.Ruleset.WriteToFile(external_path)
+
+        let result = library.Install(external_path)
+
+        match result with
+        | None -> Assert.Fail("Expected a successful install")
+        | Some(id) ->
+            Assert.AreEqual(2, library.Count)
+            Assert.True(library.Exists(id))
+            Assert.AreEqual("quaver-standard", QUAVER_STANDARD.Ruleset.Filename())
+            Assert.AreEqual(QUAVER_STANDARD.Ruleset.Filename(), id)
+
+        let result = library.Install(external_path)
+
+        match result with
+        | None -> Assert.Fail("Expected a successful install")
+        | Some(id2) ->
+            Assert.AreEqual(3, library.Count)
+            Assert.True(library.Exists(id2))
+
+    [<Test>]
+    let Install_FromPath_FailsWhenFileNotFound () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        let result = library.Install("does-not-exist.ruleset")
+
+        match result with
+        | None -> Assert.AreEqual(1, library.Count)
+        | Some _ -> Assert.Fail()
+
+    [<Test>]
+    let Install_FromPath_FailsWhenRulesetAlreadyInFolder () : unit =
+        let ruleset_location = Directory.CreateTempSubdirectory("rulesets").FullName
+        let library = RulesetLibrary(ruleset_location)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        let ruleset_file_path = Path.Combine(ruleset_location, "quaver-standard.ruleset")
+        QUAVER_STANDARD.Ruleset.WriteToFile(ruleset_file_path)
+
+        let result = library.Install(ruleset_file_path)
+
+        match result with
+        | None -> Assert.AreEqual(1, library.Count)
+        | Some _ -> Assert.Fail()
+
+    [<Test>]
+    let Install_FromPath_FailsWhenRulesetInvalid () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        let external_path = Path.GetTempFileName()
+
+        let result = library.Install(external_path)
+
+        match result with
+        | None -> Assert.AreEqual(1, library.Count)
+        | Some _ -> Assert.Fail()
+
+        let external_path2 = Path.GetTempFileName()
+
+        let INVALID_RULESET = { SC_J4.Ruleset with Judgements = [||] }
+        INVALID_RULESET.WriteToFile(external_path2)
+
+        let result = library.Install(external_path2)
+
+        match result with
+        | None -> Assert.AreEqual(1, library.Count)
+        | Some _ -> Assert.Fail()
+
+    [<Test>]
+    let Update_UpdatesRulesetWithNameUnchanged () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        let id = library.Install(QUAVER_STANDARD.Ruleset)
+        Assert.True(library.Exists(id))
+        Assert.AreEqual(2, library.Count)
+
+        Assert.AreEqual(
+            QUAVER_STANDARD.Ruleset.Description,
+            library.GetCurrent(None, FileId("quaver-standard")).Ruleset.Description
+        )
+
+        let updated_ruleset =
+            { QUAVER_STANDARD.Ruleset with Description = "Updated description" }
+
+        Assert.True(library.Update(id, updated_ruleset))
+        Assert.True(library.Exists(id))
+        Assert.AreEqual(2, library.Count)
+
+        Assert.AreNotEqual(
+            QUAVER_STANDARD.Ruleset.Description,
+            library.GetCurrent(None, FileId("quaver-standard")).Ruleset.Description
+        )
+
+    [<Test>]
+    let Update_UpdatesRulesetWithNameAndFileChanged () : unit =
+        let ruleset_location = Directory.CreateTempSubdirectory("rulesets").FullName
+        let library = RulesetLibrary(ruleset_location)
+
+        let file_system_state () =
+            Directory.GetFiles(ruleset_location) |> Array.map Path.GetFileNameWithoutExtension |> Array.sort
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        let id = library.Install(QUAVER_STANDARD.Ruleset)
+        Assert.True(library.Exists(id))
+        Assert.AreEqual(2, library.Count)
+
+        Assert.AreEqual(
+            QUAVER_STANDARD.Ruleset.Description,
+            library.GetCurrent(None, FileId("quaver-standard")).Ruleset.Description
+        )
+
+        Assert.AreEqual([| "quaver-standard"; "sc-j4" |], file_system_state())
+
+        Assert.True(library.Update(id, WIFE3_J4.Ruleset))
+        Assert.False(library.Exists(id))
+        Assert.AreEqual(2, library.Count)
+        Assert.AreEqual(WIFE3_J4.Ruleset.Description, library.GetCurrent(None, FileId("wife3-j4")).Ruleset.Description)
+        Assert.AreEqual([| "sc-j4"; "wife3-j4" |], file_system_state())
+
+    [<Test>]
+    let Update_ReturnsFalse_WhenEditingDefault () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        Assert.False(library.Update(RulesetLibrary.DEFAULT_ID, QUAVER_STANDARD.Ruleset))
+        Assert.AreEqual(SC_J4.Ruleset, library.GetCurrent(None).Ruleset)
+
+    [<Test>]
+    let Update_ReturnsFalse_WhenIdNotFound () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        library.Load()
+        Assert.AreEqual(1, library.Count)
+
+        Assert.False(library.Update("does_not_exist", QUAVER_STANDARD.Ruleset))
+        Assert.AreEqual(SC_J4.Ruleset, library.GetCurrent(None).Ruleset)
 
     [<Test>]
     let OnChanged_OnlyFiresAfterLoad () : unit =
@@ -90,6 +268,24 @@ module RulesetLibraryTests =
         Assert.True(event_fired)
 
     [<Test>]
+    let OnChanged_FiresOnUpdate_WhenUpdatedWasSelected () : unit =
+        let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
+
+        let mutable event_fired = false
+        library.OnChanged.Add(fun () -> event_fired <- true)
+
+        library.Load()
+        Assert.False(event_fired)
+
+        let new_id = library.Install(QUAVER_STANDARD.Ruleset)
+        library.Selected.Set(FileId(new_id))
+        Assert.True(event_fired)
+
+        event_fired <- false
+        Assert.True(library.Update(new_id, WIFE3_J4.Ruleset))
+        Assert.True(event_fired)
+
+    [<Test>]
     let Delete_SelectsDefault_WhenDeletedWasSelected () : unit =
         let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
 
@@ -130,14 +326,14 @@ module RulesetLibraryTests =
         let reloaded_list_from_folder () =
             let copy_of_library = RulesetLibrary(ruleset_location)
             copy_of_library.Load()
-            copy_of_library.ToList()
+            copy_of_library.Count
 
         library.Load()
 
         let new_id = library.Install(QUAVER_STANDARD.Ruleset)
-        Assert.AreEqual(2, Seq.length(library.ToList()))
-        Assert.AreEqual(2, Seq.length(reloaded_list_from_folder()))
+        Assert.AreEqual(2, library.Count)
+        Assert.AreEqual(2, reloaded_list_from_folder())
 
         Assert.True(library.Delete(new_id))
-        Assert.AreEqual(1, Seq.length(library.ToList()))
-        Assert.AreEqual(1, Seq.length(reloaded_list_from_folder()))
+        Assert.AreEqual(1, library.Count)
+        Assert.AreEqual(1, reloaded_list_from_folder())

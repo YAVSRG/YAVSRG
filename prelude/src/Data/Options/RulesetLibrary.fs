@@ -36,12 +36,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.Load() : unit =
         loaded.Clear()
 
-        let default_path =
-            Path.Combine(rulesets_storage_path, RulesetLibrary.DEFAULT_ID + ".ruleset")
-
-        if not(File.Exists(default_path)) then
-            DEFAULT.Ruleset.WriteToFile(default_path)
-
         for f in Directory.GetFiles(rulesets_storage_path) do
             if Path.GetExtension(f).ToLower() = ".ruleset" then
                 let id = Path.GetFileNameWithoutExtension(f)
@@ -50,8 +44,12 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 | Ok ruleset -> loaded.Add(id, ruleset.ToInfo())
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
+        let default_path =
+            Path.Combine(rulesets_storage_path, RulesetLibrary.DEFAULT_ID + ".ruleset")
+
         if not(loaded.ContainsKey(RulesetLibrary.DEFAULT_ID)) then
             loaded.Add(RulesetLibrary.DEFAULT_ID, DEFAULT)
+            DEFAULT.Ruleset.WriteToFile(default_path)
 
         match current_selection with
         | FileId file_id when not(loaded.ContainsKey(file_id)) ->
@@ -116,7 +114,10 @@ type RulesetLibrary(rulesets_storage_path: string) =
         }
         |> Seq.sortBy(fun (_, ruleset_info) -> ruleset_info.Ruleset.Name.ToLowerInvariant())
 
+    member this.Count: int = loaded.Count
+
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
+    /// Does not validate the ruleset! it must already be validated
     member this.Install(ruleset: Ruleset) : string =
         let new_id: string = ruleset.Filename()
 
@@ -138,11 +139,12 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 Logging.Error "Ruleset import failed: %s" reason
                 None
 
+    member this.CanUpdate(existing_file_id: string) : bool =
+        existing_file_id <> RulesetLibrary.DEFAULT_ID && this.Exists(existing_file_id)
+
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
-    member this.Update(existing_file_id: string, ruleset: Ruleset) : unit =
-
-        // todo: prevent updating the default ruleset?
-
+    /// Does not validate the ruleset! it must already be validated
+    member this.Update(existing_file_id: string, ruleset: Ruleset) : bool =
         let ensure_filename_updated () =
             let new_id: string = ruleset.Filename()
 
@@ -164,16 +166,24 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 Logging.Error "Failed to move ruleset file from '%s' to '%s': %O" existing_file_id new_id err
                 existing_file_id
 
-        let new_file_id = ensure_filename_updated()
+        if this.CanUpdate(existing_file_id) then
+            let new_file_id = ensure_filename_updated()
 
-        if loaded.Remove(existing_file_id) then
+            loaded.Remove(existing_file_id) |> ignore
             loaded.Add(new_file_id, ruleset.ToInfo())
+
             ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_file_id + ".ruleset"))
+
             let selected_was_changed = current_selection = FileId(existing_file_id)
 
             if selected_was_changed then
                 current_selection <- FileId(new_file_id)
                 on_changed_ev.Trigger()
+
+            true
+        else
+            Logging.Error "Ruleset '%s' is default or does not exist, cannot be updated" existing_file_id
+            false
 
     member this.CanDelete(file_id: string) : bool =
         file_id <> RulesetLibrary.DEFAULT_ID && this.Exists(file_id)
@@ -191,6 +201,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 Logging.Error "IO error deleting ruleset: %O" err
                 false
         else
+            Logging.Error "Ruleset '%s' is default or does not exist, cannot be deleted" file_id
             false
 
     member this.GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =

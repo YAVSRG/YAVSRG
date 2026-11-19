@@ -40,7 +40,7 @@ type RulesetEditorPage(id: string, original: Ruleset) =
             | _ -> true
 
         if not has_error then
-            rulesets.Update(id, { ruleset.Value with Name = name.Value.Trim() })
+            rulesets.Update(id, { ruleset.Value with Name = name.Value.Trim() }) |> ignore
 
     override this.Content() : Widget =
         this.OnClose(this.SaveChangesIfValid)
