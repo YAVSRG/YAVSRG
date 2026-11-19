@@ -134,7 +134,7 @@ module SearchResults =
             if token_match tokens [| %"skins" |] then
                 yield PageButton(%"skins", fun () -> SelectSkinsPage().Show())
                 yield PageButton(%"noteskin.edit", SkinActions.edit_or_extract_noteskin)
-                yield ImportsPage.GetSkins()
+                yield ImportsPage.GetMoreSkins()
 
             if token_match tokens [| %"skins"; %"skins.import_from_osu" |] then
                 yield ImportsPage.ImportOsuSkins()

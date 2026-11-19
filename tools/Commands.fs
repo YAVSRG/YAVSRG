@@ -73,8 +73,6 @@ module Commands =
             )
             .WithCommand("down_detector", "Ping several services Interlude depends on for status", Server.down_detector)
 
-            .WithCommand("skin_add", "Add a local skin to YAVSRG's skin repo", "folder_name", Skins.add_skin)
-
             .WithCommand("run", "Build and run the client in debug mode", Play.debug_run)
             .WithCommand("test", "Build and run all tests", Test.run)
 

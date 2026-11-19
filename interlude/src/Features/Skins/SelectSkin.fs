@@ -16,7 +16,6 @@ open Interlude.Features.Import.Osu
 open Interlude.Features.Gameplay
 open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Skins.EditHUD
-open Interlude.Features.Skins.Browser
 
 type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, on_edit: unit -> unit) =
     inherit
@@ -158,6 +157,9 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
 
 module SkinActions =
 
+    let get_more_skins () : unit =
+        ConfirmPage(%"skins.get_more_skins.discord_prompt", fun () -> open_url("https://yavsrg.net/discord")).Show()
+
     let edit_hud (on_exit: unit -> unit) : unit =
         SelectedChart.if_loaded(fun info ->
             if
@@ -252,10 +254,7 @@ type SelectSkinsPage() =
                         .ShrinkY(PAGE_MARGIN_Y)
                 )
                 .With(
-                    OptionsMenuButton(
-                        Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
-                        (fun () -> SkinsBrowserPage().Show())
-                    )
+                    OptionsMenuButton(Icons.DOWNLOAD_CLOUD + " " + %"skins.get_more_skins", SkinActions.get_more_skins)
                         .Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).TranslateY(-10.0f)),
                     OptionsMenuButton(
                         Icons.DOWNLOAD + " " + %"skins.import_from_osu",
