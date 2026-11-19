@@ -53,7 +53,7 @@ type RecalculatePersonalBestsTask(library: Library, rulesets: RulesetInfo array,
                                 update_bests_for_ruleset(ruleset_info)
 
                             match Ruleset.GetNativeOsuRuleset(chart_meta.Origins) with
-                            | Some ruleset_info -> update_bests_for_ruleset(ruleset_info)
+                            | Some native_ruleset -> update_bests_for_ruleset(native_ruleset.ToInfo())
                             | None -> ()
 
                     if new_bests <> existing_bests then
