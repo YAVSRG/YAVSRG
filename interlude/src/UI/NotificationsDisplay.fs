@@ -1,10 +1,60 @@
 namespace Interlude.UI
 
+open System.Runtime.CompilerServices
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Windowing
+open Prelude
 open Interlude.UI
+
+type DisplayedNotification =
+    private
+        {
+            Data: Callout
+            Size: float32 * float32
+            Fade: Animation.Fade
+            FillColor: Color * Color
+            ContentColor: Color * Color
+            mutable Duration: float
+        }
+
+    static member FromNotification(notification: Notification) : DisplayedNotification =
+        let body =
+            Callout.Small.Icon(notification.Icon).Title(notification.Title).Body(notification.Description)
+
+        let color =
+            match notification.Type with
+            | NotificationType.Task -> (Colors.pink_accent, Colors.pink)
+            | NotificationType.System -> (Colors.green_accent, Colors.green)
+            | NotificationType.Error -> (Colors.red_accent, Colors.red)
+            | NotificationType.Result _ -> (Colors.cyan_accent, Colors.cyan)
+
+        match notification.Type with
+        | NotificationType.Result(Some(button_label, button_action)) ->
+            let body = body.Button(button_label, button_action)
+
+            {
+                Data = body
+                Size = Callout.measure body
+                FillColor = color
+                ContentColor = Colors.text
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
+                Duration = 5000.0
+            }
+        | _ ->
+            {
+                Data = body
+                Size = Callout.measure body
+                FillColor = color
+                ContentColor = Colors.text
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
+                Duration = 2000.0
+            }
+
+    [<Extension>]
+    static member ToDisplay(notification: Notification) : DisplayedNotification =
+        DisplayedNotification.FromNotification(notification)
 
 [<Sealed>]
 type NotificationsDisplay() =
@@ -16,7 +66,7 @@ type NotificationsDisplay() =
         base.Init(parent)
 
         let on_notification_added (notification: Notification) =
-            GameThread.on_game_thread(fun () -> displayed_notifications.Add(notification.ToDisplay()))
+            displayed_notifications.Add(notification.ToDisplay())
 
             match notification.Type with
             | NotificationType.Error -> Style.notify_error.Play()
