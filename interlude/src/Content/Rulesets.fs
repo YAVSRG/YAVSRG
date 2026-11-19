@@ -7,6 +7,3 @@ open Prelude.Data.Options
 module Rulesets =
 
     let rulesets: RulesetLibrary = RulesetLibrary(get_game_folder("Rulesets"))
-
-    // todo: rulesets.CanDelete instead of exposing this
-    let DEFAULT_RULESET_ID = "sc-j4"

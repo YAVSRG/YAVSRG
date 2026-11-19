@@ -42,6 +42,7 @@ type SelectRulesetPage() =
 
         let edit_action =
             Button(Icons.EDIT, fun () -> RulesetEditorPage(id, ruleset_info.Ruleset).Show())
+                .Disabled(not(rulesets.CanUpdate(id)))
 
         let copy_action =
             Button(
@@ -71,7 +72,7 @@ type SelectRulesetPage() =
                         .Show()
                 )
             )
-                .Disabled((DEFAULT_RULESET_ID = id))
+                .Disabled(not(rulesets.CanDelete(id)))
                 .TextColor(Colors.red_accent)
 
         NavigationContainer
