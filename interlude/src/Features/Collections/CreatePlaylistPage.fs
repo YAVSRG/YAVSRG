@@ -27,7 +27,7 @@ type CreatePlaylistPage(starting_name: string, on_create: string * Collection ->
                             on_create(new_name.Value, Playlist playlist)
                             CollectionActions.collection_modified_ev.Trigger()
                         | None ->
-                            Notifications.action_feedback(
+                            Notifications.Result(
                                 Icons.X,
                                 %"notification.collection_create_failed.title",
                                 %"notification.collection_create_failed.body"

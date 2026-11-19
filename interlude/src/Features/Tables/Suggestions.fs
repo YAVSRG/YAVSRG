@@ -22,25 +22,17 @@ type SuggestChartPage(table: Table, chart_id: string) =
                     { ChartId = chart_id; TableId = table.Id; Level = level },
                     function
                     | Some Tables.Suggestions.Vote.Response.Ok ->
-                        Notifications.action_feedback(
-                            Icons.FOLDER_PLUS,
-                            %"notification.suggestion.send_success.title",
-                            ""
-                        )
+                        Notifications.Result(Icons.FOLDER_PLUS, %"notification.suggestion.send_success.title", "")
                     | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
                         // todo: send backbeat addition request with suggestion
-                        Notifications.action_feedback(
-                            Icons.FOLDER_PLUS,
-                            %"notification.suggestion.send_success.title",
-                            ""
-                        )
+                        Notifications.Result(Icons.FOLDER_PLUS, %"notification.suggestion.send_success.title", "")
                     | Some Tables.Suggestions.Vote.Response.Rejected ->
-                        Notifications.action_feedback(
+                        Notifications.Result(
                             Icons.X_CIRCLE,
                             %"notification.suggestion.rejected.title",
                             %"notification.suggestion.rejected.body"
                         )
-                    | None -> Notifications.error(%"notification.suggestion.server_error.title", "")
+                    | None -> Notifications.Error(%"notification.suggestion.server_error.title", "")
                 )
 
                 Menu.Back()
@@ -87,10 +79,10 @@ type RejectSuggestionPage(table: Table, suggestion: Suggestion) =
             : Tables.Suggestions.Reject.Request),
             function
             | Some true ->
-                Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.suggestion.rejected.title", "")
+                Notifications.Result(Icons.FOLDER_PLUS, %"notification.suggestion.rejected.title", "")
                 Menu.Back()
                 Menu.Back()
-            | _ -> Notifications.error(%"notification.suggestion.server_error.title", "")
+            | _ -> Notifications.Error(%"notification.suggestion.server_error.title", "")
         )
 
     override this.Content() : Widget =
@@ -110,9 +102,8 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
         Tables.Suggestions.Accept.post(
             ({ TableId = table.Id; ChartId = suggestion.ChartId; Level = level }: Tables.Suggestions.Accept.Request),
             function
-            | Some true ->
-                Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.suggestion.apply_success.title", "")
-            | _ -> Notifications.error(%"notification.suggestion.server_error.title", "")
+            | Some true -> Notifications.Result(Icons.FOLDER_PLUS, %"notification.suggestion.apply_success.title", "")
+            | _ -> Notifications.Error(%"notification.suggestion.server_error.title", "")
         )
 
         Menu.Back()
@@ -130,7 +121,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             (suggestion.ChartId, table.Id),
             function
             | true ->
-                Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", "")
+                Notifications.Task(Icons.DOWNLOAD, %"notification.install_song", "")
 
                 GameThread.defer(fun () ->
                     if still_open then
@@ -140,7 +131,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                             Menu.Exit()
                         | None -> ()
                 )
-            | false -> Notifications.error(%"notification.install_song_failed", "")
+            | false -> Notifications.Error(%"notification.install_song_failed", "")
         )
 
     override this.Content() : Widget =

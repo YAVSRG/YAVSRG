@@ -24,11 +24,11 @@ module Notifications =
     let notification_ev = Event<Notification>()
     let OnNotificationAdded = notification_ev.Publish
 
-    let private add_notification (notification: Notification) : unit =
+    let private send_notification (notification: Notification) : unit =
         GameThread.on_game_thread(fun () -> notification_ev.Trigger(notification))
 
-    let task_feedback (icon: string, title: string, description: string) : unit =
-        add_notification(
+    let Task (icon: string, title: string, description: string) : unit =
+        send_notification(
             {
                 Icon = icon
                 Title = title
@@ -37,8 +37,8 @@ module Notifications =
             }
         )
 
-    let action_feedback (icon: string, title: string, description: string) : unit =
-        add_notification(
+    let Result (icon: string, title: string, description: string) : unit =
+        send_notification(
             {
                 Icon = icon
                 Title = title
@@ -50,7 +50,7 @@ module Notifications =
     let action_feedback_button
         (icon: string, title: string, description: string, button_label: string, button_action: unit -> unit)
         : unit =
-        add_notification(
+        send_notification(
             {
                 Icon = icon
                 Title = title
@@ -59,8 +59,8 @@ module Notifications =
             }
         )
 
-    let system_feedback (icon: string, title: string, description: string) : unit =
-        add_notification(
+    let System (icon: string, title: string, description: string) : unit =
+        send_notification(
             {
                 Icon = icon
                 Title = title
@@ -69,8 +69,8 @@ module Notifications =
             }
         )
 
-    let error (title: string, description: string) : unit =
-        add_notification(
+    let Error (title: string, description: string) : unit =
+        send_notification(
             {
                 Icon = Icons.ALERT_CIRCLE
                 Title = title

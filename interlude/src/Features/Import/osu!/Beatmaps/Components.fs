@@ -40,7 +40,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                 .WithCallback(
                     function
                     | Ok(result: ConversionResult) ->
-                        Notifications.task_feedback(
+                        Notifications.Task(
                             Icons.DOWNLOAD,
                             %"notification.install_song",
                             [
@@ -56,7 +56,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                         status <- Installed
                     | Error reason ->
                         Logging.Error "Error importing %s: %s" data.title reason
-                        Notifications.error(%"notification.install_song_failed", data.title)
+                        Notifications.Error(%"notification.install_song_failed", data.title)
                         status <- DownloadFailed
                 )
                 .Queue(import_queue)

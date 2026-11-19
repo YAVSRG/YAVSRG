@@ -86,7 +86,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                         fun success ->
                             if success then
                                 GameThread.defer Skins.load
-                                Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_skin", group.Name)
+                                Notifications.Task(Icons.DOWNLOAD, %"notification.install_skin", group.Name)
                                 status <- Installed
                             else
                                 status <- DownloadFailed

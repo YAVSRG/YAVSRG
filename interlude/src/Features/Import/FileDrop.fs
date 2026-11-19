@@ -20,7 +20,7 @@ module FileDrop =
     let conversion_result_callback (result: Result<ConversionResult, string>) : unit =
         match result with
         | Ok result ->
-            Notifications.task_feedback(
+            Notifications.Task(
                 Icons.CHECK,
                 %"notification.import_success",
                 [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
@@ -28,7 +28,7 @@ module FileDrop =
             )
 
             Content.TriggerChartAdded(result.FirstConvertedChart)
-        | Error reason -> Notifications.error(%"notification.import_failed", reason)
+        | Error reason -> Notifications.Error(%"notification.import_failed", reason)
 
     let import_stepmania_noteskin (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
@@ -54,7 +54,7 @@ module FileDrop =
         | Ok conversion -> show_import_osu_skin_dialog(conversion, id)
         | Error err ->
             Logging.Error "Error while parsing osu! skin.ini: %O" err
-            Notifications.error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
+            Notifications.Error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
 
     let import_osu_skin_zip (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileNameWithoutExtension(path), "")
@@ -63,7 +63,7 @@ module FileDrop =
         | Ok conversion -> show_import_osu_skin_dialog(conversion, id)
         | Error err ->
             Logging.Error "Error while parsing osu! skin.ini: %O" err
-            Notifications.error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
+            Notifications.Error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
 
     let handle (path: string) : unit =
         assert GameThread.is_game_thread()
@@ -86,9 +86,9 @@ module FileDrop =
 
         | _ when Path.GetExtension(path).ToLower() = ".ruleset" ->
             if rulesets.Install(path).IsSome then
-                Notifications.action_feedback(Icons.CHECK, %"notification.install_ruleset", "")
+                Notifications.Result(Icons.CHECK, %"notification.install_ruleset", "")
             else
-                Notifications.error(%"notification.install_ruleset_failed", "")
+                Notifications.Error(%"notification.install_ruleset_failed", "")
 
         | OsuSkinArchive ->
             if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
@@ -101,8 +101,8 @@ module FileDrop =
                 if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
                     Replay.figure_out_replay(replay)
                 else
-                    Notifications.error(%"osu_replay_import.failed", %"osu_replay_import.wrong_menu")
-            | None -> Notifications.error(%"notification.import_failed", "")
+                    Notifications.Error(%"osu_replay_import.failed", %"osu_replay_import.wrong_menu")
+            | None -> Notifications.Error(%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import
             if Directory.Exists(path) && Path.GetFileName(path) = "Songs" then
@@ -115,7 +115,7 @@ module FileDrop =
                         function
                         | Ok(Some result) -> conversion_result_callback(Ok(result))
                         | Ok(None) ->
-                            Notifications.error(
+                            Notifications.Error(
                                 %"notification.import_failed",
                                 %"notification.import_failed.not_importable"
                             )
@@ -129,7 +129,7 @@ module FileDrop =
         assert GameThread.is_game_thread()
 
         if paths.Length > MAX_ITEMS_ALLOWED then
-            Notifications.error(
+            Notifications.Error(
                 %"notification.import_limit.title",
                 [ MAX_ITEMS_ALLOWED.ToString() ] %> "notification.import_limit.body"
             )

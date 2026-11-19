@@ -27,7 +27,7 @@ type CreateFolderPage(on_create: string * Collection -> unit) =
                             on_create(new_name.Value, Folder folder)
                             CollectionActions.collection_modified_ev.Trigger()
                         | None ->
-                            Notifications.action_feedback(
+                            Notifications.Result(
                                 Icons.X,
                                 %"notification.collection_create_failed.title",
                                 %"notification.collection_create_failed.body"

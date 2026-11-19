@@ -56,7 +56,7 @@ type UpdateButton() as this =
 
         elif not Updates.update_started then
 
-            Notifications.system_feedback(
+            Notifications.System(
                 Icons.ALERT_OCTAGON,
                 %"notification.update_installing.title",
                 %"notification.update_installing.body"
@@ -65,7 +65,7 @@ type UpdateButton() as this =
             Updates.apply_update(
                 (fun progress -> download_progress <- progress),
                 (fun () ->
-                    Notifications.system_feedback(
+                    Notifications.System(
                         Icons.ALERT_OCTAGON,
                         %"notification.update_installed.title",
                         %"notification.update_installed.body"

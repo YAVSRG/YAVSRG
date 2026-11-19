@@ -42,7 +42,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                 .WithCallback(
                     function
                     | Ok(result: ConversionResult) ->
-                        Notifications.task_feedback(
+                        Notifications.Task(
                             Icons.DOWNLOAD,
                             %"notification.install_pack",
                             [
@@ -58,7 +58,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                         status <- Installed
                     | Error reason ->
                         Logging.Error "Error installing %s: %s" data.name reason
-                        Notifications.error(%"notification.install_pack_failed", data.name)
+                        Notifications.Error(%"notification.install_pack_failed", data.name)
                         status <- DownloadFailed
                 )
                 .Queue(import_queue)

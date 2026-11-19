@@ -80,7 +80,7 @@ module Network =
             | Downstream.DISCONNECT reason ->
                 Logging.Info "Disconnected from server: %s" reason
                 kicked_no_reconnect <- true
-                GameThread.defer(fun () -> Notifications.error(%"notification.network.disconnected", reason))
+                GameThread.defer(fun () -> Notifications.Error(%"notification.network.disconnected", reason))
             | Downstream.HANDSHAKE_SUCCESS ->
                 if credentials.Token <> "" then
                     this.Send(Upstream.LOGIN(credentials.Token))
@@ -94,7 +94,7 @@ module Network =
                 GameThread.defer(fun () -> NetworkEvents.waiting_registration_ev.Trigger(discord_tag))
             | Downstream.REGISTRATION_FAILED reason ->
                 Logging.Info "Registration failed: %s" reason
-                Notifications.error(%"notification.network.registrationfailed", reason)
+                Notifications.Error(%"notification.network.registrationfailed", reason)
                 GameThread.defer(fun () -> NetworkEvents.registration_failed_ev.Trigger(reason))
             | Downstream.AUTH_TOKEN token ->
                 credentials.Token <- token
@@ -109,7 +109,7 @@ module Network =
                     API.Client.authenticate credentials.Token
 
                     if Screen.current_type <> ScreenType.SplashScreen then
-                        Notifications.system_feedback(Icons.GLOBE, [ name ] %> "notification.network.login", "")
+                        Notifications.System(Icons.GLOBE, [ name ] %> "notification.network.login", "")
 
                     NetworkEvents.successful_login_ev.Trigger(name)
                 )
@@ -119,7 +119,7 @@ module Network =
 
                 GameThread.defer(fun () ->
                     if Screen.current_type <> ScreenType.SplashScreen then
-                        Notifications.error(%"notification.network.loginfailed", reason)
+                        Notifications.Error(%"notification.network.loginfailed", reason)
 
                     NetworkEvents.login_failed_ev.Trigger(reason)
                 )

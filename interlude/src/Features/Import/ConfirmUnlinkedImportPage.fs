@@ -15,7 +15,7 @@ type ConfirmUnlinkedImportPage(path: string) =
     let conversion_result_callback (result: Result<ConversionResult, string>) : unit =
         match result with
         | Ok result ->
-            Notifications.task_feedback(
+            Notifications.Task(
                 Icons.CHECK,
                 %"notification.import_success",
                 [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
@@ -23,7 +23,7 @@ type ConfirmUnlinkedImportPage(path: string) =
             )
 
             Content.TriggerChartAdded(result.FirstConvertedChart)
-        | Error reason -> Notifications.error(%"notification.import_failed", reason)
+        | Error reason -> Notifications.Error(%"notification.import_failed", reason)
 
     let info =
         Callout.Normal
@@ -46,7 +46,7 @@ type ConfirmUnlinkedImportPage(path: string) =
                                     function
                                     | Ok(Some result) -> conversion_result_callback(Ok(result))
                                     | Ok(None) ->
-                                        Notifications.error(
+                                        Notifications.Error(
                                             %"notification.import_failed",
                                             %"notification.import_failed.not_importable"
                                         )

@@ -31,7 +31,7 @@ type ScoreScreenRulesetSwitcher
             set_ruleset_direct(ruleset_info)
             Style.click.Play()
         | None ->
-            Notifications.system_feedback(
+            Notifications.System(
                 Icons.HELP_CIRCLE,
                 %"notification.no_native_ruleset.title",
                 %"notification.no_native_ruleset.body"

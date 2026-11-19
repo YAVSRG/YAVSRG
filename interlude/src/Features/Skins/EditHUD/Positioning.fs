@@ -621,7 +621,7 @@ and PositionerContext =
             (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
             this.Recreate(element)
 
-        Notifications.action_feedback(
+        Notifications.Result(
             Icons.REPEAT,
             %"hud.horiontal_flip_all.success",
             [ (%%"hud_flip_horizontal_all").ToString() ] %> "hud.horizontal_flip_all.undo_hint"
@@ -632,7 +632,7 @@ and PositionerContext =
             (HudElement.position_setting element) |> Setting.app _.FlipVertical
             this.Recreate(element)
 
-        Notifications.action_feedback(
+        Notifications.Result(
             Icons.REPEAT,
             %"hud.vertical_flip_all.success",
             [ (%%"hud_flip_horizontal_all").ToString() ] %> "hud.vertical_flip_all.undo_hint"

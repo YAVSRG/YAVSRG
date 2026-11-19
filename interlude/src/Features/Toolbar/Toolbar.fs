@@ -36,7 +36,7 @@ type Toolbar() =
         match Presets.load i with
         | Some success_name ->
             SelectedChart.recolor()
-            Notifications.action_feedback(Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
+            Notifications.Result(Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
         | None -> ()
 
     let draw_waveform (bounds: Rect) : unit =
@@ -136,7 +136,7 @@ type Toolbar() =
                             Skins.load()
                             rulesets.Load()
                             SelectedChart.recolor()
-                            Notifications.action_feedback(Icons.CHECK, %"notification.reload_content", "")
+                            Notifications.Result(Icons.CHECK, %"notification.reload_content", "")
                 ),
 
                 HotkeyListener("preset1", fun () -> load_preset 1),

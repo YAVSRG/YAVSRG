@@ -126,7 +126,7 @@ module LevelSelect =
             suggestion_ctx <- Some next.NextContext
             true
         | None ->
-            Notifications.action_feedback(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+            Notifications.Result(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
             false
 
     let start_playlist (playlist_id: string, playlist: Playlist) : unit =

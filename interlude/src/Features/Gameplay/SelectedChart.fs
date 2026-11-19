@@ -141,7 +141,7 @@ module SelectedChart =
                             Logging.Error "Couldn't load chart: %s" reason
                             Background.load None
 
-                            Notifications.error(
+                            Notifications.Error(
                                 %"notification.chart_load_failed.title",
                                 %"notification.chart_load_failed.body"
                             )

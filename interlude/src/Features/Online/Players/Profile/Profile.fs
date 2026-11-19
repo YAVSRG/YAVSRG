@@ -118,7 +118,7 @@ type private Profile() =
 
                         Players.update_friends_list()
                     )
-                | _ -> Notifications.error(%"notification.network_action_failed", "")
+                | _ -> Notifications.Error(%"notification.network_action_failed", "")
             )
 
         let add_friend () =
@@ -130,7 +130,7 @@ type private Profile() =
                         container.SetData({ data with IsFriend = true })
                         Players.update_friends_list()
                     )
-                | _ -> Notifications.error(%"notification.network_action_failed", "")
+                | _ -> Notifications.Error(%"notification.network_action_failed", "")
             )
 
         Container(NodeType.None)
@@ -179,7 +179,7 @@ type private Profile() =
                     %"online.players.profile.invite_to_lobby",
                     (fun () ->
                         Network.lobby.Value.InvitePlayer(data.Username)
-                        Notifications.action_feedback(Icons.SEND, %"notification.lobby_invite_sent", data.Username)
+                        Notifications.Result(Icons.SEND, %"notification.lobby_invite_sent", data.Username)
                     )
                 )
                     .Icon(Icons.SEND)
