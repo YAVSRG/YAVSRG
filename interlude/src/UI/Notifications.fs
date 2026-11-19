@@ -5,7 +5,7 @@ open Percyqaz.Flux.Windowing
 open Prelude
 open Interlude.UI
 
-type Notification =
+type DisplayedNotification =
     private
         {
             Data: Callout
@@ -18,11 +18,11 @@ type Notification =
 
 module Notifications =
 
-    let displayed_notifications = ResizeArray<Notification>()
+    let displayed_notifications = ResizeArray<DisplayedNotification>()
 
     let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
         GameThread.on_game_thread(fun () ->
-            let n: Notification =
+            let n: DisplayedNotification =
                 {
                     Data = body
                     Size = Callout.measure body
@@ -37,7 +37,7 @@ module Notifications =
 
     let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
         GameThread.on_game_thread(fun () ->
-            let n: Notification =
+            let n: DisplayedNotification =
                 {
                     Data = body
                     Size = Callout.measure body
