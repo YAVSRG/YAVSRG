@@ -91,11 +91,11 @@ type RulesetLibrary(rulesets_storage_path: string) =
         | FileId file_id -> loaded.[file_id]
         | OsuAutomatic od ->
             match chart_meta with
-            | None -> NativeRuleset.OsuMania(od).GetInfo()
+            | None -> NativeRuleset.OsuMania(od).ToInfo()
             | Some chart_meta ->
                 match Ruleset.GetAutomaticOsuRuleset(chart_meta.Origins) with
                 | Some ruleset_info -> this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
-                | None -> NativeRuleset.OsuMania(od).GetInfo()
+                | None -> NativeRuleset.OsuMania(od).ToInfo()
 
     member this.GetCurrent(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
         this.GetCurrent(Some chart_meta, selection)

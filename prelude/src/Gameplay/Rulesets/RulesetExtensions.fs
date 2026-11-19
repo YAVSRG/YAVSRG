@@ -23,7 +23,7 @@ module RulesetExtensions =
         | Wife3
         | Quaver
 
-        member this.GetInfo() : RulesetInfo =
+        member this.ToInfo() : RulesetInfo =
             match this with
             | OsuMania od ->
                 let idx = int(round(od * 10.0f)) |> min 100 |> max 0
@@ -49,14 +49,9 @@ module RulesetExtensions =
             | None when wife3_as_fallback -> Some(NativeRuleset.Wife3)
             | otherwise -> otherwise
 
-        static member GetNativeRuleset(origins: ChartOrigin seq) : RulesetInfo option =
-            match Ruleset.GetNativeRulesetType(origins) with
-            | None -> None
-            | Some(native_ruleset) -> Some(native_ruleset.GetInfo())
-
         static member GetAutomaticOsuRuleset(origins: ChartOrigin seq) : RulesetInfo option =
             Seq.tryPick
                 (function
-                | ChartOrigin.Osu osu -> Some(NativeRuleset.OsuMania(osu.SourceOD).GetInfo())
+                | ChartOrigin.Osu osu -> Some(NativeRuleset.OsuMania(osu.SourceOD).ToInfo())
                 | _ -> None)
                 origins
