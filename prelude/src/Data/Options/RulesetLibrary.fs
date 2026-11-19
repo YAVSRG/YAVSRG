@@ -198,3 +198,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 false
         else
             false
+
+    member this.CanDelete(file_id: string) : bool = file_id <> DEFAULT_ID
+
+    member this.CanEdit(file_id: string) : bool = file_id <> DEFAULT_ID
