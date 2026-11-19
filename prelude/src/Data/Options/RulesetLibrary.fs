@@ -39,18 +39,22 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.Load() : unit =
         loaded.Clear()
 
-        for f in Directory.GetFiles(rulesets_storage_path) do
-            if Path.GetExtension(f).ToLower() = ".ruleset" then
-                let id = Path.GetFileNameWithoutExtension(f)
+        for ruleset_file in Directory.GetFiles(rulesets_storage_path) do
+            if Path.GetExtension(ruleset_file).ToLower() = ".ruleset" then
+                let id = Path.GetFileNameWithoutExtension(ruleset_file)
 
-                match Ruleset.TryFromFile(f) with
+                match Ruleset.TryFromFile(ruleset_file) with
                 | Ok ruleset -> loaded.Add(id, ruleset.ToInfo())
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         let default_path =
             Path.Combine(rulesets_storage_path, RulesetLibrary.DEFAULT_ID + ".ruleset")
 
-        if not(loaded.ContainsKey(RulesetLibrary.DEFAULT_ID)) then
+        if
+            not(loaded.ContainsKey(RulesetLibrary.DEFAULT_ID))
+            || loaded.[RulesetLibrary.DEFAULT_ID].Hash <> DEFAULT.Hash
+        then
+            Logging.Debug("Default ruleset was missing or modified, recreating it")
             loaded.Add(RulesetLibrary.DEFAULT_ID, DEFAULT)
             DEFAULT.Ruleset.WriteToFile(default_path)
 
