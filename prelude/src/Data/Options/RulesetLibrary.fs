@@ -93,7 +93,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             match chart_meta with
             | None -> NativeRuleset.OsuMania(od).ToInfo()
             | Some chart_meta ->
-                match Ruleset.GetNativeOsuRuleset(chart_meta.Origins) with
+                match NativeRuleset.GetNativeOsuRuleset(chart_meta.Origins) with
                 | Some native_ruleset ->
                     let ruleset_info = native_ruleset.ToInfo()
                     this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info

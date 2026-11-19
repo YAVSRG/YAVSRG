@@ -31,8 +31,6 @@ module RulesetExtensions =
             | Wife3 -> WIFE3_J4
             | Quaver -> QUAVER_STANDARD
 
-    type Ruleset with
-
         static member GetNativeRuleset(origins: ChartOrigin seq) : NativeRuleset option =
             let mutable wife3_as_fallback = false
 
