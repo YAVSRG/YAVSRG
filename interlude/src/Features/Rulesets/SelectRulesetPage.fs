@@ -50,8 +50,10 @@ type SelectRulesetPage() =
                     ConfirmPage(
                         [ ruleset_info.Ruleset.Name ] %> "rulesets.confirm_copy",
                         fun () ->
-                            rulesets.Install
+                            rulesets.Install(
                                 { ruleset_info.Ruleset.Clone() with Name = ruleset_info.Ruleset.Name + " (Copy)" }
+                            )
+                            |> ignore
                     )
                         .Show()
             )

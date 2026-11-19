@@ -14,6 +14,11 @@ type RulesetSelection =
 
 type RulesetLibrary(rulesets_storage_path: string) =
 
+    let mutable initialised = false
+    let loaded = Dictionary<string, RulesetInfo>()
+    let mutable current_selection = FileId(RulesetLibrary.DEFAULT_ID)
+    let on_changed_ev = Event<unit>()
+
     /// Ruleset IDs are the name of the file under the Rulesets folder, without the extension
     /// e.g. Rulesets/my-ruleset.ruleset is loaded with id 'my-ruleset'
     /// Not to be confused with a ruleset 'hash' which uniquely identifies what its actual behaviour is
@@ -21,12 +26,8 @@ type RulesetLibrary(rulesets_storage_path: string) =
     //   If their gameplay behaviour is the same they get the same hash for gameplay purposes
     //   They get different IDs which allows the user to distinguish and select the version they want
     let DEFAULT = SC_J4
-    let DEFAULT_ID = DEFAULT.Ruleset.Filename()
+    static member val DEFAULT_ID = SC_J4.Ruleset.Filename()
 
-    let mutable initialised = false
-    let loaded = Dictionary<string, RulesetInfo>()
-    let mutable current_selection = FileId(DEFAULT_ID)
-    let on_changed_ev = Event<unit>()
     member val OnChanged = on_changed_ev.Publish
 
     /// Once called: All rulesets from the Rulesets folder have been read; The valid ones are loaded into the available list
@@ -34,10 +35,11 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.Load() : unit =
         loaded.Clear()
 
-        let default_path = Path.Combine(rulesets_storage_path, DEFAULT_ID + ".ruleset")
+        let default_path =
+            Path.Combine(rulesets_storage_path, RulesetLibrary.DEFAULT_ID + ".ruleset")
 
         if not(File.Exists(default_path)) then
-            SC_J4.Ruleset.WriteToFile(default_path)
+            DEFAULT.Ruleset.WriteToFile(default_path)
 
         for f in Directory.GetFiles(rulesets_storage_path) do
             if Path.GetExtension(f).ToLower() = ".ruleset" then
@@ -47,13 +49,13 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 | Ok ruleset -> loaded.Add(id, ruleset.ToInfo())
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
-        if not(loaded.ContainsKey(DEFAULT_ID)) then
-            loaded.Add(DEFAULT_ID, SC_J4)
+        if not(loaded.ContainsKey(RulesetLibrary.DEFAULT_ID)) then
+            loaded.Add(RulesetLibrary.DEFAULT_ID, DEFAULT)
 
         match current_selection with
         | FileId file_id when not(loaded.ContainsKey(file_id)) ->
             Logging.Warn "Ruleset '%s' not found, switching to default" file_id
-            current_selection <- FileId(DEFAULT_ID)
+            current_selection <- FileId(RulesetLibrary.DEFAULT_ID)
             on_changed_ev.Trigger()
         | _ -> ()
 
@@ -64,9 +66,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
     member this.FindByHash(hash: string) : RulesetInfo option =
         loaded.Values |> Seq.tryFind(fun ruleset -> ruleset.Hash = hash)
 
-    member this.FindIdByHash(hash: string) : string option =
-        loaded.Keys |> Seq.tryFind(fun id -> loaded.[id].Hash = hash)
-
     member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
     member val Selected: Setting<RulesetSelection> =
@@ -76,7 +75,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 if initialised then
                     if not(loaded.ContainsKey(new_id)) then
                         Logging.Warn "Ruleset '%s' not found, switching to default" new_id
-                        current_selection <- FileId(DEFAULT_ID)
+                        current_selection <- FileId(RulesetLibrary.DEFAULT_ID)
                     else
                         current_selection <- FileId(new_id)
 
@@ -117,7 +116,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
         |> Seq.sortBy(fun (_, ruleset_info) -> ruleset_info.Ruleset.Name.ToLowerInvariant())
 
     /// Ruleset is saved as a new (non-conflicting) file and added to the available list
-    member this.Install(ruleset: Ruleset) : unit =
+    member this.Install(ruleset: Ruleset) : string =
         let new_id: string = ruleset.Filename()
 
         let new_id =
@@ -125,26 +124,23 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
         loaded.Add(new_id, ruleset.ToInfo())
         ruleset.WriteToFile(Path.Combine(rulesets_storage_path, new_id + ".ruleset"))
+        new_id
 
-    member this.Install(path: string) : bool =
+    member this.Install(path: string) : string option =
         if Path.GetDirectoryName(path) = rulesets_storage_path then
             Logging.Debug("User tried to import a ruleset that was already in the Rulesets folder")
-            false
+            None
         else
             match Ruleset.TryFromFile(path) with
-            | Ok ruleset ->
-                this.Install(ruleset)
-                true
+            | Ok ruleset -> Some(this.Install(ruleset))
             | Error reason ->
                 Logging.Error "Ruleset import failed: %s" reason
-                false
+                None
 
     member this.EnsureInstalledAndSelect(ruleset_info: RulesetInfo) : unit =
         let id =
-            match this.FindIdByHash(ruleset_info.Hash) with
-            | None ->
-                this.Install(ruleset_info.Ruleset)
-                this.FindIdByHash(ruleset_info.Hash).Value
+            match loaded.Keys |> Seq.tryFind(fun id -> loaded.[id].Hash = ruleset_info.Hash) with
+            | None -> this.Install(ruleset_info.Ruleset)
             | Some id -> id
 
         this.Selected.Set(FileId(id))
@@ -185,10 +181,10 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 on_changed_ev.Trigger()
 
     member this.Delete(file_id: string) : bool =
-        if file_id <> DEFAULT_ID && this.Exists(file_id) then
+        if file_id <> RulesetLibrary.DEFAULT_ID && this.Exists(file_id) then
             try
                 if current_selection = FileId(file_id) then
-                    current_selection <- FileId(DEFAULT_ID)
+                    current_selection <- FileId(RulesetLibrary.DEFAULT_ID)
                     on_changed_ev.Trigger()
 
                 File.Delete(Path.Combine(rulesets_storage_path, file_id + ".ruleset"))
@@ -199,6 +195,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
         else
             false
 
-    member this.CanDelete(file_id: string) : bool = file_id <> DEFAULT_ID
+    member this.CanDelete(file_id: string) : bool = file_id <> RulesetLibrary.DEFAULT_ID
 
-    member this.CanEdit(file_id: string) : bool = file_id <> DEFAULT_ID
+    member this.CanEdit(file_id: string) : bool = file_id <> RulesetLibrary.DEFAULT_ID

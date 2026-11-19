@@ -13,7 +13,7 @@ type WifeRulesetPage() =
     let judge = Setting.simple 4
 
     let create () =
-        rulesets.Install(Wife3.create judge.Value)
+        rulesets.Install(Wife3.create judge.Value) |> ignore
         Menu.Back()
         Menu.Back()
 

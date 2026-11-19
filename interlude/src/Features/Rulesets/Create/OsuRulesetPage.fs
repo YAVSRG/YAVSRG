@@ -14,7 +14,7 @@ type OsuRulesetPage() =
     let mode = Setting.simple OsuMania.NoMod
 
     let create () =
-        rulesets.Install(OsuMania.create od.Value mode.Value)
+        rulesets.Install(OsuMania.create od.Value mode.Value) |> ignore
         Menu.Back()
         Menu.Back()
 
