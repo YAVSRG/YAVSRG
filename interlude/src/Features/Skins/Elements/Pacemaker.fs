@@ -4,7 +4,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
 

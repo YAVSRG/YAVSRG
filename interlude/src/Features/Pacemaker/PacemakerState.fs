@@ -154,10 +154,7 @@ type PacemakerState =
         | PacemakerCreationContext.FromScore score_info -> create_from_score(score_info)
 
         | PacemakerCreationContext.FromUserSetting ->
-            let pacemaker_settings =
-                match options.Pacemaker.TryGetValue(ruleset_hash) with
-                | true, settings -> settings
-                | false, _ -> PacemakerSettings.Default
+            let pacemaker_settings = options.GetPacemakerOptions()
 
             match pacemaker_settings.Mode with
             | PacemakerMode.Accuracy -> create_from_accuracy(pacemaker_settings)

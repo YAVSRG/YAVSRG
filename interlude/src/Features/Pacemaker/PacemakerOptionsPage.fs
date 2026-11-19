@@ -11,14 +11,9 @@ open Interlude.Content
 type PacemakerOptionsPage() =
     inherit Page()
 
-    // todo: pacemaker needs redesigning around RulesetSelection since you want one setting per all osu! rulesets
     let ruleset_info = rulesets.GetCurrent(SelectedChart.CACHE_DATA)
 
-    let existing =
-        if options.Pacemaker.ContainsKey(ruleset_info.Hash) then
-            options.Pacemaker.[ruleset_info.Hash]
-        else
-            PacemakerSettings.Default
+    let existing = options.GetPacemakerOptions()
 
     let mode = Setting.simple existing.Mode
 
@@ -30,7 +25,7 @@ type PacemakerOptionsPage() =
 
     override this.Content() : Widget =
 
-        this.OnClose(this.SavePacemakerSetting)
+        this.OnClose(this.Save)
 
         let lamps =
             seq {
@@ -87,11 +82,12 @@ type PacemakerOptionsPage() =
 
     override this.Title = sprintf "%s %s" Icons.FLAG (%"gameplay.pacemaker")
 
-    member this.SavePacemakerSetting() : unit =
-        options.Pacemaker.[ruleset_info.Hash] <-
+    member this.Save() : unit =
+        options.SavePacemakerOptions(
             {
                 Accuracy = accuracy.Value
                 Lamp = lamp.Value
                 Mode = mode.Value
                 PersonalBest = use_personal_best.Value
             }
+        )

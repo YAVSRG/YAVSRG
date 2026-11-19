@@ -1,4 +1,4 @@
-﻿namespace Interlude.Options
+namespace Interlude.Options
 
 open System.IO
 open System.Collections.Generic
@@ -348,6 +348,25 @@ type GameOptions =
             ScoreGraphWindowBackground = Setting.simple false
             HoldToGiveUp = Setting.simple false
         }
+
+    member this.GetPacemakerOptions() : PacemakerSettings =
+        let pacemaker_options_key =
+            match this.Ruleset.Value with
+            | OsuAutomatic _ -> "osu"
+            | FileId file_id -> file_id.Split('-').[0].Trim()
+
+        if this.Pacemaker.ContainsKey(pacemaker_options_key) then
+            this.Pacemaker.[pacemaker_options_key]
+        else
+            PacemakerSettings.Default
+
+    member this.SavePacemakerOptions(options: PacemakerSettings) : unit =
+        let pacemaker_options_key =
+            match this.Ruleset.Value with
+            | OsuAutomatic _ -> "osu"
+            | FileId file_id -> file_id.Split('-').[0].Trim()
+
+        this.Pacemaker.[pacemaker_options_key] <- options
 
 [<AutoOpen>]
 module StaticOptions =
