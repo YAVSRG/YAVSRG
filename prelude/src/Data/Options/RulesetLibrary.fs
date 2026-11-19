@@ -100,11 +100,12 @@ type RulesetLibrary(rulesets_storage_path: string) =
             match chart_meta with
             | None -> NativeRuleset.OsuMania(od).ToInfo()
             | Some chart_meta ->
-                match NativeRuleset.DetectOsu(chart_meta.Origins) with
-                | Some native_ruleset ->
-                    let ruleset_info = native_ruleset.ToInfo()
-                    this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
-                | None -> NativeRuleset.OsuMania(od).ToInfo()
+                let ruleset_info =
+                    match NativeRuleset.DetectOsu(chart_meta.Origins) with
+                    | Some native_ruleset -> native_ruleset.ToInfo()
+                    | None -> NativeRuleset.OsuMania(od).ToInfo()
+
+                this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info
 
     member this.Get(chart_meta: ChartMeta, selection: RulesetSelection) : RulesetInfo =
         this.Get(Some chart_meta, selection)
