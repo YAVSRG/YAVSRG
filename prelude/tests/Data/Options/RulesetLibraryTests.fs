@@ -156,7 +156,7 @@ module RulesetLibraryTests =
         let updated_ruleset =
             { QUAVER_STANDARD.Ruleset with Description = "Updated description" }
 
-        Assert.True(library.Update(id, updated_ruleset))
+        Assert.AreEqual(Some(id), library.Update(id, updated_ruleset))
         Assert.True(library.Exists(id))
         Assert.AreEqual(2, library.Count)
 
@@ -187,7 +187,7 @@ module RulesetLibraryTests =
 
         Assert.AreEqual([| "quaver-standard"; "sc-j4" |], file_system_state())
 
-        Assert.True(library.Update(id, WIFE3_J4.Ruleset))
+        Assert.AreEqual(Some("wife3-j4"), library.Update(id, WIFE3_J4.Ruleset))
         Assert.False(library.Exists(id))
         Assert.AreEqual(2, library.Count)
         Assert.AreEqual(WIFE3_J4.Ruleset.Description, library.GetCurrent(None, FileId("wife3-j4")).Ruleset.Description)
@@ -200,7 +200,7 @@ module RulesetLibraryTests =
         library.Load()
         Assert.AreEqual(1, library.Count)
 
-        Assert.False(library.Update(RulesetLibrary.DEFAULT_ID, QUAVER_STANDARD.Ruleset))
+        Assert.AreEqual(None, library.Update(RulesetLibrary.DEFAULT_ID, QUAVER_STANDARD.Ruleset))
         Assert.AreEqual(SC_J4.Ruleset, library.GetCurrent(None).Ruleset)
 
     [<Test>]
@@ -210,7 +210,7 @@ module RulesetLibraryTests =
         library.Load()
         Assert.AreEqual(1, library.Count)
 
-        Assert.False(library.Update("does_not_exist", QUAVER_STANDARD.Ruleset))
+        Assert.AreEqual(None, library.Update("does_not_exist", QUAVER_STANDARD.Ruleset))
         Assert.AreEqual(SC_J4.Ruleset, library.GetCurrent(None).Ruleset)
 
     [<Test>]
@@ -282,7 +282,7 @@ module RulesetLibraryTests =
         Assert.True(event_fired)
 
         event_fired <- false
-        Assert.True(library.Update(new_id, WIFE3_J4.Ruleset))
+        Assert.True(library.Update(new_id, WIFE3_J4.Ruleset).IsSome)
         Assert.True(event_fired)
 
     [<Test>]

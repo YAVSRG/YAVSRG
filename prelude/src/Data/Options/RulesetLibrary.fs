@@ -144,7 +144,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     /// This may change the file name (and therefore ID) based on the name given in the ruleset
     /// Does not validate the ruleset! it must already be validated
-    member this.Update(existing_file_id: string, ruleset: Ruleset) : bool =
+    member this.Update(existing_file_id: string, ruleset: Ruleset) : string option =
         let ensure_filename_updated () =
             let new_id: string = ruleset.Filename()
 
@@ -180,10 +180,10 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 current_selection <- FileId(new_file_id)
                 on_changed_ev.Trigger()
 
-            true
+            Some(new_file_id)
         else
             Logging.Error "Ruleset '%s' is default or does not exist, cannot be updated" existing_file_id
-            false
+            None
 
     member this.CanDelete(file_id: string) : bool =
         file_id <> RulesetLibrary.DEFAULT_ID && this.Exists(file_id)
