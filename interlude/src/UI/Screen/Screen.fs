@@ -170,6 +170,7 @@ module Screen =
         inherit Root()
 
         let perf = DebugOverlay()
+        let notifications = NotificationsDisplay()
 
         override this.Update(elapsed_ms: float, moved: bool) : unit =
             let elapsed_ms = elapsed_ms * timescale
@@ -181,7 +182,7 @@ module Screen =
             HelpOverlay.display.Update(elapsed_ms, moved)
 
             if current_type <> ScreenType.Play || Dialog.exists() then
-                Notifications.display.Update(elapsed_ms, moved)
+                notifications.Update(elapsed_ms, moved)
 
             assert (Render.width() > 0.0f)
             let x, y = Mouse.pos()
@@ -223,7 +224,7 @@ module Screen =
                 Toolbar.take_screenshot_internal()
 
             if not Toolbar.cursor_hidden || Dialog.exists() then
-                Notifications.display.Draw()
+                notifications.Draw()
 
                 if Mouse.in_bounds() then
                     let x, y = Mouse.pos()
@@ -240,7 +241,7 @@ module Screen =
 
             logo.Init(this)
             toolbar.Init(this)
-            Notifications.display.Init(this)
+            notifications.Init(this)
             HelpOverlay.display.Init(this)
             Dialog.display.Init(this)
             screen_container.Init(this)
