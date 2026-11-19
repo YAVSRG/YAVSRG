@@ -55,7 +55,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             || loaded.[RulesetLibrary.DEFAULT_ID].Hash <> DEFAULT.Hash
         then
             Logging.Debug("Default ruleset was missing or modified, recreating it")
-            loaded.Add(RulesetLibrary.DEFAULT_ID, DEFAULT)
+            loaded.[RulesetLibrary.DEFAULT_ID] <- DEFAULT
             DEFAULT.Ruleset.WriteToFile(default_path)
 
         match current_selection with

@@ -25,6 +25,21 @@ module RulesetLibraryTests =
         Assert.AreEqual(SC_J4.Hash, (snd loaded.[0]).Hash)
 
     [<Test>]
+    let Load_OverwritesDefaultRuleset () : unit =
+        let ruleset_location = Directory.CreateTempSubdirectory("rulesets").FullName
+        let library = RulesetLibrary(ruleset_location)
+
+        QUAVER_STANDARD.Ruleset.WriteToFile(Path.Combine(ruleset_location, "sc-j4.ruleset"))
+
+        library.Load()
+        let loaded = Array.ofSeq(library.ToList())
+
+        Assert.True(library.Exists(RulesetLibrary.DEFAULT_ID))
+        Assert.IsNotEmpty(loaded)
+        Assert.AreEqual(1, loaded.Length)
+        Assert.AreEqual(SC_J4.Hash, (snd loaded.[0]).Hash)
+
+    [<Test>]
     let Load_SelectsDefault_WhenSelectionNotAvailable () : unit =
         let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
 
