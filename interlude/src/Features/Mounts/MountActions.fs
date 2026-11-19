@@ -73,10 +73,10 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
                 Menu.Back()
                 callback path
 
-            | MountedGameType.Osu, _ -> Notifications.Error(%"mount.create.osu.error", "")
-            | MountedGameType.Quaver, _ -> Notifications.Error(%"mount.create.quaver.error", "")
-            | MountedGameType.Stepmania, _ -> Notifications.Error(%"mount.create.stepmania.error", "")
-            | MountedGameType.Etterna, _ -> Notifications.Error(%"mount.create.etterna.error", "")
+            | MountedGameType.Osu, _ -> Notifications.Error(%"mount.create.osu.error")
+            | MountedGameType.Quaver, _ -> Notifications.Error(%"mount.create.quaver.error")
+            | MountedGameType.Stepmania, _ -> Notifications.Error(%"mount.create.stepmania.error")
+            | MountedGameType.Etterna, _ -> Notifications.Error(%"mount.create.etterna.error")
 
         let choose_path () : unit =
             FileDialog.pick_folder(
@@ -84,7 +84,7 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
                 function
                 | FileDialogResult.Ok path -> path_chosen path
                 | FileDialogResult.Cancelled -> ()
-                | FileDialogResult.Error -> Notifications.Error(%"notification.file_picker_error", "")
+                | FileDialogResult.Error -> Notifications.Error(%"notification.file_picker_error")
             )
 
         page_container().With(PageButton(%"mount.choose_folder", choose_path).Pos(6), CalloutCard(info).Pos(0))
@@ -148,4 +148,4 @@ module Mounts =
             .Queue(general_task_queue)
 
         if notify_start then
-            Notifications.System(Icons.ALERT_OCTAGON, %"notification.score_import_queued", "")
+            Notifications.System(Icons.ALERT_OCTAGON, %"notification.score_import_queued")

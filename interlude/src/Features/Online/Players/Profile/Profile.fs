@@ -118,7 +118,7 @@ type private Profile() =
 
                         Players.update_friends_list()
                     )
-                | _ -> Notifications.Error(%"notification.network_action_failed", "")
+                | _ -> Notifications.Error(%"notification.network_action_failed")
             )
 
         let add_friend () =
@@ -130,7 +130,7 @@ type private Profile() =
                         container.SetData({ data with IsFriend = true })
                         Players.update_friends_list()
                     )
-                | _ -> Notifications.Error(%"notification.network_action_failed", "")
+                | _ -> Notifications.Error(%"notification.network_action_failed")
             )
 
         Container(NodeType.None)

@@ -109,7 +109,7 @@ module Network =
                     API.Client.authenticate credentials.Token
 
                     if Screen.current_type <> ScreenType.SplashScreen then
-                        Notifications.System(Icons.GLOBE, [ name ] %> "notification.network.login", "")
+                        Notifications.System(Icons.GLOBE, [ name ] %> "notification.network.login")
 
                     NetworkEvents.successful_login_ev.Trigger(name)
                 )

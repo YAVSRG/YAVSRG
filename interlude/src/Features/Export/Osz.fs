@@ -15,7 +15,7 @@ module OsuExport =
         match Exports.create_osz options chart chart_meta (get_game_folder "Exports") with
         | Ok _ ->
             open_directory(get_game_folder "Exports")
-            Notifications.Result(Icons.CHECK, %"notification.song_exported.title", "")
+            Notifications.Result(Icons.CHECK, %"notification.song_exported.title")
         | Error err ->
             Notifications.Error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
             Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
@@ -41,7 +41,7 @@ module OsuExport =
         match Exports.create_osz options chart_with_mods meta_with_mods (get_game_folder "Exports") with
         | Ok _ ->
             open_directory(get_game_folder "Exports")
-            Notifications.Result(Icons.CHECK, %"notification.song_exported.title", "")
+            Notifications.Result(Icons.CHECK, %"notification.song_exported.title")
         | Error err ->
             Notifications.Error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
             Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err

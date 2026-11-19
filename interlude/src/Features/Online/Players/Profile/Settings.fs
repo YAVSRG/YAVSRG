@@ -31,7 +31,7 @@ type private ProfileSettingsPage(profile: ProfileData, profile_color: Setting<in
                 { Color = color },
                 function
                 | Some true -> GameThread.defer(fun () -> profile_color.Set(color))
-                | _ -> Notifications.Error(%"notification.network_action_failed", "")
+                | _ -> Notifications.Error(%"notification.network_action_failed")
             )
 
         let dropdown =

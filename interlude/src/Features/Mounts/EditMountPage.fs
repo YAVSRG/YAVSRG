@@ -75,7 +75,7 @@ type private EditMountPage
                         %"mount.import",
                         fun () ->
                             queued_import <- 1
-                            Notifications.Result(Icons.FOLDER_PLUS, %"notification.import_queued", "")
+                            Notifications.Result(Icons.FOLDER_PLUS, %"notification.import_queued")
                     )
                     .Help(Help.Info("mount.import"))
                     .Pos(9),
@@ -84,7 +84,7 @@ type private EditMountPage
                         %"mount.importall",
                         fun () ->
                             queued_import <- 2
-                            Notifications.Result(Icons.FOLDER_PLUS, %"notification.import_queued", "")
+                            Notifications.Result(Icons.FOLDER_PLUS, %"notification.import_queued")
                     )
                     .Help(Help.Info("mount.importall"))
                     .Pos(11),

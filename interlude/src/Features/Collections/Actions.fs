@@ -22,11 +22,11 @@ module CollectionActions =
         if is_liked chart_meta then
             Content.Library.Collections.Unlike(chart_meta.Hash)
             likes_modified_ev.Trigger()
-            Notifications.Result(Icons.FOLDER_MINUS, [ chart_meta.Title ] %> "collections.unliked", "")
+            Notifications.Result(Icons.FOLDER_MINUS, [ chart_meta.Title ] %> "collections.unliked")
         else
             Content.Library.Collections.Like(chart_meta.Hash)
             likes_modified_ev.Trigger()
-            Notifications.Result(Icons.HEART, [ chart_meta.Title ] %> "collections.liked", "")
+            Notifications.Result(Icons.HEART, [ chart_meta.Title ] %> "collections.liked")
 
     let add_to (name: string, collection: Collection, chart_meta: ChartMeta) : bool =
         if
@@ -36,7 +36,7 @@ module CollectionActions =
         then
             collection_modified_ev.Trigger()
 
-            Notifications.Result(Icons.FOLDER_PLUS, [ chart_meta.Title; name ] %> "collections.added", "")
+            Notifications.Result(Icons.FOLDER_PLUS, [ chart_meta.Title; name ] %> "collections.added")
             true
         else
             false
@@ -52,7 +52,7 @@ module CollectionActions =
         then
             collection_modified_ev.Trigger()
 
-            Notifications.Result(Icons.FOLDER_MINUS, [ chart_meta.Title; name ] %> "collections.removed", "")
+            Notifications.Result(Icons.FOLDER_MINUS, [ chart_meta.Title; name ] %> "collections.removed")
 
             if Some chart_meta = SelectedChart.CACHE_DATA then
                 SelectedChart.LIBRARY_CTX <- LibraryContext.None

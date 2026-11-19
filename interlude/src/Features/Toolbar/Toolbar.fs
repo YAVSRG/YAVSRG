@@ -136,7 +136,7 @@ type Toolbar() =
                             Skins.load()
                             rulesets.Load()
                             SelectedChart.recolor()
-                            Notifications.Result(Icons.CHECK, %"notification.reload_content", "")
+                            Notifications.Result(Icons.CHECK, %"notification.reload_content")
                 ),
 
                 HotkeyListener("preset1", fun () -> load_preset 1),

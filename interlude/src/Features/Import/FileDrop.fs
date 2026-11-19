@@ -86,9 +86,9 @@ module FileDrop =
 
         | _ when Path.GetExtension(path).ToLower() = ".ruleset" ->
             if rulesets.Install(path).IsSome then
-                Notifications.Result(Icons.CHECK, %"notification.install_ruleset", "")
+                Notifications.Result(Icons.CHECK, %"notification.install_ruleset")
             else
-                Notifications.Error(%"notification.install_ruleset_failed", "")
+                Notifications.Error(%"notification.install_ruleset_failed")
 
         | OsuSkinArchive ->
             if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
@@ -102,7 +102,7 @@ module FileDrop =
                     Replay.figure_out_replay(replay)
                 else
                     Notifications.Error(%"osu_replay_import.failed", %"osu_replay_import.wrong_menu")
-            | None -> Notifications.Error(%"notification.import_failed", "")
+            | None -> Notifications.Error(%"notification.import_failed")
 
         | Unknown -> // Treat it as a chart/pack/library import
             if Directory.Exists(path) && Path.GetFileName(path) = "Songs" then
