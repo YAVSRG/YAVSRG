@@ -11,6 +11,7 @@ open Prelude.Data.Options
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
 open Interlude.Content
+open Interlude.Options
 
 module RulesetSwitcher =
 
@@ -80,7 +81,7 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
     let switch_to_native_ruleset () =
         match SelectedChart.CACHE_DATA with
         | Some chart_meta ->
-            if rulesets.SwitchToNativeRuleset(chart_meta.Origins) then
+            if rulesets.SwitchToNativeRuleset(chart_meta.Origins, options.AutomaticOsuOD.Value) then
                 Style.click.Play()
             else
                 Notifications.system_feedback(

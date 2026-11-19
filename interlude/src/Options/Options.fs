@@ -173,6 +173,7 @@ type GameOptions =
         Noteskin: Setting<string>
         SelectedHUD: Setting<string>
         Ruleset: Setting<RulesetSelection>
+        AutomaticOsuOD: Setting.Bounded<float32>
 
         Pacemaker: Dictionary<string, PacemakerSettings>
         EnablePacemaker: Setting<bool>
@@ -246,6 +247,7 @@ type GameOptions =
             Noteskin = Skins.selected_noteskin_id
             SelectedHUD = Skins.selected_hud_id
             Ruleset = Setting.make rulesets.Select rulesets.get_Selected
+            AutomaticOsuOD = 8.0f |> Setting.bounded(0.0f, 10.0f)
 
             Pacemaker = Dictionary<string, PacemakerSettings>()
             EnablePacemaker = Setting.simple false

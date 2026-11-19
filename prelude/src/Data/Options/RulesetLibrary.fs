@@ -215,7 +215,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             Some(this.FindByHash(ruleset_info.Hash) |> Option.defaultValue ruleset_info)
         | None -> None
 
-    member this.SwitchToNativeRuleset(origins: ChartOrigin seq) : bool =
+    member this.SwitchToNativeRuleset(origins: ChartOrigin seq, default_od: float32) : bool =
         let ensure_installed_and_select (ruleset_info: RulesetInfo) =
             let id =
                 match loaded.Keys |> Seq.tryFind(fun id -> loaded.[id].Hash = ruleset_info.Hash) with
@@ -229,7 +229,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
             match native_ruleset with
             | NativeRuleset.Wife3 -> ensure_installed_and_select(WIFE3_J4)
             | NativeRuleset.Quaver -> ensure_installed_and_select(QUAVER_STANDARD)
-            | NativeRuleset.OsuMania(od) -> this.Select(OsuAutomatic(od))
+            | NativeRuleset.OsuMania _ -> this.Select(OsuAutomatic(default_od))
 
             true
         | None -> false
