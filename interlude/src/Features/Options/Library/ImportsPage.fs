@@ -35,13 +35,17 @@ type ImportsPage() =
         PageButton(
             %"imports.from_file",
             fun () ->
-                FileDialog.pick_file(
+                FileDialog.pick_files(
                     null,
-                    "osz,osu,qp,qua,zip,sm;osk,isk;osr",
+                    "osz,osu,qp,qua,zip,sm,osk,isk,osr,ruleset",
                     function
-                    | FileDialogResult.Ok path -> FileDrop.handle path
-                    | FileDialogResult.Cancelled -> ()
-                    | FileDialogResult.Error -> () // error toast
+                    | FileDialogMultipleResult.Ok paths ->
+                        if Screen.current_type = ScreenType.LevelSelect then
+                            Menu.Exit()
+
+                        FileDrop.handle_many(paths)
+                    | FileDialogMultipleResult.Cancelled -> ()
+                    | FileDialogMultipleResult.Error -> () // error toast
                 )
         )
             .Icon(Icons.FILE_PLUS)
@@ -53,7 +57,7 @@ type ImportsPage() =
                 FileDialog.pick_folder(
                     null,
                     function
-                    | FileDialogResult.Ok path -> FileDrop.handle path
+                    | FileDialogResult.Ok path -> FileDrop.handle(path)
                     | FileDialogResult.Cancelled -> ()
                     | FileDialogResult.Error -> () // error toast
                 )

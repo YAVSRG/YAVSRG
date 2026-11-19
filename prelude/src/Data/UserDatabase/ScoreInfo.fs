@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 open Prelude
 open Prelude.Charts
@@ -36,31 +36,39 @@ type ScoreInfo =
         ImportedFromOsu: bool
         IsFailed: bool
     }
-    member this.Ruleset
-        with get () = this.Scoring.Ruleset
-        and set ruleset =
-            let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, this.Replay, this.WithMods, this.Rate)
-            this.Scoring <- scoring
-            this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            this.Grade <- Grade.calculate ruleset.Grades scoring.Accuracy
 
-    member this.WithRuleset(ruleset: Ruleset) : ScoreInfo =
-        let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, this.Replay, this.WithMods, this.Rate)
+    member this.RulesetInfo
+        with get (): RulesetInfo = this.Scoring.RulesetInfo
+        and set (ruleset_info: RulesetInfo) =
+            let scoring =
+                ScoreProcessor.ProcessEntireReplay(ruleset_info, this.Replay, this.WithMods, this.Rate)
+
+            this.Scoring <- scoring
+            this.Lamp <- Lamp.calculate ruleset_info.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            this.Grade <- Grade.calculate ruleset_info.Ruleset.Grades scoring.Accuracy
+
+    member this.Ruleset: Ruleset = this.Scoring.Ruleset
+
+    member this.WithRuleset(ruleset_info: RulesetInfo) : ScoreInfo =
+        let scoring =
+            ScoreProcessor.ProcessEntireReplay(ruleset_info, this.Replay, this.WithMods, this.Rate)
 
         { this with
             Scoring = scoring
-            Lamp = Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            Grade = Grade.calculate ruleset.Grades scoring.Accuracy
+            Lamp = Lamp.calculate ruleset_info.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate ruleset_info.Ruleset.Grades scoring.Accuracy
         }
 
     member this.Accuracy = this.Scoring.Accuracy
-    member this.Mods : ModState = this.WithMods.ModsApplied
+    member this.Mods: ModState = this.WithMods.ModsApplied
 
-    member this.ModStatus : ModStatus = this.WithMods.Status
+    member this.ModStatus: ModStatus = this.WithMods.Status
 
-    member this.ModString() : string = ModState.format (this.Rate, this.Mods)
-    member this.Shorthand : string = sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.LampName this.Lamp)
-    
+    member this.ModString() : string = ModState.format(this.Rate, this.Mods)
+
+    member this.Shorthand: string =
+        sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.LampName(this.Lamp))
+
     member this.ToScore() : Score =
         {
             Timestamp = this.TimePlayed
@@ -71,11 +79,16 @@ type ScoreInfo =
             IsFailed = this.IsFailed
             Keys = this.WithMods.Keys
         }
-        
-    static member CreateFromScore(chart_meta: ChartMeta, chart: Chart, ruleset: Ruleset, score: Score) : ScoreInfo =
+
+    static member CreateFromScore
+        (chart_meta: ChartMeta, chart: Chart, ruleset_info: RulesetInfo, score: Score)
+        : ScoreInfo =
         let with_mods = ModState.apply score.Mods chart
         let replay = Replay.FromByteArray(score.Replay)
-        let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, replay, with_mods, score.Rate)
+
+        let scoring =
+            ScoreProcessor.ProcessEntireReplay(ruleset_info, replay, with_mods, score.Rate)
+
         let difficulty = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
         {
@@ -89,8 +102,8 @@ type ScoreInfo =
 
             Replay = replay
             Scoring = scoring
-            Lamp = Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-            Grade = Grade.calculate ruleset.Grades scoring.Accuracy
+            Lamp = Lamp.calculate ruleset_info.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate ruleset_info.Ruleset.Grades scoring.Accuracy
 
             Rating = difficulty
             Performance = Performance.calculate difficulty scoring

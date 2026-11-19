@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Stats.Leaderboard
+namespace Interlude.Web.Server.API.Stats.Leaderboard
 
 open NetCoreServer
 open Percyqaz.Common
@@ -14,17 +14,13 @@ module MonthlyKeymode =
     open Stats.Leaderboard.MonthlyKeymode
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             let user_id, user = authorize headers
 
             let sort =
-                match query_params.TryFind "sort" |> Option.bind Array.tryHead |> Option.map (_.ToLowerInvariant()) with
+                match query_params.TryFind("sort") |> Option.bind Array.tryHead |> Option.map(_.ToLowerInvariant()) with
                 | Some "playtime" -> Playtime
                 | Some "combined" -> Combined
                 | Some "jacks" -> Jacks
@@ -33,7 +29,7 @@ module MonthlyKeymode =
                 | _ -> Combined
 
             let keys =
-                match query_params.TryFind "keys" |> Option.bind Array.tryHead with
+                match query_params.TryFind("keys") |> Option.bind Array.tryHead with
                 | Some k ->
                     match System.Int32.TryParse(k) with
                     | true, keys -> keys
@@ -58,17 +54,18 @@ module MonthlyKeymode =
 
                 | _ -> [||]
 
-            let users =
-                data |> Array.map (fun x -> x.UserId) |> User.by_ids |> Map.ofArray
+            let users = data |> Array.map(fun x -> x.UserId) |> User.by_ids |> Map.ofArray
 
-            let mutable you : (int64 * KeymodeLeaderboardEntry) option = None
+            let mutable you: (int64 * KeymodeLeaderboardEntry) option = None
 
             let mutable i = 0
+
             let result =
                 data
-                |> Array.map (fun l ->
+                |> Array.map(fun l ->
                     i <- i + 1
                     let user = users.[l.UserId]
+
                     let entry =
                         {
                             Username = user.Username
@@ -79,7 +76,10 @@ module MonthlyKeymode =
                             Chordstream = l.Chordstream
                             Stream = l.Stream
                         }
-                    if user_id = l.UserId then you <- Some (i, entry)
+
+                    if user_id = l.UserId then
+                        you <- Some(i, entry)
+
                     entry
                 )
 
@@ -103,18 +103,19 @@ module MonthlyKeymode =
                     | _ -> None
                 with
                 | Some rank ->
-                    you <- Some (
-                        rank.Rank,
-                        {
-                            Username = user.Username
-                            Color = user.Color
-                            Playtime = rank.Playtime
-                            Combined = rank.Combined
-                            Jacks = rank.Jacks
-                            Chordstream = rank.Chordstream
-                            Stream = rank.Stream
-                        }
-                    )
+                    you <-
+                        Some(
+                            rank.Rank,
+                            {
+                                Username = user.Username
+                                Color = user.Color
+                                Playtime = rank.Playtime
+                                Combined = rank.Combined
+                                Jacks = rank.Jacks
+                                Chordstream = rank.Chordstream
+                                Stream = rank.Stream
+                            }
+                        )
                 | None -> ()
 
             response.ReplyJson({ Leaderboard = result; You = you }: Response)

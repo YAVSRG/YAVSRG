@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API
+namespace Interlude.Web.Server.API
 
 open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests

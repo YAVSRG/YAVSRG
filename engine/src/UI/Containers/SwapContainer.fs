@@ -11,29 +11,26 @@ type SwapContainer(current: Widget) as this =
 
     member this.Current
         with get () = current
-        and set (child) =
+        and set (child: Widget) =
             let old_child = current
             current <- child
 
             if this.Initialised then
-                if not child.Initialised then
-                    child.Init this
-                else
-                    assert (child.Parent = this)
+                if not child.Initialised then child.Init(this) else assert (child.Parent = this)
 
             if old_child.Focused then
-                child.Focus false
+                child.Focus(false)
 
             swapped_last_frame <- true
 
-    override this.Init(parent) =
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
 
-        current.Init this
+        current.Init(this)
 
-    override this.Draw() = current.Draw()
+    override this.Draw() : unit = current.Draw()
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
         let moved =

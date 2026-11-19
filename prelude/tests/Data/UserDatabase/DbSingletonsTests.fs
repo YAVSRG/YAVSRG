@@ -13,7 +13,7 @@ module DbSingletonsTests =
     type TestDataType =
         {
             Timestamp: int64
-            Rate: float32<rate>
+            Rate: Rate
             Mods: int64 list
             Replay: byte array
             IsImported: bool

@@ -8,8 +8,9 @@ open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
+open Prelude.Mods
 
-type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
+type ChartPreview(info: LoadedChartInfo, multiplayer_lobby: bool) as this =
     inherit Dialog()
 
     let playstate, recreate_scoring = PlayState.Dummy(info)
@@ -27,27 +28,30 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
 
     let mutable show_difficulty_overlay = false
 
+    let recreate_preview (info: LoadedChartInfo) : unit =
+        let _playstate, _recreate_scoring = PlayState.Dummy(info)
+        playstate <- _playstate
+        recreate_scoring <- _recreate_scoring
+
+        playfield <- Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
+
+        difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
+        timeline <- Timeline(info.WithMods, Song.Seek, SelectedChart.rate)
+
+        if this.Initialised then
+            difficulty_overlay.Init(this)
+            playfield.Init(this)
+            timeline.Init(this)
+
     let change_chart_listener =
-        SelectedChart.on_chart_change_finished.Subscribe(fun info ->
-            let _playstate, _recreate_scoring = PlayState.Dummy(info)
-            playstate <- _playstate
-            recreate_scoring <- _recreate_scoring
-
-            playfield <-
-                Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
-
-            difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
-            timeline <- Timeline(info.WithMods, Song.Seek, SelectedChart.rate)
-
-            if this.Initialised then
-                difficulty_overlay.Init(this)
-                playfield.Init(this)
-                timeline.Init(this)
-        )
+        SelectedChart.on_chart_update_or_change_finished.Subscribe(recreate_preview)
 
     let unpause_song_on_exit = Song.IsPlaying
 
     let volume = VolumeSlider()
+
+    let can_change_rate_mods () : bool =
+        not(Transitions.in_progress()) && not multiplayer_lobby
 
     override this.Init(parent: Widget) : unit =
         Selection.clear()
@@ -107,8 +111,14 @@ type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
                 Song.Pause()
             elif not(Mouse.held Mouse.LEFT) then
                 Song.Resume()
-        else
-            SelectedChart.change_rate_hotkeys change_rate
+        elif (%%"mirror").Pressed() && can_change_rate_mods() then
+            SelectedChart.selected_mods.Set(ModState.cycle_fd "mirror" SelectedChart.selected_mods.Value)
+            Style.click.Play()
+        elif can_change_rate_mods() then
+            SelectedChart.change_rate_hotkeys(fun v ->
+                SelectedChart.rate.Set(SelectedChart.rate.Value + v)
+                LevelSelect.refresh_details()
+            )
 
         if not(Mouse.held Mouse.LEFT) then
             let scroll = Mouse.scroll()

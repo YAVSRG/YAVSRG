@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Online
+namespace Interlude.Web.Server.Online
 
 open System
 open Interlude.Web.Shared
@@ -11,15 +11,12 @@ module Online =
             match packet with
 
             | Upstream.VERSION v ->
-                if v = PROTOCOL_VERSION then
-                    Session.handshake id
-                else
-                    Server.kick (id, "Your client is out of date")
+                if v = PROTOCOL_VERSION then Session.handshake id else Server.kick(id, "Your client is out of date")
             | Upstream.LOGIN_WITH_DISCORD -> Users.DiscordAuthFlow.begin_register_or_login_with_discord id
             | Upstream.COMPLETE_REGISTRATION_WITH_DISCORD username ->
-                Users.DiscordAuthFlow.finish_register_with_discord (id, username) |> ignore
-            | Upstream.LOGIN token -> Session.login (id, token)
-            | Upstream.LOGOUT -> Lobby.ensure_player_leaves_lobby (id, (fun () -> Session.logout id))
+                Users.DiscordAuthFlow.finish_register_with_discord(id, username) |> ignore
+            | Upstream.LOGIN token -> Session.login(id, token)
+            | Upstream.LOGOUT -> Lobby.ensure_player_leaves_lobby(id, (fun () -> Session.logout id))
 
             | Upstream.GET_LOBBIES -> Lobby.List(id).Do
             | Upstream.JOIN_LOBBY lid -> Lobby.Join(id, lid).Do
@@ -32,7 +29,7 @@ module Online =
             | Upstream.MISSING_CHART -> Lobby.MissingChart(id).Do
 
             | Upstream.BEGIN_PLAYING -> Lobby.BeginPlaying(id).Do
-            | Upstream.PLAY_DATA (timestamp, data) -> Lobby.PlayData(id, timestamp, data).Do
+            | Upstream.PLAY_DATA(timestamp, data) -> Lobby.PlayData(id, timestamp, data).Do
             | Upstream.BEGIN_SPECTATING -> Lobby.BeginSpectating(id).Do
             | Upstream.FINISH_PLAYING abandoned -> Lobby.FinishPlaying(id, abandoned).Do
 
@@ -42,7 +39,7 @@ module Online =
             | Upstream.START_GAME -> Lobby.StartGame(id).Do
             | Upstream.CANCEL_GAME -> Lobby.CancelStartGame(id).Do
 
-            | Upstream.KICK_PLAYER _ -> Server.kick (id, "not yet implemented")
+            | Upstream.KICK_PLAYER _ -> Server.kick(id, "not yet implemented")
 
         }
         |> Async.Start
@@ -50,4 +47,4 @@ module Online =
     let handle_connect (id: Guid) = Session.connect id
 
     let handle_disconnect (id: Guid) =
-        Lobby.ensure_player_leaves_lobby (id, (fun () -> Session.disconnect id))
+        Lobby.ensure_player_leaves_lobby(id, (fun () -> Session.disconnect id))

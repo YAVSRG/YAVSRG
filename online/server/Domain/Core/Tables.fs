@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Core
+namespace Interlude.Web.Server.Domain.Core
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -7,7 +7,7 @@ open Interlude.Web.Server
 module TableRating =
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE table_ratings (
@@ -31,8 +31,8 @@ module TableRating =
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@TableId", SqliteType.Text, -1 ]
             FillParameters =
                 fun p (user_id, table_id) ->
-                    p.Int64 user_id
-                    p.String table_id
+                    p.Int64(user_id)
+                    p.String(table_id)
             Read = fun r -> r.Float64, r.Int64
         }
 
@@ -55,10 +55,10 @@ module TableRating =
                 ]
             FillParameters =
                 (fun p (user_id, table_id, rating) ->
-                    p.Int64 user_id
-                    p.String table_id
-                    p.Float64 rating
-                    p.Int64(Timestamp.now ())
+                    p.Int64(user_id)
+                    p.String(table_id)
+                    p.Float64(rating)
+                    p.Int64(Timestamp.now())
                 )
         }
 
@@ -77,7 +77,7 @@ module TableRating =
             LIMIT 50;
             """
             Parameters = [ "@TableId", SqliteType.Text, -1 ]
-            FillParameters = fun p table_id -> p.String table_id
+            FillParameters = fun p table_id -> p.String(table_id)
             Read = (fun r -> { UserId = r.Int64; Rating = r.Float64 })
         }
 

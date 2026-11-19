@@ -19,7 +19,7 @@ module Tables =
     let private load () : unit =
         loaded.Clear()
 
-        for file in Directory.EnumerateFiles(get_game_folder <| Path.Combine("Data", "Tables")) do
+        for file in Directory.EnumerateFiles(get_game_folder(Path.Combine("Data", "Tables"))) do
             if Path.GetExtension(file).ToLower() = ".table" then
                 let id = Path.GetFileNameWithoutExtension(file)
 
@@ -35,10 +35,10 @@ module Tables =
             current <- Some table
 
     let init () =
-        load ()
+        load()
 
         match _selected_id.Value with
-        | Some id when loaded.ContainsKey id -> current <- Some loaded.[id]
+        | Some id when loaded.ContainsKey(id) -> current <- Some loaded.[id]
         | Some id ->
             Logging.Warn "Table '%s' not found" id
             _selected_id.Value <- None
@@ -46,19 +46,19 @@ module Tables =
 
         initialised <- true
 
-    let selected_id : Setting<string option> =
+    let selected_id: Setting<string option> =
         Setting.make
             (fun new_id ->
                 if initialised then
                     match new_id with
-                    | Some id when loaded.ContainsKey id -> _selected_id.Value <- Some id
+                    | Some id when loaded.ContainsKey(id) -> _selected_id.Value <- Some id
                     | Some id ->
                         Logging.Warn "Table '%s' not found" id
                         _selected_id.Value <- None
                     | None -> _selected_id.Value <- None
 
                     match _selected_id.Value with
-                    | Some id when loaded.ContainsKey id -> current <- Some loaded.[id]
+                    | Some id when loaded.ContainsKey(id) -> current <- Some loaded.[id]
                     | _ -> current <- None
                 else
                     _selected_id.Value <- new_id
@@ -66,6 +66,6 @@ module Tables =
             (fun () -> _selected_id.Value)
 
     let by_id (id: string) : Table option =
-        if loaded.ContainsKey id then Some loaded.[id] else None
+        if loaded.ContainsKey(id) then Some loaded.[id] else None
 
     let list () : Table list = loaded.Values |> List.ofSeq

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -29,16 +29,18 @@ module DbSessions =
                     Column.Text("KeymodeSkills")
                 ]
         }
+
     let internal ADD_KEYMODE_PLAYTIME: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             ALTER TABLE sessions
             ADD COLUMN KeymodePlaytime TEXT NOT NULL DEFAULT '[]'
             """
         }
+
     let internal REMOVE_KEYMODE_SKILLS: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             ALTER TABLE sessions
@@ -47,7 +49,7 @@ module DbSessions =
         }
 
     let internal CREATE_INDEX: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE INDEX idx_sessions_start
@@ -61,29 +63,28 @@ module DbSessions =
                 """SELECT Start, End, PlayTime, PracticeTime, GameTime, NotesHit, PlaysStarted, PlaysRetried, PlaysCompleted, PlaysQuit, XP, KeymodePlaytime FROM sessions ORDER BY Start ASC;"""
             Parameters = []
             FillParameters = fun _ _ -> ()
-            Read = fun r ->
-                {
-                    Start = r.Int64
-                    End = r.Int64
+            Read =
+                fun r ->
+                    {
+                        Start = r.Int64
+                        End = r.Int64
 
-                    PlayTime = r.Float64
-                    PracticeTime = r.Float64
-                    GameTime = r.Float64
-                    NotesHit = r.Int32
+                        PlayTime = r.Float64
+                        PracticeTime = r.Float64
+                        GameTime = r.Float64
+                        NotesHit = r.Int32
 
-                    PlaysStarted = r.Int32
-                    PlaysRetried = r.Int32
-                    PlaysCompleted = r.Int32
-                    PlaysQuit = r.Int32
+                        PlaysStarted = r.Int32
+                        PlaysRetried = r.Int32
+                        PlaysCompleted = r.Int32
+                        PlaysQuit = r.Int32
 
-                    XP = r.Int64
-                    KeymodePlaytime = r.Json JSON
-                }
+                        XP = r.Int64
+                        KeymodePlaytime = r.Json(JSON)
+                    }
         }
 
-    let get_all (db: Database) : Session array =
-        GET_ALL.Execute () db
-        |> expect
+    let get_all (db: Database) : Session array = GET_ALL.Execute () db |> expect
 
     let private SAVE: NonQuery<Session> =
         {
@@ -92,39 +93,41 @@ module DbSessions =
                 INSERT OR REPLACE INTO sessions (Start, End, PlayTime, PracticeTime, GameTime, NotesHit, PlaysStarted, PlaysRetried, PlaysCompleted, PlaysQuit, XP, KeymodePlaytime)
                 VALUES (@Start, @End, @PlayTime, @PracticeTime, @GameTime, @NotesHit, @PlaysStarted, @PlaysRetried, @PlaysCompleted, @PlaysQuit, @XP, json(@KeymodePlaytime));
             """
-            Parameters = [
-                "@Start", SqliteType.Integer, 8;
-                "@End", SqliteType.Integer, 8;
+            Parameters =
+                [
+                    "@Start", SqliteType.Integer, 8
+                    "@End", SqliteType.Integer, 8
 
-                "@PlayTime", SqliteType.Real, 8;
-                "@PracticeTime", SqliteType.Real, 8;
-                "@GameTime", SqliteType.Real, 8;
-                "@NotesHit", SqliteType.Integer, 4;
+                    "@PlayTime", SqliteType.Real, 8
+                    "@PracticeTime", SqliteType.Real, 8
+                    "@GameTime", SqliteType.Real, 8
+                    "@NotesHit", SqliteType.Integer, 4
 
-                "@PlaysStarted", SqliteType.Integer, 4;
-                "@PlaysRetried", SqliteType.Integer, 4;
-                "@PlaysCompleted", SqliteType.Integer, 4;
-                "@PlaysQuit", SqliteType.Integer, 4;
+                    "@PlaysStarted", SqliteType.Integer, 4
+                    "@PlaysRetried", SqliteType.Integer, 4
+                    "@PlaysCompleted", SqliteType.Integer, 4
+                    "@PlaysQuit", SqliteType.Integer, 4
 
-                "@XP", SqliteType.Integer, 8;
-                "@KeymodePlaytime", SqliteType.Text, -1
-            ]
-            FillParameters = fun p session ->
-                p.Int64 session.Start
-                p.Int64 session.End
+                    "@XP", SqliteType.Integer, 8
+                    "@KeymodePlaytime", SqliteType.Text, -1
+                ]
+            FillParameters =
+                fun p session ->
+                    p.Int64(session.Start)
+                    p.Int64(session.End)
 
-                p.Float64 session.PlayTime
-                p.Float64 session.PracticeTime
-                p.Float64 session.GameTime
-                p.Int32 session.NotesHit
+                    p.Float64(session.PlayTime)
+                    p.Float64(session.PracticeTime)
+                    p.Float64(session.GameTime)
+                    p.Int32(session.NotesHit)
 
-                p.Int32 session.PlaysStarted
-                p.Int32 session.PlaysRetried
-                p.Int32 session.PlaysCompleted
-                p.Int32 session.PlaysQuit
+                    p.Int32(session.PlaysStarted)
+                    p.Int32(session.PlaysRetried)
+                    p.Int32(session.PlaysCompleted)
+                    p.Int32(session.PlaysQuit)
 
-                p.Int64 session.XP
-                p.Json JSON session.KeymodePlaytime
+                    p.Int64(session.XP)
+                    p.Json JSON session.KeymodePlaytime
         }
 
     let save (session: Session) (db: Database) =

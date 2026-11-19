@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Replays
+namespace Prelude.Gameplay.Replays
 
 // todo: represent if more data can come or if knowing the full replay is possible (HasFullReplay)
 // todo: what is even the point of finished as is currently is? investigate and then change to be clearer

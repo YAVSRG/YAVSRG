@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Core
+namespace Interlude.Web.Server.Domain.Core
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -19,7 +19,7 @@ type Replay =
 module Replay =
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE replays2 (
@@ -35,7 +35,7 @@ module Replay =
             );
             """
         }
-        
+
     let internal REMOVE_PERSISTENT_COLUMN: NonQuery<unit> =
         { NonQuery.without_parameters() with
             SQL =
@@ -49,7 +49,7 @@ module Replay =
             UserId = user_id
             ChartId = chart_id
             TimePlayed = timestamp
-            TimeUploaded = Timestamp.now ()
+            TimeUploaded = Timestamp.now()
             Data = replay.ToByteArray()
         }
 
@@ -72,11 +72,11 @@ module Replay =
                 ]
             FillParameters =
                 (fun p replay ->
-                    p.Int64 replay.UserId
-                    p.String replay.ChartId
-                    p.Int64 replay.TimePlayed
-                    p.Int64 replay.TimeUploaded
-                    p.Blob replay.Data
+                    p.Int64(replay.UserId)
+                    p.String(replay.ChartId)
+                    p.Int64(replay.TimePlayed)
+                    p.Int64(replay.TimeUploaded)
+                    p.Blob(replay.Data)
                 )
             Read = fun r -> r.Int64
         }
@@ -92,7 +92,7 @@ module Replay =
             WHERE Id = @Id;
             """
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
-            FillParameters = fun p id -> p.Int64 id
+            FillParameters = fun p id -> p.Int64(id)
             Read =
                 (fun r ->
                     {
@@ -116,7 +116,7 @@ module Replay =
         let ids_string = String.concat "," (Array.map string replay_ids)
 
         let query: Query<unit, int64 * Replay> =
-            { Query.without_parameters () with
+            { Query.without_parameters() with
                 SQL =
                     sprintf
                         "SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays2 WHERE Id IN (%s)"

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Integration
+namespace Interlude.Web.Tests.Integration
 
 open NUnit.Framework
 open Interlude.Web.Shared.Requests
@@ -20,7 +20,7 @@ module Stats =
 
         use done_signal = new AutoResetEvent(false)
 
-        Stats.Fetch.get (
+        Stats.Fetch.get(
             Option.get
             >> fun (res: Stats.Fetch.Response) ->
                 printfn "%A" res
@@ -34,7 +34,7 @@ module Stats =
 
         use done_signal = new AutoResetEvent(false)
 
-        Stats.Leaderboard.XP.get (
+        Stats.Leaderboard.XP.get(
             false,
             Option.get
             >> fun (res: Stats.Leaderboard.XP.Response) ->
@@ -49,7 +49,7 @@ module Stats =
 
         use done_signal = new AutoResetEvent(false)
 
-        Stats.Leaderboard.XP.get (
+        Stats.Leaderboard.XP.get(
             true,
             Option.get
             >> fun (res: Stats.Leaderboard.XP.Response) ->
@@ -64,7 +64,7 @@ module Stats =
 
         use done_signal = new AutoResetEvent(false)
 
-        Stats.Leaderboard.MonthlyXP.get (
+        Stats.Leaderboard.MonthlyXP.get(
             false,
             Option.get
             >> fun (res: Stats.Leaderboard.MonthlyXP.Response) ->
@@ -79,7 +79,7 @@ module Stats =
 
         use done_signal = new AutoResetEvent(false)
 
-        Stats.Leaderboard.MonthlyXP.get (
+        Stats.Leaderboard.MonthlyXP.get(
             true,
             Option.get
             >> fun (res: Stats.Leaderboard.MonthlyXP.Response) ->
@@ -95,7 +95,7 @@ module Stats =
         for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
-            Stats.Leaderboard.Keymode.get (
+            Stats.Leaderboard.Keymode.get(
                 4,
                 sort,
                 Option.get
@@ -112,7 +112,7 @@ module Stats =
         for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
-            Stats.Leaderboard.Keymode.get (
+            Stats.Leaderboard.Keymode.get(
                 7,
                 sort,
                 Option.get
@@ -129,7 +129,7 @@ module Stats =
         for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
-            Stats.Leaderboard.MonthlyKeymode.get (
+            Stats.Leaderboard.MonthlyKeymode.get(
                 4,
                 sort,
                 Option.get
@@ -146,7 +146,7 @@ module Stats =
         for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
-            Stats.Leaderboard.MonthlyKeymode.get (
+            Stats.Leaderboard.MonthlyKeymode.get(
                 7,
                 sort,
                 Option.get

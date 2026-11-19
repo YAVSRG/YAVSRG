@@ -7,26 +7,26 @@ module RulesetEditingTests =
 
     [<Test>]
     let SCJ4_DeletingJudgements () =
-        let ruleset = SC.create 4
+        let ruleset = SC.create(4)
 
-        let ruleset_without_bad = Ruleset.remove_judgement 4 ruleset
+        let ruleset_without_bad = ruleset.WithoutJudgement(4)
 
         printfn "%A" ruleset_without_bad
 
-        match Ruleset.check ruleset_without_bad with
+        match ruleset_without_bad.Validate() with
         | Ok _ -> Assert.Pass()
         | Error reason -> Assert.Fail(reason)
 
     [<Test>]
     let SCJ4_DeletingAllJudgementsButMiss () =
-        let mutable ruleset = SC.create 4
+        let mutable ruleset = SC.create(4)
 
         for _ = 1 to 5 do
 
-            ruleset <- Ruleset.remove_judgement 0 ruleset
+            ruleset <- ruleset.WithoutJudgement(0)
             printfn "%A" ruleset
 
-            match Ruleset.check ruleset with
+            match ruleset.Validate() with
             | Ok _ -> ()
             | Error reason -> Assert.Fail(reason)
 
@@ -34,14 +34,14 @@ module RulesetEditingTests =
 
     [<Test>]
     let SCJ4_DuplicatingPerfectTwice () =
-        let mutable ruleset = SC.create 4
+        let mutable ruleset = SC.create(4)
 
         for i = 0 to 1 do
 
-            ruleset <- Ruleset.duplicate_judgement 1 ruleset
+            ruleset <- ruleset.WithDuplicatedJudgement(1)
             printfn "%A" ruleset
 
-            match Ruleset.check ruleset with
+            match ruleset.Validate() with
             | Ok _ -> ()
             | Error reason -> Assert.Fail(reason)
 
@@ -49,14 +49,14 @@ module RulesetEditingTests =
 
     [<Test>]
     let SCJ4_DuplicatingAllJudgements () =
-        let mutable ruleset = SC.create 4
+        let mutable ruleset = SC.create(4)
 
         for i = 5 downto 0 do
 
-            ruleset <- Ruleset.duplicate_judgement i ruleset
+            ruleset <- ruleset.WithDuplicatedJudgement(i)
             printfn "%A" ruleset
 
-            match Ruleset.check ruleset with
+            match ruleset.Validate() with
             | Ok _ -> ()
             | Error reason -> Assert.Fail(reason)
 

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Tables.Suggestions
+namespace Interlude.Web.Server.API.Tables.Suggestions
 
 open NetCoreServer
 open Percyqaz.Common
@@ -16,20 +16,16 @@ module Accept =
     open Tables.Suggestions.Accept
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             let user_id, user = authorize headers
 
-            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
+            if not(user.Badges.Contains(Badge.TABLE_EDITOR)) then
                 raise PermissionDeniedException
 
-            match JSON.FromString body with
-            | Error e -> raise (BadRequestException None)
+            match JSON.FromString(body) with
+            | Error e -> raise(BadRequestException None)
             | Ok(request: Request) ->
 
             match Backbeat.Tables.get request.TableId with
@@ -48,8 +44,7 @@ module Accept =
                         known_chart
                         request.TableId
 
-                    TableSuggestion.reject request.TableId chart_id user_id "Wrong keymode"
-                    |> ignore
+                    TableSuggestion.reject request.TableId chart_id user_id "Wrong keymode" |> ignore
 
                     response.ReplyJson(false)
 
@@ -57,10 +52,11 @@ module Accept =
 
                     TableLevel.add_or_move user_id request.TableId chart_id request.Level
 
-                    sprintf "# :checkered_flag: %s\nNow in %s, %s"
+                    sprintf
+                        "# :checkered_flag: %s\nNow in %s, %s"
                         known_song.FormattedTitle
                         table.Name
-                        (table.LevelName request.Level)
+                        (table.LevelName(request.Level))
                     |> Discord.feed_log
 
                     response.ReplyJson(true)

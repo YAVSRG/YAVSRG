@@ -1,4 +1,4 @@
-﻿namespace Prelude
+namespace Prelude
 
 open System
 
@@ -9,16 +9,14 @@ open System
 ///   Be future proof, it will not change like Microsoft's System.Random could and so a score with Interlude's Random mod set in 2024 can be understood in 2034
 
 type PseudoRandom =
-    private {
-        mutable State: uint64
-    }
+    private
+        {
+            mutable State: uint64
+        }
 
-    member private this.Step() =
+    member private this.Step() : unit =
         this.State <-
-            if this.State &&& 1uL <> 0uL then
-                (this.State >>> 1) ^^^ 0x800000000000000DuL
-            else
-                this.State >>> 1
+            if this.State &&& 1uL <> 0uL then (this.State >>> 1) ^^^ 0x800000000000000DuL else this.State >>> 1
 
     /// Returns number in the range [0 .. max)
     member this.Next(max: int) : int =
@@ -30,7 +28,7 @@ type PseudoRandom =
         non_negative % max
 
     /// Returns number in the range [min .. max)
-    member this.Next(min: int, max: int) = this.Next (max - min) + min
+    member this.Next(min: int, max: int) : int = this.Next(max - min) + min
 
     member this.Shuffle<'T>(items: 'T array) : unit =
         for i = items.Length - 1 downto 1 do
@@ -39,8 +37,8 @@ type PseudoRandom =
             items.[i] <- items.[j]
             items.[j] <- swap
 
-    static member FromSeed (seed: int32) =
-        let non_zero_64_bit_seed : uint64 =
+    static member FromSeed(seed: int32) : PseudoRandom =
+        let non_zero_64_bit_seed: uint64 =
             if seed = 0 then 31415926uL
             elif seed = Int32.MinValue then Int32.MaxValue |> uint64
             elif seed < 0 then abs seed |> uint64

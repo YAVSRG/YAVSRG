@@ -10,7 +10,6 @@ open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Calculator
 open Prelude.Data.UserDatabase
-open Prelude.Data.Stats
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -24,7 +23,7 @@ type MultiplayerScreen =
 
     static member Create(info: LoadedChartInfo, lobby: Lobby) : Screen =
 
-        let ruleset = Rulesets.current
+        let ruleset = rulesets.GetCurrent(info.ChartMeta)
         let first_note = info.WithMods.FirstNote
         let liveplay = GameplayReplaySource first_note
 

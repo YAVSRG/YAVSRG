@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Integration
+namespace Interlude.Web.Tests.Integration
 
 open NUnit.Framework
 open Interlude.Web.Shared.Requests
@@ -11,7 +11,7 @@ module Charts =
 
         use done_signal = new AutoResetEvent(false)
 
-        Charts.Identify.get (
+        Charts.Identify.get(
             CRESCENT_MOON,
             Option.get
             >> fun (res: Charts.Identify.Response) ->
@@ -26,7 +26,7 @@ module Charts =
 
         use done_signal = new AutoResetEvent(false)
 
-        Charts.Identify.get (
+        Charts.Identify.get(
             "NOTAVALIDCHARTID",
             Option.get
             >> fun (res: Charts.Identify.Response) ->
@@ -46,7 +46,7 @@ module Charts =
 
             use done_signal = new AutoResetEvent(false)
 
-            Charts.Scores.Leaderboard.get (
+            Charts.Scores.Leaderboard.get(
                 CRESCENT_MOON,
                 Option.get
                 >> fun (res: Charts.Scores.Leaderboard.Response) ->
@@ -61,7 +61,7 @@ module Charts =
 
             use done_signal = new AutoResetEvent(false)
 
-            Charts.Scores.Leaderboard.get (
+            Charts.Scores.Leaderboard.get(
                 "DoesntExist",
                 function
                 | Some _ -> Assert.Fail()

@@ -12,14 +12,10 @@ let test() =
     Directory.SetCurrentDirectory("C:/Interlude/dev") // this is my interlude install location
     let library = Library.Load()
 
-    let sc_j4 = SC.create 4
-    let sc_j4_id = Ruleset.hash sc_j4
-
     let ctx : LibraryViewContext =
         {
             Library = library
-            Ruleset = sc_j4
-            RulesetId = sc_j4_id
+            RulesetProvider = K SC_J4
             Rate = 1.0f<rate>
         }
 
@@ -38,8 +34,7 @@ let test() =
             MaximumRate = 1.5f<rate>
             OnlyNewCharts = false
             Filter = FilteredSearch.Empty
-            Ruleset = sc_j4
-            RulesetId = sc_j4_id
+            RulesetProvider = K SC_J4
             Mods = Map.empty
         }
 

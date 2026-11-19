@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Conversions
+namespace Prelude.Formats.Conversions
 
 open System.IO
 open System.Collections.Generic
@@ -25,7 +25,7 @@ module QuaverConverter =
                     | Some v -> earliest_upcoming_release <- min earliest_upcoming_release v
                     | None -> ()
 
-            find_earliest_upcoming_release ()
+            find_earliest_upcoming_release()
 
             while earliest_upcoming_release < time do
                 for k = 0 to keys - 1 do
@@ -33,13 +33,9 @@ module QuaverConverter =
                         assert (earliest_upcoming_release >= last_row.Time)
 
                         if earliest_upcoming_release > last_row.Time then
-                            last_row <-
-                                {
-                                    Time = earliest_upcoming_release
-                                    Data = Array.zeroCreate keys
-                                }
+                            last_row <- { Time = earliest_upcoming_release; Data = Array.zeroCreate keys }
 
-                            output.Add last_row
+                            output.Add(last_row)
 
                             for k = 0 to keys - 1 do
                                 if holding_until.[k] <> None then
@@ -52,20 +48,16 @@ module QuaverConverter =
                             holding_until.[k] <- None
                         | _ -> failwithf "impossible"
 
-                find_earliest_upcoming_release ()
+                find_earliest_upcoming_release()
 
         let add_note column time =
             finish_holds time
             assert (time >= last_row.Time)
 
             if time > last_row.Time then
-                last_row <-
-                    {
-                        Time = time
-                        Data = Array.zeroCreate keys
-                    }
+                last_row <- { Time = time; Data = Array.zeroCreate keys }
 
-                output.Add last_row
+                output.Add(last_row)
 
                 for k = 0 to keys - 1 do
                     if holding_until.[k] <> None then
@@ -73,20 +65,16 @@ module QuaverConverter =
 
             match last_row.Data.[column] with
             | NoteType.NOTHING -> last_row.Data.[column] <- NoteType.NORMAL
-            | _ -> skip_conversion (sprintf "Stacked note at %f" time)
+            | _ -> skip_conversion(sprintf "Stacked note at %f" time)
 
         let start_hold column time end_time =
             finish_holds time
             assert (time >= last_row.Time)
 
             if time > last_row.Time then
-                last_row <-
-                    {
-                        Time = time
-                        Data = Array.zeroCreate keys
-                    }
+                last_row <- { Time = time; Data = Array.zeroCreate keys }
 
-                output.Add last_row
+                output.Add(last_row)
 
                 for k = 0 to keys - 1 do
                     if holding_until.[k] <> None then
@@ -96,9 +84,9 @@ module QuaverConverter =
             | NoteType.NOTHING ->
                 last_row.Data.[column] <- NoteType.HOLDHEAD
                 holding_until.[column] <- Some end_time
-            | _ -> skip_conversion (sprintf "Stacked LN at %f" time)
+            | _ -> skip_conversion(sprintf "Stacked LN at %f" time)
 
-        for object in objects |> List.filter (fun x -> x.Type = QuaverHitObjectType.Normal) |> List.sortBy _.StartTime do
+        for object in objects |> List.filter(fun x -> x.Type = QuaverHitObjectType.Normal) |> List.sortBy _.StartTime do
             if object.EndTime > object.StartTime then
                 start_hold (object.Lane - 1) (Time.of_number object.StartTime) (Time.of_number object.EndTime)
             else
@@ -112,17 +100,17 @@ module QuaverConverter =
             let keys = int b.Mode
 
             if keys < 3 || keys > 10 then
-                skip_conversion (sprintf "Unsupported number of keys: %d" keys)
+                skip_conversion(sprintf "Unsupported number of keys: %d" keys)
 
             if b.HitObjects.Length < 20 then
                 skip_conversion "Chart has less than 20 notes"
 
-            let path = Path.GetDirectoryName ctx.OriginalPath
+            let path = Path.GetDirectoryName(ctx.OriginalPath)
 
             let md5 =
-                match QuaverChart.HashFromFile ctx.OriginalPath with
+                match QuaverChart.HashFromFile(ctx.OriginalPath) with
                 | Ok s -> s
-                | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .qua file: %s" reason)
+                | Error reason -> skip_conversion(sprintf "Failed to calculate MD5 of .qua file: %s" reason)
 
             let snaps = convert_hit_objects b.HitObjects keys
 
@@ -140,21 +128,25 @@ module QuaverConverter =
 
                     PreviewTime = Time.of_number b.SongPreviewTime
                     BackgroundFile =
-                        if b.BackgroundFile = "" then ImportAsset.Missing else
+                        if b.BackgroundFile = "" then
+                            ImportAsset.Missing
+                        else
 
                         let absolute_background_path = Path.Combine(path, b.BackgroundFile)
 
                         match ctx.Options.AssetMode with
-                        | Copy -> ImportAsset.Copy absolute_background_path
-                        | Link -> ImportAsset.Link absolute_background_path
+                        | Copy -> ImportAsset.Copy(absolute_background_path)
+                        | Link -> ImportAsset.Link(absolute_background_path)
                     AudioFile =
-                        if b.AudioFile = "" then ImportAsset.Missing else
+                        if b.AudioFile = "" then
+                            ImportAsset.Missing
+                        else
 
                         let absolute_audio_path = Path.Combine(path, b.AudioFile)
 
                         match ctx.Options.AssetMode with
-                        | Copy -> ImportAsset.Copy absolute_audio_path
-                        | Link -> ImportAsset.Link absolute_audio_path
+                        | Copy -> ImportAsset.Copy(absolute_audio_path)
+                        | Link -> ImportAsset.Link(absolute_audio_path)
 
                     Origins =
                         {
@@ -173,45 +165,40 @@ module QuaverConverter =
             if not b.BPMDoesNotAffectScrollVelocity then
                 skip_conversion "BPMDoesNotAffectScrollVelocity: false is not currently supported"
 
-            let bpm : TimeArray<BPM> =
+            let bpm: TimeArray<BPM> =
                 b.TimingPoints
-                |> Seq.map (fun tp ->
+                |> Seq.map(fun tp ->
                     {
                         Time = Time.of_number tp.StartTime
-                        Data =
-                            {
-                                Meter = 4<beat>
-                                MsPerBeat = MS_PER_MINUTE / (tp.Bpm * 1.0f<beat/minute>)
-                            }
+                        Data = { Meter = 4<beat>; MsPerBeat = MS_PER_MINUTE / (tp.Bpm * 1.0f<beat / minute>) }
                     }
-                ) |> Array.ofSeq
+                )
+                |> Array.ofSeq
 
-            let sv : TimeArray<float32> =
+            let sv: TimeArray<float32> =
                 seq {
                     if b.InitialScrollVelocity <> 1.0f then
                         yield { Time = -10000.0f<ms>; Data = b.InitialScrollVelocity }
+
                     yield!
                         b.SliderVelocities
-                        |> Seq.map (fun sv ->
-                            {
-                                Time = Time.of_number sv.StartTime
-                                Data = sv.Multiplier
-                            }
-                        )
+                        |> Seq.map(fun sv -> { Time = Time.of_number sv.StartTime; Data = sv.Multiplier })
                 }
                 |> Array.ofSeq
 
-            Ok {
-                Header = header
-                LoadedFromPath = ctx.OriginalPath
-                PackName = ctx.Options.PackName
-                Chart = {
-                    Keys = keys
-                    Notes = snaps
-                    BPM = bpm
-                    SV = sv
+            Ok
+                {
+                    Header = header
+                    LoadedFromPath = ctx.OriginalPath
+                    PackName = ctx.Options.PackName
+                    Chart =
+                        {
+                            Keys = keys
+                            Notes = snaps
+                            BPM = bpm
+                            SV = sv
+                        }
                 }
-            }
         with
         | :? ConversionSkipException as skip_reason ->
             Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }

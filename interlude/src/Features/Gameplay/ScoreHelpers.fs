@@ -10,7 +10,6 @@ open Prelude.Gameplay.Rulesets
 open Prelude.Calculator
 open Prelude.Data.UserDatabase
 open Prelude.Data.Stats
-open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
@@ -43,7 +42,7 @@ module Gameplay =
             | None ->
                 Logging.Error
                     "Error submitting score (%s on %s)"
-                    (score_info.Ruleset.FormatAccuracy(score_info.Accuracy))
+                    score_info.Scoring.FormattedAccuracy
                     score_info.ChartMeta.Title
             | Some None -> ()
             | Some(Some leaderboard_result) ->
@@ -52,7 +51,7 @@ module Gameplay =
             | Some new_position ->
                 Logging.Info
                     "New leaderboard rank! (%s on %s) is #%i"
-                    (score_info.Ruleset.FormatAccuracy(score_info.Accuracy))
+                    score_info.Scoring.FormattedAccuracy
                     score_info.ChartMeta.Title
                     new_position
 
@@ -98,13 +97,13 @@ module Gameplay =
             if mod_status = ModStatus.Ranked then
 
                 let standardised_score =
-                    if Rulesets.current_hash <> SC_J4_HASH then score_info.WithRuleset(SC_J4) else score_info
+                    if score_info.RulesetInfo.Hash <> SC_J4.Hash then score_info.WithRuleset(SC_J4) else score_info
 
                 if Network.status = Network.Status.LoggedIn && not standardised_score.IsFailed then
                     upload_score standardised_score
 
                 let new_bests, improvement_flags =
-                    match Map.tryFind Rulesets.current_hash save_data.PersonalBests with
+                    match Map.tryFind score_info.RulesetInfo.Hash save_data.PersonalBests with
                     | Some existing_bests -> Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
 
@@ -120,15 +119,15 @@ module Gameplay =
                 then
                     Content.UserData.SaveScore(score_info)
                     score_saved_ev.Trigger(score_info)
-                    save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
+                    save_data.PersonalBests <- Map.add score_info.RulesetInfo.Hash new_bests save_data.PersonalBests
 
-                    if Rulesets.current_hash <> SC_J4_HASH then
+                    if score_info.RulesetInfo.Hash <> SC_J4.Hash then
                         let new_standard_bests =
-                            match Map.tryFind SC_J4_HASH save_data.PersonalBests with
+                            match Map.tryFind SC_J4.Hash save_data.PersonalBests with
                             | Some existing_bests -> Bests.update standardised_score existing_bests |> fst
                             | None -> Bests.create standardised_score
 
-                        save_data.PersonalBests <- Map.add SC_J4_HASH new_standard_bests save_data.PersonalBests
+                        save_data.PersonalBests <- Map.add SC_J4.Hash new_standard_bests save_data.PersonalBests
 
                     Content.UserData.SaveChanges()
 

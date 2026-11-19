@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Services
+namespace Interlude.Web.Server.Domain.Services
 
 open Percyqaz.Common
 open Prelude.Backbeat
@@ -10,17 +10,16 @@ module Tables =
     let recalculate_table_rating (user_id: int64, table_id: string, table: TableInfo, charts: (string * int) array) =
 
         match TableRating.get user_id table_id with
-        | Some(existing, timestamp) when Timestamp.now () - timestamp < 300000 -> existing
+        | Some(existing, timestamp) when Timestamp.now() - timestamp < 300000 -> existing
         | _ ->
 
-        let user_grades =
-            Score.aggregate_user_ranked_grades user_id |> Map.ofSeq
+        let user_grades = Score.aggregate_user_ranked_grades user_id |> Map.ofSeq
 
         // todo: this implements AverageTop50 but should be a switch to future proof other calculation types
         let new_rating =
             charts
-            |> Seq.choose (fun (chart, level) ->
-                match user_grades.TryFind chart with
+            |> Seq.choose(fun (chart, level) ->
+                match user_grades.TryFind(chart) with
                 | Some grade -> Some(Table.points table (level, grade))
                 | None -> None
             )
@@ -37,7 +36,7 @@ module Tables =
         for table_id in Backbeat.Tables.TABLES.Keys do
             match TableLevel.get table_id chart_id with
             | Some _ ->
-                recalculate_table_rating (
+                recalculate_table_rating(
                     user_id,
                     table_id,
                     Backbeat.Tables.TABLES.[table_id],
@@ -50,12 +49,12 @@ module Tables =
         let table_rankings = TableRating.leaderboard table_id
 
         let users =
-            table_rankings |> Array.map (fun x -> x.UserId) |> User.by_ids |> Map.ofArray
+            table_rankings |> Array.map(fun x -> x.UserId) |> User.by_ids |> Map.ofArray
 
         table_rankings
         |> Array.indexed
-        |> Array.choose (fun (i, table_ranking) ->
-            match users.TryFind table_ranking.UserId with
+        |> Array.choose(fun (i, table_ranking) ->
+            match users.TryFind(table_ranking.UserId) with
             | None -> None
             | Some user ->
 

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Domain.Core
+namespace Interlude.Web.Tests.Domain.Core
 
 open NUnit.Framework
 
@@ -19,10 +19,10 @@ module ReplayTests =
 
     [<Test>]
     let RoundTrip () =
-        let user_id = User.create ("ReplayRoundTrip", 0uL) |> User.save_new
+        let user_id = User.create("ReplayRoundTrip", 0uL) |> User.save_new
 
         let replay =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay.create(user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
         let replay_id = Replay.save replay
 
@@ -32,10 +32,10 @@ module ReplayTests =
 
     [<Test>]
     let Idempotent () =
-        let user_id = User.create ("ReplayIdempotent", 0uL) |> User.save_new
+        let user_id = User.create("ReplayIdempotent", 0uL) |> User.save_new
 
         let replay =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay.create(user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
         let replay_id = Replay.save replay
         let replay_id2 = Replay.save replay
@@ -46,14 +46,13 @@ module ReplayTests =
 
     [<Test>]
     let Multiple () =
-        let user_id =
-            User.create ("ReplayMultiple", 0uL) |> User.save_new
+        let user_id = User.create("ReplayMultiple", 0uL) |> User.save_new
 
         let replay_a =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay.create(user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
         let replay_b =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay.create(user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
         let replay_id = Replay.save replay_a
         let replay_id2 = Replay.save replay_a

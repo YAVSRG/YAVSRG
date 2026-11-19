@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Graphics
+namespace Percyqaz.Flux.Graphics
 
 open System
 open System.IO
@@ -27,6 +27,7 @@ type SpriteFontOptions =
         SpaceWidth: float32
         ShadowDepth: float32
     }
+
     static member Default =
         {
             BaseScale = 30.0f
@@ -56,21 +57,24 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
             GraphicsOptions = GraphicsOptions(Antialias = true, AntialiasSubpixelDepth = 24)
         )
 
-    let code_to_string (c: int32) : string = Char.ConvertFromUtf32 c
+    let code_to_string (c: int32) : string = Char.ConvertFromUtf32(c)
 
     let render_char_level (font: Font) (c: int32) : Bitmap =
         let s = code_to_string c
-        let render_options = RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+
+        let render_options =
+            RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+
         let size = TextMeasurer.Measure(s, render_options)
         let img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
 
         try
             img.Mutate<PixelFormats.Rgba32>(fun img ->
-                img.DrawText(draw_options, s, font, Color.White, PointF(0f, 0f))
-                |> ignore
+                img.DrawText(draw_options, s, font, Color.White, PointF(0f, 0f)) |> ignore
             )
         with err ->
             Logging.Warn "Exception occurred rendering glyph with code point %i: %O" (int c) err
+
         img
 
     let render_char (c: int32) : unit =
@@ -111,11 +115,14 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
             char_lookup_sm.Add(c, snd sprites.[0])
             char_lookup_md.Add(c, snd sprites.[1])
             char_lookup_lg.Add(c, snd sprites.[2])
-        else failwithf "Sprites for glyph with code point %i didn't upload correctly" (int c)
+        else
+            failwithf "Sprites for glyph with code point %i didn't upload correctly" (int c)
 
     let render_atlas_level (font: Font) : Bitmap * GlyphInfo list list * float32 =
         let row_spacing = font.Size * 1.5f
-        let render_options = RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+
+        let render_options =
+            RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
 
         let row_glyph_info chars =
             let mutable w = 0.0f
@@ -123,24 +130,16 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
             seq {
                 for c in chars do
-                    if Char.IsHighSurrogate c then
+                    if Char.IsHighSurrogate(c) then
                         high_surrogate <- c
                     else
                         let code =
-                            if Char.IsLowSurrogate c then
-                                Char.ConvertToUtf32(high_surrogate, c)
-                            else
-                                int32 c
+                            if Char.IsLowSurrogate(c) then Char.ConvertToUtf32(high_surrogate, c) else int32 c
 
                         let size = TextMeasurer.Measure(code_to_string code, render_options)
                         w <- w + size.Width + 2.0f
 
-                        yield
-                            {
-                                Code = code
-                                Size = size
-                                Offset = w - size.Width - 1.0f
-                            }
+                        yield { Code = code; Size = size; Offset = w - size.Width - 1.0f }
             }
             |> List.ofSeq
 
@@ -155,15 +154,15 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
         let h = float32 glyphs.Length * row_spacing |> int
 
         let w =
-            glyphs
-            |> List.map (fun x -> let l = List.last x in l.Offset + l.Size.Width + 2.0f)
-            |> List.max
-            |> int
+            glyphs |> List.map(fun x -> let l = List.last x in l.Offset + l.Size.Width + 2.0f) |> List.max |> int
 
-        assert(int w <= 4096)
+        assert (int w <= 4096)
+
         if int w > Texture.MAX_TEXTURE_SIZE then
             Logging.Critical "Font atlas width of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
-        assert(int h <= 4096)
+
+        assert (int h <= 4096)
+
         if int h > Texture.MAX_TEXTURE_SIZE then
             Logging.Critical "Font atlas height of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
 
@@ -188,7 +187,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
     // render a font texture atlas, containing common characters + icons
     // characters outside this set are dynamically generated on use
-    let render_atlas() : unit =
+    let render_atlas () : unit =
 
         let sm, sm_glyphs, sm_spacing = render_atlas_level FONT_SM
         let md, md_glyphs, md_spacing = render_atlas_level FONT_MD
@@ -304,24 +303,28 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
                     }
                 )
 
-        unused_layer_sprites |> Seq.map snd |> Seq.iter (Sprite.destroy >> ignore)
+        unused_layer_sprites |> Seq.map snd |> Seq.iter(Sprite.destroy >> ignore)
 
-    do render_atlas ()
+    do render_atlas()
 
-    member this.CharLookup (level: int) : int32 -> Sprite =
+    member this.CharLookup(level: int) : int32 -> Sprite =
 
-        let target = match level with 2 -> char_lookup_lg | 1 -> char_lookup_md | _ -> char_lookup_sm
+        let target =
+            match level with
+            | 2 -> char_lookup_lg
+            | 1 -> char_lookup_md
+            | _ -> char_lookup_sm
 
         fun (c: int32) ->
-            if not <| target.ContainsKey c then
-                render_char c
+            if not(target.ContainsKey(c)) then
+                render_char(c)
 
             target.[c]
 
-    member this.Dispose() =
-        char_lookup_sm.Values |> Seq.iter (Sprite.destroy >> ignore)
-        char_lookup_md.Values |> Seq.iter (Sprite.destroy >> ignore)
-        char_lookup_lg.Values |> Seq.iter (Sprite.destroy >> ignore)
+    member this.Dispose() : unit =
+        char_lookup_sm.Values |> Seq.iter(Sprite.destroy >> ignore)
+        char_lookup_md.Values |> Seq.iter(Sprite.destroy >> ignore)
+        char_lookup_lg.Values |> Seq.iter(Sprite.destroy >> ignore)
 
     member this.BaseScale = options.BaseScale
     member this.CharSpacing = options.CharSpacing
@@ -332,31 +335,25 @@ module Fonts =
 
     let collection = FontCollection()
 
-    let add (stream: Stream) : unit = collection.Install stream |> ignore
+    let add (stream: Stream) : unit = collection.Install(stream) |> ignore
 
     let create (name: string) (options: SpriteFontOptions) : SpriteFont =
-        let found, family = collection.TryFind name
+        let found, family = collection.TryFind(name)
 
         let family =
             if found then
                 family
             else
                 Logging.Error "Couldn't find font '%s', defaulting" name
-                collection.Find "Inconsolata"
+                collection.Find("Inconsolata")
 
-        SpriteFont(family, [ collection.Find "feather" ], options)
+        SpriteFont(family, [ collection.Find("feather") ], options)
 
     open System.Reflection
 
     let init () : unit =
-        Assembly
-            .GetCallingAssembly()
-            .GetManifestResourceStream("Percyqaz.Flux.Resources.feather.ttf")
-        |> add
-        Assembly
-            .GetCallingAssembly()
-            .GetManifestResourceStream("Percyqaz.Flux.Resources.Inconsolata.ttf")
-        |> add
+        Assembly.GetCallingAssembly().GetManifestResourceStream("Percyqaz.Flux.Resources.feather.ttf") |> add
+        Assembly.GetCallingAssembly().GetManifestResourceStream("Percyqaz.Flux.Resources.Inconsolata.ttf") |> add
 
 (*
     Font rendering
@@ -368,37 +365,35 @@ module Text =
     let measure (font: SpriteFont, text: string) : float32 =
         let mutable width = -font.CharSpacing
         let mutable high_surrogate = ' '
-        let char_lookup = font.CharLookup 0
+        let char_lookup = font.CharLookup(0)
 
         for char in text.AsSpan() do
 
             if char = ' ' then
                 width <- width + font.SpaceWidth
-            elif Char.IsHighSurrogate char then
+            elif Char.IsHighSurrogate(char) then
                 high_surrogate <- char
             else
                 let code =
-                    if Char.IsLowSurrogate char then
-                        Char.ConvertToUtf32(high_surrogate, char)
-                    else
-                        int32 char
+                    if Char.IsLowSurrogate(char) then Char.ConvertToUtf32(high_surrogate, char) else int32 char
 
                 let s = char_lookup code
                 width <- width + (float32 s.GridWidth) / font.BaseScale + font.CharSpacing
 
         width
 
-    let draw_b (font: SpriteFont, text: string, scale: float32, x: float32, y: float32, (fg: Drawing.Color, bg: Drawing.Color)) : unit =
+    let draw_b
+        (font: SpriteFont, text: string, scale: float32, x: float32, y: float32, (fg: Drawing.Color, bg: Drawing.Color))
+        : unit =
 
         let level, scale_mult =
             let l1 = scale / font.BaseScale
-            if l1 < 1.05f then
-                0, l1
-            elif l1 < 2.1f then
-                1, l1 / 2.0f
-            else
-                2, l1 / 4.0f
-        let char_lookup = font.CharLookup level
+
+            if l1 < 1.05f then 0, l1
+            elif l1 < 2.1f then 1, l1 / 2.0f
+            else 2, l1 / 4.0f
+
+        let char_lookup = font.CharLookup(level)
         let shadow_spacing = font.ShadowDepth * scale
         let mutable x = x
         let mutable high_surrogate = ' '
@@ -407,14 +402,11 @@ module Text =
 
             if char = ' ' then
                 x <- x + font.SpaceWidth * scale
-            elif Char.IsHighSurrogate char then
+            elif Char.IsHighSurrogate(char) then
                 high_surrogate <- char
             else
                 let code =
-                    if Char.IsLowSurrogate char then
-                        Char.ConvertToUtf32(high_surrogate, char)
-                    else
-                        int32 char
+                    if Char.IsLowSurrogate(char) then Char.ConvertToUtf32(high_surrogate, char) else int32 char
 
                 let s = char_lookup code
                 let w = float32 s.Width * scale_mult
@@ -431,24 +423,25 @@ module Text =
                 x <- x + w + font.CharSpacing * scale
 
     let draw (font, text, scale, x, y, color) : unit =
-        draw_b (font, text, scale, x, y, (color, Drawing.Color.Transparent))
+        draw_b(font, text, scale, x, y, (color, Drawing.Color.Transparent))
 
     let draw_aligned (font: SpriteFont, text, scale, x, y, color, alignment: float32) : unit =
-        draw (font, text, scale, x - measure (font, text) * scale * alignment, y, color)
+        draw(font, text, scale, x - measure(font, text) * scale * alignment, y, color)
 
     let draw_aligned_b (font: SpriteFont, text, scale, x, y, color, alignment: float32) : unit =
-        draw_b (font, text, scale, x - measure (font, text) * scale * alignment, y, color)
+        draw_b(font, text, scale, x - measure(font, text) * scale * alignment, y, color)
 
-    let fill_b (font: SpriteFont, text: string, bounds: Rect, colors: Drawing.Color * Drawing.Color, just: float32) : unit =
-        let w = measure (font, text)
+    let fill_b
+        (font: SpriteFont, text: string, bounds: Rect, colors: Drawing.Color * Drawing.Color, just: float32)
+        : unit =
+        let w = measure(font, text)
         let scale = Math.Min(bounds.Height * 0.6f, (bounds.Width / w))
 
         let x =
-            (1.0f - just) * (bounds.Left + scale * w * 0.5f)
-            + just * (bounds.Right - scale * w * 0.5f)
+            (1.0f - just) * (bounds.Left + scale * w * 0.5f) + just * (bounds.Right - scale * w * 0.5f)
             - w * scale * 0.5f
 
-        draw_b (font, text, scale, x, bounds.CenterY - scale * 0.75f, colors)
+        draw_b(font, text, scale, x, bounds.CenterY - scale * 0.75f, colors)
 
     let fill (font: SpriteFont, text: string, bounds: Rect, color: Drawing.Color, alignment: float32) : unit =
-        fill_b (font, text, bounds, (color, Drawing.Color.Transparent), alignment)
+        fill_b(font, text, bounds, (color, Drawing.Color.Transparent), alignment)

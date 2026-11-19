@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 type Session =
     {

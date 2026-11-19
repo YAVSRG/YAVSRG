@@ -32,7 +32,7 @@ let private compare_interlude_implementation_to_osu
             OsuMania.NoMod
 
     let score_v2 = score_data.ModsUsed &&& Mods.ScoreV2 <> Mods.None
-    let ruleset = OsuMania.create (float32 chart_od) window_modifier
+    let ruleset = (OsuMania.create (float32 chart_od) window_modifier).ToInfo()
     let metric = ScoreProcessor.ProcessEntireReplay(ruleset, replay, chart, rate)
 
     let osu_accuracy =
@@ -97,19 +97,19 @@ let read_scores () =
 
     Logging.Info "Reading osu database ..."
 
-    use file = Path.Combine(OSU_SONG_FOLDER, "..", "scores.db") |> File.OpenRead
+    use file = Path.Combine(MountedChartSource.DEFAULT_OSU_SONGS_LOCATION, "..", "scores.db") |> File.OpenRead
 
     use reader = new BinaryReader(file, Text.Encoding.UTF8)
     let scores = OsuScoreDatabase.Read(reader)
 
-    use file = Path.Combine(OSU_SONG_FOLDER, "..", "osu!.db") |> File.OpenRead
+    use file = Path.Combine(MountedChartSource.DEFAULT_OSU_SONGS_LOCATION, "..", "osu!.db") |> File.OpenRead
 
     use reader = new BinaryReader(file, Text.Encoding.UTF8)
     let main_db = OsuDatabase.Read(reader)
 
     for beatmap_data in main_db.Beatmaps |> Seq.filter (fun b -> b.Mode = 3uy) do
         let osu_file =
-            Path.Combine(OSU_SONG_FOLDER, beatmap_data.FolderName, beatmap_data.Filename)
+            Path.Combine(MountedChartSource.DEFAULT_OSU_SONGS_LOCATION, beatmap_data.FolderName, beatmap_data.Filename)
 
         let chart, od =
             try
@@ -136,7 +136,7 @@ let read_scores () =
                 for score in scores.Scores do
                     let replay_file =
                         Path.Combine(
-                            OSU_SONG_FOLDER,
+                            MountedChartSource.DEFAULT_OSU_SONGS_LOCATION,
                             "..",
                             "Data",
                             "r",

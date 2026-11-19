@@ -32,8 +32,7 @@ module ScoreScreenStatsTests =
             |> Option.get
 
         let replay = OsuReplay.decode(osu_replay, chart.FirstNote, 1.0f<rate>)
-        let ruleset = SC.create 4
-        ScoreProcessor.ProcessEntireReplay(ruleset, replay, chart, 1.0f<rate>)
+        ScoreProcessor.ProcessEntireReplay(SC_J4, replay, chart, 1.0f<rate>)
 
     [<Test>]
     let BasicEndToEnd () =
@@ -55,8 +54,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(990.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let score =
-            ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
+        let score = ScoreProcessor.ProcessEntireReplay(SC_J4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| true; true; true; true |]
         printfn "%A" result
@@ -76,8 +74,7 @@ module ScoreScreenStatsTests =
 
         let replay = ReplayBuilder().KeyDownFor(-30.0f<ms>, 30.0f<ms>).Build()
 
-        let score =
-            ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
+        let score = ScoreProcessor.ProcessEntireReplay(SC_J4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| true; true; true; true |]
         printfn "%A" result
@@ -104,8 +101,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(1980.0f<ms>, 30.0f<ms>, 2)
                 .Build()
 
-        let score =
-            ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
+        let score = ScoreProcessor.ProcessEntireReplay(SC_J4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| false; false; true; true |]
         printfn "%A" result
@@ -132,8 +128,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(1980.0f<ms>, 30.0f<ms>, 2)
                 .Build()
 
-        let score =
-            ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
+        let score = ScoreProcessor.ProcessEntireReplay(SC_J4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| false; false; false; true |]
         printfn "%A" result

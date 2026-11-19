@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions.Osu.Noteskins
+namespace Prelude.Skins.Conversions.Osu.Noteskins
 
 open System.IO
 open Percyqaz.Common
@@ -6,17 +6,20 @@ open Prelude.Skins.Conversions.Osu
 
 module NoteskinConverter =
 
-    let convert_to_noteskin (ini: SkinIni, fs: OsuSkinFileSystem, target: string, keymode: int, is_arrows: bool) : unit =
+    let convert_to_noteskin
+        (ini: SkinIni, fs: OsuSkinFileSystem, target: string, keymode: int, is_arrows: bool)
+        : unit =
 
-        if Directory.Exists target then
+        if Directory.Exists(target) then
             failwith "a folder with this name already exists!"
-        Directory.CreateDirectory target |> ignore
+
+        Directory.CreateDirectory(target) |> ignore
 
         let ctx = NoteskinConverterContext.Create(fs, target, ini, keymode, is_arrows)
         Logging.Debug "Converting skin '%s', version %.1f" ini.General.Name ctx.Version
 
         let note_height_scale = NotesConverter.get_note_height_scale(ctx)
-        let core_textures : ColumnTextures list = NotesConverter.get_core_textures(ctx)
+        let core_textures: ColumnTextures list = NotesConverter.get_core_textures(ctx)
 
         Logging.Debug "%i column variations to convert (Distinct by note/head/body/tail textures)" core_textures.Length
 

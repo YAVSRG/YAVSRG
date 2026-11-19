@@ -232,6 +232,9 @@ type private ModSelectPage(change_rate: Rate -> unit) =
         if (%%"autoplay").Pressed() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
             Style.click.Play()
+        elif (%%"mirror").Pressed() then
+            SelectedChart.selected_mods.Set(ModState.cycle_fd "mirror" SelectedChart.selected_mods.Value)
+            Style.click.Play()
         elif (%%"reset_mods").Pressed() then
             SelectedChart.autoplay <- false
             SelectedChart.set_rate_and_mods(1.0f<rate>, Map.empty)
@@ -257,6 +260,9 @@ type ModSelect(change_rate: Rate -> unit) =
 
         if (%%"autoplay").Pressed() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
+            Style.click.Play()
+        elif (%%"mirror").Pressed() then
+            SelectedChart.selected_mods.Set(ModState.cycle_fd "mirror" SelectedChart.selected_mods.Value)
             Style.click.Play()
         elif (%%"reset_mods").Pressed() then
             SelectedChart.autoplay <- false

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Charts.Scores
+namespace Interlude.Web.Server.API.Charts.Scores
 
 open System
 open NetCoreServer
@@ -13,12 +13,8 @@ module Leaderboard =
     open Charts.Scores.Leaderboard
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             require_query_parameter query_params "chart"
             let _, _ = authorize headers
@@ -31,7 +27,7 @@ module Leaderboard =
 
                 let scores: Score array =
                     info
-                    |> Array.map (fun (i, user, score, replay) ->
+                    |> Array.map(fun (i, user, score, replay) ->
                         {
                             Username = user.Username
                             Rank = i + 1
@@ -44,6 +40,5 @@ module Leaderboard =
 
                 response.ReplyJson<Response>({ Scores = scores })
 
-            | None ->
-                response.ReplyError(404, "Chart not leaderboarded") |> ignore
+            | None -> response.ReplyError(404, "Chart not leaderboarded") |> ignore
         }

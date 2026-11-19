@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Stats
+namespace Prelude.Data.Stats
 
 open Percyqaz.Data
 open Prelude.Data.UserDatabase
@@ -24,12 +24,13 @@ type CurrentSession =
         mutable Streak: int
         mutable KeymodePlaytime: Map<int, float>
     }
-    
+
     member this.HasTimedOut(now: int64) : bool = now - SESSION_TIMEOUT > this.LastTime
     member this.IsEmpty() : bool = this.NotesHit = 0
 
     member this.ToSession() : Session =
-        assert(this.NotesHit > 0)
+        assert (this.NotesHit > 0)
+
         {
             Start = this.Start
             End = this.LastTime
@@ -68,5 +69,5 @@ type CurrentSession =
             Streak = 0
             KeymodePlaytime = Map.empty
         }
-        
+
     static member Default = CurrentSession.StartNew(-1L)

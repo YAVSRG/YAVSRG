@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Exports
+namespace Prelude.Data.Exports
 
 open System.IO
 open System.IO.Compression
@@ -10,7 +10,12 @@ module Exports =
 
     /// Creates an .osz representation of the chart in the given folder `export_folder`
     /// If successful, the exported beatmap data + the filename of the .osz are returned
-    let create_osz (options: OsuExportOptions) (chart: Chart) (chart_meta: ChartMeta) (export_folder: string) : Result<Beatmap * string, exn> =
+    let create_osz
+        (options: OsuExportOptions)
+        (chart: Chart)
+        (chart_meta: ChartMeta)
+        (export_folder: string)
+        : Result<Beatmap * string, exn> =
         try
             let beatmap = OsuExport.convert options chart chart_meta
 
@@ -24,13 +29,23 @@ module Exports =
             do
                 let osu_file_entry = archive.CreateEntry(file_name)
                 use osu_file_stream = osu_file_entry.Open()
-                beatmap.WriteToStream (osu_file_stream, false)
+                beatmap.WriteToStream(osu_file_stream, false)
 
             do
                 match chart_meta.Background.Path with
                 | Some bg_path when File.Exists(bg_path) ->
                     use fs = File.Open(bg_path, FileMode.Open)
-                    let bg_file_entry = archive.CreateEntry(beatmap.Events |> Seq.pick (function Background(bg, _, _) -> Some bg | _ -> None))
+
+                    let bg_file_entry =
+                        archive.CreateEntry(
+                            beatmap.Events
+                            |> Seq.pick(
+                                function
+                                | Background(bg, _, _) -> Some bg
+                                | _ -> None
+                            )
+                        )
+
                     use bg_file_stream = bg_file_entry.Open()
                     fs.CopyTo(bg_file_stream)
                 | _ -> ()
@@ -45,6 +60,7 @@ module Exports =
                     use audio_file_stream = audio_file_entry.Open()
                     fs.CopyTo(audio_file_stream)
                 | _ -> ()
-            Ok (beatmap, archive_file_name)
+
+            Ok(beatmap, archive_file_name)
         with err ->
             Error err

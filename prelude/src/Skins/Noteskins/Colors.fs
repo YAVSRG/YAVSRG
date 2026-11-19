@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Noteskins
+namespace Prelude.Skins.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Data
@@ -18,9 +18,7 @@ type ColorScheme =
 
 module ColorScheme =
 
-    let DDR_VALUES =
-        [| 1; 2; 3; 4; 6; 8; 12; 16 |]
-        |> Array.map (fun i -> 48 / i)
+    let DDR_VALUES = [| 1; 2; 3; 4; 6; 8; 12; 16 |] |> Array.map(fun i -> 48 / i)
 
     let count (keycount: int) (scheme: ColorScheme) : int =
         match scheme with
@@ -36,11 +34,12 @@ type ColoredChart =
         Source: ModdedChart
         Colors: TimeArray<ColorData>
     }
+
     member this.Keys = this.Source.Keys
     member this.BPM = this.Source.BPM
     member this.SV = this.Source.SV
-    member this.ModsSelected : ModState = this.Source.ModsSelected
-    member this.ModsApplied : ModState = this.Source.ModsApplied
+    member this.ModsSelected: ModState = this.Source.ModsSelected
+    member this.ModsApplied: ModState = this.Source.ModsApplied
     member this.FirstNote = this.Source.FirstNote
     member this.LastNote = this.Source.LastNote
     member this.Notes = this.Source.Notes
@@ -53,20 +52,14 @@ type ColorConfig =
         Colors: ColorData array
         UseGlobalColors: bool
     }
+
     static member Default =
-        {
-            Style = ColorScheme.Column
-            Colors = Array.init 9 (fun _ -> Array.init 10 byte)
-            UseGlobalColors = true
-        }
+        { Style = ColorScheme.Column; Colors = Array.init 9 (fun _ -> Array.init 10 byte); UseGlobalColors = true }
 
     member this.Validate =
         { this with
             Colors =
-                if
-                    Array.forall (fun (x: ColorData) -> x.Length = 10) this.Colors
-                    && this.Colors.Length = 9
-                then
+                if Array.forall (fun (x: ColorData) -> x.Length = 10) this.Colors && this.Colors.Length = 9 then
                     this.Colors
                 else
                     Logging.Error(
@@ -79,26 +72,27 @@ type ColorConfig =
 module NoteColors =
 
     let private ddr_func (delta: Time) (ms_per_beat: float32<ms / beat>) : int =
-        let tick = (float32 delta % float32 ms_per_beat) * 48.0f / float32 ms_per_beat |> round |> int
+        let tick =
+            (float32 delta % float32 ms_per_beat) * 48.0f / float32 ms_per_beat |> round |> int
 
         let rec f i =
             if i >= ColorScheme.DDR_VALUES.Length then ColorScheme.DDR_VALUES.Length
             elif tick % ColorScheme.DDR_VALUES.[i] = 0 then i
-            else f (i + 1)
+            else f(i + 1)
 
         f 0
 
     let private column_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
 
         let c = [| for i in 0 .. (mc.Keys - 1) -> color_data.[i] |]
-        mc.Notes |> TimeArray.map (fun _ -> c)
+        mc.Notes |> TimeArray.map(fun _ -> c)
 
     let private chord_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
 
         let mutable previous_colors: ColorData = Array.zeroCreate mc.Keys
 
         mc.Notes
-        |> TimeArray.map (fun nr ->
+        |> TimeArray.map(fun nr ->
 
             let mutable index = -1
 
@@ -127,13 +121,10 @@ module NoteColors =
         let mutable bpm_time = if mc.BPM.Length = 0 then 0.0f<ms> else mc.BPM.[0].Time
 
         let mutable bpm_mspb =
-            if mc.BPM.Length = 0 then
-                500.0f<ms / beat>
-            else
-                mc.BPM.[0].Data.MsPerBeat
+            if mc.BPM.Length = 0 then 500.0f<ms / beat> else mc.BPM.[0].Data.MsPerBeat
 
         mc.Notes
-        |> Array.map (fun { Time = time; Data = nr } ->
+        |> Array.map(fun { Time = time; Data = nr } ->
 
             while bpm_index < mc.BPM.Length - 1 && mc.BPM.[bpm_index + 1].Time < time do
                 bpm_index <- bpm_index + 1

@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Data
+open Prelude.Data.Imports
 open Interlude.UI
 
 type LinkHandler = { Condition: string -> bool; Action: string -> unit }

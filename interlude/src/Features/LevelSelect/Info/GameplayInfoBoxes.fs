@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 open Prelude.Data.UserDatabase
 open Interlude.Content
@@ -17,34 +18,35 @@ type GameplayInfoBoxes() =
     let mutable save_data = None
     let mutable category = "Uncategorised"
     let mutable specific_patterns = ""
+    let mutable ruleset_info = SC_J4
 
     let refresh (info: LoadedChartInfo) =
         save_data <- Some info.SaveData
         category <- info.Patterns.Category
+        ruleset_info <- rulesets.GetCurrent(info.ChartMeta)
 
         specific_patterns <-
             info.Patterns.ImportantClusters
             |> Seq.truncate 2
-            |> Seq.map(fun c -> c.Format(SelectedChart.rate.Value))
+            |> Seq.map(_.Format(SelectedChart.rate.Value))
             |> String.concat ", "
 
     override this.Init(parent: Widget) : unit =
-        SelectedChart.on_chart_change_finished.Add(refresh)
-        SelectedChart.on_chart_update_finished.Add(refresh)
+        SelectedChart.on_chart_update_or_change_finished.Add(refresh)
         SelectedChart.if_loaded refresh
         base.Init(parent)
 
     override this.Draw() : unit =
         match save_data with
-        | Some save_data when save_data.PersonalBests.ContainsKey(Rulesets.current_hash) ->
+        | Some save_data when save_data.PersonalBests.ContainsKey(ruleset_info.Hash) ->
 
-            let pbs = save_data.PersonalBests.[Rulesets.current_hash]
+            let pbs = save_data.PersonalBests.[ruleset_info.Hash]
 
             let accuracy =
                 match pbs.Accuracy |> PersonalBests.get_best_above SelectedChart.rate.Value with
                 | Some(acc, rate, timestamp) ->
-                    let grade = Grade.calculate Rulesets.current.Grades acc
-                    let color = Rulesets.current.GradeColor(grade)
+                    let grade = Grade.calculate ruleset_info.Ruleset.Grades acc
+                    let color = ruleset_info.Ruleset.GradeColor(grade)
                     Some(acc, rate, timestamp, color)
                 | None ->
 
@@ -55,7 +57,7 @@ type GameplayInfoBoxes() =
             let lamp =
                 match pbs.Lamp |> PersonalBests.get_best_above SelectedChart.rate.Value with
                 | Some(lamp, rate, timestamp) ->
-                    let color = Rulesets.current.LampColor(lamp)
+                    let color = ruleset_info.Ruleset.LampColor(lamp)
                     Some(lamp, rate, timestamp, color)
                 | None ->
 
@@ -73,7 +75,7 @@ type GameplayInfoBoxes() =
 
                 Text.fill_b(
                     Style.font,
-                    Rulesets.current.FormatAccuracy(acc),
+                    ruleset_info.Ruleset.FormatAccuracy(acc),
                     accuracy_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f),
                     (color, Colors.shadow_2),
                     Alignment.CENTER
@@ -98,7 +100,7 @@ type GameplayInfoBoxes() =
 
                 Text.fill_b(
                     Style.font,
-                    Rulesets.current.LampName(lamp),
+                    ruleset_info.Ruleset.LampName(lamp),
                     lamp_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f),
                     (color, Colors.shadow_2),
                     Alignment.CENTER

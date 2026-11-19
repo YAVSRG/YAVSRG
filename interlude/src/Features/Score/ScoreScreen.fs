@@ -37,7 +37,8 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
     let previous_personal_bests =
         match SelectedChart.SAVE_DATA with
-        | Some d when d.PersonalBests.ContainsKey(Rulesets.current_hash) -> Some d.PersonalBests.[Rulesets.current_hash]
+        | Some d when d.PersonalBests.ContainsKey(score_info.RulesetInfo.Hash) ->
+            Some d.PersonalBests.[score_info.RulesetInfo.Hash]
         | _ -> None
         |> ref
 
@@ -58,7 +59,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         previous_personal_bests := None
         graph.Refresh()
 
-    let on_ruleset_changed = Rulesets.on_changed.Subscribe(fun _ -> refresh())
+    let on_ruleset_changed = rulesets.OnChanged.Subscribe(fun _ -> refresh())
 
     let bottom_info =
         BottomBanner(score_info, played_just_now, graph, refresh).Position(Position.SlicePercentB(0.35f))
@@ -102,7 +103,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         DiscordRPC.in_menus(%"discord_status.score_screen")
 
     override this.OnExit(_: ScreenType) : unit =
-        score_info.Ruleset <- Rulesets.current
+        score_info.RulesetInfo <- rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         (graph :> System.IDisposable).Dispose()
         on_ruleset_changed.Dispose()
         Toolbar.show()

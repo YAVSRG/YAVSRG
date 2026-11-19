@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open System.Linq
 open System.Runtime.CompilerServices
@@ -12,7 +12,7 @@ module NavigationContainer =
 
     [<AbstractClass>]
     type Base() as this =
-        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
+        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map(fun x -> x :> ISelection)))
 
         let children = ResizeArray<Widget>()
         let mutable last_selected = 0
@@ -34,7 +34,7 @@ module NavigationContainer =
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 
-        member this.Previous() =
+        member this.Previous() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + children.Count - 1) % children.Count
@@ -44,9 +44,9 @@ module NavigationContainer =
 
                 last_selected <- index
                 children.[index].Focus false
-            | None -> this.WhoShouldFocus.Value.Focus false
+            | None -> this.WhoShouldFocus.Value.Focus(false)
 
-        member this.Next() =
+        member this.Next() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + 1) % children.Count
@@ -56,25 +56,25 @@ module NavigationContainer =
 
                 last_selected <- index
                 children.[index].Focus false
-            | None -> this.WhoShouldFocus.Value.Focus false
+            | None -> this.WhoShouldFocus.Value.Focus(false)
 
-        member this.CanPrevious() =
+        member this.CanPrevious() : bool =
             if this.WrapNavigation then
                 true
             else
                 match this.WhoIsFocused with
-                | Some i -> Seq.indexed children |> Seq.exists (fun (idx, c) -> idx < i && c.Focusable)
+                | Some i -> Seq.indexed children |> Seq.exists(fun (idx, c) -> idx < i && c.Focusable)
                 | None -> true
 
-        member this.CanNext() =
+        member this.CanNext() : bool =
             if this.WrapNavigation then
                 true
             else
                 match this.WhoIsFocused with
-                | Some i -> Seq.indexed children |> Seq.exists (fun (idx, c) -> idx > i && c.Focusable)
+                | Some i -> Seq.indexed children |> Seq.exists(fun (idx, c) -> idx > i && c.Focusable)
                 | None -> true
 
-        member this.SelectFocusedChild() =
+        member this.SelectFocusedChild() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 last_selected <- i
@@ -83,11 +83,11 @@ module NavigationContainer =
 
         abstract member Navigate: unit -> unit
 
-        override this.Draw() =
+        override this.Draw() : unit =
             for i = children.Count - 1 downto 0 do
                 children.[i].Draw()
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
 
             for c in children do
@@ -96,37 +96,39 @@ module NavigationContainer =
             if this.Focused && children.Count > 0 then
                 this.Navigate()
 
-        member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add child
-        member this.Remove(child: Widget) : bool = (this :> IContainer<Widget>).Remove child
+        member this.Add(child: #Widget) : unit = (this :> IContainer<Widget>).Add(child)
 
-        override this.Init(parent: Widget) =
-            base.Init parent
+        member this.Remove(child: Widget) : bool =
+            (this :> IContainer<Widget>).Remove(child)
+
+        override this.Init(parent: Widget) : unit =
+            base.Init(parent)
 
             for c in children do
-                c.Init this
+                c.Init(this)
 
-        member this.Clear() =
-            assert(GameThread.is_game_thread())
+        member this.Clear() : unit =
+            assert GameThread.is_game_thread()
             children.Clear()
 
         interface IContainer<Widget> with
 
-            member this.Add (child: Widget) : unit =
-                assert(GameThread.is_game_thread())
-                children.Add child
+            member this.Add(child: Widget) : unit =
+                assert GameThread.is_game_thread()
+                children.Add(child)
 
                 if this.Initialised then
-                    child.Init this
+                    child.Init(this)
 
-            member this.Remove (child: Widget) : bool =
-                assert(GameThread.is_game_thread())
-                children.Remove child
+            member this.Remove(child: Widget) : bool =
+                assert GameThread.is_game_thread()
+                children.Remove(child)
 
     [<Sealed>]
     type Column() =
         inherit Base()
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if this.CanPrevious() && (%%"up").Pressed() then
                 this.Previous()
 
@@ -140,7 +142,7 @@ module NavigationContainer =
     type Row() =
         inherit Base()
 
-        override this.Navigate() =
+        override this.Navigate() : unit =
             if this.CanPrevious() && (%%"left").Pressed() then
                 this.Previous()
 
@@ -161,7 +163,7 @@ module NavigationContainer =
         let mutable last_selected = 0
         let children = ResizeArray<GridSwitchItem>()
 
-        member this.Clear() =
+        member this.Clear() : unit =
             children.Clear()
             rows <- 0
             columns <- 0
@@ -184,7 +186,7 @@ module NavigationContainer =
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 
-        member private this.Up() =
+        member private this.Up() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let c = children.[i]
@@ -210,7 +212,7 @@ module NavigationContainer =
                 | None -> ()
             | None -> ()
 
-        member private this.Down() =
+        member private this.Down() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let c = children.[i]
@@ -236,7 +238,7 @@ module NavigationContainer =
                 | None -> ()
             | None -> ()
 
-        member private this.Left() =
+        member private this.Left() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let c = children.[i]
@@ -262,7 +264,7 @@ module NavigationContainer =
                 | None -> ()
             | None -> ()
 
-        member private this.Right() =
+        member private this.Right() : unit =
             match this.WhoIsFocused with
             | Some i ->
                 let c = children.[i]
@@ -288,13 +290,13 @@ module NavigationContainer =
                 | None -> ()
             | None -> ()
 
-        override this.Init(parent: Widget) =
-            base.Init parent
+        override this.Init(parent: Widget) : unit =
+            base.Init(parent)
 
             for c in children do
-                c.Widget.Init this
+                c.Widget.Init(this)
 
-        member private this.CanUp() =
+        member private this.CanUp() : bool =
             if this.WrapNavigation then
                 true
             else
@@ -303,12 +305,10 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem) ->
-                        item.X = c.X && item.Y < c.Y && item.Widget.Focusable
-                    )
+                    children.Any(fun (item: GridSwitchItem) -> item.X = c.X && item.Y < c.Y && item.Widget.Focusable)
                 | None -> false
 
-        member private this.CanDown() =
+        member private this.CanDown() : bool =
             if this.WrapNavigation then
                 true
             else
@@ -317,12 +317,10 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem) ->
-                        item.X = c.X && item.Y > c.Y && item.Widget.Focusable
-                    )
+                    children.Any(fun (item: GridSwitchItem) -> item.X = c.X && item.Y > c.Y && item.Widget.Focusable)
                 | None -> false
 
-        member private this.CanLeft() =
+        member private this.CanLeft() : bool =
             if this.WrapNavigation then
                 true
             else
@@ -331,12 +329,10 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem) ->
-                        item.X < c.X && item.Y = c.Y && item.Widget.Focusable
-                    )
+                    children.Any(fun (item: GridSwitchItem) -> item.X < c.X && item.Y = c.Y && item.Widget.Focusable)
                 | None -> false
 
-        member private this.CanRight() =
+        member private this.CanRight() : bool =
             if this.WrapNavigation then
                 true
             else
@@ -345,12 +341,10 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem) ->
-                        item.X > c.X && item.Y = c.Y && item.Widget.Focusable
-                    )
+                    children.Any(fun (item: GridSwitchItem) -> item.X > c.X && item.Y = c.Y && item.Widget.Focusable)
                 | None -> false
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
 
             for { Widget = c } in children do
@@ -378,23 +372,22 @@ module NavigationContainer =
                         children.[i].Widget.Select false
                     | None -> ()
 
-        override this.Draw() =
+        override this.Draw() : unit =
             for { Widget = c } in children do
                 if this.Floating || c.VisibleBounds.Visible then
                     c.Draw()
 
-        member this.Add(child: 'T, x: int, y: int) =
+        member this.Add(child: 'T, x: int, y: int) : unit =
             if x < 0 || y < 0 then
                 failwith "X and Y can't be negative"
 
             rows <- max rows (y + 1)
             columns <- max columns (x + 1)
-            children.Add { Widget = child; X = x; Y = y }
+            children.Add({ Widget = child; X = x; Y = y })
 
             if this.Initialised then
-                child.Init this
+                child.Init(this)
 
-[<Extension>]
 type NavigationContainerExtensions =
 
     [<Extension>]

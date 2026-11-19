@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
+open Prelude.Gameplay.Rulesets
 open Prelude.Mods
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
@@ -113,6 +114,12 @@ module SelectedChart =
 
     let private chart_change_failed = Event<unit>()
     let on_chart_change_failed = chart_change_failed.Publish
+
+    let on_chart_update_or_change_finished =
+        let ev = Event<LoadedChartInfo>()
+        on_chart_change_finished.Add(ev.Trigger)
+        on_chart_update_finished.Add(ev.Trigger)
+        ev.Publish
 
     let mutable private on_load_succeeded: (bool * (unit -> unit)) list = []
     let mutable private on_song_load_succeeded: (unit -> unit) list = []
@@ -390,7 +397,7 @@ module SelectedChart =
             )
         )
 
-    let set_rate_and_mods (rate: float32<rate>, mods: ModState) =
+    let set_rate_and_mods (rate: Rate, mods: ModState) =
         _rate.Set(rate)
         _selected_mods.Set(mods)
 
@@ -428,12 +435,7 @@ module SelectedChart =
             match
                 Suggestion.get_random
                     Filter.Empty
-                    {
-                        Rate = rate.Value
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
-                        Library = Content.Library
-                    }
+                    { Rate = rate.Value; RulesetProvider = rulesets.RulesetProvider(); Library = Content.Library }
             with
             | Some chart_meta -> change(chart_meta, LibraryContext.None, true)
             | None ->

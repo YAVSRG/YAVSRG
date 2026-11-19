@@ -1,6 +1,7 @@
 namespace Interlude.Web.Tests.Integration
 
-module [<AutoOpen>] Constants =
+[<AutoOpen>]
+module Constants =
     let CRESCENT_MOON =
         "1467CD6DEB4A3B87FA58FAB4F2398BE9AD7B0017031C511C549D3EF28FFB58D3"
 

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Health
+namespace Interlude.Web.Server.API.Health
 
 open NetCoreServer
 open Interlude.Web.Shared
@@ -12,12 +12,8 @@ module Status =
     let mutable private request_counter = 0
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             request_counter <- request_counter + 1
 

@@ -1,4 +1,4 @@
-﻿open System
+open System
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -10,10 +10,7 @@ let main argv =
     use sw = new StreamWriter(logfile)
 
     Logging.Subscribe(fun (level, main, details) ->
-        if details = "" then
-            sprintf "[%A] %s" level main
-        else
-            sprintf "[%A] %s\n%s" level main details
+        if details = "" then sprintf "[%A] %s" level main else sprintf "[%A] %s\n%s" level main details
         |> sw.WriteLine
     )
 
@@ -42,7 +39,7 @@ let main argv =
 
         try
             window.Run()
-            Logging.Info "Exiting game"
+            Logging.Info("Exiting game")
         with err ->
             Logging.Critical("Flux crashed", err)
             crashed <- true
@@ -50,7 +47,7 @@ let main argv =
         window.Close()
 
         if crashed then
-            ignore (Console.ReadLine())
+            ignore(Console.ReadLine())
 
     Logging.Wait()
 

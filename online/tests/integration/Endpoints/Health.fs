@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Integration
+namespace Interlude.Web.Tests.Integration
 
 open NUnit.Framework
 open Interlude.Web.Shared.Requests
@@ -10,7 +10,7 @@ module Health =
     let Status () =
         use done_signal = new AutoResetEvent(false)
 
-        Health.Status.get (
+        Health.Status.get(
             Option.get
             >> fun (res: Health.Status.Response) ->
                 printfn "%s" res.Status

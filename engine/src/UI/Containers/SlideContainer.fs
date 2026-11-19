@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.UI
+namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Windowing
 
@@ -41,7 +41,7 @@ type private SlideablePosition(pos: Position) =
                 : Position
             else
                 pos
-        and set (value) =
+        and set (value: Position) =
             pos <- value
             left_offset.Target <- fst pos.Left
             left_anchor.Target <- snd pos.Left
@@ -52,7 +52,7 @@ type private SlideablePosition(pos: Position) =
             bottom_offset.Target <- fst pos.Bottom
             bottom_anchor.Target <- snd pos.Bottom
 
-    member this.Snap() =
+    member this.Snap() : unit =
         left_offset.Snap()
         left_anchor.Snap()
         top_offset.Snap()
@@ -62,9 +62,9 @@ type private SlideablePosition(pos: Position) =
         bottom_offset.Snap()
         bottom_anchor.Snap()
 
-    member this.Update(elapsed_ms) =
+    member this.Update(elapsed_ms: float) : unit =
         if this.Moving then
-            anim.Update elapsed_ms
+            anim.Update(elapsed_ms)
 
 type SlideContainer(node_type) =
     inherit Widget(node_type)
@@ -74,7 +74,7 @@ type SlideContainer(node_type) =
     let mutable snapped_last_frame = false
 
     override this.Position
-        with set (value) =
+        with set (value: Position) =
             pos.Position <- value
 
             if not this.Initialised then
@@ -82,22 +82,31 @@ type SlideContainer(node_type) =
 
     member this.Moving = pos.Moving
 
-    member this.SnapPosition() =
+    member this.SnapPosition() : unit =
         pos.Snap()
+
         if this.Initialised then
             snapped_last_frame <- true
 
-    member private this.UpdateBounds() =
+    member private this.UpdateBounds() : unit =
         this.Bounds <- Position.calculate pos.Position this.Parent.Bounds
-        this.VisibleBounds <- this.Bounds.IntersectWith this.Parent.VisibleBounds
+        this.VisibleBounds <- this.Bounds.IntersectWith(this.Parent.VisibleBounds)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         for c in children do
             c.Draw()
 
-    override this.Update(elapsed_ms, moved) =
-        pos.Update elapsed_ms
-        let moved = moved || pos.Moving || (if snapped_last_frame then snapped_last_frame <- false; true else false)
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
+        pos.Update(elapsed_ms)
+
+        let moved =
+            moved
+            || pos.Moving
+            || (if snapped_last_frame then
+                    snapped_last_frame <- false
+                    true
+                else
+                    false)
 
         if moved then
             this.UpdateBounds()
@@ -105,25 +114,27 @@ type SlideContainer(node_type) =
         for i = children.Count - 1 downto 0 do
             children.[i].Update(elapsed_ms, moved)
 
-    member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add child
-    member this.Remove(child: Widget) : bool = (this :> IContainer<Widget>).Remove child
+    member this.Add(child: #Widget) : unit = (this :> IContainer<Widget>).Add(child)
 
-    override this.Init(parent: Widget) =
-        base.Init parent
+    member this.Remove(child: Widget) : bool =
+        (this :> IContainer<Widget>).Remove(child)
+
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
         this.UpdateBounds()
 
         for c in children do
-            c.Init this
+            c.Init(this)
 
     interface IContainer<Widget> with
 
-        member this.Add (child: Widget) : unit =
-            assert(GameThread.is_game_thread())
-            children.Add child
+        member this.Add(child: Widget) : unit =
+            assert GameThread.is_game_thread()
+            children.Add(child)
 
             if this.Initialised then
-                child.Init this
+                child.Init(this)
 
-        member this.Remove (child: Widget) : bool =
-            assert(GameThread.is_game_thread())
-            children.Remove child
+        member this.Remove(child: Widget) : bool =
+            assert GameThread.is_game_thread()
+            children.Remove(child)

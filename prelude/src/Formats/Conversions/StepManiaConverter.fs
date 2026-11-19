@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.Conversions
+namespace Prelude.Formats.Conversions
 
 open System
 open System.IO
@@ -16,13 +16,13 @@ module StepManiaConverter =
         (bpms: (float32<beat> * float32<beat / minute>) list)
         (stops: (float32<beat> * float32) list)
         (start: Time)
-        : int * TimeArray<NoteRow> * TimeArray<BPM>
-        =
+        : int * TimeArray<NoteRow> * TimeArray<BPM> =
 
         let keys =
             match steps_type.Keycount with
             | -1 -> (measures |> List.head |> List.head).Length
             | known -> known
+
         let mutable bpms = bpms
         let mutable stops = stops
         let meter = 4<beat>
@@ -33,19 +33,13 @@ module StepManiaConverter =
         let mutable now = start
         let _, b = List.head bpms
 
-        points.Add(
-            {
-                Time = start
-                Data =
-                    {
-                        Meter = meter
-                        MsPerBeat = MS_PER_MINUTE / b
-                    }
-            }
-        )
+        points.Add({ Time = start; Data = { Meter = meter; MsPerBeat = MS_PER_MINUTE / b } })
 
         let mutable ms_per_beat = MS_PER_MINUTE / b
-        if ms_per_beat < 0.0f<ms/beat> then skip_conversion "SM file has negative BPMs"
+
+        if ms_per_beat < 0.0f<ms / beat> then
+            skip_conversion "SM file has negative BPMs"
+
         bpms <- List.tail bpms
         let mutable total_beats = 0.0f<beat>
         let mutable lo = 0.0f<beat>
@@ -62,7 +56,7 @@ module StepManiaConverter =
             for i in start .. (finish - 1) do
                 let beat = total_beats + float32 i * fmeter / l
 
-                while ((not (List.isEmpty stops)) && fst (List.head stops) <= beat) do
+                while ((not(List.isEmpty stops)) && fst(List.head stops) <= beat) do
                     let _, s = List.head stops in
                     now <- now + s * 1000.0f<ms>
                     stops <- List.tail stops
@@ -75,11 +69,11 @@ module StepManiaConverter =
                         match note_type with
                         | '0' -> ()
                         | '1' ->
-                            if not (ln.Contains(key)) then
+                            if not(ln.Contains(key)) then
                                 nr.[key] <- NoteType.NORMAL
                         | '2'
                         | '4' ->
-                            if not (ln.Contains(key)) then
+                            if not(ln.Contains(key)) then
                                 nr.[key] <- NoteType.HOLDHEAD
                                 ln <- ln.Add(key)
                         | '3' ->
@@ -89,44 +83,33 @@ module StepManiaConverter =
                         | 'M'
                         | 'L'
                         | 'F' -> () // ignore mines, lifts, fakes
-                        | _ -> skip_conversion (sprintf "Unknown note type '%c'" note_type)
+                        | _ -> skip_conversion(sprintf "Unknown note type '%c'" note_type)
                     )
                     m.[i]
 
                 if NoteRow.is_empty nr |> not then
-                    states.Add(
-                        {
-                            Time = now + offset + float32 (i - start) * sep
-                            Data = nr
-                        }
-                    )
+                    states.Add({ Time = now + offset + float32(i - start) * sep; Data = nr })
 
         List.iter
             (fun m ->
                 point_at_end_of_measure <- false
                 lo <- 0.0f<beat>
 
-                while ((not (List.isEmpty bpms)) && fst (List.head bpms) < total_beats + fmeter) do
-                    hi <- fst (List.head bpms) - total_beats
+                while ((not(List.isEmpty bpms)) && fst(List.head bpms) < total_beats + fmeter) do
+                    hi <- fst(List.head bpms) - total_beats
                     convert_measure m lo hi
                     now <- now + ms_per_beat * (hi - lo)
                     lo <- hi
                     point_at_end_of_measure <- true
                     let _, b = List.head bpms in
 
-                    points.Add(
-                        {
-                            Time = now
-                            Data =
-                                {
-                                    Meter = meter
-                                    MsPerBeat = MS_PER_MINUTE / b
-                                }
-                        }
-                    )
+                    points.Add({ Time = now; Data = { Meter = meter; MsPerBeat = MS_PER_MINUTE / b } })
 
                     ms_per_beat <- MS_PER_MINUTE / b
-                    if ms_per_beat < 0.0f<ms/beat> then skip_conversion "SM file has negative BPMs"
+
+                    if ms_per_beat < 0.0f<ms / beat> then
+                        skip_conversion "SM file has negative BPMs"
+
                     bpms <- List.tail bpms
 
                 convert_measure m lo fmeter
@@ -134,31 +117,29 @@ module StepManiaConverter =
                 total_beats <- total_beats + fmeter
 
                 if point_at_end_of_measure then
-                    points.Add(
-                        {
-                            Time = now
-                            Data = { Meter = meter; MsPerBeat = ms_per_beat }
-                        }
-                    )
+                    points.Add({ Time = now; Data = { Meter = meter; MsPerBeat = ms_per_beat } })
             )
             measures
 
         let mutable i = states.Count - 1
+
         while not ln.IsEmpty do
             let s = states.[i].Data
+
             for k in ln.ToSeq() do
                 if s.[k] = NoteType.HOLDHEAD then
                     s.[k] <- NoteType.NORMAL
                     ln <- ln.Remove(k)
                 elif s.[k] = NoteType.HOLDBODY then
                     s.[k] <- NoteType.NOTHING
+
             i <- i - 1
 
         keys, states |> Array.ofSeq, points |> Array.ofSeq
 
     let convert (sm: StepManiaFile) (ctx: ConversionContext) : Result<ImportChart, SkippedConversion> list =
 
-        let path = Path.GetDirectoryName ctx.OriginalPath
+        let path = Path.GetDirectoryName(ctx.OriginalPath)
 
         let rec metadata_fallback (choices: string list) : string =
             match choices with
@@ -190,21 +171,19 @@ module StepManiaConverter =
             | Some p -> Some p
             | None ->
 
-            let files = Directory.GetFiles path |> Array.map Path.GetFileName
+            let files = Directory.GetFiles(path) |> Array.map Path.GetFileName
 
             match
                 files
-                |> Array.tryFind (fun filename ->
-                    filename.ToLower().Contains "bg" || filename.ToLower().Contains "back"
-                )
+                |> Array.tryFind(fun filename -> filename.ToLower().Contains "bg" || filename.ToLower().Contains "back")
             with
             | Some p -> Some p
             | None ->
 
             let image_files =
                 files
-                |> Array.filter (fun f -> f.ToLower().Contains ".jpg" || f.ToLower().Contains ".png")
-                |> Array.map (fun file ->
+                |> Array.filter(fun f -> f.ToLower().Contains ".jpg" || f.ToLower().Contains ".png")
+                |> Array.map(fun file ->
                     try
                         let info = Bitmap.Identify(Path.Combine(path, file))
                         file, info.Width * info.Height
@@ -222,26 +201,26 @@ module StepManiaConverter =
                 Some sm.MUSIC
             else
 
-            let files = Directory.GetFiles path |> Array.map Path.GetFileName
+            let files = Directory.GetFiles(path) |> Array.map Path.GetFileName
 
             files
-            |> Array.tryFind (fun filename ->
+            |> Array.tryFind(fun filename ->
                 filename.ToLower().Contains "mp3"
                 || filename.ToLower().Contains "wav"
                 || filename.ToLower().Contains "ogg"
             )
 
         let guess_author () : string =
-            let folder_name = Path.GetFileName path
+            let folder_name = Path.GetFileName(path)
             let round_paren = folder_name.LastIndexOf('(')
             let square_paren = folder_name.LastIndexOf('[')
 
             if round_paren > square_paren then
                 let guess = folder_name.Substring(round_paren + 1)
-                if guess.EndsWith(')') then guess.TrimEnd ')' else ""
+                if guess.EndsWith(')') then guess.TrimEnd(')') else ""
             elif square_paren > 1 then
                 let guess = folder_name.Substring(square_paren + 1)
-                if guess.EndsWith(']') then guess.TrimEnd ']' else ""
+                if guess.EndsWith(']') then guess.TrimEnd(']') else ""
             else
                 "Unknown"
 
@@ -250,9 +229,12 @@ module StepManiaConverter =
                 original, None
             elif original = "" then
                 translit, None
-            elif (original |> Seq.filter Char.IsAscii |> Seq.length) > (translit |> Seq.filter Char.IsAscii |> Seq.length) then
+            elif
+                (original |> Seq.filter Char.IsAscii |> Seq.length) > (translit |> Seq.filter Char.IsAscii |> Seq.length)
+            then
                 original, Some translit
-            else translit, Some original
+            else
+                translit, Some original
 
         let convert_difficulty (diff: StepManiaChart) : Result<ImportChart, SkippedConversion> =
             try
@@ -271,32 +253,39 @@ module StepManiaConverter =
                         TitleNative = title_native
                         Artist = artist
                         ArtistNative = artist_native
-                        Creator = metadata_fallback [ if diff.CREDIT.Contains("Copied f") then "" else diff.CREDIT.Trim(); sm.CREDIT.Trim(); guess_author () ]
+                        Creator =
+                            metadata_fallback
+                                [
+                                    if diff.CREDIT.Contains("Copied f") then
+                                        ""
+                                    else
+                                        diff.CREDIT.Trim()
+                                        sm.CREDIT.Trim()
+                                        guess_author()
+                                ]
                         DiffName = sprintf "%O%O %O" diff.STEPSTYPE diff.DIFFICULTY diff.METER
                         Subtitle = metadata_fallback_opt [ sm.SUBTITLETRANSLIT; sm.SUBTITLE ]
-                        Tags =
-                            sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries)
-                            |> List.ofArray
+                        Tags = sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
                         Source = None
 
                         PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
                         AudioFile =
-                            match find_audio () with
+                            match find_audio() with
                             | Some file ->
                                 let absolute_audio_path = Path.Combine(path, file)
 
                                 match ctx.Options.AssetMode with
-                                | Copy -> ImportAsset.Copy absolute_audio_path
-                                | Link -> ImportAsset.Link absolute_audio_path
+                                | Copy -> ImportAsset.Copy(absolute_audio_path)
+                                | Link -> ImportAsset.Link(absolute_audio_path)
                             | None -> ImportAsset.Missing
                         BackgroundFile =
-                            match find_background () with
+                            match find_background() with
                             | Some file ->
                                 let absolute_background_path = Path.Combine(path, file)
 
                                 match ctx.Options.AssetMode with
-                                | Copy -> ImportAsset.Copy absolute_background_path
-                                | Link -> ImportAsset.Link absolute_background_path
+                                | Copy -> ImportAsset.Copy(absolute_background_path)
+                                | Link -> ImportAsset.Link(absolute_background_path)
                             | None -> ImportAsset.Missing
 
                         Origins =
@@ -306,17 +295,19 @@ module StepManiaConverter =
                             |> Set.singleton
                     }
 
-                Ok {
-                    Header = header
-                    LoadedFromPath = ctx.OriginalPath
-                    PackName = ctx.Options.PackName
-                    Chart = {
-                        Keys = keys
-                        Notes = notes
-                        BPM = bpm
-                        SV = [||]
+                Ok
+                    {
+                        Header = header
+                        LoadedFromPath = ctx.OriginalPath
+                        PackName = ctx.Options.PackName
+                        Chart =
+                            {
+                                Keys = keys
+                                Notes = notes
+                                BPM = bpm
+                                SV = [||]
+                            }
                     }
-                }
             with
             | :? ConversionSkipException as skip_reason ->
                 Error { OriginalPath = ctx.OriginalPath; Reason = skip_reason.Reason }

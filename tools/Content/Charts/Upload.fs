@@ -5,7 +5,6 @@ open System.Net.Http
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Data
 open Prelude.Data.ChartDatabase
 open Prelude.Data.Imports
 open Interlude.Web.Shared
@@ -131,9 +130,9 @@ module Upload =
         | _ -> async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
     let create_backbeat_data (chart_meta: ChartMeta) (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
-        if chart_meta.Audio = AssetLocation.Missing then
+        if not chart_meta.Audio.HasPath then
             Error "Missing audio file"
-        elif chart_meta.Background = AssetLocation.Missing then
+        elif not chart_meta.Background.HasPath then
             Error "Missing background image"
         else
 
@@ -252,7 +251,7 @@ module Upload =
         OnlineImports.download_by_origin(
             ChartOrigin.Etterna(pack_name),
             interlude_library,
-            TaskProgress.log_progress_bar pack_name
+            TaskContext(pack_name).LogProgress()
         )
         |> Async.RunSynchronously
 

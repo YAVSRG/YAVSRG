@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Scoring
+namespace Prelude.Gameplay.Scoring
 
 open Prelude.Gameplay.Rulesets
 
@@ -10,11 +10,7 @@ type LampImprovement =
     | AchievedMax
 
 [<Struct>]
-type LampResult =
-    {
-        Lamp: int
-        NextLampGoal: LampImprovement
-    }
+type LampResult = { Lamp: int; NextLampGoal: LampImprovement }
 
 module Lamp =
 
@@ -34,35 +30,31 @@ module Lamp =
 
         let rec loop (achieved: int) =
             if achieved + 1 = lamps.Length then // got max grade already
-                {
-                    Lamp = achieved
-                    NextLampGoal = LampImprovement.AchievedMax
-                }
+                { Lamp = achieved; NextLampGoal = LampImprovement.AchievedMax }
             else
                 let next_lamp = lamps.[achieved + 1]
 
                 match next_lamp.Requirement with
                 | LampRequirement.ComboBreaksAtMost threshold ->
                     if combo_breaks > threshold then
-                        {
-                            Lamp = achieved
-                            NextLampGoal = LampImprovement.FewerComboBreaks (combo_breaks - threshold)
-                        }
+                        { Lamp = achieved; NextLampGoal = LampImprovement.FewerComboBreaks(combo_breaks - threshold) }
                     else
-                        loop (achieved + 1)
-                | LampRequirement.JudgementAtMost (judgement, threshold) ->
+                        loop(achieved + 1)
+                | LampRequirement.JudgementAtMost(judgement, threshold) ->
                     if worst_judgement > judgement then
                         {
                             Lamp = achieved
-                            NextLampGoal = LampImprovement.FewerOfJudgement (worst_judgement, judgements.[worst_judgement])
+                            NextLampGoal =
+                                LampImprovement.FewerOfJudgement(worst_judgement, judgements.[worst_judgement])
                         }
                     elif judgements.[judgement] > threshold then
                         {
                             Lamp = achieved
-                            NextLampGoal = LampImprovement.FewerOfJudgement (judgement, judgements.[judgement] - threshold)
+                            NextLampGoal =
+                                LampImprovement.FewerOfJudgement(judgement, judgements.[judgement] - threshold)
                         }
                     else
-                        loop (achieved + 1)
+                        loop(achieved + 1)
 
         loop -1
 

@@ -88,7 +88,7 @@ type OptionsPage() =
                         Menu.Exit()
                         Themes.reload_current()
                         Skins.load()
-                        Rulesets.load()
+                        rulesets.Load()
                         Notifications.action_feedback(Icons.CHECK, %"notification.reload_content", "")
                         OptionsPage().Show()
                         SkinPreview.RefreshAll()

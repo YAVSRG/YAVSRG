@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 open System.Collections.Generic
 open Percyqaz.Common
@@ -10,17 +10,20 @@ type internal ChangeTracker<'T> =
     {
         Changes: Dictionary<string, 'T>
     }
+
     static member Empty = { Changes = Dictionary<string, 'T>() }
 
     member this.Add(chart_id: string, value: 'T) : unit =
-        lock this <| fun () -> this.Changes.[chart_id] <- value
+        lock this (fun () -> this.Changes.[chart_id] <- value)
 
     member this.Dump: (string * 'T) array =
-        lock this
-        <| fun () ->
-            let result = this.Changes |> Seq.map (|KeyValue|) |> Array.ofSeq
-            this.Changes.Clear()
-            result
+        lock
+            this
+            (fun () ->
+                let result = this.Changes |> Seq.map (|KeyValue|) |> Array.ofSeq
+                this.Changes.Clear()
+                result
+            )
 
 type ChartSaveData(chart_id: string, data: DbChartData, db: UserDatabase) =
     let mutable offset = data.Offset
@@ -82,32 +85,37 @@ and UserDatabase =
             ChangedPersonalBests: ChangeTracker<Map<string, Bests>>
             FastLoaded: bool
         }
-    member this.TryGetCachedChartData(chart_id: string) : ChartSaveData option =
-        lock this.LockObject
-        <| fun () ->
 
-            match this.Cache.TryGetValue(chart_id) with
-            | true, data -> Some data
-            | false, _ -> None
+    member this.TryGetCachedChartData(chart_id: string) : ChartSaveData option =
+        lock
+            this.LockObject
+            (fun () ->
+
+                match this.Cache.TryGetValue(chart_id) with
+                | true, data -> Some data
+                | false, _ -> None
+            )
 
     member this.GetChartData(chart_id: string) : ChartSaveData =
-        lock this.LockObject
-        <| fun () ->
+        lock
+            this.LockObject
+            (fun () ->
 
-            let inline fetch_chart_data () : ChartSaveData =
-                if this.FastLoaded then
-                    ChartSaveData(chart_id, DbChartData.DEFAULT, this)
-                else
-                    let chart_db_data: DbChartData = DbChartData.get chart_id this.Database
-                    let scores = DbScores.by_chart_id chart_id this.Database
-                    ChartSaveData(chart_id, chart_db_data, this, Scores = List.ofArray scores)
+                let inline fetch_chart_data () : ChartSaveData =
+                    if this.FastLoaded then
+                        ChartSaveData(chart_id, DbChartData.DEFAULT, this)
+                    else
+                        let chart_db_data: DbChartData = DbChartData.get chart_id this.Database
+                        let scores = DbScores.by_chart_id chart_id this.Database
+                        ChartSaveData(chart_id, chart_db_data, this, Scores = List.ofArray scores)
 
-            match this.TryGetCachedChartData(chart_id) with
-            | Some already_cached -> already_cached
-            | None ->
-                let new_info = fetch_chart_data()
-                this.Cache.[chart_id] <- new_info
-                new_info
+                match this.TryGetCachedChartData(chart_id) with
+                | Some already_cached -> already_cached
+                | None ->
+                    let new_info = fetch_chart_data()
+                    this.Cache.[chart_id] <- new_info
+                    new_info
+            )
 
     member this.SaveChanges() : unit =
         DbChartData.save_offsets this.ChangedOffsets.Dump this.Database
@@ -117,33 +125,37 @@ and UserDatabase =
         DbChartData.save_personal_bests this.ChangedPersonalBests.Dump this.Database
 
     member this.SaveScore(chart_id: string, score: Score) : unit =
-        lock this.LockObject
-        <| fun () ->
+        lock
+            this.LockObject
+            (fun () ->
 
-            DbScores.save chart_id score this.Database
+                DbScores.save chart_id score this.Database
 
-            match this.TryGetCachedChartData(chart_id) with
-            | None -> ()
-            | Some existing_data -> existing_data.Scores <- score :: existing_data.Scores
+                match this.TryGetCachedChartData(chart_id) with
+                | None -> ()
+                | Some existing_data -> existing_data.Scores <- score :: existing_data.Scores
+            )
 
     member this.SaveScore(score_info: ScoreInfo) : unit =
         this.SaveScore(score_info.ChartMeta.Hash, score_info.ToScore())
 
     member this.DeleteScore(chart_id: string, timestamp: int64) : bool =
-        lock this.LockObject
-        <| fun () ->
+        lock
+            this.LockObject
+            (fun () ->
 
-            let inline remove_score_from_cache () =
-                match this.TryGetCachedChartData(chart_id) with
-                | None -> ()
-                | Some existing_data ->
-                    existing_data.Scores <- existing_data.Scores |> List.filter(fun s -> s.Timestamp <> timestamp)
+                let inline remove_score_from_cache () =
+                    match this.TryGetCachedChartData(chart_id) with
+                    | None -> ()
+                    | Some existing_data ->
+                        existing_data.Scores <- existing_data.Scores |> List.filter(fun s -> s.Timestamp <> timestamp)
 
-            if DbScores.delete_by_timestamp chart_id timestamp this.Database > 0 then
-                remove_score_from_cache()
-                true
-            else
-                false
+                if DbScores.delete_by_timestamp chart_id timestamp this.Database > 0 then
+                    remove_score_from_cache()
+                    true
+                else
+                    false
+            )
 
     member this.DeleteScore(score_info: ScoreInfo) : bool =
         this.DeleteScore(score_info.ChartMeta.Hash, score_info.TimePlayed)
@@ -152,15 +164,17 @@ and UserDatabase =
         DbScores.get_between start_time end_time this.Database
 
     member this.TransferScores(source_hash: string, target_hash: string) : unit =
-        lock this.LockObject
-        <| fun () ->
+        lock
+            this.LockObject
+            (fun () ->
 
-            let before_scores = this.GetChartData(source_hash)
-            let after_scores = this.GetChartData(target_hash)
-            after_scores.Scores <- before_scores.Scores @ after_scores.Scores
-            this.Cache.Remove(source_hash) |> ignore
-            let succeeded = DbScores.transfer source_hash target_hash this.Database
-            Logging.Debug "Moved %i scores from '%s' to '%s'" succeeded source_hash target_hash
+                let before_scores = this.GetChartData(source_hash)
+                let after_scores = this.GetChartData(target_hash)
+                after_scores.Scores <- before_scores.Scores @ after_scores.Scores
+                this.Cache.Remove(source_hash) |> ignore
+                let succeeded = DbScores.transfer source_hash target_hash this.Database
+                Logging.Debug "Moved %i scores from '%s' to '%s'" succeeded source_hash target_hash
+            )
 
     // Pre-loads the contents of the db into memory (used by game client)
     static member CreateFullyLoaded(database: Database) : UserDatabase =

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Shared
+namespace Interlude.Web.Shared
 
 #nowarn "3370"
 
@@ -44,10 +44,9 @@ module Buffer =
 
                 if packet_length <= 0 then
                     buffer := Empty
-                    packet (data.[offset], [||])
+                    packet(data.[offset], [||])
                 else
-                    buffer
-                    := Reading_Buffer(packet_length, data.[offset], Array.zeroCreate (int packet_length))
+                    buffer := Reading_Buffer(packet_length, data.[offset], Array.zeroCreate(int packet_length))
 
                 offset <- offset + 1
 
@@ -59,7 +58,7 @@ module Buffer =
 
                 if new_remaining = 0 then
                     buffer := Empty
-                    packet (kind, b)
+                    packet(kind, b)
                 else
                     buffer := Reading_Buffer(new_remaining, kind, b)
 
@@ -67,7 +66,7 @@ module Buffer =
         if data.Length > MAX_PACKET_SIZE then
             failwithf "Packet data exceeded maximum size"
 
-        let result = Array.zeroCreate (data.Length + 3)
+        let result = Array.zeroCreate(data.Length + 3)
         Buffer.BlockCopy(data, 0, result, 3, data.Length)
         result.[0] <- data.Length >>> 8 |> byte
         result.[1] <- data.Length |> byte

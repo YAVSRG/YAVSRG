@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions.Osu.Noteskins
+namespace Prelude.Skins.Conversions.Osu.Noteskins
 
 open System.IO
 open SixLabors.ImageSharp
@@ -7,8 +7,8 @@ open Prelude.Skins
 open Prelude.Skins.Conversions.Osu
 
 module internal StageConverter =
-    
-    let convert_stage_textures(ctx: NoteskinConverterContext) : unit =
+
+    let convert_stage_textures (ctx: NoteskinConverterContext) : unit =
         try
             let stage_left =
                 ctx.FileSystem
@@ -16,6 +16,7 @@ module internal StageConverter =
                     .ThrowIfNotFound()
                     .Load(ctx.FileSystem)
                     .Image
+
             let stage_right =
                 ctx.FileSystem
                     .SearchForTexture(ctx.KeymodeSettings.StageRight, ctx.DefaultSettings.StageRight)

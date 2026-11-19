@@ -1,1 +1,1 @@
-﻿Allow 3.0x rates
+﻿Re-enable table listing without auth

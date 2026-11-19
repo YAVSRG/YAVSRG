@@ -1,4 +1,4 @@
-﻿namespace Prelude.Formats.StepMania
+namespace Prelude.Formats.StepMania
 
 open Prelude
 
@@ -29,6 +29,7 @@ type StepManiaChartType =
     | Pump_Routine
     | Kb7_Single
     | UNKNOWN
+
     member this.Keycount =
         match this with
         | Dance_Threepanel -> 3
@@ -45,7 +46,7 @@ type StepManiaChartType =
         | Pump_Double
         | Pump_Routine -> 10
 
-    override this.ToString() =
+    override this.ToString() : string =
         match this with
         | UNKNOWN -> ""
         | _ -> sprintf "%iK " this.Keycount
@@ -107,6 +108,7 @@ type StepManiaFile =
         TIMESIGNATURES: (float32<beat> * float32<beat>) list
         Charts: StepManiaChart list
     }
+
     static member Default =
         {
             TITLE = "Unknown Chart"

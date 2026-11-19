@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions.Osu.Noteskins
+namespace Prelude.Skins.Conversions.Osu.Noteskins
 
 open System.IO
 open Prelude
@@ -6,14 +6,11 @@ open Prelude.Skins.Noteskins
 open Prelude.Skins.Conversions.Osu
 
 module internal NoteskinConfigConverter =
-        
-    let generate_noteskin_config(ctx: NoteskinConverterContext) : unit =
-        
+
+    let generate_noteskin_config (ctx: NoteskinConverterContext) : unit =
+
         let color_config: ColorConfig =
-            { ColorConfig.Default with
-                Style = ColorScheme.Column
-                UseGlobalColors = false
-            }
+            { ColorConfig.Default with Style = ColorScheme.Column; UseGlobalColors = false }
 
         color_config.Colors.[ctx.Keymode - 2] <- ctx.Colors
 

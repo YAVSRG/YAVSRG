@@ -7,6 +7,7 @@ open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.Imports
 open Prelude.Data.OsuClientInterop
+open Prelude.Formats.Conversions
 open Prelude.Skins.Conversions
 open Prelude.Skins.Conversions.Osu
 open Interlude.UI
@@ -15,6 +16,19 @@ open Interlude.Features.Import.Etterna
 open Interlude.Features.Import.Osu
 
 module FileDrop =
+
+    let conversion_result_callback (result: Result<ConversionResult, string>) : unit =
+        match result with
+        | Ok result ->
+            Notifications.task_feedback(
+                Icons.CHECK,
+                %"notification.import_success",
+                [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                %> "notification.import_success.body"
+            )
+
+            Content.TriggerChartAdded(result.FirstConvertedChart)
+        | Error reason -> Notifications.error(%"notification.import_failed", reason)
 
     let import_stepmania_noteskin (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
@@ -71,9 +85,16 @@ module FileDrop =
             with err ->
                 Logging.Error "Error moving/importing dropped skin: %O" err
 
+        | _ when Path.GetExtension(path).ToLower() = ".ruleset" ->
+            if rulesets.Install(path).IsSome then
+                Notifications.action_feedback(Icons.CHECK, %"notification.install_ruleset", "")
+            else
+                Notifications.error(%"notification.install_ruleset_failed", "")
+
         | OsuSkinArchive ->
-            Menu.Exit()
-            import_osu_skin_zip(path)
+            if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
+                Menu.Exit()
+                import_osu_skin_zip(path)
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match OsuReplay.TryReadFile(path) with
@@ -85,30 +106,34 @@ module FileDrop =
             | None -> Notifications.error(%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import
-
             if Directory.Exists(path) && Path.GetFileName(path) = "Songs" then
                 Menu.Exit()
                 ConfirmUnlinkedImportPage(path).Show()
             else
-
-            let task_tracking = TaskTracking.add(Path.GetFileName(path))
-
-            let task =
-                FileSystemImports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
-
-            import_queue.Request(
-                task,
-                function
-                | Ok result ->
-                    Notifications.task_feedback(
-                        Icons.CHECK,
-                        %"notification.import_success",
-                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
-                        %> "notification.import_success.body"
+                FileSystemImportTask(path, Content.Library)
+                    .Track(TaskTracking.add(Path.GetFileName(path)))
+                    .WithCallback(
+                        function
+                        | Ok(Some result) -> conversion_result_callback(Ok(result))
+                        | Ok(None) ->
+                            Notifications.error(
+                                %"notification.import_failed",
+                                %"notification.import_failed.not_importable"
+                            )
+                        | Error(reason) -> conversion_result_callback(Error(reason))
                     )
+                    .Queue(import_queue)
 
-                    Content.TriggerChartAdded()
-                | Error reason ->
-                    Logging.Error "Error importing %s: %s" path reason
-                    Notifications.error(%"notification.import_failed", reason)
+    let MAX_ITEMS_ALLOWED = 20
+
+    let handle_many (paths: string array) : unit =
+        assert GameThread.is_game_thread()
+
+        if paths.Length > MAX_ITEMS_ALLOWED then
+            Notifications.error(
+                %"notification.import_limit.title",
+                [ MAX_ITEMS_ALLOWED.ToString() ] %> "notification.import_limit.body"
             )
+        else
+            for path in paths do
+                handle(path)

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Bot
+namespace Interlude.Web.Server.Bot
 
 open Discord
 open Discord.WebSocket
@@ -9,7 +9,7 @@ open Interlude.Web.Server.Domain.Backbeat
 module AdminInteractables =
 
     let user_list (page: int) : Embed * MessageComponent =
-        let user_list = User.list (page)
+        let user_list = User.list(page)
         let user_count = User.count()
 
         let embed =
@@ -18,10 +18,7 @@ module AdminInteractables =
                     if user_list.Length = 0 then
                         "Empty page :("
                     else
-                        user_list
-                        |> Seq.map snd
-                        |> Seq.map (fun user -> user.Username)
-                        |> String.concat "\n"
+                        user_list |> Seq.map snd |> Seq.map(fun user -> user.Username) |> String.concat "\n"
                 )
                 .WithColor(Color.Blue)
                 .Build()
@@ -51,9 +48,7 @@ module AdminInteractables =
     let do_songs_match (song_a_id: int64, song_a: Song, song_b_id: int64, song_b: Song) : Embed * MessageComponent =
         let embed =
             EmbedBuilder(Title = "Are these the same song?")
-                .WithDescription(
-                    sprintf "%s\n <-> \n%s" song_a.FormattedTitle song_b.FormattedTitle
-                )
+                .WithDescription(sprintf "%s\n <-> \n%s" song_a.FormattedTitle song_b.FormattedTitle)
                 .Build()
 
         let components =
@@ -61,14 +56,14 @@ module AdminInteractables =
                 .AddRow(
                     ActionRowBuilder()
                         .WithButton(
-                            ButtonBuilder(Emote = Emoji.Parse(":white_check_mark:"), CustomId = sprintf "merge_songs %i$%i" song_a_id song_b_id)
+                            ButtonBuilder(
+                                Emote = Emoji.Parse(":white_check_mark:"),
+                                CustomId = sprintf "merge_songs %i$%i" song_a_id song_b_id
+                            )
                                 .WithStyle(ButtonStyle.Secondary)
                         )
                         .WithButton(
-                            ButtonBuilder(
-                                Emote = Emoji.Parse(":x:"),
-                                CustomId = sprintf "dismiss"
-                            )
+                            ButtonBuilder(Emote = Emoji.Parse(":x:"), CustomId = sprintf "dismiss")
                                 .WithStyle(ButtonStyle.Secondary)
                         )
                 )
@@ -88,7 +83,7 @@ module AdminInteractables =
             | "users" ->
                 match args with
                 | page :: [] ->
-                    let embed, components = user_list (int page)
+                    let embed, components = user_list(int page)
 
                     do!
                         context.UpdateAsync(fun msg ->

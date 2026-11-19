@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Auth
+namespace Interlude.Web.Server.API.Auth
 
 open NetCoreServer
 open System.Net.Http
@@ -13,26 +13,13 @@ module Discord =
 
     let http_client = new HttpClient()
 
-    type DiscordOAuthResponse =
-        {
-            access_token: string
-            token_type: string
-        }
+    type DiscordOAuthResponse = { access_token: string; token_type: string }
 
-    type DiscordIdentityResponse =
-        {
-            id: string
-            username: string
-            discriminator: string
-        }
+    type DiscordIdentityResponse = { id: string; username: string; discriminator: string }
 
     let handle
-        (
-            body: string,
-            query_params: Map<string, string array>,
-            headers: Map<string, string>,
-            response: HttpResponse
-        ) =
+        (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse)
+        =
         async {
             require_query_parameter query_params "code"
             require_query_parameter query_params "state"
@@ -55,9 +42,7 @@ module Discord =
             data.Headers.Clear()
             data.Headers.Add("Content-Type", "application/x-www-form-urlencoded")
 
-            let! oauth_response =
-                http_client.PostAsync("https://discord.com/api/oauth2/token", data)
-                |> Async.AwaitTask
+            let! oauth_response = http_client.PostAsync("https://discord.com/api/oauth2/token", data) |> Async.AwaitTask
 
             if not oauth_response.IsSuccessStatusCode then
                 Logging.Error "Discord OAuth request failed: %s" oauth_response.ReasonPhrase
@@ -65,14 +50,12 @@ module Discord =
                 oauth_response.Content.ReadAsStringAsync()
                 |> Async.AwaitTask
                 |> Async.RunSynchronously
-                |> Logging.Error "%s"
+                |> Logging.Error("%s")
 
                 response.ReplyRedirect("https://yavsrg.net/login_failed")
             else
 
-            let! oauth_data =
-                oauth_response.Content.ReadFromJsonAsync<DiscordOAuthResponse>()
-                |> Async.AwaitTask
+            let! oauth_data = oauth_response.Content.ReadFromJsonAsync<DiscordOAuthResponse>() |> Async.AwaitTask
 
             // use oauth token to get api information about "@me" on behalf of the user
             let identity_request =
@@ -88,14 +71,12 @@ module Discord =
                 identity_response.Content.ReadAsStringAsync()
                 |> Async.AwaitTask
                 |> Async.RunSynchronously
-                |> Logging.Error "%s"
+                |> Logging.Error("%s")
 
                 response.ReplyRedirect("https://yavsrg.net/login_failed")
             else
 
-            let! identity =
-                identity_response.Content.ReadFromJsonAsync<DiscordIdentityResponse>()
-                |> Async.AwaitTask
+            let! identity = identity_response.Content.ReadFromJsonAsync<DiscordIdentityResponse>() |> Async.AwaitTask
 
             let discord_tag =
                 if identity.discriminator <> "0" then
@@ -103,7 +84,7 @@ module Discord =
                 else
                     identity.username
 
-            match Users.DiscordAuthFlow.receive_discord_callback (state, uint64 identity.id, discord_tag) with
+            match Users.DiscordAuthFlow.receive_discord_callback(state, uint64 identity.id, discord_tag) with
             | true -> response.ReplyRedirect("https://yavsrg.net/login_success")
             | false -> response.ReplyRedirect("https://yavsrg.net/login_failed")
         }

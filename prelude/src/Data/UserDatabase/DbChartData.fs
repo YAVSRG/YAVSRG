@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -25,7 +25,7 @@ module DbChartData =
         }
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE chart_data (
@@ -40,33 +40,28 @@ module DbChartData =
         }
 
     let internal RESET_PERSONAL_BESTS: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL = """ UPDATE chart_data SET PersonalBests = '[]'; """
-        }
+        { NonQuery.without_parameters() with SQL = """ UPDATE chart_data SET PersonalBests = '[]'; """ }
 
     let private GET: Query<string, DbChartData> =
         {
             SQL =
                 """SELECT Offset, LastPlayed, Comment, Breakpoints, PersonalBests FROM chart_data WHERE ChartId = @ChartId;"""
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
-            FillParameters = fun p chart_id -> p.String chart_id
+            FillParameters = fun p chart_id -> p.String(chart_id)
             Read =
                 (fun r ->
                     {
                         Offset = r.Float32 |> Time.of_number
                         LastPlayed = r.Int64
                         Comment = r.String
-                        Breakpoints = r.Json JSON
-                        PersonalBests = r.Json JSON
+                        Breakpoints = r.Json(JSON)
+                        PersonalBests = r.Json(JSON)
                     }
                 )
         }
 
     let get (chart_id: string) (db: Database) : DbChartData =
-        GET.Execute chart_id db
-        |> expect
-        |> Array.tryExactlyOne
-        |> Option.defaultValue DEFAULT
+        GET.Execute chart_id db |> expect |> Array.tryExactlyOne |> Option.defaultValue DEFAULT
 
     let private SAVE_OFFSET: NonQuery<string * Time> =
         {
@@ -79,7 +74,7 @@ module DbChartData =
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@Offset", SqliteType.Real, 4 ]
             FillParameters =
                 fun p (chart_id, offset) ->
-                    p.String chart_id
+                    p.String(chart_id)
                     p.Float32(float32 offset)
         }
 
@@ -97,8 +92,8 @@ module DbChartData =
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@LastPlayed", SqliteType.Integer, 8 ]
             FillParameters =
                 fun p (chart_id, last_played) ->
-                    p.String chart_id
-                    p.Int64 last_played
+                    p.String(chart_id)
+                    p.Int64(last_played)
         }
 
     let save_last_played (changes: (string * int64) seq) (db: Database) =
@@ -115,8 +110,8 @@ module DbChartData =
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@Comment", SqliteType.Text, -1 ]
             FillParameters =
                 fun p (chart_id, comment) ->
-                    p.String chart_id
-                    p.String comment
+                    p.String(chart_id)
+                    p.String(comment)
         }
 
     let save_comments (changes: (string * string) seq) (db: Database) =
@@ -133,7 +128,7 @@ module DbChartData =
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@Breakpoints", SqliteType.Text, -1 ]
             FillParameters =
                 fun p (chart_id, breakpoints) ->
-                    p.String chart_id
+                    p.String(chart_id)
                     p.Json JSON breakpoints
         }
 
@@ -151,7 +146,7 @@ module DbChartData =
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@PersonalBests", SqliteType.Text, -1 ]
             FillParameters =
                 fun p (chart_id, bests) ->
-                    p.String chart_id
+                    p.String(chart_id)
                     p.Json JSON bests
         }
 
@@ -175,8 +170,8 @@ module DbChartData =
                         Offset = r.Float32 |> Time.of_number
                         LastPlayed = r.Int64
                         Comment = r.String
-                        Breakpoints = r.Json JSON
-                        PersonalBests = r.Json JSON
+                        Breakpoints = r.Json(JSON)
+                        PersonalBests = r.Json(JSON)
                     }
                 )
         }

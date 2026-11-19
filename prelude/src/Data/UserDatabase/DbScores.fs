@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.UserDatabase
+namespace Prelude.Data.UserDatabase
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -7,7 +7,7 @@ open Prelude
 module DbScores =
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE scores (
@@ -22,20 +22,23 @@ module DbScores =
             );
             """
         }
+
     let internal ADD_FAILED_COLUMN: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL = """ALTER TABLE scores ADD COLUMN IsFailed INTEGER NOT NULL DEFAULT 0;"""
         }
+
     let internal CREATE_INDEX: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE INDEX idx_scores_chartid
             ON scores (ChartId ASC);
             """
         }
+
     let internal CREATE_TIMESTAMP_INDEX: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE INDEX idx_scores_timestamp
@@ -63,13 +66,13 @@ module DbScores =
                 ]
             FillParameters =
                 (fun p (chart_id, score) ->
-                    p.String chart_id
-                    p.Int64 score.Timestamp
-                    p.Blob score.Replay
-                    p.Float32 (float32 score.Rate)
+                    p.String(chart_id)
+                    p.Int64(score.Timestamp)
+                    p.Blob(score.Replay)
+                    p.Float32(float32 score.Rate)
                     p.Json JSON score.Mods
-                    p.Boolean score.IsImported
-                    p.Boolean score.IsFailed
+                    p.Boolean(score.IsImported)
+                    p.Boolean(score.IsFailed)
                     p.Byte(byte score.Keys)
                 )
         }
@@ -82,16 +85,17 @@ module DbScores =
 
     let private BY_CHART_ID: Query<string, Score> =
         {
-            SQL = """SELECT Timestamp, Replay, Rate, Mods, IsImported, IsFailed, Keys FROM scores WHERE ChartId = @ChartId;"""
+            SQL =
+                """SELECT Timestamp, Replay, Rate, Mods, IsImported, IsFailed, Keys FROM scores WHERE ChartId = @ChartId;"""
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
-            FillParameters = fun p chart_id -> p.String chart_id
+            FillParameters = fun p chart_id -> p.String(chart_id)
             Read =
                 (fun r ->
                     {
                         Timestamp = r.Int64
                         Replay = r.Blob
                         Rate = 1.0f<rate> * r.Float32
-                        Mods = r.Json JSON
+                        Mods = r.Json(JSON)
                         IsImported = r.Boolean
                         IsFailed = r.Boolean
                         Keys = int r.Byte
@@ -108,8 +112,8 @@ module DbScores =
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@Timestamp", SqliteType.Integer, 8 ]
             FillParameters =
                 fun p (chart_id, timestamp) ->
-                    p.String chart_id
-                    p.Int64 timestamp
+                    p.String(chart_id)
+                    p.Int64(timestamp)
         }
 
     let delete_by_timestamp (chart_id: string) (timestamp: int64) (db: Database) =
@@ -133,7 +137,7 @@ module DbScores =
                         Timestamp = r.Int64
                         Replay = r.Blob
                         Rate = 1.0f<rate> * r.Float32
-                        Mods = r.Json JSON
+                        Mods = r.Json(JSON)
                         IsImported = r.Boolean
                         IsFailed = r.Boolean
                         Keys = int r.Byte
@@ -181,7 +185,10 @@ module DbScores =
             ORDER BY Timestamp ASC;
             """
             Parameters = [ "@StartTime", SqliteType.Integer, 8; "@EndTime", SqliteType.Integer, 8 ]
-            FillParameters = fun p (start_time, end_time) -> p.Int64 start_time; p.Int64 end_time
+            FillParameters =
+                fun p (start_time, end_time) ->
+                    p.Int64(start_time)
+                    p.Int64(end_time)
             Read =
                 (fun r ->
                     r.String,
@@ -189,7 +196,7 @@ module DbScores =
                         Timestamp = r.Int64
                         Replay = r.Blob
                         Rate = 1.0f<rate> * r.Float32
-                        Mods = r.Json JSON
+                        Mods = r.Json(JSON)
                         IsImported = r.Boolean
                         IsFailed = r.Boolean
                         Keys = int r.Byte
@@ -207,7 +214,10 @@ module DbScores =
             UPDATE scores SET ChartId = @AfterHash WHERE ChartId = @BeforeHash;
             """
             Parameters = [ "@BeforeHash", SqliteType.Text, -1; "@AfterHash", SqliteType.Text, -1 ]
-            FillParameters = fun p (before_hash, after_hash) -> p.String before_hash; p.String after_hash
+            FillParameters =
+                fun p (before_hash, after_hash) ->
+                    p.String(before_hash)
+                    p.String(after_hash)
         }
 
     let transfer (before_hash: string) (after_hash: string) (db: Database) : int =

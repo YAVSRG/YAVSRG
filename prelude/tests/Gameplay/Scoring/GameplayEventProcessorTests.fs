@@ -9,8 +9,6 @@ open Prelude.Tests.Helpers
 
 module GameplayEventProcessorTests =
 
-    let RULESET = SC.create 4
-
     [<Test>]
     let BasicEndToEnd () =
         let note_data = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
@@ -22,8 +20,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(1000.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
         Assert.Pass()
@@ -41,8 +38,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(3030.0f<ms>, 250.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -69,8 +65,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(2970.0f<ms>, 250.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -94,8 +89,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>) // would be +0ms on note 0, which has a -180ms hit. eat the hit (don't have it hit note 1)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -114,8 +108,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(360.0f<ms>, 30.0f<ms>) // this tap goes nowhere, ghost tap
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -132,7 +125,7 @@ module GameplayEventProcessorTests =
             ReplayBuilder().KeyDownFor(-180.0f<ms>, 30.0f<ms>).KeyDownFor(0.0f<ms>, 30.0f<ms>).Build()
 
         let ruleset =
-            { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
+            { SC_J4.Ruleset with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing =
             GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
@@ -152,7 +145,7 @@ module GameplayEventProcessorTests =
             ReplayBuilder().KeyDownFor(180.0f<ms>, 30.0f<ms>).KeyDownFor(360.0f<ms>, 30.0f<ms>).Build()
 
         let ruleset =
-            { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
+            { SC_J4.Ruleset with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing =
             GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
@@ -199,8 +192,7 @@ module GameplayEventProcessorTests =
                 .KeyUp(1050.0f<ms>, 3)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -252,7 +244,7 @@ module GameplayEventProcessorTests =
                 .Build()
 
         let ruleset =
-            { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
+            { SC_J4.Ruleset with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing =
             GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
@@ -295,8 +287,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(510.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -335,8 +326,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(255.0f<ms>, 15.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 0.5f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 0.5f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -375,8 +365,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(1020.0f<ms>, 60.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 2.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 2.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -415,8 +404,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(511.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -444,8 +432,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(1000.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -465,8 +452,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(1000.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -488,8 +474,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(2000.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -505,8 +490,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -526,8 +510,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDown(0.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -548,8 +531,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(0.0f<ms>, 30.0f<ms>).KeyDownFor(400.0f<ms>, 30.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -569,8 +551,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(-200.0f<ms>, 30.0f<ms>).KeyDownFor(800.0f<ms>, 30.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -586,8 +567,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(-200.0f<ms>, 30.0f<ms>, 1).KeyDownFor(800.0f<ms>, 30.0f<ms>, 2).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -602,8 +582,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownFor(0.0f<ms>, 1000.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -621,8 +600,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownUntil(10.0f<ms>, 990.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -640,8 +618,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownUntil(180.0f<ms>, 820.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -659,8 +636,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownUntil(-180.0f<ms>, 1180.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -678,8 +654,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownUntil(90.0f<ms>, 910.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 0.5f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 0.5f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -697,8 +672,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownUntil(-90.0f<ms>, 1090.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 0.5f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 0.5f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -716,8 +690,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownUntil(360.0f<ms>, 640.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 2.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 2.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -735,8 +708,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownUntil(-360.0f<ms>, 1360.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 2.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 2.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -754,8 +726,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -773,8 +744,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownFor(0.0f<ms>, 2000.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -792,8 +762,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownFor(0.0f<ms>, 500.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -813,8 +782,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(0.0f<ms>, 400.0f<ms>).KeyDownFor(500.0f<ms>, 500.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -840,8 +808,7 @@ module GameplayEventProcessorTests =
                 .KeyDownFor(650.0f<ms>, 350.0f<ms>)
                 .Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -871,8 +838,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(0.0f<ms>, 400.0f<ms>).KeyDownFor(500.0f<ms>, 1000.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -892,8 +858,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownFor(500.0f<ms>, 500.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -912,8 +877,7 @@ module GameplayEventProcessorTests =
 
         let replay = ReplayBuilder().KeyDownFor(-500.0f<ms>, 1500.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -933,8 +897,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(0.0f<ms>, 500.0f<ms>).KeyDownFor(990.0f<ms>, 10.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -956,8 +919,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(0.0f<ms>, 500.0f<ms>).KeyDownFor(990.0f<ms>, 30.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -979,8 +941,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(0.0f<ms>, 500.0f<ms>).KeyDownFor(1179.0f<ms>, 1.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -1007,7 +968,7 @@ module GameplayEventProcessorTests =
                 .Build()
 
         let event_step_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         let mutable prev_expected = 0
 
@@ -1041,7 +1002,7 @@ module GameplayEventProcessorTests =
         let rewind_replay = replay.GetFullReplay() |> StoredReplaySource
 
         let event_processing =
-            GameplayEventCollector(RULESET, rewind_replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(SC_J4, rewind_replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -1060,7 +1021,7 @@ module GameplayEventProcessorTests =
                 .Build()
 
         let event_step_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         let mutable prev_expected = 0
 
@@ -1102,7 +1063,7 @@ module GameplayEventProcessorTests =
         let rewind_replay = replay.GetFullReplay() |> StoredReplaySource
 
         let event_processing =
-            GameplayEventCollector(RULESET, rewind_replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(SC_J4, rewind_replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -1115,8 +1076,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(100.0f<ms>, 1.0f<ms>).KeyDownFor(102.0f<ms>, 30.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -1138,7 +1098,7 @@ module GameplayEventProcessorTests =
             ReplayBuilder().KeyDownFor(100.0f<ms>, 1.0f<ms>).KeyDownFor(102.0f<ms>, 30.0f<ms>).Build()
 
         let event_processing =
-            GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
+            GameplayEventCollector(OsuMania.nomod 8.0f, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -1323,8 +1283,7 @@ module GameplayEventProcessorTests =
         let note_data =
             NotesBuilder(4).Note(0.0f<ms>).Note(100.0f<ms>).Note(200.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.ProcessEntireReplay()
 
@@ -1334,7 +1293,7 @@ module GameplayEventProcessorTests =
             NotesBuilder(4).Note(1000.0f<ms>).Note(1100.0f<ms>).Note(1200.0f<ms>).Build()
 
         let event_processing_2 =
-            GameplayEventCollector(RULESET, StoredReplaySource(replay.GetFullReplay()), note_data_2, 1.0f<rate>)
+            GameplayEventCollector(SC_J4, StoredReplaySource(replay.GetFullReplay()), note_data_2, 1.0f<rate>)
 
         event_processing_2.ProcessEntireReplay()
 
@@ -1354,8 +1313,7 @@ module GameplayEventProcessorTests =
         let note_data =
             NotesBuilder(4).Note(0.0f<ms>).Note(100.0f<ms>).Note(200.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.IgnoreNotesBefore(100.0f<ms>)
         event_processing.ProcessEntireReplay()
@@ -1366,7 +1324,7 @@ module GameplayEventProcessorTests =
             NotesBuilder(4).Note(1000.0f<ms>).Note(1100.0f<ms>).Note(1200.0f<ms>).Build()
 
         let event_processing_2 =
-            GameplayEventCollector(RULESET, StoredReplaySource(replay.GetFullReplay()), note_data_2, 1.0f<rate>)
+            GameplayEventCollector(SC_J4, StoredReplaySource(replay.GetFullReplay()), note_data_2, 1.0f<rate>)
 
         event_processing_2.IgnoreNotesBefore(1100.0f<ms>)
         event_processing_2.ProcessEntireReplay()
@@ -1381,8 +1339,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownFor(0.0f<ms>, 1000.0f<ms>).KeyDownFor(2000.0f<ms>, 1000.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.IgnoreNotesBefore(500.0f<ms>)
         event_processing.ProcessEntireReplay()
@@ -1392,7 +1349,7 @@ module GameplayEventProcessorTests =
                 HOLD(0.0f<ms / rate>, false)
                 RELEASE(0.0f<ms / rate>, false, false, false, 0.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map(fun e -> e.Inner)
+            event_processing.Events |> Seq.map(_.Inner)
         )
 
     [<Test>]
@@ -1403,8 +1360,7 @@ module GameplayEventProcessorTests =
         let replay =
             ReplayBuilder().KeyDownUntil(-1.0f<ms>, 91.0f<ms>).KeyDownUntil(101.0f<ms>, 189.0f<ms>).Build()
 
-        let event_processing =
-            GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(SC_J4, replay, note_data, 1.0f<rate>)
 
         event_processing.IgnoreNotesBefore(75.0f<ms>)
         event_processing.ProcessEntireReplay()
@@ -1416,5 +1372,5 @@ module GameplayEventProcessorTests =
                 HOLD(1.0f<ms / rate>, false)
                 RELEASE(-1.0f<ms / rate>, false, false, false, 1.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map(fun e -> e.Inner)
+            event_processing.Events |> Seq.map(_.Inner)
         )

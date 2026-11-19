@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions
+namespace Prelude.Skins.Conversions
 
 open System.IO
 
@@ -6,13 +6,10 @@ open System.IO
 module IdentifySkinImport =
 
     let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|StepmaniaNoteskinFolder|Unknown|) (path: string) =
-        if Directory.Exists path then
-            if File.Exists(Path.Combine(path, "skin.ini")) then
-                OsuSkinFolder
-            elif File.Exists(Path.Combine(path, "metrics.ini")) then
-                StepmaniaNoteskinFolder
-            else
-                Unknown
+        if Directory.Exists(path) then
+            if File.Exists(Path.Combine(path, "skin.ini")) then OsuSkinFolder
+            elif File.Exists(Path.Combine(path, "metrics.ini")) then StepmaniaNoteskinFolder
+            else Unknown
         else
             let s = Path.GetExtension(path).ToLower()
 

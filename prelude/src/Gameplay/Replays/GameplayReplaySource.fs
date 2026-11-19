@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Replays
+namespace Prelude.Gameplay.Replays
 
 open System.IO
 open Percyqaz.Common
@@ -11,10 +11,12 @@ type GameplayReplaySource(first_note: Time) =
     let mutable export = 0
     let buffer = ResizeArray<ReplayFrame>()
 
-    let mutable last_time : ChartTime = -Time.infinity
+    let mutable last_time: ChartTime = -Time.infinity
 
     member this.AddFrame(time: Time, pressed_keys: Bitmask) : unit =
-        if finished then invalidOp "Live play is declared as over; cannot append to replay"
+        if finished then
+            invalidOp "Live play is declared as over; cannot append to replay"
+
         if time - first_note < last_time then
             Logging.Warn "Timestamp for replay data went backwards: %f, %f" (time - first_note) last_time
 
@@ -25,29 +27,31 @@ type GameplayReplaySource(first_note: Time) =
         member this.Finished = finished
 
         member this.HasNext(time: ChartTime) : bool =
-            if i >= buffer.Count then
-                false
-            else
-                buffer.[i].Time <= time
+            if i >= buffer.Count then false else buffer.[i].Time <= time
 
         member this.GetNext() : ReplayFrame =
             i <- i + 1
             buffer.[i - 1]
 
         member this.GetFullReplay() : Replay =
-            if not finished then invalidOp "Live play is not declared as over, we don't have the full replay yet!"
+            if not finished then
+                invalidOp "Live play is not declared as over, we don't have the full replay yet!"
+
             { Frames = buffer.ToArray() }
 
         member this.EnumerateRecentFrames() : ReplayFrame seq =
             seq {
                 let mutable j = buffer.Count - 1
+
                 while j >= 0 do
                     yield buffer.[j]
                     j <- j - 1
             }
 
     member this.Finish() : unit =
-        if finished then invalidOp "Live play is already declared as over; cannot do so again"
+        if finished then
+            invalidOp "Live play is already declared as over; cannot do so again"
+
         finished <- true
 
     /// Export all data not yet exported, for sending over a network in multiplayer

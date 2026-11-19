@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Graphics
+namespace Percyqaz.Flux.Graphics
 
 open System
 open SixLabors.ImageSharp
@@ -45,6 +45,7 @@ type Sprite =
 
         mutable PrecomputedQuad: Quad voption
     }
+
     member this.Width = this.GridWidth / this.Columns
     member this.Height = this.GridHeight / this.Rows
     member this.AspectRatio = float32 this.Width / float32 this.Height
@@ -56,12 +57,9 @@ type QuadTexture =
         Layer: int
         UV: Quad
     }
+
     member this.Transform(func: Quad -> Quad) : QuadTexture =
-        {
-            Texture = this.Texture
-            Layer = this.Layer
-            UV = func this.UV
-        }
+        { Texture = this.Texture; Layer = this.Layer; UV = func this.UV }
 
 type SpriteUpload =
     {
@@ -71,6 +69,7 @@ type SpriteUpload =
         Image: Bitmap
         DisposeImageAfter: bool
     }
+
     static member OfImage(label: string, img: Bitmap) : SpriteUpload =
         {
             Label = label
@@ -88,12 +87,13 @@ type SpriteSmoothing =
 
 module Texture =
 
-    let [<Literal>] TRACE = false
+    [<Literal>]
+    let TRACE = false
 
-    let MAX_TEXTURE_UNITS = GL.GetInteger GetPName.MaxTextureImageUnits
-    let TOTAL_TEXTURE_UNITS = GL.GetInteger GetPName.MaxCombinedTextureImageUnits
-    let MAX_TEXTURE_SIZE = GL.GetInteger GetPName.MaxTextureSize
-    let MAX_ARRAY_TEXTURE_LAYERS = GL.GetInteger GetPName.MaxArrayTextureLayers
+    let MAX_TEXTURE_UNITS = GL.GetInteger(GetPName.MaxTextureImageUnits)
+    let TOTAL_TEXTURE_UNITS = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits)
+    let MAX_TEXTURE_SIZE = GL.GetInteger(GetPName.MaxTextureSize)
+    let MAX_ARRAY_TEXTURE_LAYERS = GL.GetInteger(GetPName.MaxArrayTextureLayers)
 
     // texture unit 0 is reserved for binding uncached sprites
     let private texture_unit_handles: int array = Array.zeroCreate MAX_TEXTURE_UNITS
@@ -106,10 +106,10 @@ module Texture =
 
             let texture_unit =
                 seq { 1 .. (MAX_TEXTURE_UNITS - 1) }
-                |> Seq.tryFind (fun i -> not texture_unit_in_use.[i])
+                |> Seq.tryFind(fun i -> not texture_unit_in_use.[i])
                 |> function
                     | None ->
-                        Logging.Debug "Texture unit claim failed, all texture units are full"
+                        Logging.Debug("Texture unit claim failed, all texture units are full")
                         0
                     | Some i ->
                         texture_unit_handles.[i] <- texture.Handle
@@ -120,7 +120,9 @@ module Texture =
                         GL.ActiveTexture(TextureUnit.Texture0)
                         check_gl_error()
 
-                        if TRACE then Logging.Debug "Texture slot [%i] <- %i" i texture.Handle
+                        if TRACE then
+                            Logging.Debug "Texture slot [%i] <- %i" i texture.Handle
+
                         i
 
             texture.TextureUnit <- texture_unit
@@ -128,15 +130,19 @@ module Texture =
 
     let unclaim_texture_unit (texture: Texture) : unit =
         if texture.TextureUnit <> 0 then
-            if TRACE then Logging.Debug "Texture slot [%i] -> %i" texture.TextureUnit texture.Handle
+            if TRACE then
+                Logging.Debug "Texture slot [%i] -> %i" texture.TextureUnit texture.Handle
+
             texture_unit_in_use.[texture.TextureUnit] <- false
             texture.TextureUnit <- 0
 
     let destroy (texture: Texture) : unit =
         assert (texture.References = 0)
         unclaim_texture_unit texture
-        GL.DeleteTexture texture.Handle
-        if TRACE then Logging.Debug "Destroyed texture %i" texture.Handle
+        GL.DeleteTexture(texture.Handle)
+
+        if TRACE then
+            Logging.Debug "Destroyed texture %i" texture.Handle
 
     let create (width: int, height: int, layers: int) : Texture =
         let id = GL.GenTexture()
@@ -153,7 +159,13 @@ module Texture =
             References = 0
         }
 
-    let create_sprite (x: int, y: int) (layer: int) (w: int, h: int) (rows: int, columns: int) (texture: Texture) : Sprite =
+    let create_sprite
+        (x: int, y: int)
+        (layer: int)
+        (w: int, h: int)
+        (rows: int, columns: int)
+        (texture: Texture)
+        : Sprite =
         texture.References <- texture.References + 1
 
         {
@@ -193,8 +205,10 @@ module Sprite =
 
     [<Literal>]
     let private FRILL_OPACITY = 1uy
+
     [<Literal>]
     let private FRILL_SIZE = 3
+
     [<Literal>]
     let private FRILL_THRESHOLD = 0uy
 
@@ -212,8 +226,10 @@ module Sprite =
         for x = 0 to image.Width - 1 do
             let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
             let mutable s: int = 0
+
             for y = 0 to image.Height - 1 do
                 let pixel = image.[x, y]
+
                 if pixel.A > FRILL_THRESHOLD then
                     p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
@@ -223,8 +239,10 @@ module Sprite =
 
             let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
             let mutable s: int = 0
+
             for y = image.Height - 1 downto 0 do
                 let pixel = image.[x, y]
+
                 if pixel.A > FRILL_THRESHOLD then
                     p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
@@ -235,8 +253,10 @@ module Sprite =
         for y = 0 to image.Height - 1 do
             let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
             let mutable s: int = 0
+
             for x = 0 to image.Width - 1 do
                 let pixel = image.[x, y]
+
                 if pixel.A > FRILL_THRESHOLD then
                     p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
@@ -246,8 +266,10 @@ module Sprite =
 
             let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
             let mutable s: int = 0
+
             for x = image.Width - 1 downto 0 do
                 let pixel = image.[x, y]
+
                 if pixel.A > FRILL_THRESHOLD then
                     p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
@@ -303,20 +325,24 @@ module Sprite =
         : Texture * (string * Sprite) array =
 
         let width =
-            if images.Length = 0 then 1 else
-                (images |> Array.map _.Image.Width |> Array.max) +
-                (if smoothing = LinearSamplingFixEdges then 2 else 0)
+            if images.Length = 0 then
+                1
+            else
+                (images |> Array.map _.Image.Width |> Array.max) + (if smoothing = LinearSamplingFixEdges then 2 else 0)
 
         let height =
-            if images.Length = 0 then 1 else
-                (images |> Array.map _.Image.Height |> Array.max) +
-                (if smoothing = LinearSamplingFixEdges then 2 else 0)
+            if images.Length = 0 then
+                1
+            else
+                (images |> Array.map _.Image.Height |> Array.max)
+                + (if smoothing = LinearSamplingFixEdges then 2 else 0)
 
         let layers = images.Length + 1
 
-        let texture = Texture.create (width, height, layers)
+        let texture = Texture.create(width, height, layers)
 
-        if Texture.TRACE then Logging.Debug "Texture %i created by %s" texture.Handle label
+        if Texture.TRACE then
+            Logging.Debug "Texture %i created by %s" texture.Handle label
 
         if use_texture_unit then
             Texture.claim_texture_unit texture |> ignore
@@ -365,7 +391,7 @@ module Sprite =
             let success = image_data.TryGetSinglePixelSpan(&pixel_data)
 
             if not success then
-                Logging.Critical "Couldn't get pixel span for image!"
+                Logging.Critical("Couldn't get pixel span for image!")
 
             GL.TexSubImage3D<Rgba32>(
                 TextureTarget.Texture2DArray,
@@ -438,10 +464,7 @@ module Sprite =
                     texture
 
             let sprite =
-                if info.Rows = 1 && info.Columns = 1 then
-                    precompute_1x1 sprite
-                else
-                    sprite
+                if info.Rows = 1 && info.Columns = 1 then precompute_1x1 sprite else sprite
 
             if info.DisposeImageAfter then
                 info.Image.Dispose()
@@ -449,6 +472,7 @@ module Sprite =
             layer <- layer + 1
 
             info.Label, sprite
+
         check_gl_error()
 
         texture, images |> Array.map gen_sprite
@@ -464,8 +488,10 @@ module Sprite =
             if sprite.Texture.References = 0 then
                 Texture.destroy sprite.Texture
                 true
-            else false
-        else false
+            else
+                false
+        else
+            false
 
     let pick_texture (x: int, y: int) (sprite: Sprite) : QuadTexture =
         if sprite.PrecomputedQuad.IsSome then
@@ -479,12 +505,10 @@ module Sprite =
                 float32 sprite.GridHeight / float32 sprite.Texture.Height / float32 sprite.Rows
 
             let origin_x =
-                float32 sprite.X / float32 sprite.Texture.Width
-                + float32 (x % sprite.Columns) * stride_x
+                float32 sprite.X / float32 sprite.Texture.Width + float32(x % sprite.Columns) * stride_x
 
             let origin_y =
-                float32 sprite.Y / float32 sprite.Texture.Height
-                + float32 (y % sprite.Rows) * stride_y
+                float32 sprite.Y / float32 sprite.Texture.Height + float32(y % sprite.Rows) * stride_y
 
             let quad = Rect.FromSize(origin_x, origin_y, stride_x, stride_y).AsQuad
 
@@ -505,7 +529,10 @@ module Sprite =
             UV = Quad.map (fun v -> Vector2((v.X - left) / width, (v.Y - top) / height)) quad
         }
 
-    let aligned_box_x (x_origin: float32, y_origin: float32, x_offset: float32, y_offset: float32, x_scale: float32, y_mult: float32) (sprite: Sprite) : Rect =
+    let aligned_box_x
+        (x_origin: float32, y_origin: float32, x_offset: float32, y_offset: float32, x_scale: float32, y_mult: float32)
+        (sprite: Sprite)
+        : Rect =
         let width = x_scale
         let height = float32 sprite.Height / float32 sprite.Width * width * y_mult
         let left = x_origin - x_offset * width
@@ -513,16 +540,22 @@ module Sprite =
         Rect.FromSize(left, top, width, height)
 
     let fill (bounds: Rect) (sprite: Sprite) : Rect =
-        let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+        let scale =
+            min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
         Rect.FromSize(bounds.CenterX - 0.5f * w, bounds.CenterY - 0.5f * h, w, h)
 
     let fill_left (bounds: Rect) (sprite: Sprite) : Rect =
-        let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+        let scale =
+            min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
         Rect.FromSize(bounds.Left, bounds.CenterY - 0.5f * h, w, h)
 
     let fill_right (bounds: Rect) (sprite: Sprite) : Rect =
-        let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+        let scale =
+            min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
         Rect.FromSize(bounds.Right - w, bounds.CenterY - 0.5f * h, w, h)

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.ChartDatabase
+namespace Prelude.Data.ChartDatabase
 
 open Prelude
 open Prelude.Charts
@@ -46,7 +46,7 @@ type ChartMeta =
         // Tiebreaker rule when importing data over the top of an existing chart
         // Etterna metadata takes priority over osu, etc
         let existing_takes_priority =
-            not (Set.isEmpty existing.Origins) && existing.Origins < this.Origins
+            not(Set.isEmpty existing.Origins) && existing.Origins < this.Origins
 
         if existing_takes_priority then
             { existing with
@@ -56,7 +56,8 @@ type ChartMeta =
                 Source = existing.Source |> Option.orElse this.Source
                 Packs = Set.union this.Packs existing.Packs
                 Origins = Set.union this.Origins existing.Origins
-                Background = this.Background
+                Background =
+                    if existing.Background = AssetLocation.Deleted then AssetLocation.Deleted else this.Background
             },
             true
         else
@@ -67,13 +68,19 @@ type ChartMeta =
                 Source = this.Source |> Option.orElse existing.Source
                 Packs = Set.union this.Packs existing.Packs
                 Origins = Set.union this.Origins existing.Origins
+                Background =
+                    if existing.Background = AssetLocation.Deleted then AssetLocation.Deleted else this.Background
             },
             false
 
-    static member CreateFromImport(timestamp: int64, import_chart: ImportChart, handle_asset: ImportAsset -> AssetLocation) : ChartMeta =
+    static member CreateFromImport
+        (timestamp: int64, import_chart: ImportChart, handle_asset: ImportAsset -> AssetLocation)
+        : ChartMeta =
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
-        let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s
+
+        let truncate (s: string) =
+            if s.Length > 200 then s.Substring(0, 200) else s
 
         {
             Hash = chart.Hash()
@@ -87,7 +94,6 @@ type ChartMeta =
             Source = Option.map truncate import_chart.Header.Source
             Creator = truncate import_chart.Header.Creator
             Tags = import_chart.Header.Tags // todo: consider just removing tags ?
-
             Background = handle_asset import_chart.Header.BackgroundFile
             Audio = handle_asset import_chart.Header.AudioFile
             PreviewTime = import_chart.Header.PreviewTime
@@ -100,9 +106,7 @@ type ChartMeta =
             BPM =
                 let mspb = Chart.find_most_common_bpm chart
                 let bpm = MS_PER_MINUTE / mspb |> float32
-                if System.Single.IsFinite(bpm) then
-                    bpm |> round |> int
-                else 0
+                if System.Single.IsFinite(bpm) then bpm |> round |> int else 0
             DateAdded = timestamp
             Rating = difficulty.Overall
             Patterns = PatternReport.from_chart(difficulty, chart)

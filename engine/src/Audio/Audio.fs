@@ -106,7 +106,7 @@ module Audio =
                     if index >= 0 then
                         Logging.Debug "No audio device with index %i, using default" index
 
-                    match detected_devices |> Array.tryFind(fun x -> x.IsDefault) with
+                    match detected_devices |> Array.tryFind(_.IsDefault) with
                     | None ->
                         Logging.Error("No default audio device! Initialising with no sound :(")
 

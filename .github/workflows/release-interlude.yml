@@ -29,6 +29,7 @@ jobs:
     - name: Package Interlude
       id: package
       run: |
+        chmod +x ./scripts/yavsrg.sh
         ./scripts/yavsrg.sh pack_win_x64
         ./scripts/yavsrg.sh pack_linux_x64
         echo "VERSION=v$(./scripts/yavsrg.sh version)" >> $GITHUB_OUTPUT

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Integration
+namespace Interlude.Web.Tests.Integration
 
 open NUnit.Framework
 open Interlude.Web.Shared.Requests
@@ -10,7 +10,7 @@ module Players =
     let Online () =
         use done_signal = new AutoResetEvent(false)
 
-        Players.Online.get (
+        Players.Online.get(
             Option.get
             >> fun (res: Players.Online.Response) ->
                 printfn "%A" res.Players
@@ -23,7 +23,7 @@ module Players =
     let Search () =
         use done_signal = new AutoResetEvent(false)
 
-        Players.Search.get (
+        Players.Search.get(
             USERNAME,
             Option.get
             >> fun (res: Players.Search.Response) ->
@@ -39,7 +39,7 @@ module Players =
         let View_Me () =
             use done_signal = new AutoResetEvent(false)
 
-            Players.Profile.View.get_me (
+            Players.Profile.View.get_me(
                 Option.get
                 >> fun (res: Players.Profile.View.Response) ->
                     printfn "%A" res
@@ -52,7 +52,7 @@ module Players =
         let View () =
             use done_signal = new AutoResetEvent(false)
 
-            Players.Profile.View.get (
+            Players.Profile.View.get(
                 USERNAME,
                 Option.get
                 >> fun (res: Players.Profile.View.Response) ->

@@ -19,22 +19,22 @@ module Dialog =
 
     let mutable private current: Dialog option = None
 
-    let fade = Animation.Fade 0.0f
+    let fade = Animation.Fade(0.0f)
 
     type Display() =
         inherit Overlay(NodeType.None)
 
-        override this.Draw() =
+        override this.Draw() : unit =
             if fade.Value > 0.0f then
-                Render.rect this.Bounds (Color.FromArgb(int (225f * fade.Value), 35, 35, 35))
+                Render.rect this.Bounds (Color.FromArgb(int(225f * fade.Value), 35, 35, 35))
 
                 match current with
                 | Some d -> d.Draw()
                 | None -> ()
 
-        override this.Update(elapsed_ms, moved) =
+        override this.Update(elapsed_ms: float, moved: bool) : unit =
             base.Update(elapsed_ms, moved)
-            fade.Update elapsed_ms
+            fade.Update(elapsed_ms)
 
             match current with
             | Some d ->
@@ -44,19 +44,19 @@ module Dialog =
                     current <- None
                     fade.Target <- 0.0f
                 else
-                    Input.finish_frame_events ()
+                    Input.finish_frame_events()
             | None -> ()
 
     let display = Display()
 
     let show (d: Dialog) =
         match current with
-        | Some existing ->
-            d.Init display
+        | Some _existing ->
+            d.Init(display)
             d.Close()
         | None ->
             current <- Some d
-            d.Init display
+            d.Init(display)
             fade.Target <- 1.0f
 
     let exists () = current.IsSome
@@ -67,4 +67,4 @@ module Dialog =
         | None -> ()
 
 type Dialog with
-    member this.Show() = Dialog.show this
+    member this.Show() : unit = Dialog.show this

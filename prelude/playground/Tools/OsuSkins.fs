@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude.Data.Imports
 open Prelude.Skins.Conversions.Osu
 
-let osu_skin_path = Path.Combine(OSU_SONG_FOLDER, "..", "Skins")
+let osu_skin_path = Path.Combine(MountedChartSource.DEFAULT_OSU_SONGS_LOCATION, "..", "Skins")
 
 let main() =
     for skin in Directory.EnumerateDirectories(osu_skin_path) do

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Options
+namespace Interlude.Options
 
 open Percyqaz.Common
 open Prelude.Mods
@@ -48,40 +48,37 @@ module Presets =
         | Some loaded_preset ->
             options.SelectedPreset.Value <- Some id
 
-            options.VisualOffset.Set loaded_preset.VisualOffset
-            options.ScrollSpeed.Set loaded_preset.ScrollSpeed
-            options.HitPosition.Set loaded_preset.HitPosition
-            options.Upscroll.Set loaded_preset.Upscroll
-            options.LaneCover.LoadPreset loaded_preset.LaneCover
+            options.VisualOffset.Set(loaded_preset.VisualOffset)
+            options.ScrollSpeed.Set(loaded_preset.ScrollSpeed)
+            options.HitPosition.Set(loaded_preset.HitPosition)
+            options.Upscroll.Set(loaded_preset.Upscroll)
+            options.LaneCover.LoadPreset(loaded_preset.LaneCover)
 
             if Skins.noteskin_exists loaded_preset.Noteskin then
-                options.Noteskin.Set loaded_preset.Noteskin
+                options.Noteskin.Set(loaded_preset.Noteskin)
             else
                 Logging.Debug
                     "Noteskin '%s' used in this preset has been renamed or isn't available"
                     loaded_preset.Noteskin
 
             if Skins.hud_exists loaded_preset.HUD then
-                options.SelectedHUD.Set loaded_preset.HUD
+                options.SelectedHUD.Set(loaded_preset.HUD)
             else
-                Logging.Debug
-                    "HUD '%O' used in this preset has been renamed or isn't available"
-                    loaded_preset.HUD
+                Logging.Debug "HUD '%O' used in this preset has been renamed or isn't available" loaded_preset.HUD
 
             Some loaded_preset.Name
         | None -> None
 
     let mutable private previous_keymode: int option = None
+
     let check_for_keymode_change (base_keys: int, mods: ModState) : unit =
 
         // todo: push down into Prelude
-        let keys = 
-            if mods.ContainsKey "column_swap" then
-                ColumnSwap.keys mods.["column_swap"]
-            else base_keys
+        let keys =
+            if mods.ContainsKey("column_swap") then ColumnSwap.keys mods.["column_swap"] else base_keys
 
-        if previous_keymode <> Some keys then 
-            
+        if previous_keymode <> Some keys then
+
             match options.KeymodePreferredPresets.[keys - 3] with
             | Some preference -> load preference |> ignore
             | None -> ()

@@ -27,7 +27,7 @@ module OnlineScores =
 
     type Request =
         {
-            Ruleset: Ruleset
+            RulesetInfo: RulesetInfo
             ChartMeta: ChartMeta
             CurrentChart: Chart
         }
@@ -46,8 +46,12 @@ module OnlineScores =
     let leaderboard_loaded = leaderboard_loaded_ev.Publish
 
     let private load_score (score: LeaderboardScore, score_info: ScoreInfo) : unit =
-        if score_info.Ruleset <> Rulesets.current then
-            score_info.Ruleset <- Rulesets.current
+        // score_info was loaded on a background thread, the user could have changed the ruleset since then
+        // if so, set it to that ruleset on the main thread
+        let current_ruleset = rulesets.GetCurrent(score_info.ChartMeta)
+
+        if score_info.RulesetInfo <> current_ruleset then
+            score_info.RulesetInfo <- current_ruleset
 
         leaderboard_scores.Add(score_info)
         leaderboard_score_loaded_ev.Trigger(score, score_info)
@@ -78,7 +82,7 @@ module OnlineScores =
                         let replay = Replay.FromBase64String(score.Replay)
 
                         let scoring =
-                            ScoreProcessor.ProcessEntireReplay(req.Ruleset, replay, with_mods, score.Rate)
+                            ScoreProcessor.ProcessEntireReplay(req.RulesetInfo, replay, with_mods, score.Rate)
 
                         let rating = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
@@ -94,8 +98,12 @@ module OnlineScores =
 
                                 Replay = replay
                                 Scoring = scoring
-                                Lamp = Lamp.calculate req.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-                                Grade = Grade.calculate req.Ruleset.Grades scoring.Accuracy
+                                Lamp =
+                                    Lamp.calculate
+                                        req.RulesetInfo.Ruleset.Lamps
+                                        scoring.JudgementCounts
+                                        scoring.ComboBreaks
+                                Grade = Grade.calculate req.RulesetInfo.Ruleset.Grades scoring.Accuracy
 
                                 Rating = rating
                                 Performance = Performance.calculate rating scoring
@@ -116,7 +124,13 @@ module OnlineScores =
         if Network.status <> Network.Status.LoggedIn then
             state <- State.Offline
         elif state = State.Unloaded then
-            score_loader.Request({ Ruleset = Rulesets.current; ChartMeta = info.ChartMeta; CurrentChart = info.Chart })
+            score_loader.Request(
+                {
+                    RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
+                    ChartMeta = info.ChartMeta
+                    CurrentChart = info.Chart
+                }
+            )
 
     do
         SelectedChart.on_chart_change_started.Add(fun _ ->
@@ -125,14 +139,18 @@ module OnlineScores =
             score_loader.Cancel()
         )
 
-        Rulesets.on_changed.Add(fun ruleset ->
+        rulesets.OnChanged.Add(fun () ->
             for score_info in leaderboard_scores do
-                score_info.Ruleset <- ruleset
+                score_info.RulesetInfo <- rulesets.GetCurrent(SelectedChart.CACHE_DATA)
         )
 
         Gameplay.leaderboard_rank_changed.Add(fun info ->
             if state = State.Loaded then
                 score_loader.Request(
-                    { Ruleset = Rulesets.current; ChartMeta = info.ChartMeta; CurrentChart = info.Chart }
+                    {
+                        RulesetInfo = rulesets.GetCurrent(info.ChartMeta)
+                        ChartMeta = info.ChartMeta
+                        CurrentChart = info.Chart
+                    }
                 )
         )

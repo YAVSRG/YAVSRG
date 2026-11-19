@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain
+namespace Interlude.Web.Server.Domain
 
 open System
 open Percyqaz.Common
@@ -34,7 +34,11 @@ module Migrations =
 
         Database.migrate
             "RulesetSCHasNewId"
-            (fun _ -> Logging.Info("Migration no longer applies: Original tables to apply ruleset ID change to no longer exists"))
+            (fun _ ->
+                Logging.Info(
+                    "Migration no longer applies: Original tables to apply ruleset ID change to no longer exists"
+                )
+            )
             db
 
         Database.migrate
@@ -49,39 +53,48 @@ module Migrations =
 
         Database.migrate
             "MigrateLeaderboardData"
-            (fun _ -> Logging.Info("Migration no longer applies: Old 'scores' and 'replays' tables no longer exist to migrate from"))
+            (fun _ ->
+                Logging.Info(
+                    "Migration no longer applies: Old 'scores' and 'replays' tables no longer exist to migrate from"
+                )
+            )
             db
 
         Database.migrate
             "ClearOldScoreTables"
-            (fun _ -> Logging.Info("Migration no longer applies: Old 'scores' and 'replays' tables no longer exist to drop"))
+            (fun _ ->
+                Logging.Info("Migration no longer applies: Old 'scores' and 'replays' tables no longer exist to drop")
+            )
             db
 
         Database.migrate
             "UnrankPreLeaderboardScores"
             (fun db ->
-                Database.exec_raw """UPDATE scores2 SET Ranked = 0 WHERE ReplayId IS NULL;""" db |> expect |> Logging.Debug "Unranked %i scores in prep of leaderboards"
+                Database.exec_raw """UPDATE scores2 SET Ranked = 0 WHERE ReplayId IS NULL;""" db
+                |> expect
+                |> Logging.Debug("Unranked %i scores in prep of leaderboards")
             )
             db
 
-        Database.migrate
-            "CreateStatsTable"
-            (fun db -> Stats.CREATE_TABLE.Execute () db |> expect |> ignore)
-            db
+        Database.migrate "CreateStatsTable" (fun db -> Stats.CREATE_TABLE.Execute () db |> expect |> ignore) db
 
         Database.migrate
             "CreateMonthlyStatsTable"
             (fun db -> MonthlyStats.CREATE_TABLE.Execute () db |> expect |> ignore)
             db
-            
+
         Database.migrate
             "AllReplaysArePersistent"
             (fun db -> Replay.REMOVE_PERSISTENT_COLUMN.Execute () db |> expect |> ignore)
             db
-            
+
         Database.migrate
             "RunLeaderboardBugFix"
-            (fun db -> Score.LEADERBOARD_BUG_FIX.Execute () db |> expect |> Logging.Info "Applied leaderboard fix; %i rows affected!")
+            (fun db ->
+                Score.LEADERBOARD_BUG_FIX.Execute () db
+                |> expect
+                |> Logging.Info("Applied leaderboard fix; %i rows affected!")
+            )
             db
 
     open Interlude.Web.Server.Domain.Backbeat
@@ -105,7 +118,11 @@ module Migrations =
 
         Database.migrate
             "MoveBackbeatData"
-            (fun _ -> Logging.Info("Migration no longer applies: Old backbeat chart dump no longer exists to migrate data from"))
+            (fun _ ->
+                Logging.Info(
+                    "Migration no longer applies: Old backbeat chart dump no longer exists to migrate data from"
+                )
+            )
             db
 
         Database.migrate
@@ -126,7 +143,11 @@ module Migrations =
 	                    WHERE json_each.value NOT LIKE '%Osu%'
 	                    AND json_each.value NOT LIKE '%Quaver%'
                     );
-                """ db |> expect |> ignore)
+                """
+                    db
+                |> expect
+                |> ignore
+            )
             db
 
 module Database =

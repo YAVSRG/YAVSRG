@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.HudLayouts
+namespace Prelude.Skins.HudLayouts
 
 open System.IO
 open System.IO.Compression
@@ -9,8 +9,7 @@ type HudLayout(storage) as this =
 
     let mutable config: HudConfig = HudConfig.Default
 
-    do
-        this.ReloadFromDisk()
+    do this.ReloadFromDisk()
 
     member this.Config
         with set conf =
@@ -18,8 +17,9 @@ type HudLayout(storage) as this =
             this.WriteJson(config, "hud.json")
         and get () = config
 
-    override this.ReloadFromDisk() =
+    override this.ReloadFromDisk() : unit =
         base.ReloadFromDisk()
+
         config <-
             match this.TryGetJson<HudConfig>(true, "hud.json") with
             | Some data -> data // todo: data.Validate method
@@ -29,23 +29,22 @@ type HudLayout(storage) as this =
         this.LoadTexture(name, HudTextureRules.get this.Config name)
 
     member this.RequiredTextures =
-        HudTextureRules.list ()
-        |> Seq.filter (HudTextureRules.get this.Config >> _.IsRequired)
+        HudTextureRules.list() |> Seq.filter(HudTextureRules.get this.Config >> _.IsRequired)
 
     member this.Validate() : ValidationMessage seq =
         seq {
-            for texture_id in HudTextureRules.list () do
+            for texture_id in HudTextureRules.list() do
                 yield! this.ValidateTexture(texture_id, HudTextureRules.get this.Config texture_id)
         }
 
-    static member FromZipStream(stream: Stream) =
+    static member FromZipStream(stream: Stream) : HudLayout =
         new HudLayout(Embedded(new ZipArchive(stream)))
 
-    static member FromPath(path: string) =
+    static member FromPath(path: string) : Result<HudLayout, exn> =
         try
-            new HudLayout(Folder path)
-            |> Ok
-        with err -> Error err
+            new HudLayout(Folder path) |> Ok
+        with err ->
+            Error err
 
-    static member Exists(path: string) =
-        Directory.Exists path && File.Exists (Path.Combine(path, "hud.json"))
+    static member Exists(path: string) : bool =
+        Directory.Exists(path) && File.Exists(Path.Combine(path, "hud.json"))

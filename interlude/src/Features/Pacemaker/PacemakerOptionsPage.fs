@@ -1,5 +1,6 @@
 namespace Interlude.Features.Pacemaker
 
+open Interlude.Features.Gameplay
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
@@ -10,10 +11,9 @@ open Interlude.Content
 type PacemakerOptionsPage() =
     inherit Page()
 
-    let ruleset_id = Rulesets.current_hash
+    let ruleset_info = rulesets.GetCurrent(SelectedChart.CACHE_DATA)
 
-    let existing =
-        if options.Pacemaker.ContainsKey(ruleset_id) then options.Pacemaker.[ruleset_id] else PacemakerSettings.Default
+    let existing = options.GetPacemakerOptions()
 
     let mode = Setting.simple existing.Mode
 
@@ -25,17 +25,17 @@ type PacemakerOptionsPage() =
 
     override this.Content() : Widget =
 
-        this.OnClose(this.SavePacemakerSetting)
+        this.OnClose(this.Save)
 
         let lamps =
             seq {
-                let lamp_count = Rulesets.current.Lamps.Length
+                let lamp_count = ruleset_info.Ruleset.Lamps.Length
 
                 for i in 0 .. lamp_count - 1 do
-                    yield i, Rulesets.current.LampName(i)
+                    yield i, ruleset_info.Ruleset.LampName(i)
 
                 if lamp_count = 0 then
-                    yield 0, Rulesets.current.LampName(0)
+                    yield 0, ruleset_info.Ruleset.LampName(0)
             }
             |> Array.ofSeq
 
@@ -82,11 +82,12 @@ type PacemakerOptionsPage() =
 
     override this.Title = sprintf "%s %s" Icons.FLAG (%"gameplay.pacemaker")
 
-    member this.SavePacemakerSetting() : unit =
-        options.Pacemaker.[ruleset_id] <-
+    member this.Save() : unit =
+        options.SavePacemakerOptions(
             {
                 Accuracy = accuracy.Value
                 Lamp = lamp.Value
                 Mode = mode.Value
                 PersonalBest = use_personal_best.Value
             }
+        )

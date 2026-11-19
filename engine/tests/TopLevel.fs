@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Tests
+namespace Percyqaz.Flux.Tests
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -28,7 +28,7 @@ type TopLevel() =
     override this.Draw() =
         let (frames, ticks) = Render.FPS
 
-        Text.draw (
+        Text.draw(
             Style.baseFont,
             sprintf "FPS: %i in %.3f seconds" frames (float ticks / 10_000_000.0),
             30.0f,
@@ -50,17 +50,17 @@ type TopLevel() =
 
         for p, q in List.pairwise cols do
             Draw.rect r !*p
-            Draw.rect (r.Shrink 10.0f) !*q
+            Draw.rect (r.Shrink(10.0f)) !*q
             r <- r.Translate(200.0f, 0.0f)
 
         let mutable r = Rect.Box(100.0f, 300.0f, 200.0f, 200.0f)
 
-        for p, q in List.pairwise (List.rev cols) do
+        for p, q in List.pairwise(List.rev cols) do
             Draw.rect r !*p
-            Draw.rect (r.Shrink 10.0f) !*q
+            Draw.rect (r.Shrink(10.0f)) !*q
             r <- r.Translate(200.0f, 0.0f)
 
-        let x, y = Mouse.pos ()
+        let x, y = Mouse.pos()
         Draw.rect (Rect.Box(x, y, 5.0f, 5.0f)) System.Drawing.Color.White
 
     override this.Update(elapsedTime, moved) =
@@ -78,6 +78,6 @@ type TopLevel() =
         base.Init()
         Style.baseFont <- Fonts.create "Inconsolata"
         Style.baseFont.SpaceWidth <- Style.baseFont.SpaceWidth * 2.0f
-        Style.changePrimaryColor (System.Drawing.Color.Maroon)
-        comp.Init this
-        slider.Init this
+        Style.changePrimaryColor(System.Drawing.Color.Maroon)
+        comp.Init(this)
+        slider.Init(this)

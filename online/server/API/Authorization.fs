@@ -1,19 +1,21 @@
-﻿namespace Interlude.Web.Server.API
+namespace Interlude.Web.Server.API
 
 open Percyqaz.Common
 open Interlude.Web.Server.Domain.Core
 
-module [<AutoOpen>] Authorization =
+[<AutoOpen>]
+module Authorization =
 
-    let [<Literal>] BEARER_PREFIX = "Bearer "
+    [<Literal>]
+    let BEARER_PREFIX = "Bearer "
+
     let BEARER_PREFIX_LENGTH = BEARER_PREFIX.Length
 
     let authorize (headers: Map<string, string>) : int64 * User =
 
-        let find_auth_header() =
-            Map.tryFind "authorization" headers
+        let find_auth_header () = Map.tryFind "authorization" headers
 
-        let validate_token(auth_header: string) : int64 * User =
+        let validate_token (auth_header: string) : int64 * User =
             if auth_header.StartsWith(BEARER_PREFIX) then
                 let bearer_token = auth_header.Substring(BEARER_PREFIX_LENGTH)
 
@@ -23,7 +25,8 @@ module [<AutoOpen>] Authorization =
                     id, user
                 | None -> raise AuthorizeFailedException
 
-            else raise AuthorizeFailedException
+            else
+                raise AuthorizeFailedException
 
         match find_auth_header() with
         | Some auth_header -> validate_token(auth_header)

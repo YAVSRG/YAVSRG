@@ -28,7 +28,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         )
 
     let detected_rate =
-        detect_rate_mod replay.FilePath.Value |> Option.defaultValue 1.0f<rate>
+        RateFiltering.detect_rate_mod replay.FilePath.Value |> Option.defaultValue 1.0f<rate>
 
     let rate = Setting.rate detected_rate
 
@@ -52,7 +52,7 @@ module Replay =
 
     let show_replay (played_by: string) (chart_meta: ChartMeta) (chart: Chart) (score: Score) : unit =
         let score_info =
-            { ScoreInfo.CreateFromScore(chart_meta, chart, Rulesets.current, score) with
+            { ScoreInfo.CreateFromScore(chart_meta, chart, rulesets.GetCurrent(chart_meta), score) with
                 PlayedBy = ScorePlayedBy.Username(played_by)
             }
 

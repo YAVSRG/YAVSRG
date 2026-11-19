@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Core
+namespace Interlude.Web.Server.Domain.Core
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -10,8 +10,20 @@ type XPLeaderboardModel = { UserId: int64; XP: int64; Playtime: float }
 type XPRankModel = { Rank: int64; XP: int64; Playtime: float }
 
 type KeymodeTinyBreakdown =
-    { Combined: float32; Jacks: float32; Chordstream: float32; Stream: float32 }
-    static member Default = { Combined = 0.0f; Jacks = 0.0f; Chordstream = 0.0f; Stream = 0.0f }
+    {
+        Combined: float32
+        Jacks: float32
+        Chordstream: float32
+        Stream: float32
+    }
+
+    static member Default =
+        {
+            Combined = 0.0f
+            Jacks = 0.0f
+            Chordstream = 0.0f
+            Stream = 0.0f
+        }
 
 type KeymodeLeaderboardModel =
     {
@@ -49,6 +61,7 @@ type Stats =
         _10KPlaytime: float
         _10K: KeymodeTinyBreakdown
     }
+
     static member Default =
         {
             LastSync = 0L
@@ -70,7 +83,7 @@ module Stats =
     let private DEFAULT = Stats.Default
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE stats (
@@ -117,22 +130,41 @@ module Stats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p user_id -> p.Int64 user_id
-            Read = fun r ->
-                {
-                    LastSync = r.Int64
-                    Playtime = r.Float64
-                    PracticeTime = r.Float64
-                    GameTime = r.Float64
-                    NotesHit = r.Int32
-                    XP = r.Int64
-                    _4KPlaytime = r.Float64
-                    _4K = { Combined = r.Float32; Jacks = r.Float32; Chordstream = r.Float32; Stream = r.Float32 }
-                    _7KPlaytime = r.Float64
-                    _7K = { Combined = r.Float32; Jacks = r.Float32; Chordstream = r.Float32; Stream = r.Float32 }
-                    _10KPlaytime = r.Float64
-                    _10K = { Combined = r.Float32; Jacks = r.Float32; Chordstream = r.Float32; Stream = r.Float32 }
-                }
+            FillParameters = fun p user_id -> p.Int64(user_id)
+            Read =
+                fun r ->
+                    {
+                        LastSync = r.Int64
+                        Playtime = r.Float64
+                        PracticeTime = r.Float64
+                        GameTime = r.Float64
+                        NotesHit = r.Int32
+                        XP = r.Int64
+                        _4KPlaytime = r.Float64
+                        _4K =
+                            {
+                                Combined = r.Float32
+                                Jacks = r.Float32
+                                Chordstream = r.Float32
+                                Stream = r.Float32
+                            }
+                        _7KPlaytime = r.Float64
+                        _7K =
+                            {
+                                Combined = r.Float32
+                                Jacks = r.Float32
+                                Chordstream = r.Float32
+                                Stream = r.Float32
+                            }
+                        _10KPlaytime = r.Float64
+                        _10K =
+                            {
+                                Combined = r.Float32
+                                Jacks = r.Float32
+                                Chordstream = r.Float32
+                                Stream = r.Float32
+                            }
+                    }
         }
 
     let get (user_id: int64) =
@@ -188,31 +220,31 @@ module Stats =
                 ]
             FillParameters =
                 (fun p (user_id, stats) ->
-                    p.Int64 user_id
-                    p.Int64 stats.LastSync
-                    p.Float64 stats.Playtime
-                    p.Float64 stats.PracticeTime
-                    p.Float64 stats.GameTime
-                    p.Float64 stats.NotesHit
-                    p.Int64 stats.XP
+                    p.Int64(user_id)
+                    p.Int64(stats.LastSync)
+                    p.Float64(stats.Playtime)
+                    p.Float64(stats.PracticeTime)
+                    p.Float64(stats.GameTime)
+                    p.Float64(stats.NotesHit)
+                    p.Int64(stats.XP)
 
-                    p.Float64 stats._4KPlaytime
-                    p.Float32 stats._4K.Combined
-                    p.Float32 stats._4K.Jacks
-                    p.Float32 stats._4K.Chordstream
-                    p.Float32 stats._4K.Stream
+                    p.Float64(stats._4KPlaytime)
+                    p.Float32(stats._4K.Combined)
+                    p.Float32(stats._4K.Jacks)
+                    p.Float32(stats._4K.Chordstream)
+                    p.Float32(stats._4K.Stream)
 
-                    p.Float64 stats._7KPlaytime
-                    p.Float32 stats._7K.Combined
-                    p.Float32 stats._7K.Jacks
-                    p.Float32 stats._7K.Chordstream
-                    p.Float32 stats._7K.Stream
+                    p.Float64(stats._7KPlaytime)
+                    p.Float32(stats._7K.Combined)
+                    p.Float32(stats._7K.Jacks)
+                    p.Float32(stats._7K.Chordstream)
+                    p.Float32(stats._7K.Stream)
 
-                    p.Float64 stats._10KPlaytime
-                    p.Float32 stats._10K.Combined
-                    p.Float32 stats._10K.Jacks
-                    p.Float32 stats._10K.Chordstream
-                    p.Float32 stats._10K.Stream
+                    p.Float64(stats._10KPlaytime)
+                    p.Float32(stats._10K.Combined)
+                    p.Float32(stats._10K.Jacks)
+                    p.Float32(stats._10K.Chordstream)
+                    p.Float32(stats._10K.Stream)
                 )
         }
 
@@ -241,7 +273,7 @@ module Stats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p user_id -> p.Int64 user_id
+            FillParameters = fun p user_id -> p.Int64(user_id)
             Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
@@ -267,7 +299,7 @@ module Stats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p user_id -> p.Int64 user_id
+            FillParameters = fun p user_id -> p.Int64(user_id)
             Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
@@ -291,16 +323,17 @@ module Stats =
             ORDER BY {by_column} DESC
             LIMIT 50;
             """
-            Read = (fun r ->
-                {
-                    UserId = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            Read =
+                (fun r ->
+                    {
+                        UserId = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private RANK_4K (by_column: string) : Query<int64, KeymodeRankModel> =
@@ -314,17 +347,18 @@ module Stats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p user_id -> p.Int64 user_id
-            Read = (fun r ->
-                {
-                    Rank = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            FillParameters = fun p user_id -> p.Int64(user_id)
+            Read =
+                (fun r ->
+                    {
+                        Rank = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private LEADERBOARD_4K_PLAYTIME = LEADERBOARD_4K "_4KPlaytime"
@@ -377,16 +411,17 @@ module Stats =
             ORDER BY {by_column} DESC
             LIMIT 50;
             """
-            Read = (fun r ->
-                {
-                    UserId = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            Read =
+                (fun r ->
+                    {
+                        UserId = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private RANK_7K (by_column: string) : Query<int64, KeymodeRankModel> =
@@ -400,17 +435,18 @@ module Stats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
-            FillParameters = fun p user_id -> p.Int64 user_id
-            Read = (fun r ->
-                {
-                    Rank = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            FillParameters = fun p user_id -> p.Int64(user_id)
+            Read =
+                (fun r ->
+                    {
+                        Rank = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private LEADERBOARD_7K_PLAYTIME = LEADERBOARD_7K "_7KPlaytime"
@@ -455,7 +491,7 @@ module Stats =
     let rank_7k_stream (user_id: int64) =
         RANK_7K_STREAM.Execute user_id core_db |> expect |> Array.tryExactlyOne
 
-    let private SUM_PLAYTIME : Query<unit, float option> =
+    let private SUM_PLAYTIME: Query<unit, float option> =
         { Query.without_parameters() with
             SQL = """SELECT sum(Playtime) FROM stats;"""
             Read = fun r -> r.Float64Option
@@ -464,7 +500,7 @@ module Stats =
     let sum_playtime () =
         SUM_PLAYTIME.Execute () core_db |> expect |> Array.tryExactlyOne |> Option.flatten |> Option.defaultValue 0.0
 
-    let private SUM_GAMETIME : Query<unit, float option> =
+    let private SUM_GAMETIME: Query<unit, float option> =
         { Query.without_parameters() with
             SQL = """SELECT sum(GameTime) FROM stats;"""
             Read = fun r -> r.Float64Option
@@ -486,7 +522,8 @@ type MonthlyStats =
         _10KPlaytime: float
         _10K: KeymodeTinyBreakdown
     }
-    static member Default : MonthlyStats =
+
+    static member Default: MonthlyStats =
         {
             LastSync = 0L
             Playtime = 0.0
@@ -504,7 +541,7 @@ module MonthlyStats =
     let DEFAULT = MonthlyStats.Default
 
     let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
+        { NonQuery.without_parameters() with
             SQL =
                 """
             CREATE TABLE monthly_stats (
@@ -550,19 +587,41 @@ module MonthlyStats =
             WHERE UserId = @UserId AND Month = @Month;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
-            Read = fun r ->
-                {
-                    LastSync = r.Int64
-                    Playtime = r.Float64
-                    XP = r.Int64
-                    _4KPlaytime = r.Float64
-                    _4K = { Combined = r.Float32; Jacks = r.Float32; Chordstream = r.Float32; Stream = r.Float32 }
-                    _7KPlaytime = r.Float64
-                    _7K = { Combined = r.Float32; Jacks = r.Float32; Chordstream = r.Float32; Stream = r.Float32 }
-                    _10KPlaytime = r.Float64
-                    _10K = { Combined = r.Float32; Jacks = r.Float32; Chordstream = r.Float32; Stream = r.Float32 }
-                }
+            FillParameters =
+                fun p (user_id, month) ->
+                    p.Int64(user_id)
+                    p.Int32(month)
+            Read =
+                fun r ->
+                    {
+                        LastSync = r.Int64
+                        Playtime = r.Float64
+                        XP = r.Int64
+                        _4KPlaytime = r.Float64
+                        _4K =
+                            {
+                                Combined = r.Float32
+                                Jacks = r.Float32
+                                Chordstream = r.Float32
+                                Stream = r.Float32
+                            }
+                        _7KPlaytime = r.Float64
+                        _7K =
+                            {
+                                Combined = r.Float32
+                                Jacks = r.Float32
+                                Chordstream = r.Float32
+                                Stream = r.Float32
+                            }
+                        _10KPlaytime = r.Float64
+                        _10K =
+                            {
+                                Combined = r.Float32
+                                Jacks = r.Float32
+                                Chordstream = r.Float32
+                                Stream = r.Float32
+                            }
+                    }
         }
 
     let get (month: int) (user_id: int64) : MonthlyStats option =
@@ -616,29 +675,29 @@ module MonthlyStats =
                 ]
             FillParameters =
                 (fun p (user_id, month, stats) ->
-                    p.Int64 user_id
-                    p.Int32 month
-                    p.Int64 stats.LastSync
-                    p.Float64 stats.Playtime
-                    p.Int64 stats.XP
+                    p.Int64(user_id)
+                    p.Int32(month)
+                    p.Int64(stats.LastSync)
+                    p.Float64(stats.Playtime)
+                    p.Int64(stats.XP)
 
-                    p.Float64 stats._4KPlaytime
-                    p.Float32 stats._4K.Combined
-                    p.Float32 stats._4K.Jacks
-                    p.Float32 stats._4K.Chordstream
-                    p.Float32 stats._4K.Stream
+                    p.Float64(stats._4KPlaytime)
+                    p.Float32(stats._4K.Combined)
+                    p.Float32(stats._4K.Jacks)
+                    p.Float32(stats._4K.Chordstream)
+                    p.Float32(stats._4K.Stream)
 
-                    p.Float64 stats._7KPlaytime
-                    p.Float32 stats._7K.Combined
-                    p.Float32 stats._7K.Jacks
-                    p.Float32 stats._7K.Chordstream
-                    p.Float32 stats._7K.Stream
+                    p.Float64(stats._7KPlaytime)
+                    p.Float32(stats._7K.Combined)
+                    p.Float32(stats._7K.Jacks)
+                    p.Float32(stats._7K.Chordstream)
+                    p.Float32(stats._7K.Stream)
 
-                    p.Float64 stats._10KPlaytime
-                    p.Float32 stats._10K.Combined
-                    p.Float32 stats._10K.Jacks
-                    p.Float32 stats._10K.Chordstream
-                    p.Float32 stats._10K.Stream
+                    p.Float64(stats._10KPlaytime)
+                    p.Float32(stats._10K.Combined)
+                    p.Float32(stats._10K.Jacks)
+                    p.Float32(stats._10K.Chordstream)
+                    p.Float32(stats._10K.Stream)
                 )
         }
 
@@ -655,7 +714,7 @@ module MonthlyStats =
             LIMIT 50;
             """
             Parameters = [ "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p month -> p.Int32 month
+            FillParameters = fun p month -> p.Int32(month)
             Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
@@ -671,7 +730,10 @@ module MonthlyStats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
+            FillParameters =
+                fun p (user_id, month) ->
+                    p.Int64(user_id)
+                    p.Int32(month)
             Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
@@ -685,7 +747,7 @@ module MonthlyStats =
             LIMIT 50;
             """
             Parameters = [ "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p month -> p.Int32 month
+            FillParameters = fun p month -> p.Int32(month)
             Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
@@ -701,7 +763,10 @@ module MonthlyStats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
+            FillParameters =
+                fun p (user_id, month) ->
+                    p.Int64(user_id)
+                    p.Int32(month)
             Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
@@ -727,17 +792,18 @@ module MonthlyStats =
             LIMIT 50;
             """
             Parameters = [ "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p month -> p.Int32 month
-            Read = (fun r ->
-                {
-                    UserId = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            FillParameters = fun p month -> p.Int32(month)
+            Read =
+                (fun r ->
+                    {
+                        UserId = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private RANK_4K (by_column: string) : Query<int64 * int, KeymodeRankModel> =
@@ -753,17 +819,21 @@ module MonthlyStats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
-            Read = (fun r ->
-                {
-                    Rank = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            FillParameters =
+                fun p (user_id, month) ->
+                    p.Int64(user_id)
+                    p.Int32(month)
+            Read =
+                (fun r ->
+                    {
+                        Rank = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private LEADERBOARD_4K_PLAYTIME = LEADERBOARD_4K "_4KPlaytime"
@@ -818,17 +888,18 @@ module MonthlyStats =
             LIMIT 50;
             """
             Parameters = [ "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p month -> p.Int32 month
-            Read = (fun r ->
-                {
-                    UserId = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            FillParameters = fun p month -> p.Int32(month)
+            Read =
+                (fun r ->
+                    {
+                        UserId = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private RANK_7K (by_column: string) : Query<int64 * int, KeymodeRankModel> =
@@ -844,17 +915,21 @@ module MonthlyStats =
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
-            Read = (fun r ->
-                {
-                    Rank = r.Int64
-                    Playtime = r.Float64
-                    Combined = r.Float32
-                    Jacks = r.Float32
-                    Chordstream = r.Float32
-                    Stream = r.Float32
-                }
-            )
+            FillParameters =
+                fun p (user_id, month) ->
+                    p.Int64(user_id)
+                    p.Int32(month)
+            Read =
+                (fun r ->
+                    {
+                        Rank = r.Int64
+                        Playtime = r.Float64
+                        Combined = r.Float32
+                        Jacks = r.Float32
+                        Chordstream = r.Float32
+                        Stream = r.Float32
+                    }
+                )
         }
 
     let private LEADERBOARD_7K_PLAYTIME = LEADERBOARD_7K "_7KPlaytime"
@@ -899,11 +974,11 @@ module MonthlyStats =
     let rank_7k_stream (user_id: int64) (month: int) =
         RANK_7K_STREAM.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
 
-    let private SUM_PLAYTIME : Query<int, float option> =
+    let private SUM_PLAYTIME: Query<int, float option> =
         {
             SQL = """SELECT sum(Playtime) FROM monthly_stats WHERE Month = @Month;"""
             Parameters = [ "@Month", SqliteType.Integer, 4 ]
-            FillParameters = fun p month -> p.Int32 month
+            FillParameters = fun p month -> p.Int32(month)
             Read = fun r -> r.Float64Option
         }
 

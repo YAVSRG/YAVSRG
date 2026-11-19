@@ -1,9 +1,10 @@
-﻿namespace Prelude
+namespace Prelude
 
 open System.IO
 open SixLabors.ImageSharp
 
 type Bitmap = Image<PixelFormats.Rgba32>
+
 module Bitmap =
 
     // todo: use to ensure correctness when upgrading to later versions of ImageSharp

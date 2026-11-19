@@ -1,4 +1,4 @@
-﻿namespace Prelude.Mods
+namespace Prelude.Mods
 
 open Prelude
 open Prelude.Charts
@@ -30,8 +30,7 @@ module NoLN =
         let mutable bpm_index = -1
 
         let update_min_length now =
-            while bpm_index < 0
-                  || (bpm_index + 1 < chart.BPM.Length && chart.BPM.[bpm_index + 1].Time < now) do
+            while bpm_index < 0 || (bpm_index + 1 < chart.BPM.Length && chart.BPM.[bpm_index + 1].Time < now) do
                 let ms_per_beat = chart.BPM.[bpm_index + 1].Data.MsPerBeat
                 length_threshold <- ms_per_beat * length - 3.0f<ms>
                 bpm_index <- bpm_index + 1
@@ -41,13 +40,16 @@ module NoLN =
         let remove_short_hold k start_index =
             let mutable i = start_index + 1
             let start_time = output.[start_index].Time
+
             while output.[i].Data.[k] <> NoteType.HOLDTAIL && output.[i].Time - start_time < length_threshold do
                 i <- i + 1
 
             if output.[i].Data.[k] = NoteType.HOLDTAIL then
                 short_hold_found <- true
+
                 for j = i downto start_index + 1 do
                     output.[j].Data.[k] <- NoteType.NOTHING
+
                 output.[start_index].Data.[k] <- NoteType.NORMAL
 
         let mutable i = 0
@@ -62,7 +64,4 @@ module NoLN =
 
             i <- i + 1
 
-        { chart with
-            Notes = output |> Array.ofSeq |> compact_empty
-        },
-        short_hold_found
+        { chart with Notes = output |> Array.ofSeq |> compact_empty }, short_hold_found
