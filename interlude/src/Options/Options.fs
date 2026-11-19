@@ -245,7 +245,7 @@ type GameOptions =
             LaneCover = LanecoverOptions.Default
             Noteskin = Skins.selected_noteskin_id
             SelectedHUD = Skins.selected_hud_id
-            Ruleset = rulesets.Selected
+            Ruleset = Setting.make rulesets.Select rulesets.get_Selected
 
             Pacemaker = Dictionary<string, PacemakerSettings>()
             EnablePacemaker = Setting.simple false

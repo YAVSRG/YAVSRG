@@ -61,7 +61,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                         .Position(Position.GridX(3, 4, 30.0f)),
 
                     ScoreScreenRulesetSwitcher(
-                        Setting.simple rulesets.Selected.Value
+                        Setting.simple rulesets.Selected
                         |> Setting.trigger(fun selection ->
                             score_info.RulesetInfo <- rulesets.GetCurrent(score_info.ChartMeta, selection)
 

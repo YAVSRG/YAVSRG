@@ -68,25 +68,26 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
     member this.Exists(file_id: string) : bool = loaded.ContainsKey(file_id)
 
-    member val Selected: Setting<RulesetSelection> =
-        let on_set (selection: RulesetSelection) : unit =
-            match selection with
-            | FileId new_id ->
-                if initialised then
-                    if not(loaded.ContainsKey(new_id)) then
-                        Logging.Warn "Ruleset '%s' not found, switching to default" new_id
-                        current_selection <- FileId(RulesetLibrary.DEFAULT_ID)
-                    else
-                        current_selection <- FileId(new_id)
+    member this.Selected = current_selection
 
-                    on_changed_ev.Trigger()
+    member this.Select(selection: RulesetSelection) : unit =
+        match selection with
+        | FileId new_id ->
+            if initialised then
+                if not(loaded.ContainsKey(new_id)) then
+                    Logging.Warn "Ruleset '%s' not found, switching to default" new_id
+                    current_selection <- FileId(RulesetLibrary.DEFAULT_ID)
                 else
                     current_selection <- FileId(new_id)
-            | OsuAutomatic od ->
-                current_selection <- OsuAutomatic od
-                on_changed_ev.Trigger()
 
-        Setting.make on_set (fun () -> current_selection)
+                on_changed_ev.Trigger()
+            else
+                current_selection <- FileId(new_id)
+        | OsuAutomatic od ->
+            current_selection <- OsuAutomatic od
+            on_changed_ev.Trigger()
+
+    member this.Select(file_id: string) : unit = this.Select(FileId(file_id))
 
     member this.GetCurrent(chart_meta: ChartMeta option, selection: RulesetSelection) : RulesetInfo =
         match selection with
@@ -222,14 +223,14 @@ type RulesetLibrary(rulesets_storage_path: string) =
                 | None -> this.Install(ruleset_info.Ruleset)
                 | Some id -> id
 
-            this.Selected.Set(FileId(id))
+            this.Select(id)
 
         match NativeRuleset.Detect(origins) with
         | Some(native_ruleset) ->
             match native_ruleset with
             | NativeRuleset.Wife3 -> ensure_installed_and_select(WIFE3_J4)
             | NativeRuleset.Quaver -> ensure_installed_and_select(QUAVER_STANDARD)
-            | NativeRuleset.OsuMania(od) -> this.Selected.Set(OsuAutomatic(od))
+            | NativeRuleset.OsuMania(od) -> this.Select(OsuAutomatic(od))
 
             true
         | None -> false
@@ -238,7 +239,7 @@ type RulesetLibrary(rulesets_storage_path: string) =
     /// The function being immutable means it can safely be passed into background tasks/other threads,
     /// If the user changes what is 'selected' on the RulesetLibrary, the thread can carry on with the old selection
     member this.RulesetProvider() : RulesetProvider =
-        match this.Selected.Value with
+        match this.Selected with
         | FileId file_id ->
             let constant_ruleset = loaded.[file_id]
             fun _ -> constant_ruleset

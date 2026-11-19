@@ -16,8 +16,8 @@ type SelectRulesetPage() =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
-    let mutable selected = rulesets.Selected.Value
-    let update_selected () = selected <- rulesets.Selected.Value
+    let mutable selected = rulesets.Selected
+    let update_selected () = selected <- rulesets.Selected
 
     let listed_ruleset (id: string, ruleset_info: RulesetInfo) : Widget =
 

@@ -28,11 +28,11 @@ module RulesetLibraryTests =
     let Load_SelectsDefault_WhenSelectionNotAvailable () : unit =
         let library = RulesetLibrary(Directory.CreateTempSubdirectory("rulesets").FullName)
 
-        library.Selected.Set(FileId("does_not_exist"))
-        Assert.True(library.Selected.Value = FileId("does_not_exist"))
+        library.Select("does_not_exist")
+        Assert.True(library.Selected = FileId("does_not_exist"))
 
         library.Load()
-        Assert.True(library.Selected.Value = FileId(RulesetLibrary.DEFAULT_ID))
+        Assert.True(library.Selected = FileId(RulesetLibrary.DEFAULT_ID))
 
     [<Test>]
     let Install_AddsNewRuleset () : unit =
@@ -220,20 +220,20 @@ module RulesetLibraryTests =
         let mutable event_fired = false
         library.OnChanged.Add(fun () -> event_fired <- true)
 
-        library.Selected.Set(FileId("my_id"))
+        library.Select("my_id")
         Assert.False(event_fired)
 
-        library.Selected.Set(FileId(RulesetLibrary.DEFAULT_ID))
+        library.Select(RulesetLibrary.DEFAULT_ID)
         Assert.False(event_fired)
 
         library.Load()
         Assert.False(event_fired)
 
-        library.Selected.Set(OsuAutomatic(8.0f))
+        library.Select(OsuAutomatic(8.0f))
         Assert.True(event_fired)
 
         event_fired <- false
-        library.Selected.Set(FileId("my_id"))
+        library.Select("my_id")
         Assert.True(event_fired)
 
     [<Test>]
@@ -243,7 +243,7 @@ module RulesetLibraryTests =
         let mutable event_fired = false
         library.OnChanged.Add(fun () -> event_fired <- true)
 
-        library.Selected.Set(FileId("does_not_exist"))
+        library.Select("does_not_exist")
         Assert.False(event_fired)
 
         library.Load()
@@ -260,7 +260,7 @@ module RulesetLibraryTests =
         Assert.False(event_fired)
 
         let new_id = library.Install(QUAVER_STANDARD.Ruleset)
-        library.Selected.Set(FileId(new_id))
+        library.Select(new_id)
         Assert.True(event_fired)
 
         event_fired <- false
@@ -278,7 +278,7 @@ module RulesetLibraryTests =
         Assert.False(event_fired)
 
         let new_id = library.Install(QUAVER_STANDARD.Ruleset)
-        library.Selected.Set(FileId(new_id))
+        library.Select(new_id)
         Assert.True(event_fired)
 
         event_fired <- false
@@ -292,11 +292,11 @@ module RulesetLibraryTests =
         library.Load()
 
         let new_id = library.Install(QUAVER_STANDARD.Ruleset)
-        library.Selected.Set(FileId(new_id))
+        library.Select(new_id)
 
         Assert.True(library.Delete(new_id))
         Assert.False(library.Exists(new_id))
-        Assert.True(library.Selected.Value = FileId(RulesetLibrary.DEFAULT_ID))
+        Assert.True(library.Selected = FileId(RulesetLibrary.DEFAULT_ID))
 
     [<Test>]
     let Delete_ReturnsFalse_WhenDeletingDefault () : unit =
