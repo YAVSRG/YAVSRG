@@ -33,7 +33,7 @@ module RulesetExtensions =
 
     type Ruleset with
 
-        static member GetNativeRulesetType(origins: ChartOrigin seq) : NativeRuleset option =
+        static member GetNativeRuleset(origins: ChartOrigin seq) : NativeRuleset option =
             let mutable wife3_as_fallback = false
 
             match
@@ -49,7 +49,7 @@ module RulesetExtensions =
             | None when wife3_as_fallback -> Some(NativeRuleset.Wife3)
             | otherwise -> otherwise
 
-        static member GetAutomaticOsuRuleset(origins: ChartOrigin seq) : RulesetInfo option =
+        static member GetNativeOsuRuleset(origins: ChartOrigin seq) : RulesetInfo option =
             Seq.tryPick
                 (function
                 | ChartOrigin.Osu osu -> Some(NativeRuleset.OsuMania(osu.SourceOD).ToInfo())

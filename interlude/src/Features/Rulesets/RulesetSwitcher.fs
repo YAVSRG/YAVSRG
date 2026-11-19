@@ -80,7 +80,7 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
     let switch_to_native_ruleset () =
         match SelectedChart.CACHE_DATA with
         | Some chart_meta ->
-            match Ruleset.GetNativeRulesetType(chart_meta.Origins) with
+            match Ruleset.GetNativeRuleset(chart_meta.Origins) with
             | Some(NativeRuleset.Wife3) -> rulesets.EnsureInstalledAndSelect(WIFE3_J4)
             | Some(NativeRuleset.Quaver) -> rulesets.EnsureInstalledAndSelect(QUAVER_STANDARD)
             | Some(NativeRuleset.OsuMania(od)) -> rulesets.Selected.Set(OsuAutomatic(od))
