@@ -61,8 +61,6 @@ type RulesetLibrary(rulesets_storage_path: string) =
 
         initialised <- true
 
-    member this.FindById(file_id: string) : RulesetInfo = loaded.[file_id]
-
     member this.FindByHash(hash: string) : RulesetInfo option =
         loaded.Values |> Seq.tryFind(fun ruleset -> ruleset.Hash = hash)
 
