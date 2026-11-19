@@ -5,6 +5,19 @@ open Percyqaz.Flux.Windowing
 open Prelude
 open Interlude.UI
 
+type NotificationType =
+    | Task
+    | System
+    | Result of button: (string * (unit -> unit)) option
+
+type Notification =
+    {
+        Icon: string
+        Title: string
+        Description: string
+        Type: NotificationType
+    }
+
 type DisplayedNotification =
     private
         {
@@ -15,6 +28,38 @@ type DisplayedNotification =
             ContentColor: Color * Color
             mutable Duration: float
         }
+
+    static member FromNotification(notification: Notification) : DisplayedNotification =
+        let body =
+            Callout.Small.Icon(notification.Icon).Title(notification.Title).Body(notification.Description)
+
+        let color =
+            match notification.Type with
+            | Task -> (Colors.pink_accent, Colors.pink)
+            | System -> (Colors.green_accent, Colors.green)
+            | Result _ -> (Colors.cyan_accent, Colors.cyan)
+
+        match notification.Type with
+        | Result(Some(button_label, button_action)) ->
+            let body = body.Button(button_label, button_action)
+
+            {
+                Data = body
+                Size = Callout.measure body
+                FillColor = color
+                ContentColor = Colors.text
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
+                Duration = 5000.0
+            }
+        | _ ->
+            {
+                Data = body
+                Size = Callout.measure body
+                FillColor = color
+                ContentColor = Colors.text
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
+                Duration = 2000.0
+            }
 
 module Notifications =
 
