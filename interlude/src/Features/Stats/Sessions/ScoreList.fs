@@ -10,7 +10,6 @@ open Prelude.Data.Options
 open Prelude.Data.UserDatabase
 open Prelude.Data.Stats
 open Prelude.Data.Library
-open Prelude.Gameplay.Rulesets
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -175,26 +174,16 @@ type Score(score_info: ScoreInfo) =
 
 module private ScoreList =
 
-    [<RequireQualifiedAccess>]
-    type ScoreListRuleset =
-        | Ruleset of RulesetInfo
-        | OsuAutomatic of od: float32
-
     let loader =
-        { new Async.CancelQueueSeq<int64 * int64 * ScoreListRuleset * (Widget -> unit) * (unit -> unit), unit -> unit>() with
-            member this.Process((start_time, end_time, ruleset, callback, callback_when_done)) =
+        { new Async.CancelQueueSeq<int64 * int64 * RulesetProvider * (Widget -> unit) * (unit -> unit), unit -> unit>() with
+            member this.Process((start_time, end_time, ruleset_provider, callback, callback_when_done)) =
                 seq {
                     for chart_hash, score in Content.UserData.GetScoresInTimeRange(start_time, end_time) do
                         match Content.Charts.TryGetCachedChartMeta(chart_hash) with
                         | Some chart_meta ->
                             match Content.Charts.GetChart(chart_hash) with
                             | Ok chart ->
-                                let ruleset_info =
-                                    match ruleset with
-                                    | ScoreListRuleset.Ruleset ruleset_info -> ruleset_info
-                                    | ScoreListRuleset.OsuAutomatic od ->
-                                        rulesets.GetCurrent(chart_meta, OsuAutomatic(od))
-
+                                let ruleset_info = ruleset_provider(chart_meta)
                                 let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset_info, score)
 
                                 yield fun () -> callback(Score(score_info))
@@ -248,16 +237,14 @@ type ScoreList(start_time: int64, end_time: int64) =
         )
 
         ScoreList.loader.Request(
-            (start_time
-             , end_time
-             , match rulesets.Selected.Value with
-               | OsuAutomatic od -> ScoreList.ScoreListRuleset.OsuAutomatic(od)
-               | FileId _ -> ScoreList.ScoreListRuleset.Ruleset(rulesets.GetCurrent(None))
-             , (fun s ->
+            (start_time,
+             end_time,
+             rulesets.RulesetProvider(),
+             (fun s ->
                  has_scores <- true
                  scores.Add(s)
-             )
-             , fun () -> finished_loading <- true)
+             ),
+             fun () -> finished_loading <- true)
         )
 
         base.Init(parent)
