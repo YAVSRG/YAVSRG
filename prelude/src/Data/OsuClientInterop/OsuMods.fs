@@ -4,7 +4,7 @@ open System.Runtime.CompilerServices
 open Prelude
 open Prelude.Mods
 
-type Mods =
+type OsuMods =
     | None = 0
     | NoFail = 1
     | Easy = 2
@@ -38,37 +38,37 @@ type Mods =
     | ScoreV2 = 536870912
     | Mirror = 1073741824
 
-type ModsExtensions =
+type OsuModsExtensions =
 
-    static member val private AllowedMods: Mods =
-        Mods.NoFail
-        ||| Mods.Easy
-        ||| Mods.Hidden
-        ||| Mods.HardRock
-        ||| Mods.SuddenDeath
-        ||| Mods.DoubleTime
-        ||| Mods.HalfTime
-        ||| Mods.Nightcore
-        ||| Mods.Flashlight
-        ||| Mods.Perfect
-        ||| Mods.FadeIn
-        ||| Mods.ScoreV2
-        ||| Mods.Mirror
+    static member val private AllowedMods: OsuMods =
+        OsuMods.NoFail
+        ||| OsuMods.Easy
+        ||| OsuMods.Hidden
+        ||| OsuMods.HardRock
+        ||| OsuMods.SuddenDeath
+        ||| OsuMods.DoubleTime
+        ||| OsuMods.HalfTime
+        ||| OsuMods.Nightcore
+        ||| OsuMods.Flashlight
+        ||| OsuMods.Perfect
+        ||| OsuMods.FadeIn
+        ||| OsuMods.ScoreV2
+        ||| OsuMods.Mirror
 
     [<Extension>]
-    static member ConvertToRateAndMods(mods: Mods) : (Rate * ModState) option =
-        if mods &&& ModsExtensions.AllowedMods <> mods then
+    static member ConvertToRateAndMods(mods: OsuMods) : (Rate * ModState) option =
+        if mods &&& OsuModsExtensions.AllowedMods <> mods then
             None
         else
 
             let rate =
-                if mods &&& Mods.DoubleTime = Mods.DoubleTime then 1.5f<rate>
-                elif mods &&& Mods.HalfTime = Mods.HalfTime then 0.75f<rate>
+                if mods &&& OsuMods.DoubleTime = OsuMods.DoubleTime then 1.5f<rate>
+                elif mods &&& OsuMods.HalfTime = OsuMods.HalfTime then 0.75f<rate>
                 else 1.0f<rate>
 
             let mod_state =
                 seq {
-                    if mods &&& Mods.Mirror = Mods.Mirror then
+                    if mods &&& OsuMods.Mirror = OsuMods.Mirror then
                         yield ("mirror", 0L)
                 }
                 |> Map.ofSeq

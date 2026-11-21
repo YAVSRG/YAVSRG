@@ -161,7 +161,7 @@
     <Compile Include="Data\Stats\TotalStats.fs" />
     <Compile Include="Data\Stats\Stats.fs" />
     <Compile Include="Data\Stats\StatsSync.fs" />
-    <Compile Include="Data\OsuClientInterop\Mods.fs" />
+    <Compile Include="Data\OsuClientInterop\OsuMods.fs" />
     <Compile Include="Data\OsuClientInterop\OsuDbHelpers.fs" />
     <Compile Include="Data\OsuClientInterop\OsuDatabase.fs" />
     <Compile Include="Data\OsuClientInterop\OsuScoreDatabase.fs" />

@@ -23,7 +23,7 @@ type OsuScoreDatabase_Score =
         Score: int
         MaxCombo: int16
         PerfectCombo: bool
-        ModsUsed: Mods
+        ModsUsed: OsuMods
         LifeBarGraph: string
         Timestamp: int64
         CompressedReplayBytes: byte array option
