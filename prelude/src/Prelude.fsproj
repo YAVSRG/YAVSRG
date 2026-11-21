@@ -45,7 +45,8 @@
     <Compile Include="Formats\Conversions\OsuConverter.fs" />
     <Compile Include="Formats\Conversions\StepManiaConverter.fs" />
     <Compile Include="Formats\Conversions\QuaverConverter.fs" />
-    <Compile Include="Mods\Types.fs" />
+    <Compile Include="Mods\ModdedChart.fs" />
+    <Compile Include="Mods\Mod.fs" />
     <Compile Include="Mods\Mirror.fs" />
     <Compile Include="Mods\ColumnSwap.fs" />
     <Compile Include="Mods\NoSV.fs" />
@@ -103,7 +104,7 @@
     <Compile Include="Skins\Noteskins\NoteskinConfig.fs" />
     <Compile Include="Skins\Noteskins\Noteskin.fs" />
     <Compile Include="Skins\Skin.fs" />
-    <Compile Include="Skins\Repo.fs" />
+    <Compile Include="Skins\SkinRepo.fs" />
     <Compile Include="Skins\Conversions\Helpers.fs" />
     <Compile Include="Skins\Conversions\osu!\Parser.fs" />
     <Compile Include="Skins\Conversions\osu!\OsuSkinFileSystem.fs" />
