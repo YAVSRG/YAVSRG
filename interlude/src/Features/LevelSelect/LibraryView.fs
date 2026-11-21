@@ -86,7 +86,7 @@ type LibraryViewControls() =
                 ),
 
             ModeDropdown(
-                Grouping.modes.Keys
+                LibraryGrouping.modes.Keys
                 |> Seq.map(fun id -> (id, Localisation.localise(sprintf "levelselect.groupby.%s" id))),
                 "Group",
                 options.ChartGroupMode |> Setting.trigger(ignore >> LevelSelect.refresh_all),

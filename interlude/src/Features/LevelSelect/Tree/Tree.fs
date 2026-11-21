@@ -63,7 +63,7 @@ module Tree =
 
             LibraryView.get_groups
                 LevelSelect.filter
-                Grouping.modes.[options.ChartGroupMode.Value]
+                LibraryGrouping.modes.[options.ChartGroupMode.Value]
                 options.ChartGroupReverse.Value
                 LibrarySorting.modes.[options.ChartSortMode.Value]
                 options.ChartSortReverse.Value

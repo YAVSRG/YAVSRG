@@ -13,7 +13,7 @@ type GroupMethod =
     | Collections
     | Levels
 
-module Grouping =
+module LibraryGrouping =
 
     let first_character (s: string) : string =
         if s.Length = 0 then "?"

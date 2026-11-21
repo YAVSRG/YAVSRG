@@ -20,7 +20,7 @@ let test() =
         }
 
     let search = "getty jumper"
-    let search_result = LibraryView.get_groups (FilterParts.parse search |> LibrarySearch.Build) Grouping.modes.["pack"] false
+    let search_result = LibraryView.get_groups (FilterParts.parse search |> LibrarySearch.Build) LibraryGrouping.modes.["pack"] false
                             LibrarySorting.modes.["difficulty"] false false None ctx
     let start = search_result |> Seq.head |> snd |> fun group -> fst group.Charts.[0]
 
