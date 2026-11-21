@@ -51,7 +51,7 @@ type EditNoteskinPage() =
                     %"skins.export",
                     fun () ->
                         if not(Skins.export_skin noteskin_id) then
-                            Notifications.error(
+                            Notifications.Error(
                                 %"notification.export_skin_failure.title",
                                 %"notification.export_skin_failure.body"
                             )

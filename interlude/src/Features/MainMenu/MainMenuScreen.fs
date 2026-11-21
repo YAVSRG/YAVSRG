@@ -126,7 +126,7 @@ type MainMenuScreen() =
 
     override this.OnEnter(prev: ScreenType) : unit =
         if Updates.update_available then
-            Notifications.system_feedback(
+            Notifications.System(
                 Icons.ALERT_OCTAGON,
                 %"notification.update_available.title",
                 %"notification.update_available.body"

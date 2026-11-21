@@ -73,10 +73,10 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
                 Menu.Back()
                 callback path
 
-            | MountedGameType.Osu, _ -> Notifications.error(%"mount.create.osu.error", "")
-            | MountedGameType.Quaver, _ -> Notifications.error(%"mount.create.quaver.error", "")
-            | MountedGameType.Stepmania, _ -> Notifications.error(%"mount.create.stepmania.error", "")
-            | MountedGameType.Etterna, _ -> Notifications.error(%"mount.create.etterna.error", "")
+            | MountedGameType.Osu, _ -> Notifications.Error(%"mount.create.osu.error")
+            | MountedGameType.Quaver, _ -> Notifications.Error(%"mount.create.quaver.error")
+            | MountedGameType.Stepmania, _ -> Notifications.Error(%"mount.create.stepmania.error")
+            | MountedGameType.Etterna, _ -> Notifications.Error(%"mount.create.etterna.error")
 
         let choose_path () : unit =
             FileDialog.pick_folder(
@@ -84,7 +84,7 @@ type private MountFolderPickerPage(game: MountedGameType, callback: string -> un
                 function
                 | FileDialogResult.Ok path -> path_chosen path
                 | FileDialogResult.Cancelled -> ()
-                | FileDialogResult.Error -> Notifications.error(%"notification.file_picker_error", "")
+                | FileDialogResult.Error -> Notifications.Error(%"notification.file_picker_error")
             )
 
         page_container().With(PageButton(%"mount.choose_folder", choose_path).Pos(6), CalloutCard(info).Pos(0))
@@ -114,7 +114,7 @@ module Mounts =
                         "%s Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
                         name
 
-                    Notifications.error(moved_warning, %"notification.mount_moved.body")
+                    Notifications.Error(moved_warning, %"notification.mount_moved.body")
             | None -> ()
 
         import_mount_if_auto_enabled(options.OsuMount, "osu!", %"notification.mount_moved.osu")
@@ -137,7 +137,7 @@ module Mounts =
             .WithCallback(
                 function
                 | Ok result ->
-                    Notifications.task_feedback(
+                    Notifications.Task(
                         Icons.FOLDER_PLUS,
                         %"notification.score_import_success",
                         [ result.NewScores.ToString(); result.Maps.ToString() ]
@@ -148,4 +148,4 @@ module Mounts =
             .Queue(general_task_queue)
 
         if notify_start then
-            Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.score_import_queued", "")
+            Notifications.System(Icons.ALERT_OCTAGON, %"notification.score_import_queued")

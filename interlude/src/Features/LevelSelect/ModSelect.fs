@@ -21,7 +21,7 @@ type private ColumnSwapPage() =
         | Ok columns ->
             SelectedChart.selected_mods.Value <-
                 ModState.cycle_column_swap "column_swap" columns SelectedChart.selected_mods.Value
-        | Error reason -> Notifications.error(reason, "")
+        | Error reason -> Notifications.Error(reason)
 
     override this.Content() : Widget =
         this.OnClose(this.TrySaveChanges)

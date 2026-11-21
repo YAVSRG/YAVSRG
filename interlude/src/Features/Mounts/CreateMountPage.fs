@@ -47,7 +47,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
             )
             .Queue(import_queue)
 
-        Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.import_queued", "")
+        Notifications.Result(Icons.FOLDER_PLUS, %"notification.import_queued")
         Menu.Back()
 
     override this.Content() : Widget =

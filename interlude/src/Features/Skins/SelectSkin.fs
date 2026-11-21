@@ -183,7 +183,7 @@ module SkinActions =
                     then
                         GameThread.defer(fun () -> EditNoteskinPage().Show())
                     else
-                        Notifications.error(
+                        Notifications.Error(
                             %"skins.extract_default_failed.title",
                             %"skins.extract_default_failed.body"
                         )

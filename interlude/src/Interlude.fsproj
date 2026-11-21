@@ -47,6 +47,7 @@
     <Compile Include="UI\Animations.fs" />
     <Compile Include="UI\Callouts.fs" />
     <Compile Include="UI\Notifications.fs" />
+    <Compile Include="UI\NotificationsDisplay.fs" />
     <Compile Include="UI\Loaders.fs" />
     <Compile Include="UI\AngledButton.fs" />
     <Compile Include="UI\InlaidButton.fs" />

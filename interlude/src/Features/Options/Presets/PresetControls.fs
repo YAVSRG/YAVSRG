@@ -32,7 +32,7 @@ module Presets =
         | Some name ->
             SelectedChart.recolor()
             SkinPreview.RefreshAll()
-            Notifications.action_feedback(Icons.ALERT_OCTAGON, %"notification.preset_loaded", name)
+            Notifications.Result(Icons.ALERT_OCTAGON, %"notification.preset_loaded", name)
         | None -> ()
 
     let confirm_if_needed (action: int * Setting<Preset option> -> unit) : int * Setting<Preset option> -> unit =
@@ -76,18 +76,14 @@ type PresetControls =
                 | None ->
                     let name = [ preset_id.ToString() ] %> "gameplay.preset.default_name"
                     setting.Value <- Presets.create name |> Some
-                    Notifications.action_feedback(Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
+                    Notifications.Result(Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
                 | Some existing ->
                     ConfirmPage(
                         [ existing.Name ] %> "gameplay.preset.save.prompt",
                         fun () ->
                             setting.Value <- Presets.save existing |> Some
 
-                            Notifications.action_feedback(
-                                Icons.ALERT_OCTAGON,
-                                %"notification.preset_saved",
-                                existing.Name
-                            )
+                            Notifications.Result(Icons.ALERT_OCTAGON, %"notification.preset_saved", existing.Name)
                     )
                         .Show()
             )

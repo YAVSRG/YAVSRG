@@ -17,7 +17,7 @@ type EditFolderPage(name: string, folder: Folder) =
             if Content.Collections.RenameCollection(name, new_name.Value) then
                 CollectionActions.collection_modified_ev.Trigger()
             else
-                Notifications.action_feedback(
+                Notifications.Result(
                     Icons.X,
                     %"notification.collection_rename_failed.title",
                     %"notification.collection_rename_failed.body"

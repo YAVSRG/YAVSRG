@@ -146,7 +146,7 @@ module Gameplay =
     let delete_score (score_info: ScoreInfo) : unit =
         if Content.UserData.DeleteScore(score_info) then
             score_deleted_ev.Trigger(score_info.TimePlayed)
-            Notifications.action_feedback(Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted", "")
+            Notifications.Result(Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted")
         else
             Logging.Debug("Couldn't find score matching timestamp to delete")
 

@@ -35,7 +35,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
     let import () : unit =
         match OsuReplay.to_score replay chart chart.FirstNote rate.Value with
         | Ok score -> show_replay score
-        | Error reason -> Notifications.error(%"osu_replay_import.failed", reason)
+        | Error reason -> Notifications.Error(%"osu_replay_import.failed", reason)
 
     override this.Content() : Widget =
         page_container()
@@ -98,7 +98,7 @@ module Replay =
         | Some(chart, chart_meta, rate, first_note) ->
             match OsuReplay.to_score replay chart first_note rate with
             | Ok score -> show_replay replay.Player chart_meta chart score
-            | Error reason -> Notifications.error(%"osu_replay_import.failed", reason)
+            | Error reason -> Notifications.Error(%"osu_replay_import.failed", reason)
         | None ->
 
         // Strategy 2: Ask the user some details then assume it's the chart they have selected

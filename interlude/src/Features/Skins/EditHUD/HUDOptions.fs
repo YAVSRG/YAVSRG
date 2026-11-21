@@ -35,7 +35,7 @@ type EditHUDPage(ctx: PositionerContext) =
                     %"skins.export",
                     fun () ->
                         if not(Skins.export_skin hud_id) then
-                            Notifications.error(
+                            Notifications.Error(
                                 %"notification.export_skin_failure.title",
                                 %"notification.export_skin_failure.body"
                             )

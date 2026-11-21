@@ -15,9 +15,9 @@ module OsuExport =
         match Exports.create_osz options chart chart_meta (get_game_folder "Exports") with
         | Ok _ ->
             open_directory(get_game_folder "Exports")
-            Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
+            Notifications.Result(Icons.CHECK, %"notification.song_exported.title")
         | Error err ->
-            Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
+            Notifications.Error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
             Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
 
     let export_chart_with_mods (chart: ModdedChart) (chart_meta: ChartMeta) (options: OsuExportOptions) : unit =
@@ -41,9 +41,9 @@ module OsuExport =
         match Exports.create_osz options chart_with_mods meta_with_mods (get_game_folder "Exports") with
         | Ok _ ->
             open_directory(get_game_folder "Exports")
-            Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
+            Notifications.Result(Icons.CHECK, %"notification.song_exported.title")
         | Error err ->
-            Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
+            Notifications.Error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
             Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
 
     let bulk_export (charts: (Result<Chart, string> * ChartMeta) seq) (options: OsuExportOptions) : unit =
@@ -70,7 +70,7 @@ module OsuExport =
                     failed <- failed + 1
                     Logging.Error "Error fetching chart for '%s' to export: %s" chart_meta.Hash reason
 
-            Notifications.action_feedback(
+            Notifications.Result(
                 Icons.CHECK,
                 %"notification.bulk_exported.title",
                 [ ok.ToString(); failed.ToString() ] %> "notification.bulk_exported.body"

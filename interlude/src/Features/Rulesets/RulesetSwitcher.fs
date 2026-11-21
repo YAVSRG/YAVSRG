@@ -84,7 +84,7 @@ type RulesetSwitcher(setting: Setting<RulesetSelection>) =
             if rulesets.SwitchToNativeRuleset(chart_meta.Origins, options.AutomaticOsuOD.Value) then
                 Style.click.Play()
             else
-                Notifications.system_feedback(
+                Notifications.System(
                     Icons.HELP_CIRCLE,
                     %"notification.no_native_ruleset.title",
                     %"notification.no_native_ruleset.body"

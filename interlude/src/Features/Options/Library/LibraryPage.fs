@@ -22,15 +22,11 @@ module LibraryActions =
         RecalculatePersonalBestsTask(Content.Library, rulesets, false)
             .Track(TaskTracking.add %"library.recalculate_personal_bests")
             .WithCallback(fun () ->
-                Notifications.system_feedback(
-                    Icons.ALERT_OCTAGON,
-                    %"notification.score_recalculation_complete.title",
-                    ""
-                )
+                Notifications.System(Icons.ALERT_OCTAGON, %"notification.score_recalculation_complete.title")
             )
             .Queue(general_task_queue)
 
-        Notifications.system_feedback(
+        Notifications.System(
             Icons.ALERT_OCTAGON,
             %"notification.score_recalculation_started.title",
             %"notification.score_recalculation_started.body"
@@ -40,11 +36,11 @@ module LibraryActions =
         RecalculatePatternsTask(Content.Charts)
             .Track(TaskTracking.add %"library.recache_patterns")
             .WithCallback(fun () ->
-                Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.pattern_cache_complete.title", "")
+                Notifications.System(Icons.ALERT_OCTAGON, %"notification.pattern_cache_complete.title")
             )
             .Queue(general_task_queue)
 
-        Notifications.system_feedback(
+        Notifications.System(
             Icons.ALERT_OCTAGON,
             %"notification.pattern_cache_started.title",
             %"notification.pattern_cache_started.body"
@@ -53,9 +49,7 @@ module LibraryActions =
     let vacuum () : unit =
         VacuumTask(true, Content.Charts)
             .Track(TaskTracking.add %"library.vacuum")
-            .WithCallback(fun () ->
-                Notifications.system_feedback(Icons.ALERT_OCTAGON, %"notification.vacuum_complete.title", "")
-            )
+            .WithCallback(fun () -> Notifications.System(Icons.ALERT_OCTAGON, %"notification.vacuum_complete.title"))
             .Queue(general_task_queue)
 
 type LibraryPage() =

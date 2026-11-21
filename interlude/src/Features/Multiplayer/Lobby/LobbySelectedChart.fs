@@ -73,13 +73,13 @@ module LobbySelectedChart =
                         lobby.ReportMissingChart()
                         is_loading <- false
 
-                        Notifications.error(
+                        Notifications.Error(
                             %"notification.multiplayer_chart_not_found.title",
                             %"notification.multiplayer_chart_not_found.body"
                         )
                     | true ->
                         let newly_installed = Content.Charts.GetChartMeta(chart.Hash).Value
-                        Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
+                        Notifications.Task(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
 
                         GameThread.defer(fun () ->
                             SelectedChart.change(newly_installed, LibraryContext.None, true)

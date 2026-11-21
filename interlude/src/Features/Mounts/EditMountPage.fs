@@ -24,7 +24,7 @@ type private EditMountPage
         queued_import <- -1
         mount.DeleteLinkedCharts(Content.Charts)
         Content.TriggerChartAdded(None)
-        Notifications.action_feedback(Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
+        Notifications.Result(Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
         Menu.Back()
 
     member this.SaveChangesAndImport() : unit =
@@ -75,7 +75,7 @@ type private EditMountPage
                         %"mount.import",
                         fun () ->
                             queued_import <- 1
-                            Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.import_queued", "")
+                            Notifications.Result(Icons.FOLDER_PLUS, %"notification.import_queued")
                     )
                     .Help(Help.Info("mount.import"))
                     .Pos(9),
@@ -84,7 +84,7 @@ type private EditMountPage
                         %"mount.importall",
                         fun () ->
                             queued_import <- 2
-                            Notifications.action_feedback(Icons.FOLDER_PLUS, %"notification.import_queued", "")
+                            Notifications.Result(Icons.FOLDER_PLUS, %"notification.import_queued")
                     )
                     .Help(Help.Info("mount.importall"))
                     .Pos(11),
