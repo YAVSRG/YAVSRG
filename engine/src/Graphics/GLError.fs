@@ -3,12 +3,11 @@ namespace Percyqaz.Flux.Graphics
 open System
 open OpenTK.Graphics.OpenGL
 
-[<AutoOpen>]
-module private Helpers =
+type private GLError =
 
-    let mutable first_error = true
+    static let mutable first_error = true
 
-    let check_gl_error () =
+    static member Check() : unit =
         let error = GL.GetError()
 
         if error <> ErrorCode.NoError && first_error then

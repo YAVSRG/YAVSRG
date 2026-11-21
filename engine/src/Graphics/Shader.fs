@@ -43,7 +43,7 @@ module private Shader =
         GL.DeleteShader(frag)
 
         GL.UseProgram(program)
-        check_gl_error()
+        GLError.Check()
 
         program
 
@@ -70,12 +70,12 @@ module private Shader =
 
     let set_uniform_mat4 (location: int, value: Matrix4) : unit =
         GL.UniformMatrix4(location, false, ref value)
-        check_gl_error()
+        GLError.Check()
 
     let set_uniform_f32 (location: int, value: float32) : unit =
         GL.Uniform1(location, value)
-        check_gl_error()
+        GLError.Check()
 
     let set_uniform_i32 (location: int, value: int) : unit =
         GL.Uniform1(location, value)
-        check_gl_error()
+        GLError.Check()

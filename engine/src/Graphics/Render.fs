@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Graphics
+namespace Percyqaz.Flux.Graphics
 
 open System
 open System.Drawing
@@ -81,7 +81,7 @@ module Render =
             if clear then
                 GL.Clear(ClearBufferMask.ColorBufferBit)
 
-            check_gl_error()
+            GLError.Check()
 
             fbo_stack <- this.fbo_id :: fbo_stack
 
@@ -113,7 +113,7 @@ module Render =
 
             GL.GenTextures(1, &texture_ids.[i])
             GL.BindTexture(TextureTarget.Texture2DArray, texture_ids.[i])
-            check_gl_error()
+            GLError.Check()
 
             GL.TexImage3D(
                 TextureTarget.Texture2DArray,
@@ -168,7 +168,7 @@ module Render =
 
             GL.GenFramebuffers(1, &fbo_ids.[i])
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_ids.[i])
-            check_gl_error()
+            GLError.Check()
 
             //GL.RenderbufferStorage(
             //    RenderbufferTarget.Renderbuffer,
@@ -186,10 +186,10 @@ module Render =
                 1
             )
 
-            check_gl_error()
+            GLError.Check()
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
-        check_gl_error()
+        GLError.Check()
 
     (*
         User methods for drawing things to the screen
@@ -304,7 +304,7 @@ module Render =
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
         stencil_depth <- stencil_depth + 1
 
-        check_gl_error()
+        GLError.Check()
 
     /// <summary>
     /// Begins drawing to the screen, using the stencil created by <see cref="stencil_create"/> as a mask.<br/>
@@ -318,7 +318,7 @@ module Render =
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
 
-        check_gl_error()
+        GLError.Check()
 
     /// <summary>
     /// Begins drawing to the screen, using the stencil created by <see cref="stencil_create"/> as a mask.<br/>
@@ -338,7 +338,7 @@ module Render =
         else
             GL.StencilFunc(StencilFunction.Lequal, stencil_depth, 0xFF)
 
-        check_gl_error()
+        GLError.Check()
 
     let mutable private alpha_mult = 0.0f
 
@@ -512,7 +512,7 @@ module Render =
             |> min(framebuffer_height - viewport_height)
 
         GL.Viewport(_viewport_left, _viewport_top, _viewport_width, _viewport_height)
-        check_gl_error()
+        GLError.Check()
         let width, height = float32 viewport_width, float32 viewport_height
         _width <- (width / height) * 1080.0f
         _height <- 1080.0f
@@ -526,14 +526,14 @@ module Render =
     let internal start () : unit =
         GL.Clear(ClearBufferMask.ColorBufferBit)
         _batch.Start()
-        check_gl_error()
+        GLError.Check()
 
     let internal finish () : unit =
         _batch.Finish()
         assert (stencil_depth = 0)
         assert (alpha_mult = 1.0f)
         GL.Flush()
-        check_gl_error()
+        GLError.Check()
 
     let internal init (framebuffer: int * int) (viewport: _) : unit =
         GL.Disable(EnableCap.CullFace)
@@ -549,7 +549,7 @@ module Render =
         )
 
         GL.ClearStencil(0x00)
-        check_gl_error()
+        GLError.Check()
 
         Shader.init()
 
@@ -563,7 +563,7 @@ module Render =
 
         _batch <- Batch.Create(1024)
         alpha_multiplier_restore 1.0f
-        check_gl_error()
+        GLError.Check()
 
     (*
         Additional utilities
