@@ -5,7 +5,7 @@
     <CETCompat>false</CETCompat>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Resources\Icons.fs" />
+    <Compile Include="Resources\FeatherIcons.fs" />
     <EmbeddedResource Include="Resources\Inconsolata.ttf" />
     <EmbeddedResource Include="Resources\feather.ttf" />
     <EmbeddedResource Include="Resources\shader.frag" />

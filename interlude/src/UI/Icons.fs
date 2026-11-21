@@ -1,6 +1,6 @@
 namespace Interlude.UI
 
-type Icons = Percyqaz.Flux.Icons.Feather
+type Icons = Percyqaz.Flux.Resources.FeatherIcons
 
 [<AutoOpen>]
 module IconOperators =
