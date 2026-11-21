@@ -128,7 +128,7 @@ module OsuReplay =
         (original_osu_file_first_note: Time)
         (original_osu_file_rate: Rate)
         : Result<Score, string> =
-        match Mods.to_interlude_rate_and_mods osu_replay.ModsUsed with
+        match osu_replay.ModsUsed.ConvertToRateAndMods() with
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 

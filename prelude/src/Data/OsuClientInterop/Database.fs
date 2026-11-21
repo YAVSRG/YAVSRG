@@ -2,6 +2,7 @@ namespace Prelude.Data.OsuClientInterop
 
 open System
 open System.IO
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Prelude
 open Prelude.Mods
@@ -40,9 +41,9 @@ type Mods =
     | ScoreV2 = 536870912
     | Mirror = 1073741824
 
-module Mods =
+type ModsExtensions =
 
-    let interlude_recognised_mods =
+    static member val private AllowedMods: Mods =
         Mods.NoFail
         ||| Mods.Easy
         ||| Mods.Hidden
@@ -57,8 +58,9 @@ module Mods =
         ||| Mods.ScoreV2
         ||| Mods.Mirror
 
-    let to_interlude_rate_and_mods (mods: Mods) : (Rate * ModState) option =
-        if mods &&& interlude_recognised_mods <> mods then
+    [<Extension>]
+    static member ConvertToRateAndMods(mods: Mods) : (Rate * ModState) option =
+        if mods &&& ModsExtensions.AllowedMods <> mods then
             None
         else
 

@@ -148,7 +148,7 @@ let read_scores () =
                     let interlude_replay =
                         OsuReplay.decode (replay, chart.Value.Chart.FirstNote, 1.0f<rate>)
 
-                    match Mods.to_interlude_rate_and_mods replay.ModsUsed with
+                    match replay.ModsUsed.ConvertToRateAndMods() with
                     | Some(rate, _) ->
                         compare_interlude_implementation_to_osu (
                             chart.Value.Chart,
