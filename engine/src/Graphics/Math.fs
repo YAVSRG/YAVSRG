@@ -461,7 +461,7 @@ module Quad =
         }
 
 [<AutoOpen>]
-module AsQuadExtensions =
+module QuadExtensions =
 
     type Color with
         member inline this.AsQuad: QuadColors = Quad.from_color this
