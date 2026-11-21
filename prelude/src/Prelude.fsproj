@@ -153,7 +153,8 @@
     <Compile Include="Data\Library\Views\Sorting.fs" />
     <Compile Include="Data\Library\Views\Grouping.fs" />
     <Compile Include="Data\Library\Views\Views.fs" />
-    <Compile Include="Data\Library\Endless.fs" />
+    <Compile Include="Data\Library\Suggestion.fs" />
+    <Compile Include="Data\Library\EndlessModeState.fs" />
     <Compile Include="Data\Stats\StatsHelpers.fs" />
     <Compile Include="Data\Stats\Clock.fs" />
     <Compile Include="Data\Stats\CurrentSession.fs" />
