@@ -12,6 +12,7 @@
 	  <EmbeddedResource Include="Resources\feather.ttf" />
 	  <EmbeddedResource Include="Resources\shader.frag" />
 	  <EmbeddedResource Include="Resources\shader.vert" />
+	  <Compile Include="Graphics\GLError.fs" />
 	  <Compile Include="Graphics\Math.fs" />
 	  <Compile Include="Graphics\Shader.fs" />
 	  <Compile Include="Graphics\Sprite.fs" />

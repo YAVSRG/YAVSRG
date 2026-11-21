@@ -7,7 +7,6 @@ open Percyqaz.Common
 
 type BassErrorExtensions =
 
-    // todo: use this in more places, it's extremely useful!
     [<MethodImpl(MethodImplOptions.NoInlining)>]
     static member Stacktrace(depth: int) : string =
         let fmt_method (frame: StackFrame) =
