@@ -148,11 +148,11 @@
     <Compile Include="Data\UserDatabase\UserDatabaseMigrations.fs" />
     <Compile Include="Data\UserDatabase\UserDatabase.fs" />
     <Compile Include="Data\Library\Library.fs" />
-    <Compile Include="Data\Library\Views\Shared.fs" />
-    <Compile Include="Data\Library\Views\Filtering.fs" />
+    <Compile Include="Data\Library\Views\LibraryContext.fs" />
+    <Compile Include="Data\Library\Views\LibraryFilter.fs" />
     <Compile Include="Data\Library\Views\Sorting.fs" />
     <Compile Include="Data\Library\Views\Grouping.fs" />
-    <Compile Include="Data\Library\Views\Views.fs" />
+    <Compile Include="Data\Library\Views\LibraryView.fs" />
     <Compile Include="Data\Library\Suggestion.fs" />
     <Compile Include="Data\Library\EndlessModeState.fs" />
     <Compile Include="Data\Stats\StatsHelpers.fs" />

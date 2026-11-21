@@ -434,7 +434,7 @@ module SelectedChart =
         | None ->
             match
                 Suggestion.get_random
-                    Filter.Empty
+                    LibraryFilter.Empty
                     { Rate = rate.Value; RulesetProvider = rulesets.RulesetProvider(); Library = Content.Library }
             with
             | Some chart_meta -> change(chart_meta, LibraryContext.None, true)

@@ -15,7 +15,7 @@ module LibraryView =
         |> List.ofSeq
 
     let private get_collection_groups
-        (filter_by: FilteredSearch)
+        (filter_by: LibrarySearch)
         (reverse_groups: bool)
         (sort_by: SortMethod)
         (reverse_sorting: bool)
@@ -80,7 +80,7 @@ module LibraryView =
         }
 
     let private get_table_groups
-        (filter_by: FilteredSearch)
+        (filter_by: LibrarySearch)
         (reverse_groups: bool)
         (sort_by: SortMethod)
         (reverse_sorting: bool)
@@ -113,7 +113,7 @@ module LibraryView =
         |> Seq.map(fun kvp -> snd kvp.Key, kvp.Value)
 
     let private get_normal_groups
-        (filter_by: FilteredSearch)
+        (filter_by: LibrarySearch)
         (group_by: GroupFunc)
         (reverse_groups: bool)
         (sort_by: SortMethod)
@@ -143,7 +143,7 @@ module LibraryView =
         |> Seq.map(fun kvp -> snd kvp.Key, kvp.Value.ToGroup(reverse_sorting))
 
     let private get_packs
-        (filter_by: FilteredSearch)
+        (filter_by: LibrarySearch)
         (reverse_groups: bool)
         (sort_by: SortMethod)
         (reverse_sorting: bool)
@@ -172,7 +172,7 @@ module LibraryView =
         |> Seq.map(fun kvp -> kvp.Key, kvp.Value.ToGroup(reverse_sorting))
 
     let get_groups
-        (filter_by: FilteredSearch)
+        (filter_by: LibrarySearch)
         (group_by: GroupMethod)
         (reverse_groups: bool)
         (sort_by: SortMethod)

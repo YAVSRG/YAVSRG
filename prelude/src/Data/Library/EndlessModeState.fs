@@ -22,7 +22,7 @@ module EndlessModeState =
         (name: string)
         (playlist: Playlist)
         (library: Library)
-        (filter: FilteredSearch)
+        (filter: LibrarySearch)
         (state: EndlessModeState)
         =
         state.Playlist <- name
@@ -43,7 +43,7 @@ module EndlessModeState =
         (name: string)
         (playlist: Playlist)
         (library: Library)
-        (filter: FilteredSearch)
+        (filter: LibrarySearch)
         (state: EndlessModeState)
         =
         state.Playlist <- name

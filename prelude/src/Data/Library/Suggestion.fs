@@ -12,7 +12,7 @@ type SuggestionContext =
     {
         BaseChart: ChartMeta * Rate
         Mods: ModState
-        Filter: FilteredSearch
+        Filter: LibrarySearch
         MinimumRate: Rate
         MaximumRate: Rate
         OnlyNewCharts: bool
@@ -67,7 +67,7 @@ module Suggestion =
 
         similarity
 
-    let get_random (filter_by: Filter) (ctx: LibraryViewContext) : ChartMeta option =
+    let get_random (filter_by: LibraryFilter) (ctx: LibraryViewContext) : ChartMeta option =
         let rand = Random()
 
         let charts = filter_by.Apply(ctx.Library.Charts.Cache.Values) |> Array.ofSeq
