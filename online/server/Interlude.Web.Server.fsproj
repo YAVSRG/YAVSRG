@@ -11,7 +11,7 @@
     <Compile Include="Domain\Core\Replays.fs" />
     <Compile Include="Domain\Core\Scores.fs" />
     <Compile Include="Domain\Core\Stats.fs" />
-    <Compile Include="Domain\Core\Tables.fs" />
+    <Compile Include="Domain\Core\TableRating.fs" />
     <Compile Include="Domain\Backbeat\Sources.fs" />
     <Compile Include="Domain\Backbeat\Songs.fs" />
     <Compile Include="Domain\Backbeat\Tables.fs" />
@@ -21,8 +21,8 @@
     <Compile Include="Domain\Services\Users.fs" />
     <Compile Include="Domain\Services\Stats.fs" />
     <Compile Include="Domain\Database.fs" />
-    <Compile Include="Online\Sessions.fs" />
-    <Compile Include="Online\Lobbies.fs" />
+    <Compile Include="Online\Session.fs" />
+    <Compile Include="Online\Lobby.fs" />
     <Compile Include="Online\Online.fs" />
     <Compile Include="Bot\Constants.fs" />
     <Compile Include="Bot\UserInteractables.fs" />

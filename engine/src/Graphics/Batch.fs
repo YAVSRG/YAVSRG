@@ -39,7 +39,7 @@ type internal Batch =
         if this.vcount > 0 then
             GL.BufferSubData(BufferTarget.ArrayBuffer, 0, nativeint(this.vcount * sizeof<Vertex>), this.vertices)
             GL.DrawArrays(PrimitiveType.Triangles, 0, this.vcount)
-            check_gl_error()
+            GLError.Check()
 
         this.vcount <- 0
 
@@ -117,7 +117,7 @@ type internal Batch =
         // 1 int in slot 3, for texture layer
         GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 4 + 4)
         GL.EnableVertexAttribArray(3)
-        check_gl_error()
+        GLError.Check()
 
         {
             capacity = capacity

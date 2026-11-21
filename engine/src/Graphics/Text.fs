@@ -8,7 +8,7 @@ open SixLabors.ImageSharp.Processing
 open SixLabors.ImageSharp.Drawing.Processing
 open System.Collections.Generic
 open Percyqaz.Common
-open Percyqaz.Flux.Icons
+open Percyqaz.Flux.Resources
 
 type private GlyphInfo =
     {
@@ -145,7 +145,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
         let rows =
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
-            + Feather.CONCAT
+            + FeatherIcons.CONCAT
             |> Seq.chunkBySize 25
             |> Seq.map String
 

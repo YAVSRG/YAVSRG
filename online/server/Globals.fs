@@ -4,6 +4,7 @@ open System.IO
 open System.Reflection
 open Percyqaz.Common
 open Percyqaz.Data
+open Percyqaz.Data.Sqlite
 open Prelude
 
 [<Json.AutoCodec(false)>]
@@ -57,10 +58,8 @@ module Secrets =
         use tr = new StreamReader(stream)
         tr.ReadToEnd()
 
-open Percyqaz.Data.Sqlite
-
 [<AutoOpen>]
-module internal DatabaseRef =
+module internal Globals =
 
     let mutable core_db = Unchecked.defaultof<Database>
     let mutable backbeat_db = Unchecked.defaultof<Database>

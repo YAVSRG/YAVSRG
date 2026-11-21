@@ -118,7 +118,7 @@ module Texture =
                         GL.ActiveTexture(int TextureUnit.Texture0 + i |> enum)
                         GL.BindTexture(TextureTarget.Texture2DArray, texture.Handle)
                         GL.ActiveTexture(TextureUnit.Texture0)
-                        check_gl_error()
+                        GLError.Check()
 
                         if TRACE then
                             Logging.Debug "Texture slot [%i] <- %i" i texture.Handle
@@ -473,7 +473,7 @@ module Sprite =
 
             info.Label, sprite
 
-        check_gl_error()
+        GLError.Check()
 
         texture, images |> Array.map gen_sprite
 
