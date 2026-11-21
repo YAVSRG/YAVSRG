@@ -188,7 +188,7 @@ type OsuDatabase_Beatmap =
         ManiaScrollSpeed: byte
     }
 
-    static member Read (db_version: int) (br: BinaryReader) =
+    static member Read(db_version: int, br: BinaryReader) =
         try
             {
                 Size = if db_version < 20191106 then read_int br |> Some else None
@@ -273,7 +273,7 @@ type OsuDatabase =
             Beatmaps =
                 let count = read_int br
                 Logging.Info "osu! Database header says there are %i beatmaps to read" count
-                Array.init count (fun _ -> OsuDatabase_Beatmap.Read version br)
+                Array.init count (fun _ -> OsuDatabase_Beatmap.Read(version, br))
             UserPermissions = read_int br
         }
 
