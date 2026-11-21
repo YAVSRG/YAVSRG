@@ -165,7 +165,7 @@
     <Compile Include="Data\OsuClientInterop\OsuDbHelpers.fs" />
     <Compile Include="Data\OsuClientInterop\OsuDatabase.fs" />
     <Compile Include="Data\OsuClientInterop\OsuScoreDatabase.fs" />
-    <Compile Include="Data\OsuClientInterop\Replays.fs" />
+    <Compile Include="Data\OsuClientInterop\OsuReplay.fs" />
     <Compile Include="Data\Imports\BackgroundTasks\AsyncExtensions.fs" />
     <Compile Include="Data\Imports\BackgroundTasks\TaskStatus.fs" />
     <Compile Include="Data\Imports\BackgroundTasks\TaskContext.fs" />
