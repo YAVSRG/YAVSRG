@@ -6,7 +6,7 @@ open Prelude.Data.UserDatabase
 type internal SortingTag = string * float32 * float32
 type SortMethod = ChartMeta * LibraryViewContext -> SortingTag
 
-module Sorting =
+module LibrarySorting =
 
     let modes: IDictionary<string, SortMethod> =
         dict

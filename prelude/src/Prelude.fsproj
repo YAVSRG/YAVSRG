@@ -150,8 +150,8 @@
     <Compile Include="Data\Library\Library.fs" />
     <Compile Include="Data\Library\Views\LibraryContext.fs" />
     <Compile Include="Data\Library\Views\LibraryFilter.fs" />
-    <Compile Include="Data\Library\Views\Sorting.fs" />
-    <Compile Include="Data\Library\Views\Grouping.fs" />
+    <Compile Include="Data\Library\Views\LibrarySorting.fs" />
+    <Compile Include="Data\Library\Views\LibraryGrouping.fs" />
     <Compile Include="Data\Library\Views\LibraryView.fs" />
     <Compile Include="Data\Library\Suggestion.fs" />
     <Compile Include="Data\Library\EndlessModeState.fs" />
