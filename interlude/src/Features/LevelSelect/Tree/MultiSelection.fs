@@ -43,17 +43,12 @@ type MultiSelection =
 
             if
                 match this.Context, ctx with
-
                 | MultiSelectContext.Normal, LibraryContext.None
                 | MultiSelectContext.Normal, LibraryContext.Pack _
                 | MultiSelectContext.Normal, LibraryContext.Table _ -> true
-
                 | MultiSelectContext.Likes, LibraryContext.Likes -> true
-
                 | MultiSelectContext.Folder f, LibraryContext.Folder f2 when f = f2 -> true
-
                 | MultiSelectContext.Playlist p, LibraryContext.Playlist(_, p2, _) when p = p2 -> true
-
                 | _ -> false
             then
                 this.Selected.Add(item) |> ignore

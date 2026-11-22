@@ -14,7 +14,7 @@ open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
 
-module EditHudScreen =
+module EditHUDScreen =
 
     let rec edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
 

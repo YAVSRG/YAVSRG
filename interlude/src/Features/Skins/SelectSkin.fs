@@ -162,7 +162,7 @@ module SkinActions =
         SelectedChart.if_loaded(fun info ->
             if
                 Screen.change_new
-                    (fun () -> EditHudScreen.edit_hud_screen(info, on_exit))
+                    (fun () -> EditHUDScreen.edit_hud_screen(info, on_exit))
                     ScreenType.EditHud
                     Transitions.Default
             then

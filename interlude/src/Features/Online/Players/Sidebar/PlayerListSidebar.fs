@@ -15,7 +15,7 @@ type PlayerListSidebar =
         let tab_options: (Widget * string) array =
             [|
                 OnlineList(), %"online.players.online"
-                FriendList(), %"online.players.friends"
+                FriendsList(), %"online.players.friends"
                 SearchList.Create(), %"online.players.search"
             |]
 

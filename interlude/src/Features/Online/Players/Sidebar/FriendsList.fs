@@ -7,7 +7,7 @@ open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
-type private FriendList() =
+type private FriendsList() =
     inherit
         WebRequestContainer<Friends.List.Response>(
             fun this ->
