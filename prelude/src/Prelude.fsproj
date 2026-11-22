@@ -35,10 +35,10 @@
     <Compile Include="Formats\osu!\HitSample.fs" />
     <Compile Include="Formats\osu!\HitObject.fs" />
     <Compile Include="Formats\osu!\StoryboardEvent.fs" />
-    <Compile Include="Formats\osu!\General.fs" />
-    <Compile Include="Formats\osu!\Editor.fs" />
-    <Compile Include="Formats\osu!\Metadata.fs" />
-    <Compile Include="Formats\osu!\Difficulty.fs" />
+    <Compile Include="Formats\osu!\GeneralOsuHeader.fs" />
+    <Compile Include="Formats\osu!\EditorOsuHeader.fs" />
+    <Compile Include="Formats\osu!\MetadataOsuHeader.fs" />
+    <Compile Include="Formats\osu!\DifficultyOsuHeader.fs" />
     <Compile Include="Formats\osu!\Beatmap.fs" />
     <Compile Include="Formats\StepMania\StepManiaFile.fs" />
     <Compile Include="Formats\StepMania\StepManiaParser.fs" />

@@ -20,7 +20,7 @@ type Countdown =
     | Half = 2
     | Double = 3
 
-type General =
+type GeneralOsuHeader =
     {
         AudioFilename: string
         AudioLeadIn: int
@@ -40,7 +40,7 @@ type General =
         SamplesMatchPlaybackRate: bool
     }
 
-    static member FromMap(properties: Map<string, string>) : General =
+    static member FromMap(properties: Map<string, string>) : GeneralOsuHeader =
         {
             AudioFilename = properties.StringOrDefault("AudioFilename", "")
             AudioLeadIn = properties.IntOrDefault("AudioLeadIn", 0)
@@ -79,4 +79,3 @@ type General =
             yield "WidescreenStoryboard", if this.WidescreenStoryboard then "1" else "0"
             yield "SamplesMatchPlaybackRate", if this.SamplesMatchPlaybackRate then "1" else "0"
         }
-

@@ -2,7 +2,7 @@ namespace Prelude.Formats.Osu
 
 open System.Globalization
 
-type Difficulty =
+type DifficultyOsuHeader =
     {
         HPDrainRate: float
         CircleSize: float
@@ -12,7 +12,7 @@ type Difficulty =
         SliderTickRate: float
     }
 
-    static member FromMap(properties: Map<string, string>) : Difficulty =
+    static member FromMap(properties: Map<string, string>) : DifficultyOsuHeader =
         {
             HPDrainRate = properties.DoubleOrDefault("HPDrainRate", 8.0)
             CircleSize = properties.DoubleOrDefault("CircleSize", 4.0)
@@ -31,6 +31,3 @@ type Difficulty =
             yield "SliderMultiplier", this.SliderMultiplier.ToString(CultureInfo.InvariantCulture)
             yield "SliderTickRate", this.SliderTickRate.ToString(CultureInfo.InvariantCulture)
         }
-
-
-

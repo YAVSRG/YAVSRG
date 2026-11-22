@@ -3,7 +3,7 @@ namespace Prelude.Formats.Osu
 open System
 open System.Globalization
 
-type Metadata =
+type MetadataOsuHeader =
     {
         Title: string
         TitleUnicode: string
@@ -31,7 +31,7 @@ type Metadata =
             BeatmapSetID = -1
         }
 
-    static member FromMap(properties: Map<string, string>) : Metadata =
+    static member FromMap(properties: Map<string, string>) : MetadataOsuHeader =
         {
             Title = properties.StringOrDefault("Title", "")
             TitleUnicode = properties.StringOrDefault("TitleUnicode", "")
@@ -62,4 +62,3 @@ type Metadata =
             yield "BeatmapID", this.BeatmapID.ToString()
             yield "BeatmapSetID", this.BeatmapSetID.ToString()
         }
-

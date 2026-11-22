@@ -3,7 +3,7 @@ namespace Prelude.Formats.Osu
 open System
 open System.Globalization
 
-type Editor =
+type EditorOsuHeader =
     {
         Bookmarks: int list
         DistanceSpacing: float
@@ -21,7 +21,7 @@ type Editor =
             TimelineZoom = 1.0
         }
 
-    static member FromMap(properties: Map<string, string>) : Editor =
+    static member FromMap(properties: Map<string, string>) : EditorOsuHeader =
         {
             Bookmarks =
                 properties
@@ -49,4 +49,3 @@ type Editor =
             yield "GridSize", this.GridSize.ToString()
             yield "TimelineZoom", this.TimelineZoom.ToString(CultureInfo.InvariantCulture)
         }
-

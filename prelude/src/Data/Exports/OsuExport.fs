@@ -88,7 +88,7 @@ module OsuExport =
         List.ofSeq result
 
     let convert (options: OsuExportOptions) (chart: Chart) (chart_meta: ChartMeta) : Beatmap =
-        let general: General =
+        let general: GeneralOsuHeader =
             {
                 AudioFilename =
                     match chart_meta.Audio with
@@ -113,10 +113,10 @@ module OsuExport =
                 SamplesMatchPlaybackRate = false
             }
 
-        let editor = Editor.Default
+        let editor = EditorOsuHeader.Default
 
         let meta =
-            { Metadata.Default with
+            { MetadataOsuHeader.Default with
                 Title = chart_meta.Title
                 TitleUnicode = Option.defaultValue chart_meta.Title chart_meta.TitleNative
                 Artist = chart_meta.Artist

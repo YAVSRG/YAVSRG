@@ -18,10 +18,10 @@ type private BeatmapParserState =
 
 type Beatmap =
     {
-        General: General
-        Editor: Editor
-        Metadata: Metadata
-        Difficulty: Difficulty
+        General: GeneralOsuHeader
+        Editor: EditorOsuHeader
+        Metadata: MetadataOsuHeader
+        Difficulty: DifficultyOsuHeader
         Events: StoryboardEvent list
         Objects: HitObject list
         Timing: TimingPoint list
@@ -137,10 +137,10 @@ type Beatmap =
             | Colors -> ()
 
         {
-            General = General.FromMap(general.Value)
-            Editor = Editor.FromMap(editor.Value)
-            Metadata = Metadata.FromMap(metadata.Value)
-            Difficulty = Difficulty.FromMap(difficulty.Value)
+            General = GeneralOsuHeader.FromMap(general.Value)
+            Editor = EditorOsuHeader.FromMap(editor.Value)
+            Metadata = MetadataOsuHeader.FromMap(metadata.Value)
+            Difficulty = DifficultyOsuHeader.FromMap(difficulty.Value)
             Events = List.ofSeq events
             Objects = objects |> Seq.sortBy _.Time |> List.ofSeq
             Timing = timing |> Seq.sortBy _.Time |> List.ofSeq
