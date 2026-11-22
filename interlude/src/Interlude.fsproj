@@ -221,7 +221,7 @@
     <Compile Include="Features\Skins\SkinHotReload.fs" />
     <Compile Include="Features\Skins\HudElement.fs" />
     <Compile Include="Features\Skins\SkinPreview.fs" />
-    <Compile Include="Features\Skins\Problems.fs" />
+    <Compile Include="Features\Skins\ProblemList.fs" />
     <Compile Include="Features\Skins\Textures\TextureEditGrid.fs" />
     <Compile Include="Features\Skins\Textures\TextureActions.fs" />
     <Compile Include="Features\Skins\Textures\EditTexturePage.fs" />
