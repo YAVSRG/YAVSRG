@@ -1,4 +1,4 @@
-namespace Interlude.Features.Skins.EditHUD
+﻿namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -36,7 +36,7 @@ type ProgressPiePage() =
     let preview =
         { new ElementPreview(pos.Value) with
             override this.DrawComponent(bounds: Rect) : unit =
-                ProgressMeter.draw_pie(bounds.SliceT(bounds.Width), color.Value, background_color.Value, 0.6f)
+                ProgressPie.draw_pie(bounds.SliceT(bounds.Width), color.Value, background_color.Value, 0.6f)
 
                 if use_font.Value then
 
@@ -44,7 +44,7 @@ type ProgressPiePage() =
                     | ProgressPieLabel.Countdown ->
                         let time_left = 447000.0f<ms / rate>
 
-                        ProgressMeter.draw_countdown_centered(
+                        ProgressPie.draw_countdown_centered(
                             font_texture,
                             bounds.SliceB(bounds.Width * label_size.Value),
                             Color.White,
@@ -53,7 +53,7 @@ type ProgressPiePage() =
                             font_colon_spacing.Value
                         )
                     | ProgressPieLabel.Percentage ->
-                        ProgressMeter.draw_percent_progress_centered(
+                        ProgressPie.draw_percent_progress_centered(
                             font_texture,
                             bounds.SliceB(bounds.Width * label_size.Value),
                             Color.White,

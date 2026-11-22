@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-module ProgressMeter =
+module ProgressPie =
 
     let private PIE_SEGMENTS = 30
     let private PIE_SEGMENTS_F = float32 PIE_SEGMENTS
@@ -128,7 +128,7 @@ type ProgressPie(ctx: HudContext) =
         let now = ctx.State.CurrentChartTime()
         let percent = now / duration |> max 0.0f |> min 1.0f
 
-        ProgressMeter.draw_pie(
+        ProgressPie.draw_pie(
             this.Bounds.SliceT(this.Bounds.Width),
             ctx.Config.ProgressMeterColor,
             ctx.Config.ProgressMeterBackgroundColor,
@@ -141,7 +141,7 @@ type ProgressPie(ctx: HudContext) =
             | ProgressPieLabel.Countdown ->
                 let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
 
-                ProgressMeter.draw_countdown_centered(
+                ProgressPie.draw_countdown_centered(
                     font_texture,
                     this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
                     Color.White,
@@ -150,7 +150,7 @@ type ProgressPie(ctx: HudContext) =
                     ctx.Config.ProgressMeterColonExtraSpacing
                 )
             | ProgressPieLabel.Percentage ->
-                ProgressMeter.draw_percent_progress_centered(
+                ProgressPie.draw_percent_progress_centered(
                     font_texture,
                     this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
                     Color.White,
@@ -166,7 +166,7 @@ type ProgressPie(ctx: HudContext) =
                 match ctx.Config.ProgressMeterLabel with
                 | ProgressPieLabel.Countdown ->
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
-                    ProgressMeter.fmt_time_left time_left
+                    ProgressPie.fmt_time_left time_left
                 | ProgressPieLabel.Percentage -> sprintf "%.0f%%" (percent * 100.0f)
                 | _ -> ""
 
