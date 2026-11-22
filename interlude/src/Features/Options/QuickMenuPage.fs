@@ -5,7 +5,7 @@ open Percyqaz.Flux.Input
 open Prelude
 open Interlude.UI
 open Interlude.Features.Skins
-open Interlude.Features.OptionsMenu.SystemSettings
+open Interlude.Features.OptionsMenu.System
 
 type QuickMenuPage() =
     inherit Page()

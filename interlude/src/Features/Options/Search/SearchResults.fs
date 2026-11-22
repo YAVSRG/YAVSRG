@@ -11,7 +11,7 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Skins
-open Interlude.Features.OptionsMenu.SystemSettings
+open Interlude.Features.OptionsMenu.System
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.OptionsMenu.Library
 

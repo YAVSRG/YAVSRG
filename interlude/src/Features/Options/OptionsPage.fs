@@ -34,7 +34,7 @@ type OptionsPage() =
 
                 match new_tab with
                 | OptionsTab.System ->
-                    let p = SystemSettings.SystemPage()
+                    let p = System.SystemPage()
                     on_destroy_current_tab <- p.HandleClose
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
