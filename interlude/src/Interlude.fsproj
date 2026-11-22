@@ -80,7 +80,7 @@
     <Compile Include="Features\Wiki\WikiState.fs" />
     <Compile Include="Features\Wiki\WikiBrowserPage.fs" />
     <Compile Include="Features\Online\Credentials.fs" />
-    <Compile Include="Features\Online\LobbyState.fs" />
+    <Compile Include="Features\Online\Lobby.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Online\DiscordRPC.fs" />
     <Compile Include="Features\Online\RegisterPage.fs" />
