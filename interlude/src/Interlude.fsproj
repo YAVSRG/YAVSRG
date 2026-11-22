@@ -260,7 +260,8 @@
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\FiltersPage.fs" />
     <Compile Include="Features\LevelSelect\LevelSelectOptionsPage.fs" />
-    <Compile Include="Features\LevelSelect\LibraryView.fs" />
+    <Compile Include="Features\LevelSelect\ModeDropdown.fs" />
+    <Compile Include="Features\LevelSelect\LibraryViewControls.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\ChartContextMenus.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\GroupContextMenus.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\BulkActionsMenus.fs" />
