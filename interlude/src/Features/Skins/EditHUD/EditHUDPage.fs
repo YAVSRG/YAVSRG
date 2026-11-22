@@ -1,4 +1,4 @@
-namespace Interlude.Features.Skins.EditHUD
+﻿namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -114,7 +114,7 @@ type EditHUDPage(ctx: PositionerContext) =
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        ProblemList.loader.Join()
+        ProblemList.Loader.Join()
 
     override this.Title = meta.Name
 

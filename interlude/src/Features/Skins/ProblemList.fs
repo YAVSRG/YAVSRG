@@ -36,7 +36,7 @@ type ProblemCard =
 
 type ProblemList =
 
-    static member val private Loader =
+    static member val Loader =
         { new Async.CancelQueueSeq<Storage * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), unit -> unit>() with
             override this.Process((storage, container, after_fix)) : _ seq =
                 match storage with

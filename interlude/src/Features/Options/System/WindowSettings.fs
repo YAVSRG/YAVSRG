@@ -8,7 +8,6 @@ open Prelude
 open Interlude.Options
 open Interlude.UI
 
-[<AutoOpen>]
 module Monitors =
 
     let monitors = WindowThread.get_monitors()
@@ -41,7 +40,7 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
     let tab = Bind.mk Keys.Tab
 
     let max_width, max_height =
-        let mode = get_current_supported_video_modes() |> Array.last
+        let mode = Monitors.get_current_supported_video_modes() |> Array.last
         mode.Width, mode.Height
 
     let width = Setting.bounded (min 320 (max_width - 1), max_width) (fst setting.Value)
@@ -126,7 +125,7 @@ type WindowedResolutionPicker =
                 Dropdown
                     {
                         Items =
-                            let max_res = get_current_supported_video_modes() |> Array.last
+                            let max_res = Monitors.get_current_supported_video_modes() |> Array.last
 
                             Seq.concat
                                 [
@@ -187,7 +186,7 @@ type VideoModePicker =
             mode.Width / gcd, mode.Height / gcd
 
         let max_width, max_height =
-            let mode = get_current_supported_video_modes() |> Array.last
+            let mode = Monitors.get_current_supported_video_modes() |> Array.last
             mode.Width, mode.Height
 
         let setting =
@@ -207,7 +206,7 @@ type VideoModePicker =
                 Dropdown
                     {
                         Items =
-                            get_current_supported_video_modes()
+                            Monitors.get_current_supported_video_modes()
                             |> Seq.filter(fun mode ->
                                 mode.RefreshRate = current_mode.RefreshRate && (mode.Height * ax = mode.Width * ay)
                                 || (mode.Width, mode.Height) = (max_width, max_height)
@@ -225,7 +224,7 @@ type VideoModePicker =
                 Dropdown
                     {
                         Items =
-                            get_current_supported_video_modes()
+                            Monitors.get_current_supported_video_modes()
                             |> Seq.filter(fun mode ->
                                 mode.Width = current_mode.Width && mode.Height = current_mode.Height
                             )
@@ -242,7 +241,7 @@ type VideoModePicker =
                 Dropdown
                     {
                         Items =
-                            get_current_supported_video_modes()
+                            Monitors.get_current_supported_video_modes()
                             |> Seq.map(fun mode ->
                                 mode, let r = gcd mode.Width mode.Height in mode.Width / r, mode.Height / r
                             )

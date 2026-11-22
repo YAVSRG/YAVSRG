@@ -23,7 +23,9 @@ type SystemPage() =
                     WindowType.Fullscreen, %"system.windowmode.fullscreen"
                     WindowType.FullscreenLetterbox, %"system.windowmode.fullscreen_letterbox"
                 |],
-                config.WindowMode |> Setting.trigger window_mode_changed |> Setting.trigger(ignore >> config.Apply)
+                config.WindowMode
+                |> Setting.trigger Monitors.window_mode_changed
+                |> Setting.trigger(ignore >> config.Apply)
             )
         )
 
@@ -38,10 +40,10 @@ type SystemPage() =
         PageSetting(
             %"system.monitor",
             SelectDropdown(
-                monitors |> Seq.map(fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
+                Monitors.monitors |> Seq.map(fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                 config.Display
                 |> Setting.trigger(fun _ ->
-                    select_fullscreen_size()
+                    Monitors.select_fullscreen_size()
                     config.Apply()
                 )
             )
@@ -93,7 +95,7 @@ type SystemPage() =
         )
 
     override this.Content() : Widget =
-        window_mode_changed config.WindowMode.Value
+        Monitors.window_mode_changed config.WindowMode.Value
 
         page_container()
             .With(

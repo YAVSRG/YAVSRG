@@ -1,4 +1,4 @@
-namespace Interlude.Features.Skins.EditNoteskin
+﻿namespace Interlude.Features.Skins.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -151,7 +151,7 @@ type EditNoteskinPage() =
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        ProblemList.loader.Join()
+        ProblemList.Loader.Join()
 
     override this.Title = meta.Name
 
