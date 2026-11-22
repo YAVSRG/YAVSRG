@@ -124,7 +124,7 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
 
     override this.Title = %"score.graph.settings"
 
-and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
+type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     inherit StaticWidget(NodeType.None)
 
     let fbo = Render.borrow_fbo()
