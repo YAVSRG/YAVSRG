@@ -300,7 +300,11 @@
     <Compile Include="Features\Options\System\HotkeysPage.fs" />
     <Compile Include="Features\Options\System\PerformanceSettingsPage.fs" />
     <Compile Include="Features\Options\System\AudioPage.fs" />
-    <Compile Include="Features\Options\System\WindowSettings.fs" />
+    <Compile Include="Features\Options\System\Monitors.fs" />
+    <Compile Include="Features\Options\System\CustomWindowedResolutionPage.fs" />
+    <Compile Include="Features\Options\System\CustomWindowedOffsetPage.fs" />
+    <Compile Include="Features\Options\System\WindowedResolutionPicker.fs" />
+    <Compile Include="Features\Options\System\VideoModePicker.fs" />
     <Compile Include="Features\Options\System\SystemPage.fs" />
     <Compile Include="Features\Options\Gameplay\LanecoverPage.fs" />
     <Compile Include="Features\Options\Gameplay\GameplayBindsPage.fs" />
