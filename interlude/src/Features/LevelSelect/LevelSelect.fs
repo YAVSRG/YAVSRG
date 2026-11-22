@@ -238,10 +238,3 @@ module LevelSelect =
                         Transitions.EnterGameplayFadeAudio
                     |> ignore
             )
-
-// todo: rename; relocate
-[<RequireQualifiedAccess>]
-type InfoPanelMode =
-    | Local
-    | Online
-    | Patterns

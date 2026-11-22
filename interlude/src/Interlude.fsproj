@@ -258,7 +258,7 @@
     <Compile Include="Features\Skins\Browser\SkinsBrowserPage.fs" />
     <Compile Include="Features\Skins\SelectSkin.fs" />
     <Compile Include="Features\LevelSelect\LevelSelectHistory.fs" />
-    <Compile Include="Features\LevelSelect\Shared.fs" />
+    <Compile Include="Features\LevelSelect\LevelSelect.fs" />
     <Compile Include="Features\LevelSelect\FiltersPage.fs" />
     <Compile Include="Features\LevelSelect\LevelSelectOptionsPage.fs" />
     <Compile Include="Features\LevelSelect\ModeDropdown.fs" />
@@ -274,6 +274,7 @@
     <Compile Include="Features\LevelSelect\Tree\Tree.fs" />
     <Compile Include="Features\LevelSelect\ChartPreview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
+    <Compile Include="Features\LevelSelect\InfoPanelMode.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\LocalScores.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\LocalScoreCard.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\Scoreboard.fs" />
