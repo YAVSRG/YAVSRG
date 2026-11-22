@@ -94,7 +94,8 @@
     <Compile Include="Features\Online\Players\Profile\RecentScores.fs" />
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerListPage.fs" />
-    <Compile Include="Features\Export\Osz.fs" />
+    <Compile Include="Features\Export\OsuExport.fs" />
+    <Compile Include="Features\Export\OsuExportOptionsPage.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
     <Compile Include="Features\Gameplay\ScoreHelpers.fs" />
     <Compile Include="Features\Rulesets\CompareRulesetsPage.fs" />
