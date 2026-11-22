@@ -271,7 +271,11 @@
     <Compile Include="Features\LevelSelect\LibraryViewControls.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\ChartContextMenus.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\GroupContextMenus.fs" />
-    <Compile Include="Features\LevelSelect\ContextMenus\BulkActionsMenus.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\BulkActions.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\BatchLikesContextMenu.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\BatchFolderContextMenu.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\BatchPlaylistContextMenu.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\BatchContextMenu.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\ScoreContextMenu.fs" />
     <Compile Include="Features\LevelSelect\Tree\MultiSelection.fs" />
     <Compile Include="Features\LevelSelect\Tree\TreeContext.fs" />
