@@ -38,25 +38,25 @@ type OptionsPage() =
                     on_destroy_current_tab <- p.HandleClose
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
-                    State.recent_tab <- new_tab
+                    OptionsTab.MostRecent <- new_tab
                 | OptionsTab.Gameplay ->
                     let p = Gameplay.GameplayPage()
                     on_destroy_current_tab <- p.HandleDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
-                    State.recent_tab <- new_tab
+                    OptionsTab.MostRecent <- new_tab
                 | OptionsTab.Library ->
                     let p = Library.LibraryPage()
                     on_destroy_current_tab <- p.HandleDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
-                    State.recent_tab <- new_tab
+                    OptionsTab.MostRecent <- new_tab
                 | OptionsTab.Noteskins ->
                     let p = SelectSkinsPage()
                     on_destroy_current_tab <- p.HandleDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
-                    State.recent_tab <- new_tab
+                    OptionsTab.MostRecent <- new_tab
                 | OptionsTab.SearchResults contents ->
                     on_destroy_current_tab <- ignore
                     on_return_current_tab <- ignore
@@ -64,7 +64,7 @@ type OptionsPage() =
             )
             (fun () -> current_tab)
 
-    do content_setting.Set(State.recent_tab)
+    do content_setting.Set(OptionsTab.MostRecent)
 
     let header = OptionsPageHeader(content_setting)
 
@@ -98,7 +98,7 @@ type OptionsPage() =
         :> Widget
 
     override this.Content() : Widget =
-        content_setting.Set(State.recent_tab)
+        content_setting.Set(OptionsTab.MostRecent)
         page_body
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")

@@ -26,9 +26,7 @@ type private OptionsTab =
     | Noteskins
     | SearchResults of content: Widget
 
-module private State =
-
-    let mutable recent_tab = OptionsTab.Gameplay
+    static member val MostRecent = OptionsTab.Gameplay with get, set
 
 type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
@@ -75,7 +73,7 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
     let search_box =
         SearchBox(fun query ->
             if query = "" then
-                current_tab.Set(State.recent_tab)
+                current_tab.Set(OptionsTab.MostRecent)
             else
                 current_tab.Set(OptionsTab.SearchResults(SearchResults.get query))
         )
