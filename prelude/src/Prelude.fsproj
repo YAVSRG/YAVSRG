@@ -37,10 +37,10 @@
     <Compile Include="Formats\osu!\StoryboardEvent.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />
     <Compile Include="Formats\osu!\Beatmap.fs" />
-    <Compile Include="Formats\StepMania\Types.fs" />
-    <Compile Include="Formats\StepMania\Parser.fs" />
+    <Compile Include="Formats\StepMania\StepManiaFile.fs" />
+    <Compile Include="Formats\StepMania\StepManiaParser.fs" />
     <Compile Include="Formats\Quaver\Yaml.fs" />
-    <Compile Include="Formats\Quaver\Quaver.fs" />
+    <Compile Include="Formats\Quaver\QuaverChart.fs" />
     <Compile Include="Formats\Conversions\Conversions.fs" />
     <Compile Include="Formats\Conversions\OsuConverter.fs" />
     <Compile Include="Formats\Conversions\StepManiaConverter.fs" />
