@@ -1,4 +1,4 @@
-namespace Interlude.Features.Skins
+﻿namespace Interlude.Features.Skins
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
@@ -34,9 +34,9 @@ type ProblemCard =
                 , Colors.red.O2
             )
 
-module private ProblemList =
+type ProblemList =
 
-    let loader =
+    static member val private Loader =
         { new Async.CancelQueueSeq<Storage * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), unit -> unit>() with
             override this.Process((storage, container, after_fix)) : _ seq =
                 match storage with
@@ -48,8 +48,6 @@ module private ProblemList =
             override this.Handle(action: unit -> unit) : unit = action()
         }
 
-type ProblemList =
-
     static member Noteskin(noteskin: Noteskin) : {| Container: ScrollContainer<_>; Refresh: unit -> unit |} =
 
         let problems_list =
@@ -58,7 +56,7 @@ type ProblemList =
         let rec refresh () =
             problems_list.Clear()
 
-            ProblemList.loader.Request(
+            ProblemList.Loader.Request(
                 noteskin,
                 problems_list,
                 fun () ->
@@ -82,7 +80,7 @@ type ProblemList =
         let rec refresh () =
             problems_list.Clear()
 
-            ProblemList.loader.Request(
+            ProblemList.Loader.Request(
                 hud,
                 problems_list,
                 fun () ->
