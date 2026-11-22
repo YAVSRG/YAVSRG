@@ -133,7 +133,7 @@ module Mounts =
     let import_osu_scores (osu_mount: MountedChartSource, notify_start: bool) : unit =
 
         ImportOsuScoresTask(Path.GetDirectoryName(osu_mount.SourceFolder), Content.Library)
-            .Track(TaskTracking.add %"mount.import_osu_scores")
+            .Track(BackgroundTaskTracking.add %"mount.import_osu_scores")
             .WithCallback(
                 function
                 | Ok result ->

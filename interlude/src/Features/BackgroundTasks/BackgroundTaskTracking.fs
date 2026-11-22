@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude.Data.Imports
 
-module TaskTracking =
+module BackgroundTaskTracking =
 
     let list = ResizeArray<TaskContext>()
 

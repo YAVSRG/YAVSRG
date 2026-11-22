@@ -36,14 +36,14 @@ type private EditMountPage
         if queued_import = 1 then
             setting.Value.Value
                 .ImportNewCharts(Content.Library)
-                .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.import"))
+                .Track(BackgroundTaskTracking.add(sprintf "%O: %s" game %"mount.import"))
                 .WithCallback(FileDrop.conversion_result_callback)
                 .Queue(import_queue)
 
         elif queued_import = 2 then
             setting.Value.Value
                 .ImportAllCharts(Content.Library)
-                .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.importall"))
+                .Track(BackgroundTaskTracking.add(sprintf "%O: %s" game %"mount.importall"))
                 .WithCallback(FileDrop.conversion_result_callback)
                 .Queue(import_queue)
 

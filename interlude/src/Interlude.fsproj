@@ -40,7 +40,7 @@
     <Compile Include="Content\Content.fs" />
     <Compile Include="Content\Backbeat.fs" />
     <Compile Include="Options\Hotkeys.fs" />
-    <Compile Include="Options\Window.fs" />
+    <Compile Include="Options\WindowSettings.fs" />
     <Compile Include="Options\Options.fs" />
     <Compile Include="Options\Presets.fs" />
     <Compile Include="UI\Icons.fs" />
@@ -123,7 +123,7 @@
     <Compile Include="Features\Tables\SelectTablePage.fs" />
     <Compile Include="Features\Pacemaker\PacemakerState.fs" />
     <Compile Include="Features\Pacemaker\PacemakerOptionsPage.fs" />
-    <Compile Include="Features\Collections\Actions.fs" />
+    <Compile Include="Features\Collections\CollectionActions.fs" />
     <Compile Include="Features\Collections\CreateFolderPage.fs" />
     <Compile Include="Features\Collections\EditFolderPage.fs" />
     <Compile Include="Features\Collections\CreatePlaylistPage.fs" />
@@ -135,7 +135,7 @@
     <Compile Include="Features\Score\ScoreScreenHelpers.fs" />
     <Compile Include="Features\Score\TopBanner.fs" />
     <Compile Include="Features\Score\Sidebar.fs" />
-    <Compile Include="Features\Score\SessionScore.fs" />
+    <Compile Include="Features\Score\SessionScoreBar.fs" />
     <Compile Include="Features\Score\Graph.fs" />
     <Compile Include="Features\Score\Results.fs" />
     <Compile Include="Features\Score\ScoreChartContextMenu.fs" />
@@ -168,10 +168,10 @@
     <Compile Include="Features\Stats\Sessions\SessionsTab.fs" />
     <Compile Include="Features\Stats\Overall\OverallHeader.fs" />
     <Compile Include="Features\Stats\Overall\OverallTime.fs" />
-    <Compile Include="Features\Stats\Overall\Overall.fs" />
+    <Compile Include="Features\Stats\Overall\OverallTab.fs" />
     <Compile Include="Features\Stats\Leaderboards\Keymodes.fs" />
     <Compile Include="Features\Stats\Leaderboards\Activity.fs" />
-    <Compile Include="Features\Stats\Leaderboards\Leaderboards.fs" />
+    <Compile Include="Features\Stats\Leaderboards\LeaderboardsTab.fs" />
     <Compile Include="Features\Stats\StatsPage.fs" />
     <Compile Include="Features\Play\StartOverlay.fs" />
     <Compile Include="Features\Play\FailOverlay.fs" />
@@ -211,7 +211,7 @@
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\PracticeScreen.fs" />
     <Compile Include="Features\Skins\SkinHotReload.fs" />
-    <Compile Include="Features\Skins\Elements.fs" />
+    <Compile Include="Features\Skins\HudElement.fs" />
     <Compile Include="Features\Skins\SkinPreview.fs" />
     <Compile Include="Features\Skins\Problems.fs" />
     <Compile Include="Features\Skins\Textures\TextureEditGrid.fs" />
@@ -257,8 +257,8 @@
     <Compile Include="Features\Skins\SelectSkin.fs" />
     <Compile Include="Features\LevelSelect\LevelSelectHistory.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
-    <Compile Include="Features\LevelSelect\Filters.fs" />
-    <Compile Include="Features\LevelSelect\LevelSelectOptions.fs" />
+    <Compile Include="Features\LevelSelect\FiltersPage.fs" />
+    <Compile Include="Features\LevelSelect\LevelSelectOptionsPage.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\ChartContextMenus.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\GroupContextMenus.fs" />

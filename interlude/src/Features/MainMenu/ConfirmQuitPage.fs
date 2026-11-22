@@ -10,7 +10,7 @@ type ConfirmQuitPage(on_confirm: unit -> unit) =
     inherit Page()
 
     override this.Content() : Widget =
-        if TaskTracking.in_progress() then
+        if BackgroundTaskTracking.in_progress() then
             page_container()
                 .With(
                     PageButton.Once(%"confirm.no", Menu.Back).Pos(7),

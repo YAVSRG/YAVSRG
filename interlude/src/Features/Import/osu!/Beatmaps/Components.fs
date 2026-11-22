@@ -36,7 +36,9 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             progress <- 0.0f
 
             DownloadOsuSetTask(sprintf "https://catboy.best/d/%in" data.id, Content.Library)
-                .Track(TaskTracking.add(data.title).SubscribeDownloadProgress(fun percent -> progress <- percent))
+                .Track(
+                    BackgroundTaskTracking.add(data.title).SubscribeDownloadProgress(fun percent -> progress <- percent)
+                )
                 .WithCallback(
                     function
                     | Ok(result: ConversionResult) ->

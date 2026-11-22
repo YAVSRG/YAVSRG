@@ -38,7 +38,9 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
             progress <- 0.0f
 
             DownloadEtternaPackTask(data.name, data.download, Content.Library)
-                .Track(TaskTracking.add(data.name).SubscribeDownloadProgress(fun percent -> progress <- percent))
+                .Track(
+                    BackgroundTaskTracking.add(data.name).SubscribeDownloadProgress(fun percent -> progress <- percent)
+                )
                 .WithCallback(
                     function
                     | Ok(result: ConversionResult) ->
