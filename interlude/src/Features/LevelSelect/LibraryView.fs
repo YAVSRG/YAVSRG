@@ -122,7 +122,7 @@ type LibraryViewControls() =
             //    FiltersPage().Show()
 
             elif (%%"collections").Pressed() then
-                ManageCollectionsPage().Show()
+                SelectCollectionsPage.ManageCollections().Show()
             elif (%%"table").Pressed() then
                 SelectTablePage(LevelSelect.refresh_all).Show()
             elif (%%"reverse_sort_mode").Pressed() then

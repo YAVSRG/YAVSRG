@@ -47,7 +47,7 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
 
         base.Draw()
 
-type SelectCollectionPage
+type SelectCollectionsPage
     (on_select: string * Collection -> unit, is_disabled: string * Collection -> bool, select_on_create: bool) =
     inherit Page()
 
@@ -109,9 +109,8 @@ type SelectCollectionPage
     override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")
     override this.OnReturnFromNestedPage() : unit = refresh()
 
-type ManageCollectionsPage() =
-    inherit
-        SelectCollectionPage(
+    static member ManageCollections() : SelectCollectionsPage =
+        SelectCollectionsPage(
             fun (name, collection) ->
                 match collection with
                 | Folder f -> EditFolderPage(name, f).Show()
@@ -120,9 +119,8 @@ type ManageCollectionsPage() =
             , false
         )
 
-type AddToCollectionPage(chart_meta: ChartMeta) =
-    inherit
-        SelectCollectionPage(
+    static member AddToCollection(chart_meta: ChartMeta) : SelectCollectionsPage =
+        SelectCollectionsPage(
             fun (name, collection) ->
                 if CollectionActions.add_to(name, collection, chart_meta) then
                     Menu.Back()

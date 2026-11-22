@@ -57,7 +57,7 @@ type LevelSelectOptionsPage() =
                 PageButton(%"library.tables", fun () -> SelectTablePage(LevelSelect.refresh_all).Show())
                     .Hotkey("table")
                     .Pos(17),
-                PageButton(%"library.collections", fun () -> ManageCollectionsPage().Show())
+                PageButton(%"library.collections", fun () -> SelectCollectionsPage.ManageCollections().Show())
                     .Hotkey("collections")
                     .Pos(19)
             )

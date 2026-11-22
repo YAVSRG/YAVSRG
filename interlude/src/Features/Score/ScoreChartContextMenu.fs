@@ -45,7 +45,10 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
                 .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
                 .With(
                     like_button_swap,
-                    PageButton(%"chart.add_to_collection", fun () -> AddToCollectionPage(score_info.ChartMeta).Show())
+                    PageButton(
+                        %"chart.add_to_collection",
+                        fun () -> SelectCollectionsPage.AddToCollection(score_info.ChartMeta).Show()
+                    )
                         .Icon(Icons.FOLDER_PLUS),
                     PageButton(
                         %"chart.change_offset",

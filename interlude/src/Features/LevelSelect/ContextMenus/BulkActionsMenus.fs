@@ -86,7 +86,7 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
             .Show()
 
     let add_to_collection () =
-        SelectCollectionPage(
+        SelectCollectionsPage(
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->
@@ -154,7 +154,7 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
             .Show()
 
     let add_to_collection () =
-        SelectCollectionPage(
+        SelectCollectionsPage(
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->
@@ -230,7 +230,7 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
             .Show()
 
     let add_to_collection () =
-        SelectCollectionPage(
+        SelectCollectionsPage(
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->
@@ -283,7 +283,7 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
             .Show()
 
     let add_to_collection () =
-        SelectCollectionPage(
+        SelectCollectionsPage(
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->

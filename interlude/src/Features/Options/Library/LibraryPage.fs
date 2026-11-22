@@ -56,7 +56,7 @@ type LibraryPage() =
     inherit Page()
 
     static member ManageCollections() : PageButton =
-        PageButton(%"library.collections", fun () -> ManageCollectionsPage().Show())
+        PageButton(%"library.collections", fun () -> SelectCollectionsPage.ManageCollections().Show())
             .Help(Help.Info("library.collections"))
 
     static member ManageTables() : PageButton =

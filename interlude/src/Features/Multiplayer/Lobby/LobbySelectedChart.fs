@@ -24,7 +24,10 @@ type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
         FlowContainer
             .Vertical(PAGE_ITEM_HEIGHT)
             .With(
-                PageButton(%"chart.add_to_collection", fun () -> AddToCollectionPage(chart_meta).Show())
+                PageButton(
+                    %"chart.add_to_collection",
+                    fun () -> SelectCollectionsPage.AddToCollection(chart_meta).Show()
+                )
                     .Icon(Icons.FOLDER_PLUS)
             )
             .Position(Position.Shrink(100.0f, 200.0f))
