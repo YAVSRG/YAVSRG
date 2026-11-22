@@ -24,14 +24,14 @@ let private compare_interlude_implementation_to_osu
     ) =
 
     let window_modifier =
-        if score_data.ModsUsed &&& Mods.Easy <> Mods.None then
+        if score_data.ModsUsed &&& OsuMods.Easy <> OsuMods.None then
             OsuMania.Easy
-        elif score_data.ModsUsed &&& Mods.HardRock <> Mods.None then
+        elif score_data.ModsUsed &&& OsuMods.HardRock <> OsuMods.None then
             OsuMania.HardRock
         else
             OsuMania.NoMod
 
-    let score_v2 = score_data.ModsUsed &&& Mods.ScoreV2 <> Mods.None
+    let score_v2 = score_data.ModsUsed &&& OsuMods.ScoreV2 <> OsuMods.None
     let ruleset = (OsuMania.create (float32 chart_od) window_modifier).ToInfo()
     let metric = ScoreProcessor.ProcessEntireReplay(ruleset, replay, chart, rate)
 
@@ -148,7 +148,7 @@ let read_scores () =
                     let interlude_replay =
                         OsuReplay.decode (replay, chart.Value.Chart.FirstNote, 1.0f<rate>)
 
-                    match Mods.to_interlude_rate_and_mods replay.ModsUsed with
+                    match replay.ModsUsed.ConvertToRateAndMods() with
                     | Some(rate, _) ->
                         compare_interlude_implementation_to_osu (
                             chart.Value.Chart,

@@ -16,7 +16,7 @@ open Prelude.Tests.Helpers
 
 let mutable recent_beatmap_hash = ""
 
-let generate_scenario (note_data: NoteData) (replay: Replay) (od: float32) (mods: Mods) =
+let generate_scenario (note_data: NoteData) (replay: Replay) (od: float32) (mods: OsuMods) =
 
     let chart : Chart =
         {
@@ -151,7 +151,7 @@ let run_experiment () =
 
             Logging.Info "Experiment: LN combination experiment: OD%.1f; Head %.1fms; Tail %.1fms" od head tail
 
-            generate_scenario notes replay od Mods.None
+            generate_scenario notes replay od OsuMods.None
 
             Threading.Thread.Sleep(2000)
             if HANDS_FREE_AUTOMATION then

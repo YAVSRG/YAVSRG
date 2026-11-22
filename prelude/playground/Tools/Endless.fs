@@ -20,7 +20,8 @@ let test() =
         }
 
     let search = "getty jumper"
-    let search_result = LibraryView.get_groups (FilterParts.parse search |> FilteredSearch.Build) Grouping.modes.["pack"] false Sorting.modes.["difficulty"] false false None ctx
+    let search_result = LibraryView.get_groups (FilterParts.parse search |> LibrarySearch.Build) LibraryGrouping.modes.["pack"] false
+                            LibrarySorting.modes.["difficulty"] false false None ctx
     let start = search_result |> Seq.head |> snd |> fun group -> fst group.Charts.[0]
 
     printfn "Starting with %s - %s [%s] by %s" start.Artist start.Title start.DifficultyName start.Creator
@@ -33,7 +34,7 @@ let test() =
             MinimumRate = 1.0f<rate>
             MaximumRate = 1.5f<rate>
             OnlyNewCharts = false
-            Filter = FilteredSearch.Empty
+            Filter = LibrarySearch.Empty
             RulesetProvider = K SC_J4
             Mods = Map.empty
         }

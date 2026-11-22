@@ -57,7 +57,7 @@ module LevelSelect =
             | _ -> refresh_details()
         )
 
-    let mutable filter: FilteredSearch = FilteredSearch.Empty
+    let mutable filter: LibrarySearch = LibrarySearch.Empty
 
     let private state: EndlessModeState = EndlessModeState.create()
     let mutable private suggestion_ctx: SuggestionContext option = None

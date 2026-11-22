@@ -67,7 +67,8 @@ type LibraryViewControls() =
                 .Position(Position.SliceL(AngledButton.LEAN_AMOUNT, OPTIONS_BUTTON_WIDTH)),
 
             ModeDropdown(
-                Sorting.modes.Keys |> Seq.map(fun id -> (id, Localisation.localise(sprintf "levelselect.sortby.%s" id))),
+                LibrarySorting.modes.Keys
+                |> Seq.map(fun id -> (id, Localisation.localise(sprintf "levelselect.sortby.%s" id))),
                 "Sort",
                 options.ChartSortMode |> Setting.trigger(ignore >> LevelSelect.refresh_all),
                 options.ChartSortReverse |> Setting.map not not |> Setting.trigger(ignore >> LevelSelect.refresh_all),
@@ -85,7 +86,7 @@ type LibraryViewControls() =
                 ),
 
             ModeDropdown(
-                Grouping.modes.Keys
+                LibraryGrouping.modes.Keys
                 |> Seq.map(fun id -> (id, Localisation.localise(sprintf "levelselect.groupby.%s" id))),
                 "Group",
                 options.ChartGroupMode |> Setting.trigger(ignore >> LevelSelect.refresh_all),

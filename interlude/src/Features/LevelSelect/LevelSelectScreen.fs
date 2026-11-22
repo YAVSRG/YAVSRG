@@ -37,10 +37,10 @@ type LevelSelectScreen() =
             | _ -> LevelSelect.refresh_details()
         )
 
-        if not(Sorting.modes.ContainsKey(options.ChartSortMode.Value)) then
+        if not(LibrarySorting.modes.ContainsKey(options.ChartSortMode.Value)) then
             options.ChartSortMode.Value <- "title"
 
-        if not(Grouping.modes.ContainsKey(options.ChartGroupMode.Value)) then
+        if not(LibraryGrouping.modes.ContainsKey(options.ChartGroupMode.Value)) then
             options.ChartGroupMode.Value <- "pack"
 
         this

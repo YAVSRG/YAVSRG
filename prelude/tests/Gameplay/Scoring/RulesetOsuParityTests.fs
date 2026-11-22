@@ -66,7 +66,7 @@ module RulesetOsuParityTests =
             OsuReplay.decode(TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
 
         let back_as_osu_replay =
-            OsuReplay.encode as_interlude_replay TEST_CHART.FirstNote Mods.None TEST_OSU_FILE_HASH
+            OsuReplay.encode as_interlude_replay TEST_CHART.FirstNote OsuMods.None TEST_OSU_FILE_HASH
 
         let return_as_interlude_replay =
             OsuReplay.decode(back_as_osu_replay, TEST_CHART.FirstNote, 1.0f<rate>)

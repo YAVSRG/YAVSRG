@@ -67,7 +67,7 @@ module FilterParts =
         | Success(x, _, _) -> x
         | Failure _ -> [ Impossible ]
 
-type Filter =
+type LibraryFilter =
     {
         PatternTerms: string array
         PatternAntiTerms: string array
@@ -169,8 +169,8 @@ type Filter =
 
     member this.Apply<'T>(charts: (ChartMeta * 'T) seq) : (ChartMeta * 'T) seq = Seq.filter (fst >> this.Compile) charts
 
-    static member Build(parts: FilterPart list) : Filter =
-        let mutable filter = Filter.Empty
+    static member Build(parts: FilterPart list) : LibraryFilter =
+        let mutable filter = LibraryFilter.Empty
 
         for p in parts do
             match p with
@@ -217,18 +217,19 @@ type Filter =
 
         filter
 
-type FilteredSearch =
+type LibrarySearch =
     {
         SearchTerms: string array
         SearchAntiTerms: string array
 
-        Filter: Filter
+        Filter: LibraryFilter
     }
 
     member this.WithoutSearchTerms =
         { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = this.Filter }
 
-    static member Empty = { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = Filter.Empty }
+    static member Empty =
+        { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = LibraryFilter.Empty }
 
     member internal this.Compile: ChartMeta -> bool =
         let matches_filter = this.Filter.Compile
@@ -264,9 +265,9 @@ type FilteredSearch =
 
     member this.Apply<'T>(charts: (ChartMeta * 'T) seq) : (ChartMeta * 'T) seq = Seq.filter (fst >> this.Compile) charts
 
-    static member Build(parts: FilterPart list) : FilteredSearch =
+    static member Build(parts: FilterPart list) : LibrarySearch =
         let mutable filtered_search =
-            { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = Filter.Build(parts) }
+            { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = LibraryFilter.Build(parts) }
 
         for p in parts do
             match p with

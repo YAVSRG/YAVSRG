@@ -71,7 +71,7 @@ module OsuReplay =
         |> Array.ofSeq
         |> fun x -> { Frames = x }
 
-    let encode (replay: Replay) (first_note: Time) (mods: Mods) (beatmap_hash: string) : OsuReplay =
+    let encode (replay: Replay) (first_note: Time) (mods: OsuMods) (beatmap_hash: string) : OsuReplay =
 
         let first_note = first_note |> float32 |> round |> int
 
@@ -128,7 +128,7 @@ module OsuReplay =
         (original_osu_file_first_note: Time)
         (original_osu_file_rate: Rate)
         : Result<Score, string> =
-        match Mods.to_interlude_rate_and_mods osu_replay.ModsUsed with
+        match osu_replay.ModsUsed.ConvertToRateAndMods() with
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 

@@ -7,7 +7,7 @@ open Prelude
 //https://github.com/stepmania/stepmania/wiki/sm
 //https://github.com/stepmania/stepmania/wiki/ssc
 
-module StepmaniaParser =
+module StepManiaParser =
 
     // Main #KEY:VALUE; parser
     let private separator = anyOf ":;"
@@ -136,4 +136,4 @@ module StepmaniaParser =
             Result.Error(exn.Message)
 
 type StepMania() =
-    static member FromFile(path: string) : Result<StepManiaFile, string> = StepmaniaParser.parse_file path
+    static member FromFile(path: string) : Result<StepManiaFile, string> = StepManiaParser.parse_file path

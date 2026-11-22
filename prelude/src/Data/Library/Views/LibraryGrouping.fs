@@ -1,13 +1,19 @@
 namespace Prelude.Data.Library
 
 open System
+open System.Collections.Generic
 open Percyqaz.Common
-open Prelude.Calculator.Patterns
 open Prelude.Data.UserDatabase
-open Prelude.Data.Library
 
-[<AutoOpen>]
-module internal Shared =
+type GroupFunc = ChartMeta * LibraryViewContext -> int * string
+
+type GroupMethod =
+    | Normal of GroupFunc
+    | Packs
+    | Collections
+    | Levels
+
+module LibraryGrouping =
 
     let first_character (s: string) : string =
         if s.Length = 0 then "?"
@@ -71,54 +77,40 @@ module internal Shared =
         | Some(i, _, _) -> i, ruleset_info.Ruleset.LampName(i)
         | None -> -2, "No lamp achieved"
 
-    let below_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
-        chart_meta.Patterns.LNPercent < threshold
+    let modes: IDictionary<string, GroupMethod> =
+        dict
+            [
+                "none", Normal(fun (_, _) -> 0, "No grouping")
+                "pack", Packs
+                "collection", Collections
+                "level", Levels
+                "difficulty", Normal format_difficulty
+                "date_played", Normal format_date_last_played
+                "date_installed", Normal format_date_added
+                "grade", Normal grade_achieved
+                "lamp", Normal lamp_achieved
+                "title", Normal(fun (c, _) -> 0, first_character c.Title)
+                "artist", Normal(fun (c, _) -> 0, first_character c.Artist)
+                "creator", Normal(fun (c, _) -> 0, first_character c.Creator)
+                "keymode", Normal(fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
+                "patterns", Normal(fun (c, _) -> 0, c.Patterns.Category)
+            ]
 
-    let above_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
-        chart_meta.Patterns.LNPercent > threshold
+type Group = { Charts: (ChartMeta * LibraryContext) array; Context: LibraryGroupContext }
 
-    let has_sv (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
-        chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
+type private GroupWithSorting =
+    {
+        Charts: ResizeArray<ChartMeta * LibraryContext * SortingTag>
+        Context: LibraryGroupContext
+    }
 
-[<RequireQualifiedAccess>]
-[<NoEquality>]
-[<NoComparison>]
-type LibraryContext =
-    | None
-    | Pack of name: string
-    | Table of level: int
-    | Likes
-    | Folder of id: string
-    | Playlist of index: int * id: string * data: PlaylistEntryInfo
-
-    member this.Matches(other: LibraryContext) : bool =
-        match this, other with
-        | None, None -> true
-        | None, Pack _ -> true
-        | Pack p, Pack p2 when p = p2 -> true
-        | Pack _, None -> true
-        | Table _, Table _ -> true
-        | Likes, Likes -> true
-        | Folder f, Folder f2 when f = f2 -> true
-        | Playlist(i, id, _), Playlist(i2, id2, _) when i = i2 && id = id2 -> true
-        | _ -> false
-
-    member this.SoftMatches(other: LibraryContext) : bool =
-        match this, other with
-        | None, _ -> true
-        | Pack _, None -> true
-        | Table _, None -> true
-        | Folder _, None -> true
-        | Folder _, Pack _ -> true
-        | Likes, None -> true
-        | Likes, Pack _ -> true
-        | _ -> this.Matches(other)
-
-[<RequireQualifiedAccess>]
-type LibraryGroupContext =
-    | None
-    | Pack of name: string
-    | Table of level: int
-    | Likes
-    | Folder of id: string
-    | Playlist of id: string
+    member this.ToGroup(reverse_sorting: bool) : Group =
+        {
+            Charts =
+                this.Charts
+                |> Seq.sortBy(fun (_, _, key) -> key)
+                |> if reverse_sorting then Seq.rev else id
+                |> Seq.map(fun (chart_meta, ctx, _) -> (chart_meta, ctx))
+                |> Array.ofSeq
+            Context = this.Context
+        }
