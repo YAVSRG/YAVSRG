@@ -84,7 +84,7 @@ type Accuracy
         let text, color =
             if (!stats).ColumnFilterApplied then
                 let columns =
-                    GraphSettings.column_filter
+                    ScoreGraphSettings.column_filter
                     |> Seq.indexed
                     |> Seq.choose(fun (i, b) ->
                         if b && i < score_info.WithMods.Keys then Some((i + 1).ToString()) else None

@@ -10,28 +10,6 @@ open Prelude.Data.UserDatabase
 open Interlude.Options
 open Interlude.UI
 
-module GraphSettings =
-
-    let only_releases = Setting.simple false
-    let column_filter = Array.create 10 true
-    let scale = 1.0f |> Setting.bounded(1.0f, 6.0f)
-    let show_slice = Setting.simple false
-    let slice_size = 0.04f |> Setting.bounded(0.01f, 1.0f)
-
-    let COLUMN_FILTER_KEYS =
-        [|
-            Keys.D1
-            Keys.D2
-            Keys.D3
-            Keys.D4
-            Keys.D5
-            Keys.D6
-            Keys.D7
-            Keys.D8
-            Keys.D9
-            Keys.D0
-        |]
-
 type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
     inherit Page()
 
@@ -41,9 +19,9 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
         Setting.make
             (fun v ->
                 column_filter_changed <- true
-                GraphSettings.column_filter.[k] <- v
+                ScoreGraphSettings.column_filter.[k] <- v
             )
-            (fun () -> GraphSettings.column_filter.[k])
+            (fun () -> ScoreGraphSettings.column_filter.[k])
 
     let column_filter_ui, _ =
         refreshable_row
@@ -92,11 +70,11 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
                 PageSetting(%"score.graph.settings.line_on_top", Checkbox(options.ScoreGraphLineOnTop))
                     .Conditional(fun () -> options.ScoreGraphLineMode.Value <> ScoreGraphLineMode.None)
                     .Pos(4),
-                PageSetting(%"score.graph.settings.only_releases", Checkbox GraphSettings.only_releases).Pos(7),
+                PageSetting(%"score.graph.settings.only_releases", Checkbox ScoreGraphSettings.only_releases).Pos(7),
                 PageSetting(%"score.graph.settings.column_filter", column_filter_ui).Pos(9, 2, PageWidth.Full),
                 PageSetting(
                     %"score.graph.settings.scale",
-                    Slider(GraphSettings.scale, Step = 0.25f, Format = (fun x -> sprintf "%.0f%%" (x * 100.0f)))
+                    Slider(ScoreGraphSettings.scale, Step = 0.25f, Format = (fun x -> sprintf "%.0f%%" (x * 100.0f)))
                 )
                     .Pos(11),
                 PageSetting(%"score.graph.settings.windows_background", Checkbox(options.ScoreGraphWindowBackground))
@@ -108,7 +86,7 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
                             false, %"score.graph.settings.hover_info.cumulative"
                             true, %"score.graph.settings.hover_info.slice"
                         |],
-                        GraphSettings.show_slice
+                        ScoreGraphSettings.show_slice
                     )
                 )
                     .Help(
@@ -117,7 +95,7 @@ type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
                             .Hotkey(%"score.graph.settings.hover_info_hint", "graph_alt_info")
                     )
                     .Pos(16),
-                PageSetting(%"score.graph.settings.slice_size", Slider.Percent(GraphSettings.slice_size))
+                PageSetting(%"score.graph.settings.slice_size", Slider.Percent(ScoreGraphSettings.slice_size))
                     .Help(Help.Info("score.graph.settings.slice_size"))
                     .Pos(18)
             )
@@ -169,7 +147,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     member this.Refresh() : unit = refresh <- true
 
     member this.ApplyColumnFilter() : unit =
-        stats.Value <- ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
+        stats.Value <- ScoreScreenStats.calculate score_info.Scoring ScoreGraphSettings.column_filter
 
     member private this.DrawCumulativeInfo(bounds: Rect, info: GraphPoint) : unit =
 
@@ -392,7 +370,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let c = this.Bounds.CenterY
 
         let ms_to_y (time: GameplayTime) =
-            c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
+            c - System.Math.Clamp(time * ScoreGraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
         let mutable previous_early = 0.0f<ms / rate>
         let mutable previous_late = 0.0f<ms / rate>
@@ -429,7 +407,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let mutable y2 = c + h + 24.0f
 
             let ms_to_y (time: GameplayTime) =
-                c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
+                c - System.Math.Clamp(time * ScoreGraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
             for j in score_info.Ruleset.Judgements do
                 match j.TimingWindows with
@@ -450,7 +428,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         else
             Text.draw_b(
                 Style.font,
-                sprintf "%s (-%.0fms)" (%"score.graph.early") (MAX_WINDOW / GraphSettings.scale.Value),
+                sprintf "%s (-%.0fms)" (%"score.graph.early") (MAX_WINDOW / ScoreGraphSettings.scale.Value),
                 24.0f,
                 this.Bounds.Left + 10.0f,
                 this.Bounds.Bottom - 40.0f,
@@ -459,7 +437,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             Text.draw_b(
                 Style.font,
-                sprintf "%s (+%.0fms)" (%"score.graph.late") (MAX_WINDOW / GraphSettings.scale.Value),
+                sprintf "%s (+%.0fms)" (%"score.graph.late") (MAX_WINDOW / ScoreGraphSettings.scale.Value),
                 24.0f,
                 this.Bounds.Left + 10.0f,
                 this.Bounds.Top + 3.0f,
@@ -495,7 +473,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 if translucent then Colors.green_accent.O1, Color.Transparent else Colors.text_green
 
             let text =
-                GraphSettings.column_filter
+                ScoreGraphSettings.column_filter
                 |> Seq.indexed
                 |> Seq.choose(fun (i, b) ->
                     if b && i < score_info.WithMods.Keys then Some((i + 1).ToString()) else None
@@ -610,7 +588,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                 match e.Judgement with
                 | Some(judgement, _) when
-                    not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column]
+                    not ScoreGraphSettings.only_releases.Value && ScoreGraphSettings.column_filter.[ev.Column]
                     ->
                     let color = score_info.Ruleset.JudgementColor(judgement)
 
@@ -622,7 +600,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                             (x,
                              h
                              - System.Math.Clamp(
-                                 h * e.Delta / MAX_WINDOW * GraphSettings.scale.Value,
+                                 h * e.Delta / MAX_WINDOW * ScoreGraphSettings.scale.Value,
                                  -h + THICKNESS,
                                  h - THICKNESS
                              ))
@@ -632,7 +610,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             | Release e ->
 
                 match e.Judgement with
-                | Some(judgement, _) when GraphSettings.column_filter.[ev.Column] ->
+                | Some(judgement, _) when ScoreGraphSettings.column_filter.[ev.Column] ->
                     // todo: figure something out about half-scale releases
                     let color = score_info.Ruleset.JudgementColor(judgement)
 
@@ -643,7 +621,11 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                         dot
                             (x,
                              h
-                             - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f)
+                             - System.Math.Clamp(
+                                 e.Delta / MAX_WINDOW * ScoreGraphSettings.scale.Value * 0.5f,
+                                 -1.0f,
+                                 1.0f
+                               )
                                * (h - THICKNESS - HTHICKNESS))
                             color.O2
                 | _ -> ()
@@ -651,7 +633,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             | GhostTap e ->
                 match e.Judgement with
                 | Some(judgement, _) when
-                    not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column]
+                    not ScoreGraphSettings.only_releases.Value && ScoreGraphSettings.column_filter.[ev.Column]
                     ->
                     let color = score_info.Ruleset.JudgementColor(judgement)
                     //bar x color
@@ -703,24 +685,24 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             let s = Mouse.scroll()
 
-            if GraphSettings.show_slice.Value <> (%%"graph_alt_info").Held() then
+            if ScoreGraphSettings.show_slice.Value <> (%%"graph_alt_info").Held() then
                 show_slice_info <- true
-                GraphSettings.slice_size.Value <- GraphSettings.slice_size.Value + s * 0.005f
+                ScoreGraphSettings.slice_size.Value <- ScoreGraphSettings.slice_size.Value + s * 0.005f
             else
                 show_slice_info <- false
 
                 if s <> 0.0f then
-                    GraphSettings.scale.Value <- GraphSettings.scale.Value + 0.25f * s
+                    ScoreGraphSettings.scale.Value <- ScoreGraphSettings.scale.Value + 0.25f * s
                     refresh <- true
 
         for k = 0 to score_info.WithMods.Keys - 1 do
-            match Input.pop_key_any_modifiers(GraphSettings.COLUMN_FILTER_KEYS.[k], InputAction.Press) with
+            match Input.pop_key_any_modifiers(ScoreGraphSettings.COLUMN_FILTER_KEYS.[k], InputAction.Press) with
             | ValueSome(_, _, shift) ->
                 if shift then
                     for i = 0 to score_info.WithMods.Keys - 1 do
-                        GraphSettings.column_filter.[i] <- i = k
+                        ScoreGraphSettings.column_filter.[i] <- i = k
                 else
-                    GraphSettings.column_filter.[k] <- not GraphSettings.column_filter.[k]
+                    ScoreGraphSettings.column_filter.[k] <- not ScoreGraphSettings.column_filter.[k]
 
                 this.ApplyColumnFilter()
                 this.Refresh()
@@ -768,7 +750,7 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 this.DrawSliceInfo(
                     box,
                     snapshot_index,
-                    int(GraphSettings.slice_size.Value * 0.5f * float32 ScoreScreenStats.GRAPH_POINT_COUNT)
+                    int(ScoreGraphSettings.slice_size.Value * 0.5f * float32 ScoreScreenStats.GRAPH_POINT_COUNT)
                 )
             else
                 this.DrawCumulativeInfo(box, current_snapshot)
@@ -780,6 +762,6 @@ type ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     interface System.IDisposable with
         override this.Dispose() : unit =
             for i = 0 to 9 do
-                GraphSettings.column_filter.[i] <- true
+                ScoreGraphSettings.column_filter.[i] <- true
 
             (fbo :> System.IDisposable).Dispose()
