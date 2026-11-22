@@ -18,16 +18,6 @@ type private Transition =
     | Out
     | Hidden
 
-[<RequireQualifiedAccess>]
-type private OptionsTab =
-    | System
-    | Gameplay
-    | Library
-    | Noteskins
-    | SearchResults of content: Widget
-
-    static member val MostRecent = OptionsTab.Gameplay with get, set
-
 type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 

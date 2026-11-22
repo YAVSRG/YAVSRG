@@ -70,7 +70,8 @@
     <Compile Include="UI\Menu\Checkbox.fs" />
     <Compile Include="UI\Menu\PageSetting.fs" />
     <Compile Include="UI\Menu\PageButton.fs" />
-    <Compile Include="UI\Menu\Controls.fs" />
+    <Compile Include="UI\Menu\PageTextEntry.fs" />
+    <Compile Include="UI\Menu\OptionsMenuButton.fs" />
     <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="UI\Menu\ColorPicker.fs" />
     <Compile Include="Features\BackgroundTasks\BackgroundTaskTracking.fs" />
@@ -303,7 +304,8 @@
     <Compile Include="Features\Options\Search\SearchResults.fs" />
     <Compile Include="Features\Options\Presets\EditPresetPage.fs" />
     <Compile Include="Features\Options\Presets\PresetControls.fs" />
-    <Compile Include="Features\Options\OptionsLayout.fs" />
+    <Compile Include="Features\Options\OptionsTab.fs" />
+    <Compile Include="Features\Options\OptionsPageHeader.fs" />
     <Compile Include="Features\Options\OptionsPage.fs" />
     <Compile Include="Features\Options\QuickMenuPage.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\CreateLobbyPage.fs" />
