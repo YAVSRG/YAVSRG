@@ -8,7 +8,7 @@ open Interlude.Features.Online
 
 type private OnlineList() =
     inherit
-        WebRequestContainer<Players.Online.Response>(
+        WebRequestContainer<PlayerListContext.Online.Response>(
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Players.Online.get(fun response ->

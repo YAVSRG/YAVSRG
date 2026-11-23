@@ -80,7 +80,7 @@ type private Profile() =
 
     let load_profile (container: WebRequestContainer<_>) =
         if Network.status = Network.Status.LoggedIn then
-            match Players.current_player with
+            match PlayerListContext.current_player with
             | Some p ->
                 Players.Profile.View.get(
                     p,
@@ -116,7 +116,7 @@ type private Profile() =
                     GameThread.defer(fun () ->
                         container.SetData({ data with IsFriend = false; IsMutualFriend = false })
 
-                        Players.update_friends_list()
+                        PlayerListContext.update_friends_list()
                     )
                 | _ -> Notifications.Error(%"notification.network_action_failed")
             )
@@ -128,7 +128,7 @@ type private Profile() =
                 | Some true ->
                     GameThread.defer(fun () ->
                         container.SetData({ data with IsFriend = true })
-                        Players.update_friends_list()
+                        PlayerListContext.update_friends_list()
                     )
                 | _ -> Notifications.Error(%"notification.network_action_failed")
             )
@@ -196,7 +196,7 @@ type private Profile() =
 
     override this.Init(parent: Widget) : unit =
         this.Add(container)
-        Players.player_changed <- container.Reload
+        PlayerListContext.player_changed <- container.Reload
         base.Init(parent)
 
     override this.Draw() : unit =

@@ -86,7 +86,8 @@
     <Compile Include="Features\Online\DiscordRPC.fs" />
     <Compile Include="Features\Online\RegisterPage.fs" />
     <Compile Include="Features\Online\LoginPage.fs" />
-    <Compile Include="Features\Online\Players\Sidebar\Shared.fs" />
+    <Compile Include="Features\Online\Players\Sidebar\PlayerListContext.fs" />
+    <Compile Include="Features\Online\Players\Sidebar\PlayerButton.fs" />
     <Compile Include="Features\Online\Players\Sidebar\OnlineList.fs" />
     <Compile Include="Features\Online\Players\Sidebar\FriendsList.fs" />
     <Compile Include="Features\Online\Players\Sidebar\SearchList.fs" />

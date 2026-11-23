@@ -51,4 +51,4 @@ type private FriendsList() =
 
     override this.Init(parent: Widget) : unit =
         base.Init(parent)
-        Players.friends_changed <- this.Reload
+        PlayerListContext.friends_changed <- this.Reload

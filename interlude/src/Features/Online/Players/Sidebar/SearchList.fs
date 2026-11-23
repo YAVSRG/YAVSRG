@@ -17,7 +17,7 @@ type SearchList =
         let query = Setting.simple ""
 
         let searcher =
-            WebRequestContainer<Players.Search.Response>(
+            WebRequestContainer<PlayerListContext.Search.Response>(
                 fun this ->
                     if query.Value.Trim().Length > 0 then
                         if Network.status = Network.Status.LoggedIn then

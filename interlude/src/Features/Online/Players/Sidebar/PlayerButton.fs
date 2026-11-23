@@ -4,20 +4,8 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 
-module private Players =
-
-    let mutable current_player = None
-    let mutable player_changed = ignore
-    let mutable friends_changed = ignore
-
-    let switch (player: string option) =
-        current_player <- player
-        player_changed()
-
-    let update_friends_list () = friends_changed()
-
 type private PlayerButton(username: string, color: int) =
-    inherit Container(NodeType.Button(fun () -> Players.switch(Some username)))
+    inherit Container(NodeType.Button(fun () -> PlayerListContext.switch(Some username)))
 
     static member HEIGHT = 55.0f
 
