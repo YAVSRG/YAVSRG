@@ -249,8 +249,8 @@
     <Compile Include="Features\Skins\EditHUD\Configuration\KeysPerSecondPage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\CustomImagePage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration.fs" />
-    <Compile Include="Features\Skins\EditHUD\Previews\SelectElement.fs" />
     <Compile Include="Features\Skins\EditHUD\Positioning.fs" />
+    <Compile Include="Features\Skins\EditHUD\ElementCard.fs" />
     <Compile Include="Features\Skins\EditHUD\EditHUDPage.fs" />
     <Compile Include="Features\Skins\EditHUD\AnchorPage.fs" />
     <Compile Include="Features\Skins\EditHUD\EditorControls.fs" />
