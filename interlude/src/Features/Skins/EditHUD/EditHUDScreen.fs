@@ -48,6 +48,7 @@ module EditHUDScreen =
                         State = this.State
                         Selected = None
                         Positioners = Map.empty
+                        CreatePositioner = fun (element, ctx) -> Positioner(element, ctx)
                         UndoHistory = []
                         OnElementMoved = Event<unit>()
                         HotReload = hot_reload

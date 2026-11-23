@@ -9,7 +9,6 @@ open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Features.Play
-open Interlude.Features.Skins
 
 type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> unit, finish_drag: unit -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -491,7 +490,8 @@ and PositionerContext =
         Playfield: Playfield
         State: PlayState
         mutable Selected: HudElement option
-        mutable Positioners: Map<HudElement, Positioner>
+        mutable Positioners: Map<HudElement, Widget>
+        CreatePositioner: HudElement * PositionerContext -> Widget
         mutable UndoHistory: List<HudElement * HudPosition>
         OnElementMoved: Event<unit>
         HotReload: unit -> unit
@@ -505,7 +505,7 @@ and PositionerContext =
 
         if element.EnabledSetting().Value then
 
-            let p = Positioner(element, this)
+            let p = this.CreatePositioner(element, this)
             let pos = element.PositionSetting().Value
 
             p.Position <-

@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.UI
-open Interlude.Features.Skins
 
 type ElementCard(element: HudElement, on_select: unit -> unit) =
     inherit Container(NodeType.None)

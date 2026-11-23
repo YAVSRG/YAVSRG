@@ -3,7 +3,6 @@ namespace Interlude.Features.Skins.EditHUD
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.Features.Skins
 
 type AnchorPage(ctx: PositionerContext) =
     inherit Page()
