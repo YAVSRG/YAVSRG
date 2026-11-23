@@ -151,9 +151,11 @@
     <Compile Include="Features\Import\osu!\ImportOsuNoteskinPage.fs" />
     <Compile Include="Features\Import\osu!\OsuSkinsListPage.fs" />
     <Compile Include="Features\Import\osu!\Replays.fs" />
-    <Compile Include="Features\Import\osu!\Beatmaps\Mino.fs" />
-    <Compile Include="Features\Import\osu!\Beatmaps\Components.fs" />
-    <Compile Include="Features\Import\osu!\Beatmaps\Beatmaps.fs" />
+    <Compile Include="Features\Import\osu!\Beatmaps\MinoBeatmapSearch.fs" />
+    <Compile Include="Features\Import\osu!\Beatmaps\BeatmapImportCard.fs" />
+    <Compile Include="Features\Import\osu!\Beatmaps\BeatmapSortingDropdown.fs" />
+    <Compile Include="Features\Import\osu!\Beatmaps\BeatmapStatusToggle.fs" />
+    <Compile Include="Features\Import\osu!\Beatmaps\BeatmapBrowserPage.fs" />
     <Compile Include="Features\Import\Etterna\ImportEtternaNoteskinPage.fs" />
     <Compile Include="Features\Import\Etterna\EtternaOnlineApiResponse.fs" />
     <Compile Include="Features\Import\Etterna\EtternaPackCard.fs" />
