@@ -220,7 +220,6 @@
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\PracticeScreen.fs" />
     <Compile Include="Features\Skins\SkinHotReload.fs" />
-    <Compile Include="Features\Skins\HudElement.fs" />
     <Compile Include="Features\Skins\SkinPreview.fs" />
     <Compile Include="Features\Skins\ProblemList.fs" />
     <Compile Include="Features\Skins\Textures\TextureEditGrid.fs" />
@@ -248,6 +247,7 @@
     <Compile Include="Features\Skins\EditHUD\Configuration\InputMeterPage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\KeysPerSecondPage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\CustomImagePage.fs" />
+    <Compile Include="Features\Skins\EditHUD\HudElement.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration.fs" />
     <Compile Include="Features\Skins\EditHUD\Positioning.fs" />
     <Compile Include="Features\Skins\EditHUD\ElementCard.fs" />

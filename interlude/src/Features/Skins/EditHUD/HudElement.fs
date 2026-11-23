@@ -34,25 +34,6 @@ module HudElement =
         | HudElement.CustomImage -> %"hud.custom_image"
         | HudElement.MultiplayerScores -> %"hud.multiplayer_scores"
 
-    let tooltip (element: HudElement) : string =
-        match element with
-        | HudElement.Accuracy -> %"hud.accuracy.tooltip"
-        | HudElement.ErrorBar -> %"hud.error_bar.tooltip"
-        | HudElement.ColumnErrorBars -> %"hud.column_error_bars.tooltip"
-        | HudElement.Combo -> %"hud.combo.tooltip"
-        | HudElement.SkipButton -> %"hud.skip_button.tooltip"
-        | HudElement.Judgement -> %"hud.judgement.tooltip"
-        | HudElement.EarlyLate -> %"hud.early_late.tooltip"
-        | HudElement.ProgressPie -> %"hud.progress_pie.tooltip"
-        | HudElement.JudgementCounter -> %"hud.judgement_counter.tooltip"
-        | HudElement.RateMods -> %"hud.ratemodmeter.tooltip"
-        | HudElement.BPM -> %"hud.bpm.tooltip"
-        | HudElement.Pacemaker -> %"hud.pacemaker.tooltip"
-        | HudElement.InputMeter -> %"hud.input_meter.tooltip"
-        | HudElement.KeysPerSecond -> %"hud.kps_meter.tooltip"
-        | HudElement.CustomImage -> %"hud.custom_image.tooltip"
-        | HudElement.MultiplayerScores -> %"hud.multiplayer_scores.tooltip"
-
     let can_configure (element: HudElement) : bool =
         match element with
         | HudElement.BPM -> false
