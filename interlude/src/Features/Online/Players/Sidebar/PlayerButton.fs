@@ -4,8 +4,8 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 
-type private PlayerButton(username: string, color: int) =
-    inherit Container(NodeType.Button(fun () -> PlayerListContext.switch(Some username)))
+type private PlayerButton(ctx: PlayerListContext, username: string, color: int) =
+    inherit Container(NodeType.Button(fun () -> ctx.SwitchPlayer(username)))
 
     static member HEIGHT = 55.0f
 

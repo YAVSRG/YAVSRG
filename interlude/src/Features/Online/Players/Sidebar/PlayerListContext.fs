@@ -1,17 +1,18 @@
 namespace Interlude.Features.Online.Players
 
-open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
-open Prelude
+type PlayerListContext =
+    {
+        mutable CurrentPlayer: string option
+        PlayerChanged: Event<unit>
+        FriendsChanged: Event<unit>
+    }
 
-module private PlayerListContext =
+    member this.OnPlayerChanged = this.PlayerChanged.Publish
+    member this.OnFriendsChanged = this.FriendsChanged.Publish
 
-    let mutable current_player = None
-    let mutable player_changed = ignore
-    let mutable friends_changed = ignore
+    member this.SwitchPlayer(player: string) : unit =
+        this.CurrentPlayer <- Some player
+        this.PlayerChanged.Trigger()
 
-    let switch (player: string option) =
-        current_player <- player
-        player_changed()
-
-    let update_friends_list () = friends_changed()
+    static member Create() : PlayerListContext =
+        { CurrentPlayer = None; PlayerChanged = Event<unit>(); FriendsChanged = Event<unit>() }

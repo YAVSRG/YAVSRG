@@ -8,7 +8,7 @@ open Prelude.Gameplay.Rulesets
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
-type private RecentScores(scores: PlayerListContext.Profile.View.RecentScore array) =
+type private RecentScores(scores: Players.Profile.View.RecentScore array) =
     inherit StaticWidget(NodeType.None)
 
     let scores =

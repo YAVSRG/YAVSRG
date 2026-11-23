@@ -7,7 +7,7 @@ open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
-type private FriendsList() =
+type private FriendsList(ctx: PlayerListContext) =
     inherit
         WebRequestContainer<Friends.List.Response>(
             fun this ->
@@ -29,7 +29,7 @@ type private FriendsList() =
                         seq {
                             for player in data.Friends do
                                 yield
-                                    PlayerButton(player.Username, player.Color)
+                                    PlayerButton(ctx, player.Username, player.Color)
                                         .With(
                                             Text(
                                                 if player.Online then
@@ -51,4 +51,4 @@ type private FriendsList() =
 
     override this.Init(parent: Widget) : unit =
         base.Init(parent)
-        PlayerListContext.friends_changed <- this.Reload
+        ctx.OnFriendsChanged.Add(this.Reload)

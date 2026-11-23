@@ -8,7 +8,7 @@ open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
-type ProfileData = PlayerListContext.Profile.View.Response
+type ProfileData = Players.Profile.View.Response
 
 type private ProfileSettingsPage(profile: ProfileData, profile_color: Setting<int32>) =
     inherit Page()

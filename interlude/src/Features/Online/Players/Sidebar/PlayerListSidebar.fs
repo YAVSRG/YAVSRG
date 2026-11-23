@@ -9,14 +9,14 @@ type PlayerListSidebar =
 
     static let selected_tab = Setting.simple 0
 
-    static member Create() : Widget =
+    static member Create(ctx: PlayerListContext) : Widget =
         let list_container = SwapContainer()
 
         let tab_options: (Widget * string) array =
             [|
-                OnlineList(), %"online.players.online"
-                FriendsList(), %"online.players.friends"
-                SearchList.Create(), %"online.players.search"
+                OnlineList(ctx), %"online.players.online"
+                FriendsList(ctx), %"online.players.friends"
+                SearchList.Create(ctx), %"online.players.search"
             |]
 
         NavigationContainer

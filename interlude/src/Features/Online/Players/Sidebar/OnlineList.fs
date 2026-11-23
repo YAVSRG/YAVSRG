@@ -6,9 +6,9 @@ open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
-type private OnlineList() =
+type private OnlineList(ctx: PlayerListContext) =
     inherit
-        WebRequestContainer<PlayerListContext.Online.Response>(
+        WebRequestContainer<Players.Online.Response>(
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Players.Online.get(fun response ->
@@ -27,7 +27,7 @@ type private OnlineList() =
                     .With(
                         seq {
                             for player in data.Players do
-                                yield PlayerButton(player.Username, player.Color)
+                                yield PlayerButton(ctx, player.Username, player.Color)
                         }
                     )
                 |> ScrollContainer

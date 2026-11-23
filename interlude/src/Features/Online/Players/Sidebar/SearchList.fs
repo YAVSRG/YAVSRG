@@ -12,12 +12,12 @@ type SearchList =
 
     static let SEARCH_BOX_HEIGHT = 50.0f
 
-    static member Create() : NavigationContainer.Column =
+    static member Create(ctx: PlayerListContext) : NavigationContainer.Column =
 
         let query = Setting.simple ""
 
         let searcher =
-            WebRequestContainer<PlayerListContext.Search.Response>(
+            WebRequestContainer<Players.Search.Response>(
                 fun this ->
                     if query.Value.Trim().Length > 0 then
                         if Network.status = Network.Status.LoggedIn then
@@ -42,7 +42,7 @@ type SearchList =
                             .With(
                                 seq {
                                     for player in data.Matches do
-                                        yield PlayerButton(player.Username, player.Color)
+                                        yield PlayerButton(ctx, player.Username, player.Color)
                                 }
                             )
                         |> ScrollContainer

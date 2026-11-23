@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online.Players
+namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.UI
 open Prelude
@@ -11,13 +11,15 @@ type PlayerListPage() =
     let PADDING = 40.0f
 
     override this.Content() : Widget =
+        let ctx = PlayerListContext.Create()
+
         NavigationContainer
             .Row()
             .With(
                 PlayerListSidebar
-                    .Create()
+                    .Create(ctx)
                     .Position(Position.SlicePercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING).ExpandR(PADDING)),
-                Profile().Position(Position.ShrinkPercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING)),
+                Profile(ctx).Position(Position.ShrinkPercentL(SIDEBAR_PERCENTAGE_SPLIT).Shrink(PADDING)),
 
                 HotkeyListener("exit", Menu.Back),
                 HotkeyListener("player_list", Menu.Back)
