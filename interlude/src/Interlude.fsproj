@@ -118,7 +118,8 @@
     <Compile Include="Features\Rulesets\OsuAutomaticPage.fs" />
     <Compile Include="Features\Rulesets\SelectRulesetPage.fs" />
     <Compile Include="Features\Rulesets\RulesetSwitcher.fs" />
-    <Compile Include="Features\Tables\Browser\DownloadMenu.fs" />
+    <Compile Include="Features\Tables\Browser\TableDownloader.fs" />
+    <Compile Include="Features\Tables\Browser\TableDownloaderPage.fs" />
     <Compile Include="Features\Tables\Browser\TableBrowserPage.fs" />
     <Compile Include="Features\Tables\SelectTableLevelPage.fs" />
     <Compile Include="Features\Tables\Suggestions.fs" />

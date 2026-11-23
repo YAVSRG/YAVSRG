@@ -91,7 +91,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                         Tables.selected_id.Value <- Some table.Id
                         status <- TableStatus.Installed
                         existing <- Some table
-                        TableDownloadMenu.OpenAfterInstall(table, charts)
+                        TableDownloaderPage.OpenAfterInstall(table, charts)
                     )
                 | None ->
                     Logging.Error("Error getting charts for table")
@@ -101,7 +101,7 @@ type TableCard(online_table: Tables.List.Table) as this =
         | TableStatus.Installing -> ()
         | TableStatus.Installed ->
             Tables.selected_id.Value <- Some existing.Value.Id
-            TableDownloadMenu.LoadOrOpen(existing.Value)
+            TableDownloaderPage.LoadOrOpen(existing.Value)
 
 type TableBrowserPage() =
     inherit Page()
