@@ -252,7 +252,8 @@
     <Compile Include="Features\Skins\EditHUD\ElementCard.fs" />
     <Compile Include="Features\Skins\EditHUD\EditHUDPage.fs" />
     <Compile Include="Features\Skins\EditHUD\AnchorPage.fs" />
-    <Compile Include="Features\Skins\EditHUD\EditorControls.fs" />
+    <Compile Include="Features\Skins\EditHUD\HUDEditorButton.fs" />
+    <Compile Include="Features\Skins\EditHUD\HUDEditorControls.fs" />
     <Compile Include="Features\Skins\EditHUD\EditHUDScreen.fs" />
     <Compile Include="Features\Skins\EditNoteskin\PlayfieldSettingsPage.fs" />
     <Compile Include="Features\Skins\EditNoteskin\HoldNoteSettingsPage.fs" />
