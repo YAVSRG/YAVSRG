@@ -584,7 +584,7 @@ and PositionerContext =
     member this.ConfigureElement() : unit =
         match this.Selected with
         | Some element ->
-            show_menu
+            HudElement.show_menu
                 element
                 (fun () ->
                     this.HudContext <- { this.HudContext with Config = Interlude.Content.Content.HUD }

@@ -40,7 +40,7 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
                 .TextColor(Colors.text_red)
                 .Conditional(enabled.get_Value),
 
-            Button(sprintf "%s %s" Icons.SETTINGS %"hud.configure", (fun () -> show_menu element ignore))
+            Button(sprintf "%s %s" Icons.SETTINGS %"hud.configure", (fun () -> HudElement.show_menu element ignore))
                 .Disabled(not(HudElement.can_configure element))
                 .Position(Position.SliceB(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
         )

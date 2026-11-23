@@ -1,4 +1,4 @@
-namespace Interlude.Features.Skins
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -7,6 +7,7 @@ open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
+
 
 // todo: move most of this to prelude and/or make them extension methods
 module HudElement =
@@ -207,3 +208,23 @@ module HudElement =
         | HudElement.KeysPerSecond -> all_defaults.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> all_defaults.CustomImagePosition
         | HudElement.MultiplayerScores -> all_defaults.MultiplayerScoresPosition
+
+    let show_menu (element: HudElement) (on_close: unit -> unit) : unit =
+        match element with
+        | HudElement.Accuracy -> AccuracyPage() :> Interlude.UI.Page
+        | HudElement.ErrorBar -> ErrorBarPage()
+        | HudElement.ColumnErrorBars -> ColumnErrorBarsPage()
+        | HudElement.Combo -> ComboPage()
+        | HudElement.SkipButton -> SkipButtonPage()
+        | HudElement.Judgement -> JudgementPage()
+        | HudElement.EarlyLate -> EarlyLatePage()
+        | HudElement.ProgressPie -> ProgressPiePage()
+        | HudElement.JudgementCounter -> JudgementCounterPage()
+        | HudElement.RateMods -> RateModsPage()
+        | HudElement.BPM -> BPMPage()
+        | HudElement.InputMeter -> InputMeterPage()
+        | HudElement.Pacemaker -> PacemakerPage()
+        | HudElement.KeysPerSecond -> KeysPerSecondPage()
+        | HudElement.CustomImage -> CustomImagePage()
+        | HudElement.MultiplayerScores -> MultiplayerScoresPage()
+        |> fun page -> page.WithOnClose(on_close).Show()
