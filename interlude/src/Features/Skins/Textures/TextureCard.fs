@@ -3,8 +3,6 @@ namespace Interlude.Features.Skins
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins
-open Prelude.Skins.Noteskins
-open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
 
@@ -25,11 +23,8 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
     override this.Init(parent: Widget) : unit =
         this.Add(
             Image(sprite, StretchToFill = false).Position(Position.ShrinkB(65.0f).Shrink(20.0f)),
-
             Text(id).Align(Alignment.CENTER).Position(Position.Shrink(Style.PADDING).SliceB(40.0f, 40.0f)),
-
             MouseListener().Button(this),
-
             Button(
                 (fun () ->
                     if is_stitched then
@@ -50,43 +45,3 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
     override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus(by_mouse)
         Style.hover.Play()
-
-type TextureGrid =
-
-    static member Noteskin
-        (noteskin: Noteskin)
-        : {| Container: ScrollContainer<GridFlowContainer<TextureCard>>; Refresh: unit -> unit |} =
-        let textures_grid =
-            GridFlowContainer<TextureCard>(40.0f + PAGE_ITEM_WIDTH / 5f, 5)
-                .WrapNavigation(false)
-                .Spacing(Style.PADDING * 3.0f)
-
-        let refresh () =
-            textures_grid.Clear()
-
-            for texture in noteskin.RequiredTextures do
-                textures_grid.Add(TextureCard(noteskin, texture, fun () -> EditTexturePage(noteskin, texture).Show()))
-
-        {|
-            Container = ScrollContainer(textures_grid).Margin(Style.PADDING).Pos(3, PAGE_BOTTOM - 3, PageWidth.Normal)
-            Refresh = refresh
-        |}
-
-    static member HUD
-        (hud: HudLayout)
-        : {| Container: ScrollContainer<GridFlowContainer<TextureCard>>; Refresh: unit -> unit |} =
-        let textures_grid =
-            GridFlowContainer<TextureCard>(40.0f + PAGE_ITEM_WIDTH / 5f, 5)
-                .WrapNavigation(false)
-                .Spacing(Style.PADDING * 3.0f)
-
-        let refresh () =
-            textures_grid.Clear()
-
-            for texture in hud.RequiredTextures do
-                textures_grid.Add(TextureCard(hud, texture, fun () -> EditTexturePage(hud, texture).Show()))
-
-        {|
-            Container = ScrollContainer(textures_grid).Margin(Style.PADDING).Pos(0, PAGE_BOTTOM, PageWidth.Normal)
-            Refresh = refresh
-        |}
