@@ -6,11 +6,6 @@ open Prelude
 open Prelude.Data.UserDatabase
 open Interlude.UI
 
-[<RequireQualifiedAccess>]
-type ReplayMode =
-    | Auto
-    | Replay of score_info: ScoreInfo
-
 [<AutoOpen>]
 module private ReplayModeSettings =
 

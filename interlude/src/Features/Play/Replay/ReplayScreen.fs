@@ -16,6 +16,11 @@ open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Play
 
+[<RequireQualifiedAccess>]
+type ReplayMode =
+    | Auto
+    | Replay of score_info: ScoreInfo
+
 type ReplayScreen =
 
     static member Create(info: LoadedChartInfo, mode: ReplayMode) : Screen =
