@@ -3,7 +3,6 @@ namespace Interlude.Features.Skins.EditHUD
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.Features.Skins
 
 type AnchorPage(ctx: PositionerContext) =
     inherit Page()
@@ -68,4 +67,4 @@ type AnchorPage(ctx: PositionerContext) =
                 CalloutCard(Help.Info("hud.anchor")).Pos(15)
             )
 
-    override this.Title = %"hud.anchor" + " - " + HudElement.name ctx.Selected.Value
+    override this.Title = %"hud.anchor" + " - " + ctx.Selected.Value.Name()

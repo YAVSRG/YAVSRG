@@ -1,0 +1,229 @@
+namespace Interlude.Features.Tables.Browser
+
+open Percyqaz.Common
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
+open Prelude
+open Prelude.Backbeat
+open Interlude.Web.Shared.Requests
+open Interlude.Content
+open Interlude.UI
+
+open TableDownloader
+
+[<AbstractClass>]
+type private DownloadMenuFragment(nt: NodeType, height: float32) =
+    inherit Container(nt)
+
+    abstract member Visible: bool
+
+    interface IHeight with
+        member this.Height = height
+
+type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
+    inherit DownloadMenuFragment(NodeType.None, 40.0f)
+
+    override this.Visible = state.OpenLevel = chart.Level
+
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2),
+            Text(chart.Song.FormattedTitle).Align(Alignment.LEFT).Position(Position.Shrink(5.0f, 0.0f)),
+            Text(fun () ->
+                match state.Status(chart.Hash) with
+                | ChartStatus.Missing -> Icons.X
+                | ChartStatus.Queued -> Icons.REFRESH_CW
+                | ChartStatus.Downloading -> Icons.DOWNLOAD
+                | ChartStatus.Downloaded -> Icons.CHECK
+                | ChartStatus.DownloadFailed -> Icons.X
+            )
+                .Color(fun () ->
+                    match state.Status(chart.Hash) with
+                    | ChartStatus.Missing -> Colors.text_greyout
+                    | ChartStatus.Queued -> Colors.text_subheading
+                    | ChartStatus.Downloading -> Colors.text_yellow_2
+                    | ChartStatus.Downloaded -> Colors.text_green_2
+                    | ChartStatus.DownloadFailed -> Colors.text_red_2
+                )
+                .Position(Position.Shrink(5.0f, 0.0f))
+                .Align(Alignment.RIGHT)
+        )
+
+        base.Init(parent)
+
+type private LevelHeader(section: TableSectionInfo, level: int, level_name: string, state: DownloaderState) as this =
+    inherit
+        DownloadMenuFragment(
+            NodeType.Button(fun () ->
+                Style.click.Play()
+                this.OnClick()
+            ),
+            50.0f
+        )
+
+    override this.Visible = state.OpenSection = section.Name
+
+    member this.OnClick() : unit =
+        if state.OpenLevel = level then state.OpenLevel <- -1 else state.OpenLevel <- level
+
+    member this.Button =
+        Button(
+            (fun () ->
+                match state.LevelStatus(level) with
+                | GroupStatus.AllMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.download"
+                | GroupStatus.SomeMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.update"
+                | GroupStatus.Downloading -> ""
+                | GroupStatus.Downloaded -> ""
+            ),
+            (fun () -> state.QueueLevel(level))
+        )
+            .Position(Position.ShrinkR(160.0f).SliceR(200.0f).Shrink(20.0f, 5.0f))
+
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
+        Style.hover.Play()
+
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Frame(Fill = K(Color.FromArgb(section.Color).O1), Border = K(Color.FromArgb(section.Color).O1)),
+            Text(level_name)
+                .Align(Alignment.LEFT)
+                .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
+                .Position(Position.Shrink(5.0f, 0.0f)),
+            Text(fun () ->
+                match state.LevelStatus(level) with
+                | GroupStatus.AllMissing -> Icons.X
+                | GroupStatus.SomeMissing -> Icons.X
+                | GroupStatus.Downloading -> Icons.REFRESH_CW
+                | GroupStatus.Downloaded -> Icons.CHECK
+            )
+                .Color(fun () ->
+                    match state.LevelStatus(level) with
+                    | GroupStatus.AllMissing -> Colors.text_greyout
+                    | GroupStatus.SomeMissing -> Colors.text_yellow_2
+                    | GroupStatus.Downloading -> Colors.text_yellow_2
+                    | GroupStatus.Downloaded -> Colors.text_green_2
+                )
+                .Position(Position.Shrink(85.0f, 0.0f))
+                .Align(Alignment.RIGHT),
+            Text(fun () -> if state.OpenLevel = level then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
+                .Color(Colors.text)
+                .Align(Alignment.RIGHT)
+                .Position(Position.Shrink(5.0f, 0.0f)),
+            MouseListener().Button(this),
+            this.Button
+        )
+
+        base.Init(parent)
+
+type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as this =
+    inherit
+        DownloadMenuFragment(
+            NodeType.Button(fun () ->
+                Style.click.Play()
+                this.OnClick()
+            ),
+            120.0f
+        )
+
+    override this.Visible = true
+
+    member this.OnClick() : unit =
+        if state.OpenSection = info.Name then state.OpenSection <- "" else state.OpenSection <- info.Name
+
+    member this.Button =
+        Button(
+            fun () ->
+                match state.SectionStatus(info.Name) with
+                | GroupStatus.AllMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.download"
+                | GroupStatus.SomeMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.update"
+                | GroupStatus.Downloading -> ""
+                | GroupStatus.Downloaded -> ""
+            , (fun () -> state.QueueSection(info.Name))
+        )
+            .Position(Position.ShrinkR(100.0f).SliceR(200.0f).Shrink(20.0f, 20.0f))
+
+    override this.OnFocus(by_mouse: bool) : unit =
+        base.OnFocus(by_mouse)
+        Style.hover.Play()
+
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Frame(Fill = K(Color.FromArgb(info.Color).O2), Border = K(Color.FromArgb(info.Color).O3)),
+            Text(info.Name)
+                .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
+                .Align(Alignment.LEFT)
+                .Position(Position.Shrink(5.0f).ShrinkB(50.0f)),
+            Text(info.Description)
+                .Color(Colors.text_subheading)
+                .Align(Alignment.LEFT)
+                .Position(Position.Shrink(5.0f).SliceB(50.0f)),
+            Text(fun () -> if state.OpenSection = info.Name then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)
+                .Color(Colors.text)
+                .Align(Alignment.RIGHT)
+                .Position(Position.Shrink(25.0f, 20.0f)),
+            MouseListener().Button(this),
+            this.Button
+        )
+
+        base.Init(parent)
+
+type private TableDownloaderPage(table: Table, state: DownloaderState) =
+    inherit Page()
+
+    let container = DynamicFlowContainer.Vertical<DownloadMenuFragment>(Spacing = 10.0f)
+
+    let charts_by_level = state.Charts |> Array.groupBy _.Level
+
+    let sections =
+        table.Info.Sections
+        |> List.sortBy(fun s -> s.LevelStart)
+        |> List.map(fun section ->
+            section,
+            charts_by_level
+            |> Array.filter(fun (level, _) -> level >= section.LevelStart && level <= section.LevelEnd)
+            |> Array.sortBy fst
+        )
+
+    override this.Content() : Widget =
+        container.Filter <- _.Visible
+        state.OnSelectedChanged <- fun () -> container.Filter <- _.Visible
+
+        for section_info, section_levels in sections do
+            container.Add(SectionHeader(section_info, state))
+
+            for level, level_charts in section_levels do
+                container.Add(LevelHeader(section_info, level, table.Info.LevelName(level), state))
+
+                for chart in level_charts do
+                    container.Add(Chart(chart, state))
+
+        ScrollContainer(container).Margin(Style.PADDING * 2.0f).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+
+    override this.Title = table.Info.Name
+
+    static member LoadOrOpen(table: Table) : unit =
+        match existing_states.TryFind(table.Id) with
+        | Some state -> TableDownloaderPage(table, state).Show()
+        | None ->
+            Tables.Charts.get(
+                table.Id,
+                function
+                | Some charts ->
+                    let state = DownloaderState(table, charts.Charts, download_service)
+
+                    GameThread.defer(fun () ->
+                        match existing_states.TryFind(table.Id) with
+                        | Some _ -> () // do nothing if they spam clicked the table button
+                        | None ->
+                            existing_states <- Map.add table.Id state existing_states
+                            TableDownloaderPage(table, state).Show()
+                    )
+                | None -> Logging.Error("Error getting charts for table")
+            // error toast
+            )
+
+    static member OpenAfterInstall(table: Table, charts: Tables.Charts.Response) : unit =
+        let state = DownloaderState(table, charts.Charts, download_service)
+        existing_states <- Map.add table.Id state existing_states
+        TableDownloaderPage(table, state).Show()

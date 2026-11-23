@@ -13,7 +13,7 @@ type BackgroundTaskProgressBar() =
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
         animation.Update(elapsed_ms)
-        fade.Target <- if TaskTracking.in_progress() then 1.0f else 0.0f
+        fade.Target <- if BackgroundTaskTracking.in_progress() then 1.0f else 0.0f
         fade.Update(elapsed_ms)
 
     override this.Draw() : unit =
@@ -21,7 +21,7 @@ type BackgroundTaskProgressBar() =
 
         if alpha > 0 then
 
-            match TaskTracking.current_progress() with
+            match BackgroundTaskTracking.current_progress() with
             | InProgress(Downloading p) ->
                 Render.rect this.Bounds (Colors.shadow_2.O4a(alpha))
                 Render.rect (this.Bounds.SlicePercentL(p)) (Colors.cyan.O4a(alpha))

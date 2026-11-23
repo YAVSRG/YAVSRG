@@ -1,4 +1,4 @@
-namespace Interlude.Features.OptionsMenu.SystemSettings
+namespace Interlude.Features.OptionsMenu.System
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input

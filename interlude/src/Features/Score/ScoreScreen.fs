@@ -33,7 +33,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         )
 
     let stats =
-        ref(ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter)
+        ref(ScoreScreenStats.calculate score_info.Scoring ScoreGraphSettings.column_filter)
 
     let previous_personal_bests =
         match SelectedChart.SAVE_DATA with
@@ -55,7 +55,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
             score_info.Scoring.JudgementCounts
             score_info.Scoring.ComboBreaks
 
-        stats := ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
+        stats := ScoreScreenStats.calculate score_info.Scoring ScoreGraphSettings.column_filter
         previous_personal_bests := None
         graph.Refresh()
 

@@ -1,0 +1,67 @@
+namespace Interlude.Features.Skins.EditHUD
+
+open Percyqaz.Common
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
+open Prelude
+open Prelude.Skins.HudLayouts
+open Interlude.UI
+
+type ElementCard(element: HudElement, on_select: unit -> unit) =
+    inherit Container(NodeType.None)
+
+    let mutable hover = false
+    let enabled = element.EnabledSetting()
+    let color = Animation.Color(if enabled.Value then Colors.pink else Colors.shadow_2)
+
+    let enabled =
+        enabled |> Setting.trigger(fun b -> color.Target <- if b then Colors.pink else Colors.shadow_2)
+
+    override this.Init(parent: Widget) : unit =
+        this.Add(
+            Text(element.Name())
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceT(50.0f).ShrinkR(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
+                .Conditional(not << enabled.get_Value),
+            Button(Icons.PLUS_CIRCLE, fun () -> enabled.Value <- true)
+                .Align(Alignment.RIGHT)
+                .Position(Position.SliceT(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
+                .Conditional(not << enabled.get_Value),
+
+            Button(element.Name(), on_select)
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceT(50.0f).ShrinkR(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
+                .Conditional(enabled.get_Value),
+            Button(Icons.TRASH, fun () -> enabled.Value <- false)
+                .Align(Alignment.RIGHT)
+                .Position(Position.SliceT(50.0f).SliceR(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
+                .TextColor(Colors.text_red)
+                .Conditional(enabled.get_Value),
+
+            Button(sprintf "%s %s" Icons.SETTINGS %"hud.configure", (fun () -> element.ShowMenu(ignore)))
+                .Disabled(not(element.CanConfigure()))
+                .Position(Position.SliceB(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
+        )
+
+        base.Init(parent)
+
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
+        let was_hover = hover
+        hover <- Mouse.hover this.Bounds
+        base.Update(elapsed_ms, moved)
+
+        color.Update(elapsed_ms)
+
+        if hover && not was_hover then
+            Style.hover.Play()
+
+        if hover && Mouse.left_clicked() then
+            on_select()
+
+    override this.Draw() : unit =
+
+        Render.rect (this.Bounds.SliceT(50.0f)) color.Value.O2
+        Render.rect (this.Bounds.SliceB(50.0f)) color.Value.O1
+
+        base.Draw()

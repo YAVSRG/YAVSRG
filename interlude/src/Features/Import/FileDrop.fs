@@ -110,7 +110,7 @@ module FileDrop =
                 ConfirmUnlinkedImportPage(path).Show()
             else
                 FileSystemImportTask(path, Content.Library)
-                    .Track(TaskTracking.add(Path.GetFileName(path)))
+                    .Track(BackgroundTaskTracking.add(Path.GetFileName(path)))
                     .WithCallback(
                         function
                         | Ok(Some result) -> conversion_result_callback(Ok(result))

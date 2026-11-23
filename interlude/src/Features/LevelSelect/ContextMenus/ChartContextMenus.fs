@@ -119,7 +119,10 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
                 .Position(page_position(0, PAGE_BOTTOM, PageWidth.Normal).Translate(PAGE_MARGIN_X, PAGE_MARGIN_Y))
                 .With(
                     like_button_swap,
-                    PageButton(%"chart.add_to_collection", fun () -> AddToCollectionPage(chart_meta).Show())
+                    PageButton(
+                        %"chart.add_to_collection",
+                        fun () -> SelectCollectionsPage.AddToCollection(chart_meta).Show()
+                    )
                         .Icon(Icons.FOLDER_PLUS)
                 )
 

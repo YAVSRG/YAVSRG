@@ -11,7 +11,8 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Skins
-open Interlude.Features.OptionsMenu.SystemSettings
+open Interlude.Features.Skins.EditHUD
+open Interlude.Features.OptionsMenu.System
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.OptionsMenu.Library
 
@@ -141,7 +142,7 @@ module SearchResults =
 
             if
                 token_match tokens [| %"hud.edit" |]
-                || token_match tokens (HudElement.DRAW_ORDER |> Seq.map HudElement.name |> Array.ofSeq)
+                || token_match tokens (HudElement.DRAW_ORDER |> Seq.map _.Name() |> Array.ofSeq)
             then
                 yield
                     PageButton(%"hud.edit", fun () -> SkinActions.edit_hud ignore).Help(Help.Info("hud.edit")),

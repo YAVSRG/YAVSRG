@@ -20,7 +20,7 @@ module LibraryActions =
         let rulesets = rulesets.ToList() |> Seq.map snd |> Array.ofSeq
 
         RecalculatePersonalBestsTask(Content.Library, rulesets, false)
-            .Track(TaskTracking.add %"library.recalculate_personal_bests")
+            .Track(BackgroundTaskTracking.add %"library.recalculate_personal_bests")
             .WithCallback(fun () ->
                 Notifications.System(Icons.ALERT_OCTAGON, %"notification.score_recalculation_complete.title")
             )
@@ -34,7 +34,7 @@ module LibraryActions =
 
     let recalculate_patterns () : unit =
         RecalculatePatternsTask(Content.Charts)
-            .Track(TaskTracking.add %"library.recache_patterns")
+            .Track(BackgroundTaskTracking.add %"library.recache_patterns")
             .WithCallback(fun () ->
                 Notifications.System(Icons.ALERT_OCTAGON, %"notification.pattern_cache_complete.title")
             )
@@ -48,7 +48,7 @@ module LibraryActions =
 
     let vacuum () : unit =
         VacuumTask(true, Content.Charts)
-            .Track(TaskTracking.add %"library.vacuum")
+            .Track(BackgroundTaskTracking.add %"library.vacuum")
             .WithCallback(fun () -> Notifications.System(Icons.ALERT_OCTAGON, %"notification.vacuum_complete.title"))
             .Queue(general_task_queue)
 
@@ -56,7 +56,7 @@ type LibraryPage() =
     inherit Page()
 
     static member ManageCollections() : PageButton =
-        PageButton(%"library.collections", fun () -> ManageCollectionsPage().Show())
+        PageButton(%"library.collections", fun () -> SelectCollectionsPage.ManageCollections().Show())
             .Help(Help.Info("library.collections"))
 
     static member ManageTables() : PageButton =
@@ -107,7 +107,7 @@ type LibraryPage() =
                     Text(%"library.import_in_progress_hint")
                         .Color(Colors.text_green)
                         .Align(Alignment.LEFT)
-                        .Conditional(TaskTracking.in_progress)
+                        .Conditional(BackgroundTaskTracking.in_progress)
                         .TextPosSmall(20)
                 )
 

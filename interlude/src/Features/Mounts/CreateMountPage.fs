@@ -38,7 +38,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
 
         mount
             .ImportAllCharts(Content.Library)
-            .Track(TaskTracking.add(sprintf "%O: %s" game %"mount.importall"))
+            .Track(BackgroundTaskTracking.add(sprintf "%O: %s" game %"mount.importall"))
             .WithCallback(fun result ->
                 FileDrop.conversion_result_callback(result)
 

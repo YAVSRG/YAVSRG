@@ -14,7 +14,7 @@ open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
 
-module EditHudScreen =
+module EditHUDScreen =
 
     let rec edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
 
@@ -48,6 +48,7 @@ module EditHudScreen =
                         State = this.State
                         Selected = None
                         Positioners = Map.empty
+                        CreatePositioner = fun (element, ctx) -> Positioner(element, ctx)
                         UndoHistory = []
                         OnElementMoved = Event<unit>()
                         HotReload = hot_reload

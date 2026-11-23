@@ -35,7 +35,7 @@ type BackgroundTaskList(import_button: Widget) =
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
 
-        if Mouse.hover(import_button.Bounds) && TaskTracking.in_progress() then
+        if Mouse.hover(import_button.Bounds) && BackgroundTaskTracking.in_progress() then
             fade.Target <- 1.0f
         else
             fade.Target <- 0.0f
@@ -49,7 +49,7 @@ type BackgroundTaskList(import_button: Widget) =
                 let time_ago = now - time
 
                 if time_ago > DELAY_AFTER_COMPLETE + FADE_TIME then
-                    GameThread.defer(fun () -> TaskTracking.list.Remove(task) |> ignore)
+                    GameThread.defer(fun () -> BackgroundTaskTracking.list.Remove(task) |> ignore)
 
                 1.0f - (float32(time_ago - DELAY_AFTER_COMPLETE) / float32 FADE_TIME |> max 0.0f |> min 1.0f)
             | ValueNone ->
@@ -118,13 +118,13 @@ type BackgroundTaskList(import_button: Widget) =
 
         Text.fill_b(
             Style.font,
-            sprintf "%s: %i" %"imports.queued" TaskTracking.list.Count,
+            sprintf "%s: %i" %"imports.queued" BackgroundTaskTracking.list.Count,
             bounds.SliceT(60.0f).Shrink(5.0f),
             (Colors.white.O4a(a), Colors.shadow_2.O4a(a)),
             Alignment.CENTER
         )
 
-        for task in TaskTracking.list do
+        for task in BackgroundTaskTracking.list do
             y <- this.DrawTask(now, opacity, x, y, task)
 
     override this.Draw() : unit =

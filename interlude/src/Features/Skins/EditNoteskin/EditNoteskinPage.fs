@@ -1,4 +1,4 @@
-namespace Interlude.Features.Skins.EditNoteskin
+﻿namespace Interlude.Features.Skins.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -35,7 +35,7 @@ type EditNoteskinPage() =
                 PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8),
                 PageButton(%"noteskin.playfield", fun () -> PlayfieldSettingsPage().Show())
                     .Pos(11, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH)),
-                PageButton(%"noteskin.notes", fun () -> NotesSettingsPage().Show())
+                PageButton(%"noteskin.notes", fun () -> NoteSettingsPage().Show())
                     .Pos(13, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH)),
                 PageButton(%"noteskin.holdnotes", fun () -> HoldNoteSettingsPage().Show())
                     .Pos(15, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH)),
@@ -151,7 +151,7 @@ type EditNoteskinPage() =
 
     override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        ProblemList.loader.Join()
+        ProblemList.Loader.Join()
 
     override this.Title = meta.Name
 
