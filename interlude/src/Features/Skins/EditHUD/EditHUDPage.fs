@@ -79,7 +79,7 @@ type EditHUDPage(ctx: PositionerContext) =
                 ElementCard(
                     element,
                     fun () ->
-                        HudElement.enabled_setting(element).Set true
+                        element.EnabledSetting().Set(true)
                         ctx.Select(element)
                         Menu.Exit()
                 )

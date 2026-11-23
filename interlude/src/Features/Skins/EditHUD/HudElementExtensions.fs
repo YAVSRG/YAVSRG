@@ -1,5 +1,6 @@
 namespace Interlude.Features.Skins.EditHUD
 
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
@@ -8,15 +9,14 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
+type HudElementExtensions =
 
-// todo: move most of this to prelude and/or make them extension methods
-module HudElement =
+    static let show_pacemaker = Setting.simple false
+    static let show_skip_button = Setting.simple true
+    static let show_multiplayer_scores = Setting.simple false
 
-    let private show_pacemaker = Setting.simple false
-    let private show_skip_button = Setting.simple true
-    let private show_multiplayer_scores = Setting.simple false
-
-    let name (element: HudElement) : string =
+    [<Extension>]
+    static member Name(element: HudElement) : string =
         match element with
         | HudElement.Accuracy -> %"hud.accuracy"
         | HudElement.ErrorBar -> %"hud.error_bar"
@@ -35,14 +35,16 @@ module HudElement =
         | HudElement.CustomImage -> %"hud.custom_image"
         | HudElement.MultiplayerScores -> %"hud.multiplayer_scores"
 
-    let can_configure (element: HudElement) : bool =
+    [<Extension>]
+    static member CanConfigure(element: HudElement) : bool =
         match element with
         | HudElement.BPM -> false
         | HudElement.Pacemaker -> false
         | HudElement.MultiplayerScores -> false
         | _ -> true
 
-    let constructor (element: HudElement) : HudContext -> Widget =
+    [<Extension>]
+    static member Constructor(element: HudElement) : HudContext -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
 
         match element with
@@ -63,7 +65,13 @@ module HudElement =
         | HudElement.CustomImage -> cast CustomImage
         | HudElement.MultiplayerScores -> cast MultiplayerScores
 
-    let enabled_setting (element: HudElement) : Setting<bool> =
+    [<Extension>]
+    static member Constructor(element: HudElement, ctx: HudContext) : Widget =
+        let constructor = element.Constructor()
+        constructor(ctx)
+
+    [<Extension>]
+    static member EnabledSetting(element: HudElement) : Setting<bool> =
         match element with
         | HudElement.Accuracy ->
             Setting.make
@@ -121,8 +129,9 @@ module HudElement =
                 (fun () -> Content.HUD.CustomImageEnabled)
         | HudElement.MultiplayerScores -> show_multiplayer_scores
 
-    let position_setting (e: HudElement) : Setting<HudPosition> =
-        match e with
+    [<Extension>]
+    static member PositionSetting(element: HudElement) : Setting<HudPosition> =
+        match element with
         | HudElement.Accuracy ->
             Setting.make
                 (fun v -> Skins.save_hud_config { Content.HUD with AccuracyPosition = v })
@@ -188,10 +197,11 @@ module HudElement =
                 (fun v -> Skins.save_hud_config { Content.HUD with MultiplayerScoresPosition = v })
                 (fun () -> Content.HUD.MultiplayerScoresPosition)
 
-    let default_position (e: HudElement) : HudPosition =
+    [<Extension>]
+    static member DefaultPosition(element: HudElement) : HudPosition =
         let all_defaults = HudConfig.Default
 
-        match e with
+        match element with
         | HudElement.Accuracy -> all_defaults.AccuracyPosition
         | HudElement.ErrorBar -> all_defaults.TimingDisplayPosition
         | HudElement.ColumnErrorBars -> all_defaults.ColumnErrorBarsPosition
@@ -209,7 +219,8 @@ module HudElement =
         | HudElement.CustomImage -> all_defaults.CustomImagePosition
         | HudElement.MultiplayerScores -> all_defaults.MultiplayerScoresPosition
 
-    let show_menu (element: HudElement) (on_close: unit -> unit) : unit =
+    [<Extension>]
+    static member ShowMenu(element: HudElement, on_close: unit -> unit) : unit =
         match element with
         | HudElement.Accuracy -> AccuracyPage() :> Interlude.UI.Page
         | HudElement.ErrorBar -> ErrorBarPage()

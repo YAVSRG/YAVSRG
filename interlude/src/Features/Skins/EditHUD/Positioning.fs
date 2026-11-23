@@ -61,9 +61,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
     let mutable dragging_from: (float32 * float32) option = None
     let mutable hover = false
 
-    let child = HudElement.constructor element ctx.HudContext
+    let child = element.Constructor(ctx.HudContext)
 
-    let position = HudElement.position_setting element
+    let position = element.PositionSetting()
 
     let mutable new_unsaved_pos: Position = Position.DEFAULT
 
@@ -425,7 +425,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
             if hover && this.IsSelectedElement && Mouse.left_clicked() then
                 dragging_from <- Some(Mouse.pos())
-            elif hover && this.IsSelectedElement && Mouse.right_clicked() && HudElement.can_configure element then
+            elif hover && this.IsSelectedElement && Mouse.right_clicked() && element.CanConfigure() then
                 ctx.ConfigureElement()
             elif hover && ctx.Selected.IsNone && Mouse.left_clicked() then
                 ctx.Select(element)
@@ -503,14 +503,10 @@ and PositionerContext =
         | Some existing -> (this.Playfield.Remove(existing) || this.Screen.Remove(existing)) |> ignore
         | None -> ()
 
-        let enabled = HudElement.enabled_setting element
-
-        if enabled.Value then
-
-            let setting = HudElement.position_setting element
+        if element.EnabledSetting().Value then
 
             let p = Positioner(element, this)
-            let pos = setting.Value
+            let pos = element.PositionSetting().Value
 
             p.Position <-
                 {
@@ -534,7 +530,7 @@ and PositionerContext =
     member this.ChangeCurrentAnchor(to_playfield: bool, anchor: float32) : unit =
         match this.Selected |> Option.bind this.Positioners.TryFind with
         | Some p ->
-            let setting = HudElement.position_setting this.Selected.Value
+            let setting = this.Selected.Value.PositionSetting()
             let current = setting.Value
 
             this.AddUndoHistory(this.Selected.Value, current)
@@ -562,9 +558,9 @@ and PositionerContext =
     member this.ResetCurrentPosition() : unit =
         match this.Selected with
         | Some element ->
-            let setting = HudElement.position_setting element
+            let setting = this.Selected.Value.PositionSetting()
             this.AddUndoHistory(element, setting.Value)
-            setting.Set(HudElement.default_position element)
+            setting.Set(element.DefaultPosition())
             GameThread.defer(fun () -> this.Recreate(element))
         | None -> ()
 
@@ -575,7 +571,7 @@ and PositionerContext =
         match this.UndoHistory with
         | (element, previous_position) :: xs ->
             this.Selected <- Some element
-            HudElement.position_setting(element).Set previous_position
+            element.PositionSetting().Set(previous_position)
             this.Recreate(element)
             Style.click.Play()
             this.UndoHistory <- xs
@@ -584,19 +580,16 @@ and PositionerContext =
     member this.ConfigureElement() : unit =
         match this.Selected with
         | Some element ->
-            HudElement.show_menu
-                element
-                (fun () ->
-                    this.HudContext <- { this.HudContext with Config = Interlude.Content.Content.HUD }
-                    GameThread.defer(fun () -> this.Recreate(element))
-                )
+            element.ShowMenu(fun () ->
+                this.HudContext <- { this.HudContext with Config = Interlude.Content.Content.HUD }
+                GameThread.defer(fun () -> this.Recreate(element))
+            )
         | None -> ()
 
     member this.RemoveElement() : unit =
         match this.Selected with
         | Some element ->
-            let enabled = HudElement.enabled_setting element
-            enabled.Set(false)
+            element.EnabledSetting().Set(false)
             this.Recreate(element)
             this.Selected <- None
             Style.click.Play()
@@ -605,20 +598,20 @@ and PositionerContext =
     member this.HorizontalFlip() : unit =
         match this.Selected with
         | Some element ->
-            (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
+            element.PositionSetting() |> Setting.app _.FlipHorizontal
             this.Recreate(element)
         | None -> ()
 
     member this.VerticalFlip() : unit =
         match this.Selected with
         | Some element ->
-            (HudElement.position_setting element) |> Setting.app _.FlipVertical
+            element.PositionSetting() |> Setting.app _.FlipVertical
             this.Recreate(element)
         | None -> ()
 
     member this.HorizontalFlipAll() : unit =
         for element in HudElement.DRAW_ORDER do
-            (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
+            element.PositionSetting() |> Setting.app _.FlipHorizontal
             this.Recreate(element)
 
         Notifications.Result(
@@ -629,7 +622,7 @@ and PositionerContext =
 
     member this.VerticalFlipAll() : unit =
         for element in HudElement.DRAW_ORDER do
-            (HudElement.position_setting element) |> Setting.app _.FlipVertical
+            element.PositionSetting() |> Setting.app _.FlipVertical
             this.Recreate(element)
 
         Notifications.Result(

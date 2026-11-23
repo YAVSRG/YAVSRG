@@ -87,7 +87,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
 
             Text(fun () ->
                 match ctx.Selected with
-                | Some e -> HudElement.name e
+                | Some element -> element.Name()
                 | None -> ""
             )
                 .Align(Alignment.CENTER)

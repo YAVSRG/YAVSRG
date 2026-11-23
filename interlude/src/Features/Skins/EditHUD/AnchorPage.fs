@@ -68,4 +68,4 @@ type AnchorPage(ctx: PositionerContext) =
                 CalloutCard(Help.Info("hud.anchor")).Pos(15)
             )
 
-    override this.Title = %"hud.anchor" + " - " + HudElement.name ctx.Selected.Value
+    override this.Title = %"hud.anchor" + " - " + ctx.Selected.Value.Name()

@@ -13,7 +13,7 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
     inherit Container(NodeType.None)
 
     let mutable hover = false
-    let enabled = HudElement.enabled_setting element
+    let enabled = element.EnabledSetting()
     let color = Animation.Color(if enabled.Value then Colors.pink else Colors.shadow_2)
 
     let enabled =
@@ -21,7 +21,7 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
 
     override this.Init(parent: Widget) : unit =
         this.Add(
-            Text(HudElement.name element)
+            Text(element.Name())
                 .Align(Alignment.LEFT)
                 .Position(Position.SliceT(50.0f).ShrinkR(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
                 .Conditional(not << enabled.get_Value),
@@ -30,7 +30,7 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
                 .Position(Position.SliceT(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
                 .Conditional(not << enabled.get_Value),
 
-            Button(HudElement.name element, on_select)
+            Button(element.Name(), on_select)
                 .Align(Alignment.LEFT)
                 .Position(Position.SliceT(50.0f).ShrinkR(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
                 .Conditional(enabled.get_Value),
@@ -40,8 +40,8 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
                 .TextColor(Colors.text_red)
                 .Conditional(enabled.get_Value),
 
-            Button(sprintf "%s %s" Icons.SETTINGS %"hud.configure", (fun () -> HudElement.show_menu element ignore))
-                .Disabled(not(HudElement.can_configure element))
+            Button(sprintf "%s %s" Icons.SETTINGS %"hud.configure", (fun () -> element.ShowMenu(ignore)))
+                .Disabled(not(element.CanConfigure()))
                 .Position(Position.SliceB(50.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING))
         )
 
