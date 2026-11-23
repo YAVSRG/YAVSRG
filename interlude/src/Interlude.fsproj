@@ -258,6 +258,8 @@
     <Compile Include="Features\Skins\EditHUD\EditHUDScreen.fs" />
     <Compile Include="Features\Skins\EditNoteskin\PlayfieldSettingsPage.fs" />
     <Compile Include="Features\Skins\EditNoteskin\HoldNoteSettingsPage.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\NoteRotationPicker.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\NoteColorPicker.fs" />
     <Compile Include="Features\Skins\EditNoteskin\NoteSettingsPage.fs" />
     <Compile Include="Features\Skins\EditNoteskin\AnimationSettingsPage.fs" />
     <Compile Include="Features\Skins\EditNoteskin\EditNoteskinPage.fs" />
