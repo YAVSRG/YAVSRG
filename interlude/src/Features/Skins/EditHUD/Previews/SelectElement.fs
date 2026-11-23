@@ -66,21 +66,3 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
         Render.rect (this.Bounds.SliceB(50.0f)) color.Value.O1
 
         base.Draw()
-
-module ElementGrid =
-
-    let create (select_element: HudElement -> unit) : GridFlowContainer<ElementCard> =
-
-        let columns =
-            let w = Render.width()
-
-            if w < 1600.0f then 3
-            elif w < 1760.0f then 4
-            else 5
-
-        let grid = GridFlowContainer(100.0f, columns, Spacing = (20.0f, 20.0f))
-
-        for element in HudElement.LIST_ORDER do
-            grid.Add(ElementCard(element, fun () -> select_element element))
-
-        grid

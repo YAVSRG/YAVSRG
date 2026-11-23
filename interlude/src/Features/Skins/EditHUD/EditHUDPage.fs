@@ -1,11 +1,13 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Skins
+open Prelude.Skins.HudLayouts
 
 type EditHUDPage(ctx: PositionerContext) =
     inherit Page()
@@ -63,11 +65,27 @@ type EditHUDPage(ctx: PositionerContext) =
             )
 
     let elements_tab =
-        ElementGrid.create(fun element ->
-            HudElement.enabled_setting(element).Set true
-            ctx.Select(element)
-            Menu.Exit()
-        )
+        let columns =
+            let w = Render.width()
+
+            if w < 1600.0f then 3
+            elif w < 1760.0f then 4
+            else 5
+
+        let grid = GridFlowContainer(100.0f, columns, Spacing = (20.0f, 20.0f))
+
+        for element in HudElement.LIST_ORDER do
+            grid.Add(
+                ElementCard(
+                    element,
+                    fun () ->
+                        HudElement.enabled_setting(element).Set true
+                        ctx.Select(element)
+                        Menu.Exit()
+                )
+            )
+
+        grid
 
     let refresh () =
         textures_tab.Refresh()
